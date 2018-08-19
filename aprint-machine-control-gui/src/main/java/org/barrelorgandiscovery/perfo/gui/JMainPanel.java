@@ -16,7 +16,9 @@ public class JMainPanel extends JPanel {
 
   private JLabel connectedStatus = new JLabel();
 
-  public JMainPanel() throws Exception {}
+  public JMainPanel() throws Exception {
+	  initComponents();
+  }
 
   protected void initComponents() throws Exception {
     setLayout(new BorderLayout());
