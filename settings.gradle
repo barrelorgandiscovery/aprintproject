@@ -1,0 +1,13 @@
+
+include 'aprint-gervill'
+include 'aprint-core'
+include 'aprint-gui'
+
+include 'aprint-machine-control'
+include 'aprint-punch-extension'
+
+include 'aprint-book-scanner'
+include 'aprint-recognition-extension'
+
+
+rootProject.name = 'APrintProject'

@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?><org.barrelorgandiscovery.gui.etl.EtlMxGraph allowDanglingEdges="0" multigraph="0">
+  <mxGraphModel as="model">
+    <root>
+      <mxCell id="0"/>
+      <mxCell id="1" parent="0"/>
+      <org.barrelorgandiscovery.model.steps.book.VirtualBookDemultiplexer id="232" label="Distributor">
+        <mxCell connectable="0" parent="1" style="unconfigured" vertex="1">
+          <mxGeometry as="geometry" height="40.0" width="150.0" x="710.0" y="110.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.steps.book.VirtualBookDemultiplexer>
+      <org.barrelorgandiscovery.model.ModelParameter id="233" in="true" label="Virtual Book" name="inVirtualbookOrHole" optional="false">
+        <type>org.barrelorgandiscovery.model.type.CompositeType|info:vborholes;Virtual book or Holes,org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.model.enhanced.HoleWithScale&gt;,org.barrelorgandiscovery.model.type.JavaType|org.barrelorgandiscovery.virtualbook.VirtualBook</type>
+        <mxCell parent="232" style="inparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="10.0" y="20.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.TerminalParameterModelStep id="246" in="true" label="Fichier book en entrée" name="Fichier book en entrée">
+        <type>org.barrelorgandiscovery.model.type.JavaType|java.io.File</type>
+        <value/>
+        <mxCell connectable="0" parent="1" style="unscheduled" vertex="1">
+          <mxGeometry as="geometry" height="40.0" width="154.0" x="120.0" y="130.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.TerminalParameterModelStep>
+      <org.barrelorgandiscovery.model.ModelParameter id="247" in="false" label="Fichier book en entrée" name="Fichier book en entrée" optional="true">
+        <type>org.barrelorgandiscovery.model.type.JavaType|java.io.File</type>
+        <mxCell parent="246" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="134.0" y="20.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.steps.scripts.GroovyScriptModelStep id="249" label="Script Box">
+        <script>import org.barrelorgandiscovery.model.steps.scripts.*;&#13;
+import org.barrelorgandiscovery.model.*;&#13;
+import org.barrelorgandiscovery.virtualbook.*&#13;
+import org.barrelorgandiscovery.xml.*&#13;
+&#13;
+import java.io.File;&#13;
+&#13;
+class T extends ModelGroovyScript {&#13;
+   &#13;
+   def console&#13;
+   &#13;
+   ModelParameter[] configureParameters() {&#13;
+       [ newParameter(true,"fichier book",newJavaType(File.class)), &#13;
+         newParameter(false,"book",newJavaType(VirtualBook.class))]&#13;
+   }&#13;
+&#13;
+   Map execute(Map m) {&#13;
+       console.println(m)&#13;
+       return [book:VirtualBookXmlIO.read(m["fichier book"]).virtualBook]&#13;
+   }&#13;
+&#13;
+}&#13;
+new T(console:out)</script>
+        <mxCell connectable="0" parent="1" style="unscheduled" vertex="1">
+          <mxGeometry as="geometry" height="40.0" width="150.0" x="460.0" y="140.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.steps.scripts.GroovyScriptModelStep>
+      <org.barrelorgandiscovery.model.ModelParameter id="250" in="true" label="fichier book" name="fichier book" optional="false">
+        <type>org.barrelorgandiscovery.model.type.JavaType|java.io.File</type>
+        <mxCell parent="249" style="inparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="10.0" y="20.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="251" in="false" label="book" name="book" optional="false">
+        <type>org.barrelorgandiscovery.model.type.JavaType|org.barrelorgandiscovery.virtualbook.VirtualBook</type>
+        <mxCell parent="249" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="20.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <mxCell edge="1" id="252" parent="1" source="247" target="250">
+        <mxGeometry as="geometry" relative="1"/>
+      </mxCell>
+      <mxCell edge="1" id="253" parent="1" source="251" target="233">
+        <mxGeometry as="geometry" relative="1"/>
+      </mxCell>
+      <org.barrelorgandiscovery.model.steps.impl.NewBookFrame id="254" label="Open VirtualBook in Frame">
+        <instrumentName/>
+        <mxCell connectable="0" parent="1" style="unconfigured" vertex="1">
+          <mxGeometry as="geometry" height="40.0" width="150.0" x="1480.0" y="110.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.steps.impl.NewBookFrame>
+      <org.barrelorgandiscovery.model.ModelParameter id="255" in="true" label="virtualbook" name="virtualbook" optional="true">
+        <type>org.barrelorgandiscovery.model.type.CompositeType|info:virtualBook;Book or Holes,org.barrelorgandiscovery.model.type.JavaType|org.barrelorgandiscovery.virtualbook.VirtualBook,org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.virtualbook.Hole&gt;</type>
+        <mxCell parent="254" style="inparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="10.0" y="20.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.steps.book.VirtualBookMultiplexer id="257" label="Concentrator">
+        <mxCell connectable="0" parent="1" style="unconfigured" vertex="1">
+          <mxGeometry as="geometry" height="40.0" width="150.0" x="1040.0" y="110.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.steps.book.VirtualBookMultiplexer>
+      <org.barrelorgandiscovery.model.ModelParameter id="258" in="false" label="Virtual Book" name="outVirtualBook" optional="false">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.model.enhanced.HoleWithScale&gt;</type>
+        <mxCell parent="257" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="20.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <mxCell edge="1" id="259" parent="1" source="258" target="255">
+        <mxGeometry as="geometry" relative="1"/>
+      </mxCell>
+    </root>
+  </mxGraphModel>
+  <mxStylesheet as="stylesheet">
+    <add as="vertical">
+      <add as="labelBackgroundColor" value="white"/>
+      <add as="endArrow" value="classic"/>
+      <add as="align" value="center"/>
+      <add as="strokeColor" value="black"/>
+      <add as="rounded" value="1"/>
+      <add as="shape" value="connector"/>
+      <add as="fontSize" value="10"/>
+      <add as="elbow" value="vertical"/>
+      <add as="verticalAlign" value="middle"/>
+      <add as="labelBorderColor" value="black"/>
+      <add as="edgeStyle" value="com.mxgraph.view.mxEdgeStyle$3@5d0f5773"/>
+    </add>
+    <add as="arrow">
+      <add as="align" value="center"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$1@61f7ebdc"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="white"/>
+      <add as="shape" value="arrow"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+    </add>
+    <add as="terminalgroup">
+      <add as="fillColor" value="#FFFF00"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$1@61f7ebdc"/>
+      <add as="opacity" value="50"/>
+      <add as="align" value="center"/>
+      <add as="verticalAlign" value="top"/>
+      <add as="dashed" value="1"/>
+      <add as="fontSize" value="11"/>
+      <add as="strokeColor" value="black"/>
+      <add as="shape" value="label"/>
+    </add>
+    <add as="rhombus">
+      <add as="align" value="center"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$3@58994b6a"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="white"/>
+      <add as="shape" value="rhombus"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+    </add>
+    <add as="parameterunconnected">
+      <add as="verticalAlign" value="top"/>
+      <add as="labelPosition" value="right"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$2@1fdd5442"/>
+      <add as="strokeColor" value="black"/>
+      <add as="align" value="left"/>
+      <add as="shape" value="ellipse"/>
+      <add as="fillColor" value="#00FFFF"/>
+      <add as="fontSize" value="11"/>
+    </add>
+    <add as="disconnected">
+      <add as="fillColor" value="#FF0000"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$1@61f7ebdc"/>
+      <add as="opacity" value="50"/>
+      <add as="align" value="center"/>
+      <add as="verticalAlign" value="top"/>
+      <add as="dashed" value="1"/>
+      <add as="fontSize" value="11"/>
+      <add as="strokeColor" value="black"/>
+      <add as="shape" value="label"/>
+    </add>
+    <add as="straight">
+      <add as="align" value="center"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$1@61f7ebdc"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="white"/>
+      <add as="shape" value="connector"/>
+      <add as="strokeColor" value="black"/>
+      <add as="endArrow" value="classic"/>
+      <add as="verticalAlign" value="top"/>
+    </add>
+    <add as="configured">
+      <add as="align" value="center"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$1@61f7ebdc"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="white"/>
+      <add as="shape" value="label"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+    </add>
+    <add as="defaultEdge">
+      <add as="labelBorderColor" value="black"/>
+      <add as="align" value="center"/>
+      <add as="fontSize" value="10"/>
+      <add as="shape" value="connector"/>
+      <add as="strokeColor" value="black"/>
+      <add as="endArrow" value="classic"/>
+      <add as="verticalAlign" value="middle"/>
+      <add as="edgeStyle" value="com.mxgraph.view.mxEdgeStyle$3@5d0f5773"/>
+      <add as="rounded" value="1"/>
+      <add as="labelBackgroundColor" value="white"/>
+    </add>
+    <add as="group">
+      <add as="align" value="center"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$1@61f7ebdc"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="white"/>
+      <add as="shape" value="label"/>
+      <add as="opacity" value="50"/>
+      <add as="strokeColor" value="black"/>
+      <add as="dashed" value="1"/>
+      <add as="verticalAlign" value="top"/>
+    </add>
+    <add as="defaultVertex">
+      <add as="align" value="center"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$1@61f7ebdc"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="white"/>
+      <add as="shape" value="label"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+    </add>
+    <add as="unscheduled">
+      <add as="align" value="center"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$1@61f7ebdc"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="#FF5555"/>
+      <add as="shape" value="label"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+    </add>
+    <add as="outparam">
+      <add as="align" value="right"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$2@1fdd5442"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="#FF0000"/>
+      <add as="shape" value="ellipse"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+      <add as="labelPosition" value="left"/>
+    </add>
+    <add as="swimlane">
+      <add as="align" value="center"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$1@61f7ebdc"/>
+      <add as="fontStyle" value="1"/>
+      <add as="fontSize" value="12"/>
+      <add as="fillColor" value="white"/>
+      <add as="startSize" value="23"/>
+      <add as="shape" value="swimlane"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+    </add>
+    <add as="roundImage">
+      <add as="fillColor" value="white"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$2@1fdd5442"/>
+      <add as="labelBackgroundColor" value="white"/>
+      <add as="align" value="center"/>
+      <add as="verticalAlign" value="top"/>
+      <add as="verticalLabelPosition" value="bottom"/>
+      <add as="fontSize" value="11"/>
+      <add as="strokeColor" value="black"/>
+      <add as="shape" value="image"/>
+    </add>
+    <add as="line">
+      <add as="align" value="center"/>
+      <add as="spacingTop" value="8"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$1@61f7ebdc"/>
+      <add as="strokeWidth" value="4"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="white"/>
+      <add as="shape" value="line"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+      <add as="labelBackgroundColor" value="white"/>
+    </add>
+    <add as="entity">
+      <add as="labelBackgroundColor" value="white"/>
+      <add as="endArrow" value="classic"/>
+      <add as="align" value="center"/>
+      <add as="strokeColor" value="black"/>
+      <add as="rounded" value="1"/>
+      <add as="shape" value="connector"/>
+      <add as="fontSize" value="10"/>
+      <add as="verticalAlign" value="middle"/>
+      <add as="labelBorderColor" value="black"/>
+      <add as="edgeStyle" value="com.mxgraph.view.mxEdgeStyle$1@384e3c05"/>
+    </add>
+    <add as="unconfigured">
+      <add as="align" value="center"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$1@61f7ebdc"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="#00FFFF"/>
+      <add as="shape" value="label"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+    </add>
+    <add as="inparam">
+      <add as="align" value="left"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$2@1fdd5442"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="#00FF00"/>
+      <add as="shape" value="ellipse"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+      <add as="labelPosition" value="right"/>
+    </add>
+    <add as="image">
+      <add as="align" value="center"/>
+      <add as="verticalLabelPosition" value="bottom"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$1@61f7ebdc"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="white"/>
+      <add as="shape" value="image"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+      <add as="labelBackgroundColor" value="white"/>
+    </add>
+    <add as="rhombusImage">
+      <add as="fillColor" value="white"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$3@58994b6a"/>
+      <add as="labelBackgroundColor" value="white"/>
+      <add as="align" value="center"/>
+      <add as="verticalAlign" value="top"/>
+      <add as="verticalLabelPosition" value="bottom"/>
+      <add as="fontSize" value="11"/>
+      <add as="strokeColor" value="black"/>
+      <add as="shape" value="image"/>
+    </add>
+    <add as="triangle">
+      <add as="align" value="center"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$4@663989db"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="white"/>
+      <add as="shape" value="triangle"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+    </add>
+    <add as="ellipse">
+      <add as="align" value="center"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$2@1fdd5442"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="white"/>
+      <add as="shape" value="ellipse"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+    </add>
+    <add as="parameterconnected">
+      <add as="verticalAlign" value="top"/>
+      <add as="labelPosition" value="right"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$2@1fdd5442"/>
+      <add as="strokeColor" value="black"/>
+      <add as="align" value="left"/>
+      <add as="shape" value="ellipse"/>
+      <add as="fillColor" value="#00FF00"/>
+      <add as="fontSize" value="11"/>
+    </add>
+  </mxStylesheet>
+  <mxCell as="defaultParent" id="1" parent="0"/>
+  <Array as="multiplicities"/>
+</org.barrelorgandiscovery.gui.etl.EtlMxGraph>

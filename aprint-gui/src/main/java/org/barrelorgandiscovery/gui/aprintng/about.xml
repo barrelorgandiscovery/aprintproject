@@ -1,0 +1,1135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<page>
+	<body>
+
+		<b xml:lang="en">Software Development Informations ...</b>
+		<b xml:lang="fr">
+			Information sur la version actuelle du logiciel ...
+		</b>
+
+		<hr />
+
+		<h1 xml:lang="en">What's New</h1>
+		<h1 xml:lang="fr">Nouveautés</h1>
+
+
+		<p xml:lang="en">
+			2018 - july : move to 250 ms in perfo for feedback, simplify display, and enlarge the command pipeline.
+		</p>
+		
+		<p xml:lang="en">
+			2018 - june : Tailor punch and simplify the gui.
+		</p>
+
+		<p xml:lang="fr">
+			2018 - Juin : Tailor la fonctionnalité de perforation, bug fix pour le model editor
+		</p>
+
+		<p xml:lang="en">
+			2018 - May : Fix Usability, for model editor.
+		</p>
+		
+		<p xml:lang="fr">
+			2018 - Mai : Amélioration sur le Model editor, pour simplifier l'usage.
+		</p>
+
+
+		<p xml:lang="en">
+			2018 - February : Fix Usability, fix an issue on book reading 2014 format, when the scale has a large number of tracks and the latest tracks are not used (null definition)
+			Add new book from scratch function.
+		</p>
+		
+		<p xml:lang="fr">
+			2018 - Février : Amélioration d'utilisation, TRADUCTION COMPLETE en allemand par freddy !! génial.
+			Ajout de la fonction de création d'un carton vierge.
+		</p>
+
+		<p xml:lang="en">
+			2017 - March : add install parameter for selecting the aprint storage folder.
+			add groovy extension capability in the main window.
+		</p>
+		<p xml:lang="fr">
+			2017 - Mars : ajout du paramètre du répertoire de stockage dans l'installation
+			, ajout de la possibilité de mettre un script groovy dans la page principale.
+		</p>
+
+		<p xml:lang="en">
+			2017 - February - March : First implementation of model
+			editor, permit to handle book and midi processing without any
+			programming requierments.
+		</p>
+		<p xml:lang="fr">
+			2017 - Fevrier - Mars : RD - Model Editor, editeur de
+			workflow de traitements, permettant sans développement de faire des
+			transformations sur les fichiers midi, ou Book
+		</p>
+
+		<p xml:lang="en">
+			2017 - January- February : Book Recognition extension.
+		</p>
+		<p xml:lang="fr">
+			2017 - Janvier Fevrier : Extension de reconnaissance de
+			carton.
+		</p>
+
+		<p xml:lang="en">
+			2016 - Octobre : Ergonomic improvement (backup of user
+			preferences)
+			First aid online in French, with an integration of an
+			Internet browser
+			Markdown switch for pages.
+		</p>
+		<p xml:lang="fr">
+			2016 - Octobre : Amélioration ergonomiques (sauvegarde
+			de préférences utilisateur)
+			mise en ligne de l'aide d'abord en
+			français, avec une intégration d'un navigateur internet
+			Passage à
+			markdown pour les pages.
+		</p>
+		<p xml:lang="en">
+			2016 - August : Switch to Java 8
+		</p>
+		<p xml:lang="fr">
+			2016 - Aout : Passage à Java 8 (bug fix pour swing)
+		</p>
+
+		<p xml:lang="fr">
+			2016 - Ajout d'une extension de perforation avec GRBL
+			Punch
+			permet l'utilisation et la perforation de carton sur marchine
+			Arduino ayant
+			le logiciel GRBL Punch.
+		</p>
+
+		<p xml:lang="fr">
+			fin 2014 - Debut 2015 : amelioration du rendu sonore ,
+			ajout d'une envelope de volume pour l'attaque (plus beau pour les
+			instruments de foire). Beaucoup d'amélioration visuelle et
+			d'utilisation.
+			Attention, il faut supprimer le cache de sound font
+			pour avoir le nouveau rendu SF2.
+		</p>
+
+		<p xml:lang="fr">
+			Juin 2014 : Ajout d'outil pour le montage de carton,
+			amélioration de
+			performance sur le jeu (le démarrage du jeu du carton
+			est plus rapide).
+			Ajout
+			d'un transactionnel sur le contenu du carton,
+			pour permettre le
+			rafraichissement des autres panneaux + taille du
+			carton ... etc ...
+		</p>
+
+		<p xml:lang="fr">
+			Mars 2014 : Fix sur l'outil de sélection. Ameliorations
+			sur le
+			panneau de présentation des instruments. Nouveau panneau
+			d'import de fichier midi ou Kar.
+		</p>
+		<p xml:lang="fr">
+			Fevrier 2014 : Amelioration du panneau de saisie de
+			paramètres en groovy,
+			ajout de la possibilité de mettre une librairie
+			.jar disponible pour les
+			scripts dans
+			le répertoire aprintstudio. Cela
+			permet d'utiliser d'autres code java
+			dans le développement
+			de scripts.
+			(export DXF par exemple).
+		</p>
+		<p xml:lang="fr">
+			Ajout de deux boutons "basiques", measure et pan. ça
+			aidera les débutants
+			:-)
+		</p>
+		<p xml:lang="fr">
+			Janvier 2014 : Beaucoup d'améliorations vis à vis des
+			possibilités de transformation de cartons ou de manipulation de
+			fichiers midi par script,
+			une première DSL est mise en place pour
+			faciliter grandement la
+			transformation de fichier midi, ou conversion
+			vers book.
+			quelques
+			lignes de script suffisent maintenant pour
+			effectuer des conversions
+			ou des modifications.
+			Toutes les
+			modifications n'ont pas forcement ete consignées, mais le resultat
+			sera surement présenté sous forme de script ou tutoriels.
+		</p>
+		<p xml:lang="fr">
+			Janvier 2013 : Ajout des mesures dans l'impression de
+			ponçifs.
+		</p>
+		<p xml:lang="fr">
+			Juillet 2012 : Simplification de la gestion des
+			instruments
+			, un nouveau panneau beaucoup plus ergonomique. Ajout d'un
+			affichage
+			de barres d'outils dans la vue carton (simplifier la
+			vue).Acces pour
+			les extension
+			à la liste des problemes, cela permet de
+			proposer des extensions
+			permettant
+			d'aller plus loin dans le controle
+			d'erreurs. Egalement la
+			possibilité pour les extensions de réaliser
+			des "toolwindow",
+			fenetres dockables sur les cotés pour la vue carton.
+			Ajout de composant de sélection simple d'instrument.
+			ajout d'un
+			bibliotheque de composants visuels, pour aller plus loin.
+			Fix sur un
+			bug dans le cadre de développement d'extension (lecture par fichier
+			du fichier .extension.properties).
+			Passage vers de multiples fenêtres
+			pour les utilisateurs de MacOS.
+			Les extensions peuvent maintenant
+			proposer des librairies natives, ceci
+			a été testé sur l'accès à des
+			bibliothèques de port série.
+		</p>
+		<p xml:lang="fr">
+			Avril 2012: Ajout des mesures dans le logiciel,
+			changements dans le format
+			de stockage des cartons virtuels pour le
+			stockage des annotations ou des changements de tempos
+			Amelioration de
+			la localisation sur le carton avec le CTRL+Roulette qui centre sur
+			l'endroit pointé. Fix sur l'outil de modification de trous.
+		</p>
+		<p xml:lang="fr">
+			Mars 2012 : Documentation, Documentation, Documentation
+			...
+			Quelques amélioration sur l'utilisation + Bug Fixs.
+			Tentative de
+			mettre en place une restitution sonore particulière pour les
+			percussions. (encore qq pbs de restitution à voir).
+			Ajout des erreurs
+			de lecture MIDI dans la liste des erreurs.
+			Améliorations Ergonomiques.
+			Ameliorations significatives sur l'éditeur d'échantillons (wav)
+		</p>
+
+		<p xml:lang="fr">
+			Fevrier 2012 :Ajout du support d'un système de pilotage
+			non midi (par prise série ou autre). Point d'extension, permettant à
+			un tier
+			de développer son système de pilotage pour son instrument.
+			Bug
+			fix sur le renommage de fichier pour les machintosh (les fichiers
+			temporaires sont sur un autre filsystem).
+			Ajout support drag and drop
+			pour les quickscripts.
+		</p>
+
+		<p xml:lang="fr">
+			Decembre 2011 : Bug fixes, Ajout du drag and drop pour
+			les fichiers book et instrumentbundle. Amélioration sur le feed back
+			d'indexation et de recherche + ouverture des fichiers book.
+			Augmentation du nombre de canaux utilisables directement (+de 16)
+			et
+			jusqu'à 64. Les instruments à plus de 10 registres sont maintenant
+			restituables.
+		</p>
+		<p xml:lang="en">
+			December 2011: bug fixes and add drag and drop support
+			for book and
+			instrumentbundle files, more than 16 register that can be
+			handled.
+		</p>
+
+		<p xml:lang="fr">
+			Novembre 2011 : Bug fixes, adaptation de quelques objets
+			pour étendre l'utilisation des extensions
+		</p>
+		<p xml:lang="en">
+			November 2011: bug fixes and objects adapting for
+			extending
+			extensions functionnalities
+		</p>
+
+		<p xml:lang="fr">
+			Septembre 2011 : Amelioration Qualité, (les utilisateurs
+			aiment bien :-)
+		</p>
+
+		<p xml:lang="en">
+			2011 septembre : Quality review in many areas.
+		</p>
+
+		<p xml:lang="fr">
+			Aout 2011, ajout icone sur les fenetres, dans le
+			menu on
+			peut maintenant sélectionner la langue (si la traduction
+			n'est pas
+			exacte). Augmentation de la qualité. Amélioration dans les fonction
+			de scripting
+		</p>
+
+
+		<p xml:lang="fr">
+			Juillet 2011, Ajout de la sauvegarde et de la définition
+			de la couverture du
+			carton
+		</p>
+
+		<p xml:lang="fr">
+			Juin 2011, simplification de la création d'extensions
+			logicielles
+			(documentation + classes associées),
+			Suppression du double
+			clic sur les outils à deux états dans le carton virtuel.
+		</p>
+		<p xml:lang="fr">
+			mai 2011, ajout de quelques secondes sur l'export video
+			pour permettre
+			une fin moins abrupte. Bug Fixs, grandes amélioration
+			dans la capacité de réalisation d'instruments très réalistes dans le
+			jeu (ajout des percussions dans la description de l'instrument).
+			amélioration de la documentation, plusieurs articles et rubriques ont
+			été modifiés et ajoutée.
+		</p>
+		<p xml:lang="fr">
+			Avril 2011 : Bug Fixs, ajout d'un bouton de revalidation
+			des erreurs
+			dans la vue carton. Ajout des documentation groovy dans
+			l'installation et la documentation en ligne. Ajout d'un bouton dans
+			l'editeur de gamme pour ajouter des notes en série. Correction d'un
+			bug de jeu lorsqu'il y a beaucoup de sons associé à l'instument.
+			on
+			peut maintenant sereinement mettre un son par tuyau :-)
+		</p>
+		<p xml:lang="en">
+			April 2011 : Bug Fixs, adding a validation button in the
+			error window
+			to ease the constraints recomputation. Adding groovy docs
+			in online help and in installation folder. Speed up the note input
+			in
+			the scale editor. Fix on the limit of the sounds mapped in an
+			instrument.
+		</p>
+
+		<p xml:lang="fr">
+			Mars 2011 : Bug Fixs, corrections diverses d'olivier
+			(pas
+			encore fini :-)). Amélioration sur le support Midi dans le
+			jeu.
+			Ajout support fenetres flottantes/dockable pour simplifier l'ecran.
+		</p>
+
+		<p xml:lang="en">
+			March 2011 : Bug Fixs, several quality improvements.
+		</p>
+
+		<p xml:lang="fr">
+			Février 2011 : Correction sur la récupération du nom du
+			morceau dans un fichier book. Percussions en français. Fixs
+			sur les
+			outils de transposition Groovy. Deux nouveaux skins
+			pour aprint. Ajout
+			de deux fonction dans l'éditeur de gamme
+			pour ajouter et supprimer une
+			piste. Bug Fix sur la
+			sauvegarde au format texte des erreurs.
+		</p>
+
+		<p xml:lang="en">
+			2011 February : Fix on name reading in a book file.
+			Adding
+			the generic event reading in midifiles. Fixs for the groovy
+			tooks. Two new look and feel. In scale editor, two new
+			functions : add
+			and remove track. Bug Fix for saving the
+			issues in a text file.
+		</p>
+
+		<p xml:lang="fr">
+			Janvier 2011: bug fix sur l'arret du jeu dans la vue carton,
+			fix sur
+			les percussion dans la création de video
+			<br />
+			Inclusion des sources du programme dans le fichier .jar,
+			modification
+			de l'installation pour proposer la
+			documentation developpeur.
+		</p>
+		<p xml:lang="en">
+			January 2011: buf fix on play stop while closing the book
+			frame.
+			<br />
+			Including the software source in the aprint.jar file, and
+			adding the
+			java developper documentation in the installer.
+		</p>
+
+		<p xml:lang="fr">
+			Decembre 2010: Fix sur la registration, Ajout d'un calc
+			pour
+			visualiser la registration. Ajout d'un moteur de recherche
+			pour
+			rechercher plus facilement un fichier book. Ajout de
+			propriétés sur le
+			carton virtuel pour donner les indications
+			(arrangeur, auteur , nom
+			..). Correction d'un probleme de
+			percussion sur le jeu de fichier
+			book.
+		</p>
+		<p xml:lang="en">
+			December 2010 : Registration fix, adding a layer for
+			displaying the registration. Adding a search engine for
+			looking for
+			book files, adding metadata for the book files
+			(arranger, author .. )
+			Fix a percussion problem on the book
+			file.
+		</p>
+
+		<p xml:lang="fr">
+			27 Novembre 2010 : Ajout d'un type de script "export"
+			pour
+			APrint, pour faciliter l'export ou le jeu pour des
+			instrument midi
+			qui ont des commandes particulières.(non
+			terminé pour l'instant).
+		</p>
+
+		<p xml:lang="en">
+			November 27th : Adding a new kind of instrument scripts
+			->
+			output, for ease the usage of export or play on specific
+			midi
+			constrolled instruments
+		</p>
+
+		<p xml:lang="fr">
+			14 Novembre 2010 : Acces quickscript directement dans la
+			vue
+			carton. Ajout d'import / exports d'instruments dans l'outil
+			de
+			gestion d'instruments
+		</p>
+
+		<p xml:lang="en">
+			November 14th : Quick script access directely in the
+			book
+			view. Adding instrument export / import in the instrument
+			management form. simplifying the script errors in console.
+		</p>
+
+		<p xml:lang="fr">
+			7 Novembre 2010 : Ajout des paramètre de connection dans
+			l'éditeur de repository, bug fix rafraichissement pinao dans
+			l'editeur d'instrument. Simplification de la lecture
+			d'erreur dans la
+			console, maintenant la ligne de script est
+			affichée.
+		</p>
+
+		<p xml:lang="en">
+			November 7th : Adding connection parameters in
+			repository
+			editor, bug fixes
+		</p>
+
+
+		<p xml:lang="fr">
+			13 Octobre 2010 : Amélioration de la qualité coté
+			editeur de
+			gamme.
+		</p>
+
+		<p xml:lang="en">
+			October 13th - 2010 : Quality improvements in scale
+			editor
+		</p>
+
+
+		<p xml:lang="fr">
+			9 Octobre 2010 : Ajout quick scripts pour les scripts
+			associés au carton virtuel, mise en place d'un choix sur les
+			calques
+			du carton (menu)
+		</p>
+
+		<p xml:lang="en">
+			October 9 - 2010 : Adding QuickScripts for book frame
+			(quick
+			using scripts)
+		</p>
+
+
+		<p xml:lang="fr">
+			Octobre 2010 : Amélioration de certains écrans, pour
+			être
+			plus simples à utiliser, ajout d'un panneau de bienvenue
+			pour
+			accéder aux fonctions essentielles en un clic.
+		</p>
+
+		<p xml:lang="en">
+			October 2010 : Improving GUI, for ease the usage. Adding
+			a
+			welcome panel
+		</p>
+
+		<p xml:lang="en">
+			September 2010 : scripting improvements, usability
+			improvements in many areas. Adding new instrument /
+			repository editor
+			that simplify the editing.
+		</p>
+
+		<p xml:lang="fr">
+			September 2010 : amélioration du scripting (execution
+			asynchrone), amélioration de l'interface homme machine à
+			beaucoup
+			d'endroits. Ajout d'un outil de modification
+			d'instrument dans les
+			différents repository. Celui ci est
+			plus simple à comprendre que les
+			différentes options de
+			menu. Il manque encore quelques fonctionnalités
+			dans cet
+			endroit.
+		</p>
+
+
+		<p xml:lang="en">
+			August 2010 : scripting improvements, adding access from
+			the
+			script to the application context. Adding a script
+			capability in
+			virtualbook view.
+		</p>
+
+		<p xml:lang="fr">
+			Aout 2010 : amélioration du scripting pour permettre
+			l'accès
+			à APrint. Ajout d'un accès script dans la vue carton.
+		</p>
+
+		<p xml:lang="en">
+			July 2010 : Several bug fixes, adding groovy script
+			support,
+			adding importer script in groovy in the editable instuments.
+		</p>
+
+		<p xml:lang="fr">
+			Juillet 2010 : Corrections de bugs, ajout du support de
+			script Groovy pour les transformations de fichier midi,
+			cartons, ajout
+			de scripts d'import à partir de midi,
+			associés à l'instrument. (pour
+			permettre l'import aisé de
+			multiples fichiers midi différents)
+		</p>
+
+
+		<p xml:lang="en">
+			June 2010 : Adding an export to movie file button.
+			Refactoring Scale Editor for more future improvements on
+			gui.
+			Improvements on the paper book rendering. Adding a
+			button for
+			exporting the issues in a text file.
+		</p>
+
+		<p xml:lang="fr">
+			Juin 2010 : Ajout d'un export vers fichier video.
+			Refactorisation de l'éditeur de gamme, plus simple plus
+			ouvert.
+			Amelioration du rendu de type papier (en lecture
+			pneumatique).Ajout
+			d'un bouton d'export des problèmes dans
+			un fichier texte.
+		</p>
+
+
+		<p xml:lang="en">
+			May 2010 : Fix on Midi output, big fix on adding sample,
+			GUI
+			improvements
+		</p>
+
+		<p xml:lang="fr">
+			Mai 2010 : correction sur l'Output Midi, correction d'un
+			bug
+			sur le chargement d'un fichier wav, ameliorations mineures
+			d'écrans
+		</p>
+
+		<p xml:lang="en">
+			May 2010 : adding pan support on the middle button.
+			Adding a
+			play sub system to send message to external MIDI Interface.
+			Printing improvements. Changing the time color in the book
+			view. Fix
+			on the encoding in instrument / scale definition.
+		</p>
+
+		<p xml:lang="fr">
+			Mai 2010 : ajout du bouton du milieu pour faire des
+			déplacements dans le carton, changement couleur de la couche
+			temps.
+			Sous système pour le jeu sur une carte midi (USB ...
+			). Correction sur
+			les accents dans la définition des gammes.
+		</p>
+
+
+		<p xml:lang="en">
+			April 2010 : quality improvements in synchronization and
+			user feedbacks. adding a search function on instruments.
+			adding import
+			scale function in the instrument editor
+		</p>
+
+		<p xml:lang="fr">
+			Avril 2010 : Q/A, et ajout d'une fonction de recherche
+			d'instrument, ajout de l'import des gammes midiboek dans
+			l'editeur
+			d'instruments.
+		</p>
+
+		<p xml:lang="en">
+			March 26th : reduce large print scale menu in several
+			menus
+			+ accelerators + confirm on non saved modification in the
+			instrument editor
+		</p>
+
+		<p xml:lang="fr">
+			26 Mars : reduction des grands menu d'impression de
+			gamme en
+			petits menus + raccourcis claviers + confirmation dans
+			l'editeur d'instrument
+		</p>
+
+		<p xml:lang="en">March 13th : Quality improvements</p>
+
+		<p xml:lang="fr">
+			13 Mars : Amélioration de la qualité du logiciel
+		</p>
+
+
+		<p xml:lang="en">
+			February - March : Bug Fix and improvements in
+			instrument
+			creation ....
+		</p>
+
+		<p xml:lang="fr">
+			Février - Mars : Correction du divers bugs et
+			amelioration
+			sur la création d'instrument (mode loop + ajout
+			d'échantillons en masse ... etc ...)
+		</p>
+
+		<p xml:lang="fr">
+			10 - Janvier, Amélioration de quelques fonctionnalités.
+		</p>
+
+		<p xml:lang="en">
+			January - 23th ,Adding a feed back when the user click
+			on
+			the issue panel.
+		</p>
+
+
+		<p xml:lang="fr">
+			23 - Janvier, Ajout d'un feedback lorsque l'utilisateur
+			click sur une erreur dans le panneau d'erreurs.
+		</p>
+
+
+		<p xml:lang="en">January - 10th ,functionnalities improving.</p>
+
+
+		<p xml:lang="fr">
+			2 - Janvier, amélioration sur la gestion des fichiers de
+			son
+			en interne pour ne pas dupliquer les fichiers et gérer des
+			références partagées de fichier son wav. Ajout d'un scroll
+			sur
+			l'éditeur de wav.
+		</p>
+
+		<p xml:lang="en">
+			January - 2nd ,Improving wav reading, to not duplicate
+			file.
+			adding a scroll bar to the wav editing panel.
+		</p>
+
+		<p xml:lang="fr">
+			1 - Janvier ,Correction d'un bug posant problème sur la
+			restitution d'un instrument lorsque celui ci contient un
+			grand nombre
+			d'échantillons + améliorations diverses sur
+			l'IHM.
+		</p>
+
+		<p xml:lang="en">
+			January - 1th , Bug fix on playing instrument with a
+			large
+			number of sample. + GUI improvements.
+		</p>
+
+		<p xml:lang="fr">
+			27 - Decembre, Phase d'optimisation des structures
+			internes.
+			La rapidité de chargement a été amelioré de façon
+			significative. Correction d'un bug dans le panneau
+			d'attente, lorsque
+			les opérations sont rapides.
+		</p>
+		<p xml:lang="en">
+			December the 27th, Drastic profiling phase on internal
+			struture. The loading and search speed has been
+			significatively
+			optimized. Bug fixed in the wait panel.
+		</p>
+
+		<p xml:lang="fr">
+			25 - Decembre, Finalisation repository Web + Edition
+			Local
+			d'instrument avec mécanisme de synchronisation. (pour
+			permettre
+			de faciliter la contribution sur les instruments)
+		</p>
+		<p xml:lang="en">
+			December the 25th, Web Repository Finalization + local
+			instrument editing to use the instrument exchange.
+		</p>
+
+		<p xml:lang="fr">
+			13 - Decembre, Ajout de tous les instruments
+			independemment
+			de l'origine de la définition de l'instrument.
+			Présentation
+			des instruments sous forme de cover flow.
+		</p>
+		<p xml:lang="en">
+			December the 13th, adding all the instruments in the
+			gui,
+			whenever their origin (local, builting , web ...). Cover
+			flow
+			version in beta.
+		</p>
+
+		<p xml:lang="fr">
+			1 - Decembre, corrections de bugs interne sur
+			l'allocation
+			de fichiers temporaires. Ajout d'une fonction d'export de
+			gamme sous forme de fichier image.
+		</p>
+		<p xml:lang="en">
+			December 1th , Bug fixes on the temporary file
+			allocation,
+			speed improvements, adding an export as image function for
+			the scale.
+		</p>
+
+		<p xml:lang="fr">
+			14 -Novembre 2009, amelioration sur l'editeur
+			d'instrument...
+			<br />
+			Ajout d'une fonction d'import / export dans le menu fichier.
+		</p>
+		<p xml:lang="en">
+			Novembrer, 14th 2009, Instrument editor improvements ..
+			<br />
+			adding import / export function in the file menu.
+		</p>
+
+		<p xml:lang="fr">
+			13 -Novembre 2009, amelioration des écrans ...
+
+			Ajout d'icones dans
+			l'editeur d'instrument, creation de
+			menus pertinents, localisation ...
+			<br />
+			Ajout d'un outil pour creer des patchs à partir d'un gros
+			wav ..
+			(facilite grandement l'utilisation d'un fichier
+			monolytique contenant
+			la gamme complète en Wav)
+		</p>
+		<p xml:lang="en">
+			November, 13th 2009, GUI Improvements .. adding icones,
+			rearranging menus, bug fixes, adding bug reports on main
+			functions ...
+		</p>
+
+		<p xml:lang="fr">
+			12 -Novembre 2009, bug fixes ...
+			<br />
+			<ul>
+				<li>
+					Corrections sur l'éditeur de gamme (pb d'attribution
+					sur les
+					pistes)
+				</li>
+				<li>
+					Internationalisation des chaines dans l'interface
+					d'edition
+					d'instrument
+				</li>
+				<li>
+					Ajout d'un filtre sur les images dans l'editeur
+					d'instrument
+				</li>
+				<li>
+					Envoi de rapport de bugs en asynchrone
+					(l'utilisateur n'est plus
+					gêné)
+				</li>
+			</ul>
+
+		</p>
+		<p xml:lang="en">
+			Novembrer - 12th 2009, bug fixes ...
+			<br />
+			<ul>
+				<li>
+					Fixes on the scale editor (for tracks definitions)
+				</li>
+				<li>i18n for instrument editor</li>
+				<li>
+					Adding filter on the image / pictures for the
+					instrument
+				</li>
+				<li>
+					asynchonous bug report sending (the gui is not
+					freezed)
+				</li>
+			</ul>
+		</p>
+
+		<p xml:lang="fr">
+			11 -Novembre 2009, Ajout d'outil dans d'éditeur de wav
+			pour
+			découper les sons. Ajout de boutons supplémentaires pour
+			faciliter l'utilisation
+		</p>
+		<p xml:lang="en">
+			November 11th - Adding a crop tool in the wav editor to
+			ease
+			the use.
+		</p>
+
+		<p xml:lang="fr">
+			25 - Octobre 2009, travail sur l'editeur d'instrument.
+			Augmentation de la performance d'affichage du composant de
+			gamme.
+			Ajout de feedbacks sur l'interaction entre le piano
+			et la gamme de
+			l'instrument. Ajout d'un état "désactivé" sur
+			les touches du piano ne
+			faisant pas partie de la gamme.
+		</p>
+		<p xml:lang="en">
+			October 25 - 2009, Still working on the instrument
+			editor.
+			Speed up the scale rendering. adding feed backs between the
+			scale and the the pianoroll. Adding a disable state on the
+			pianoroll
+			when the note is not present in the scale.
+		</p>
+
+
+		<p xml:lang="fr">
+			24 - Octobre 2009, ajout d'une prévisualisation de
+			l'éditeur
+			d'instrument (toujours en cours de construction).
+		</p>
+		<p xml:lang="en">
+			October 24 - 2009, Adding a preview of the new
+			instrument
+			editor. Still in construction, but for having feedbacks on
+			his usability
+		</p>
+
+		<p xml:lang="en">
+			October - Bug Fixes in midi loading / file selected.
+			Starting to build online documentation for the software.
+		</p>
+
+		<p xml:lang="fr">
+			Octobre - Bug Fixes / dans le chargement de fichiers
+			midi,
+			certaines notes dupliquées dans différentes pistes pouvant
+			poser
+			problème lors de la conversion en carton. Ce problème
+			est maintenant
+			corrigé. Debut de rédaction de la
+			documentation en ligne du logiciel.
+		</p>
+
+		<p xml:lang="en">
+			September - Bug Fixes in several places. Back to a 72
+			dpi
+			print, because some printer , or java issue on increasing
+			the
+			DPI...
+		</p>
+		<p xml:lang="fr">
+			Septembre - Diverses corrections. retour à une
+			impression en
+			72 dpi, sur certaines imprimantes, il y a un pb.
+		</p>
+
+		<p xml:lang="en">
+			August 22th 2009 - Adding look and feel menu to change
+			the
+			look of the application..
+		</p>
+		<p xml:lang="fr">
+			22 Aout 2009 - Ajout d'un menu permettant de changer les
+			couleurs de la fenetre, si le look "mac" ne convient pas
+		</p>
+
+
+		<p xml:lang="en">August 17th 2009 - Bug fixes ..</p>
+		<p xml:lang="fr">Aout 2009 - Correction de bugs</p>
+
+
+		<p xml:lang="en">
+			August 2009 - Translation of the drums, pipe stop
+			groups.
+			Translation of the scale repository on the web ...
+		</p>
+		<p xml:lang="fr">
+			Aout 2009 - Ajout d'une traduction pour les jeux de
+			tuyaux
+			et des percussions. Mise en place sur le web d'un index
+			traduit
+			des différentes gammes
+		</p>
+
+		<p xml:lang="en">
+			August 2009 - New Extension Repository to ease the
+			installation and update of plugins. Translation of the
+			Online Help in
+			both English and French.
+		</p>
+
+		<p xml:lang="fr">
+			Aout 2009 - Une nouvelle fonction dans le menu option,
+			permettant de simplifier l'installation et la mise à jour de
+			différentes extensions. L'aide en ligne est maintenant dans
+			deux
+			langues (Français et Anglais). La traduction dans les
+			deux langues de
+			l'apropos ici présent (pour le papa
+			d'olivier :-)).
+		</p>
+
+		<p xml:lang="en">
+			19 July 2009 - Adding a translator inside APrint,
+			permitting
+			to translate the GUI. Bug Fixes (bug reporter), speedup the
+			launch.
+		</p>
+		<p xml:lang="en">June 2009 - Bug Fixes in several areas</p>
+		<p xml:lang="en">
+			June 2009 - Adding a instrument / register controlled
+			preset
+			link for the registers sound rendering
+		</p>
+		<p xml:lang="en">
+			June 2009 - adding the capability of adding a pipe stop
+			with
+			no register controlled
+		</p>
+
+		<p xml:lang="en">
+			June 2009 - Creation of an external repository to manage
+			an
+			internet connection, direct modifications of the scales and
+			instruments.
+		</p>
+		<p xml:lang="en">
+			30/05/09 - Bugs fixes in APrint, several improvements
+		</p>
+		<p xml:lang="en">
+			22/05/09 - Plugin Isolation to permit on the fly update
+			of
+			extensions, adding an automatic update of the extensions
+		</p>
+		<p xml:lang="en">
+			21/05/09 - Adding constraints gui to the scale editor,
+			adding help extension point for APrint
+		</p>
+		<p xml:lang="en">
+			16/05/09 - Adding a import Extension Point on Plugins,
+			Plugins are now capable to make transformation on midi files
+			before
+			presenting the book, Extension/Plugins enhancements
+		</p>
+		<p xml:lang="en">
+			09/05/09 - Adding an OGG export function ..., one bug
+			fix on
+			midi loading synchronization, enhancements on GUI
+		</p>
+		<p xml:lang="en">
+			01/05/09 - Scale Preview / Export Enhancement, better
+			visualization and rendering, adding a scale kind rendering
+			(paper ..)
+		</p>
+		<p xml:lang="en">
+			14/04/09 - Bug Fixes, GUI enhancement, adding support of
+			Kar
+			Files, improvements on the kernel
+		</p>
+		<p xml:lang="en">
+			30/03/09 - Correct Toolbars, Fix Bugs thank's to Bug
+			Report.
+		</p>
+		<p xml:lang="en">
+			15/03/09 - Adding Plugin capablity - for specific
+			developments, switch to tabbed view , add automatic restart,
+			and
+			automatic playing stop. Adding more preferencies for
+			user experience
+		</p>
+		<p xml:lang="en">
+			01/03/09 - IHM enhancements, more precision in scale
+			editor.
+		</p>
+		<p xml:lang="en">
+			28/02/09 - Still Fixes :-), issues previewing ... and so
+			on
+			..
+		</p>
+		<p xml:lang="en">
+			24/01/09 - Fix a freeze bug while loading / displaying
+			the
+			book
+		</p>
+		<p xml:lang="en">
+			07/01/09 - Adding a send bug report functionnality. bugs
+			are
+			automatically send to the author for improving the feedback
+		</p>
+		<p xml:lang="en">
+			29/12/08 - Adding Transition / feedback on the software.
+		</p>
+		<p xml:lang="en">
+			28/12/08 - Simplify the UI - 3 clicks to listen a file,
+			adding a feed back for the errors
+		</p>
+		<p xml:lang="en">
+			30/11/08 - Switch to an improved sequencer, soundfont
+			file
+			format now supported
+		</p>
+		<p xml:lang="en">
+			15/11/08 - Bug fixes and localization of the scale
+			editor
+		</p>
+		<p xml:lang="en">
+			11/11/08 - improvements in gamme definition - display
+			all
+			characteristics on the paper
+		</p>
+		<p xml:lang="en">
+			10/11/08 - Correct a print preferences issue, save the
+			pageformat properties, now much more user friendly
+		</p>
+		<p xml:lang="en">
+			9/11/08 - Adding Gamme Editor in file menu, bug fixes
+		</p>
+		<p xml:lang="en">
+			1/11/08 - 400ko of source code :-) - adding register
+			definition, new gamma tool construction
+		</p>
+		<p xml:lang="en">
+			26/10/08 - Correct the print preview OutOfMemory
+			Problem,
+			now seemlessly usable.
+		</p>
+		<p xml:lang="en">
+			25/10/08 - English version of the APrint changes
+		</p>
+		<p xml:lang="en">
+			09/08 - Adding a scripting language permitting doing the
+			instrument translation
+		</p>
+		<p xml:lang="en">13/6/08 - Adding instruments to APrint</p>
+		<p xml:lang="en">
+			9/5/08 - Change on the image instrument size
+		</p>
+		<p xml:lang="en">4/5/08 - Add the file name in the print</p>
+		<p xml:lang="en">1/5/08 - Updating the help content</p>
+		<p xml:lang="en">
+			29/4/08 - Add an image to the instrument, adding a help
+			section
+		</p>
+		<h1>Contact</h1>
+
+		<p xml:lang="en">
+			You can contact us a this email adress
+			<a href="mailto:frett27@free.fr">frett27@free.fr</a>
+		</p>
+
+		<p xml:lang="fr">
+			Vous pouvez nous contacter à cette adresse mail :
+			<a href="mailto:frett27@free.fr">frett27@free.fr</a>
+		</p>
+
+
+		<h1>APrint License</h1>
+
+		<center>
+			<b>APrint - Copyright (C) Patrice Freydiere 2005-2008</b>
+		</center>
+
+		<pre>
+			This library is free software; you can redistribute it
+			and/or
+			modify it under the terms of the GNU General Public
+			License as
+			published by the Free Software Foundation; either
+			version 2 of the
+			License, or (at your option) any later
+			version.
+
+
+
+			This library is
+			distributed in the hope that it will be
+			useful, but WITHOUT ANY
+			WARRANTY; without even the implied
+			warranty of MERCHANTABILITY or
+			FITNESS FOR A PARTICULAR
+			PURPOSE. See the GNU General Public License
+			for more
+			details.
+
+
+			You should have received a copy of the GNU General
+			Public
+			License along with this library; if not, write to the Free
+			Software Foundation, Inc., 59 Temple Place - Suite 330,
+			Boston, MA
+			02111-1307, USA.
+		</pre>
+
+
+		<h2>
+			This software include Liquid Look And Feel - under LGPL
+			License
+		</h2>
+
+		<h2>This software include Gervill, under GPL License</h2>
+
+	</body>
+</page>

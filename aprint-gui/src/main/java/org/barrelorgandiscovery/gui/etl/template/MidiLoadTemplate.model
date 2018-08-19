@@ -1,0 +1,1107 @@
+<?xml version="1.0" encoding="UTF-8"?><org.barrelorgandiscovery.gui.etl.EtlMxGraph allowDanglingEdges="0" multigraph="0">
+  <mxGraphModel as="model">
+    <root>
+      <mxCell id="0"/>
+      <mxCell id="1" parent="0"/>
+      <org.barrelorgandiscovery.model.TerminalParameterModelStep id="7" in="true" label="Input Midi File" name="Input Midi File">
+        <type>org.barrelorgandiscovery.model.type.JavaType|java.io.File</type>
+        <value/>
+        <mxCell connectable="0" parent="1" style="unscheduled" vertex="1">
+          <mxGeometry as="geometry" height="40.0" width="150.0" x="30.0" y="160.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.TerminalParameterModelStep>
+      <org.barrelorgandiscovery.model.ModelParameter id="8" in="false" label="Input Midi File" name="Input Midi File" optional="true">
+        <type>org.barrelorgandiscovery.model.type.JavaType|java.io.File</type>
+        <mxCell parent="7" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="120.0" y="20.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.steps.midi.MidiDemultiplexer id="10" label="Midi Distributor">
+        <fromnote>rO0ABXNyABFqYXZhLmxhbmcuSW50ZWdlchLioKT3gYc4AgABSQAFdmFsdWV4cgAQamF2YS5sYW5nLk51bWJlcoaslR0LlOCLAgAAeHAAAAAA</fromnote>
+        <tonote>rO0ABXNyABFqYXZhLmxhbmcuSW50ZWdlchLioKT3gYc4AgABSQAFdmFsdWV4cgAQamF2YS5sYW5nLk51bWJlcoaslR0LlOCLAgAAeHAAAAB/</tonote>
+        <channel_filter>rO0ABXQAAA==</channel_filter>
+        <mxCell connectable="0" parent="1" style="unscheduled" vertex="1">
+          <mxGeometry as="geometry" height="2580.0" width="150.0" x="530.0" y="110.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.steps.midi.MidiDemultiplexer>
+      <org.barrelorgandiscovery.model.ModelParameter id="11" in="true" label="Midi In" name="midiin" optional="false">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.virtualbook.transformation.importer.MidiAdvancedEvent&gt;</type>
+        <mxCell parent="10" style="inparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="10.0" y="20.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="12" in="false" label="Do 0(0)" name="mn0" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="20.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="13" in="false" label="Do # 0(1)" name="mn1" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="40.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="14" in="false" label="Ré 0(2)" name="mn2" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="60.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="15" in="false" label="Ré # 0(3)" name="mn3" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="80.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="16" in="false" label="Mi 0(4)" name="mn4" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="100.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="17" in="false" label="Fa 0(5)" name="mn5" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="120.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="18" in="false" label="Fa # 0(6)" name="mn6" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="140.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="19" in="false" label="Sol 0(7)" name="mn7" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="160.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="20" in="false" label="Sol # 0(8)" name="mn8" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="180.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="21" in="false" label="La 0(9)" name="mn9" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="200.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="22" in="false" label="La # 0(10)" name="mn10" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="220.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="23" in="false" label="Si 0(11)" name="mn11" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="240.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="24" in="false" label="Do 1(12)" name="mn12" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="260.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="25" in="false" label="Do # 1(13)" name="mn13" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="280.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="26" in="false" label="Ré 1(14)" name="mn14" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="300.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="27" in="false" label="Ré # 1(15)" name="mn15" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="320.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="28" in="false" label="Mi 1(16)" name="mn16" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="340.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="29" in="false" label="Fa 1(17)" name="mn17" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="360.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="30" in="false" label="Fa # 1(18)" name="mn18" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="380.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="31" in="false" label="Sol 1(19)" name="mn19" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="400.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="32" in="false" label="Sol # 1(20)" name="mn20" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="420.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="33" in="false" label="La 1(21)" name="mn21" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="440.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="34" in="false" label="La # 1(22)" name="mn22" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="460.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="35" in="false" label="Si 1(23)" name="mn23" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="480.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="36" in="false" label="Do 2(24)" name="mn24" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="500.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="37" in="false" label="Do # 2(25)" name="mn25" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="520.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="38" in="false" label="Ré 2(26)" name="mn26" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="540.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="39" in="false" label="Ré # 2(27)" name="mn27" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="560.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="40" in="false" label="Mi 2(28)" name="mn28" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="580.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="41" in="false" label="Fa 2(29)" name="mn29" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="600.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="42" in="false" label="Fa # 2(30)" name="mn30" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="620.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="43" in="false" label="Sol 2(31)" name="mn31" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="640.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="44" in="false" label="Sol # 2(32)" name="mn32" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="660.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="45" in="false" label="La 2(33)" name="mn33" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="680.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="46" in="false" label="La # 2(34)" name="mn34" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="700.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="47" in="false" label="Si 2(35)" name="mn35" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="720.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="48" in="false" label="Do 3(36)" name="mn36" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="740.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="49" in="false" label="Do # 3(37)" name="mn37" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="760.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="50" in="false" label="Ré 3(38)" name="mn38" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="780.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="51" in="false" label="Ré # 3(39)" name="mn39" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="800.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="52" in="false" label="Mi 3(40)" name="mn40" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="820.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="53" in="false" label="Fa 3(41)" name="mn41" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="840.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="54" in="false" label="Fa # 3(42)" name="mn42" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="860.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="55" in="false" label="Sol 3(43)" name="mn43" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="880.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="56" in="false" label="Sol # 3(44)" name="mn44" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="900.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="57" in="false" label="La 3(45)" name="mn45" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="920.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="58" in="false" label="La # 3(46)" name="mn46" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="940.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="59" in="false" label="Si 3(47)" name="mn47" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="960.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="60" in="false" label="Do 4(48)" name="mn48" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="980.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="61" in="false" label="Do # 4(49)" name="mn49" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1000.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="62" in="false" label="Ré 4(50)" name="mn50" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1020.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="63" in="false" label="Ré # 4(51)" name="mn51" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1040.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="64" in="false" label="Mi 4(52)" name="mn52" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1060.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="65" in="false" label="Fa 4(53)" name="mn53" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1080.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="66" in="false" label="Fa # 4(54)" name="mn54" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1100.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="67" in="false" label="Sol 4(55)" name="mn55" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1120.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="68" in="false" label="Sol # 4(56)" name="mn56" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1140.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="69" in="false" label="La 4(57)" name="mn57" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1160.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="70" in="false" label="La # 4(58)" name="mn58" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1180.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="71" in="false" label="Si 4(59)" name="mn59" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1200.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="72" in="false" label="Do 5(60)" name="mn60" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1220.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="73" in="false" label="Do # 5(61)" name="mn61" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1240.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="74" in="false" label="Ré 5(62)" name="mn62" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1260.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="75" in="false" label="Ré # 5(63)" name="mn63" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1280.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="76" in="false" label="Mi 5(64)" name="mn64" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1300.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="77" in="false" label="Fa 5(65)" name="mn65" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1320.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="78" in="false" label="Fa # 5(66)" name="mn66" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1340.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="79" in="false" label="Sol 5(67)" name="mn67" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1360.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="80" in="false" label="Sol # 5(68)" name="mn68" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1380.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="81" in="false" label="La 5(69)" name="mn69" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1400.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="82" in="false" label="La # 5(70)" name="mn70" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1420.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="83" in="false" label="Si 5(71)" name="mn71" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1440.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="84" in="false" label="Do 6(72)" name="mn72" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1460.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="85" in="false" label="Do # 6(73)" name="mn73" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1480.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="86" in="false" label="Ré 6(74)" name="mn74" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1500.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="87" in="false" label="Ré # 6(75)" name="mn75" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1520.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="88" in="false" label="Mi 6(76)" name="mn76" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1540.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="89" in="false" label="Fa 6(77)" name="mn77" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1560.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="90" in="false" label="Fa # 6(78)" name="mn78" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1580.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="91" in="false" label="Sol 6(79)" name="mn79" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1600.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="92" in="false" label="Sol # 6(80)" name="mn80" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1620.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="93" in="false" label="La 6(81)" name="mn81" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1640.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="94" in="false" label="La # 6(82)" name="mn82" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1660.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="95" in="false" label="Si 6(83)" name="mn83" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1680.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="96" in="false" label="Do 7(84)" name="mn84" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1700.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="97" in="false" label="Do # 7(85)" name="mn85" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1720.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="98" in="false" label="Ré 7(86)" name="mn86" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1740.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="99" in="false" label="Ré # 7(87)" name="mn87" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1760.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="100" in="false" label="Mi 7(88)" name="mn88" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1780.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="101" in="false" label="Fa 7(89)" name="mn89" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1800.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="102" in="false" label="Fa # 7(90)" name="mn90" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1820.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="103" in="false" label="Sol 7(91)" name="mn91" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1840.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="104" in="false" label="Sol # 7(92)" name="mn92" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1860.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="105" in="false" label="La 7(93)" name="mn93" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1880.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="106" in="false" label="La # 7(94)" name="mn94" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1900.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="107" in="false" label="Si 7(95)" name="mn95" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1920.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="108" in="false" label="Do 8(96)" name="mn96" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1940.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="109" in="false" label="Do # 8(97)" name="mn97" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1960.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="110" in="false" label="Ré 8(98)" name="mn98" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="1980.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="111" in="false" label="Ré # 8(99)" name="mn99" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2000.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="112" in="false" label="Mi 8(100)" name="mn100" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2020.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="113" in="false" label="Fa 8(101)" name="mn101" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2040.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="114" in="false" label="Fa # 8(102)" name="mn102" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2060.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="115" in="false" label="Sol 8(103)" name="mn103" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2080.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="116" in="false" label="Sol # 8(104)" name="mn104" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2100.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="117" in="false" label="La 8(105)" name="mn105" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2120.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="118" in="false" label="La # 8(106)" name="mn106" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2140.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="119" in="false" label="Si 8(107)" name="mn107" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2160.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="120" in="false" label="Do 9(108)" name="mn108" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2180.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="121" in="false" label="Do # 9(109)" name="mn109" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2200.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="122" in="false" label="Ré 9(110)" name="mn110" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2220.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="123" in="false" label="Ré # 9(111)" name="mn111" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2240.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="124" in="false" label="Mi 9(112)" name="mn112" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2260.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="125" in="false" label="Fa 9(113)" name="mn113" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2280.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="126" in="false" label="Fa # 9(114)" name="mn114" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2300.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="127" in="false" label="Sol 9(115)" name="mn115" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2320.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="128" in="false" label="Sol # 9(116)" name="mn116" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2340.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="129" in="false" label="La 9(117)" name="mn117" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2360.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="130" in="false" label="La # 9(118)" name="mn118" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2380.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="131" in="false" label="Si 9(119)" name="mn119" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2400.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="132" in="false" label="Do 10(120)" name="mn120" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2420.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="133" in="false" label="Do # 10(121)" name="mn121" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2440.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="134" in="false" label="Ré 10(122)" name="mn122" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2460.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="135" in="false" label="Ré # 10(123)" name="mn123" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2480.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="136" in="false" label="Mi 10(124)" name="mn124" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2500.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="137" in="false" label="Fa 10(125)" name="mn125" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2520.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="138" in="false" label="Fa # 10(126)" name="mn126" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2540.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="139" in="false" label="Sol 10(127)" name="mn127" optional="true">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.timed.ITimedLength&gt;</type>
+        <mxCell parent="10" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="2560.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.steps.book.VirtualBookMultiplexer id="141" label="Concentrator">
+        <mxCell connectable="0" parent="1" style="unconfigured" vertex="1">
+          <mxGeometry as="geometry" height="40.0" width="150.0" x="810.0" y="110.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.steps.book.VirtualBookMultiplexer>
+      <org.barrelorgandiscovery.model.ModelParameter id="142" in="false" label="Virtual Book" name="outVirtualBook" optional="false">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.model.enhanced.HoleWithScale&gt;</type>
+        <mxCell parent="141" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="20.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.steps.impl.NewBookFrame id="143" label="Open VirtualBook in Frame">
+        <instrumentName/>
+        <mxCell connectable="0" parent="1" style="configured" vertex="1">
+          <mxGeometry as="geometry" height="40.0" width="150.0" x="1140.0" y="140.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.steps.impl.NewBookFrame>
+      <org.barrelorgandiscovery.model.ModelParameter id="144" in="true" label="virtualbook" name="virtualbook" optional="true">
+        <type>org.barrelorgandiscovery.model.type.CompositeType|info:virtualBook;Book or Holes,org.barrelorgandiscovery.model.type.JavaType|org.barrelorgandiscovery.virtualbook.VirtualBook,org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.virtualbook.Hole&gt;</type>
+        <mxCell parent="143" style="inparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="10.0" y="20.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <mxCell edge="1" id="145" parent="1" source="142" style="" target="144" value="">
+        <mxGeometry as="geometry" relative="1">
+          <mxPoint as="sourcePoint" x="950.0" y="140.0"/>
+          <mxPoint as="targetPoint" x="1160.0" y="160.0"/>
+        </mxGeometry>
+      </mxCell>
+      <org.barrelorgandiscovery.model.steps.midi.MidiFileInput id="146" label="Midi File Reading">
+        <mxCell connectable="0" parent="1" style="unscheduled" vertex="1">
+          <mxGeometry as="geometry" height="40.0" width="150.0" x="240.0" y="160.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.steps.midi.MidiFileInput>
+      <org.barrelorgandiscovery.model.ModelParameter id="147" in="true" label="Midi File Reader" name="inmidifile" optional="false">
+        <type>org.barrelorgandiscovery.model.type.JavaType|java.io.File</type>
+        <mxCell parent="146" style="inparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="10.0" y="20.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <org.barrelorgandiscovery.model.ModelParameter id="148" in="false" label="Events" name="events" optional="false">
+        <type>org.barrelorgandiscovery.model.type.GenericSimpleType|java.util.Collection&lt;org.barrelorgandiscovery.virtualbook.transformation.importer.MidiAdvancedEvent&gt;</type>
+        <mxCell parent="146" style="outparam" vertex="1">
+          <mxGeometry as="geometry" height="10.0" width="10.0" x="130.0" y="20.0"/>
+        </mxCell>
+      </org.barrelorgandiscovery.model.ModelParameter>
+      <mxCell edge="1" id="149" parent="1" source="8" target="147">
+        <mxGeometry as="geometry" relative="1"/>
+      </mxCell>
+      <mxCell edge="1" id="150" parent="1" source="148" target="11">
+        <mxGeometry as="geometry" relative="1"/>
+      </mxCell>
+    </root>
+  </mxGraphModel>
+  <mxStylesheet as="stylesheet">
+    <add as="vertical">
+      <add as="labelBackgroundColor" value="white"/>
+      <add as="endArrow" value="classic"/>
+      <add as="align" value="center"/>
+      <add as="strokeColor" value="black"/>
+      <add as="rounded" value="1"/>
+      <add as="shape" value="connector"/>
+      <add as="fontSize" value="10"/>
+      <add as="elbow" value="vertical"/>
+      <add as="verticalAlign" value="middle"/>
+      <add as="labelBorderColor" value="black"/>
+      <add as="edgeStyle" value="com.mxgraph.view.mxEdgeStyle$3@24cfc8d2"/>
+    </add>
+    <add as="arrow">
+      <add as="align" value="center"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$1@2e773a06"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="white"/>
+      <add as="shape" value="arrow"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+    </add>
+    <add as="terminalgroup">
+      <add as="fillColor" value="#FFFF00"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$1@2e773a06"/>
+      <add as="opacity" value="50"/>
+      <add as="align" value="center"/>
+      <add as="verticalAlign" value="top"/>
+      <add as="dashed" value="1"/>
+      <add as="fontSize" value="11"/>
+      <add as="strokeColor" value="black"/>
+      <add as="shape" value="label"/>
+    </add>
+    <add as="rhombus">
+      <add as="align" value="center"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$3@4c5ac28d"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="white"/>
+      <add as="shape" value="rhombus"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+    </add>
+    <add as="parameterunconnected">
+      <add as="verticalAlign" value="top"/>
+      <add as="labelPosition" value="right"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$2@670aa677"/>
+      <add as="strokeColor" value="black"/>
+      <add as="align" value="left"/>
+      <add as="shape" value="ellipse"/>
+      <add as="fillColor" value="#00FFFF"/>
+      <add as="fontSize" value="11"/>
+    </add>
+    <add as="disconnected">
+      <add as="fillColor" value="#FF0000"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$1@2e773a06"/>
+      <add as="opacity" value="50"/>
+      <add as="align" value="center"/>
+      <add as="verticalAlign" value="top"/>
+      <add as="dashed" value="1"/>
+      <add as="fontSize" value="11"/>
+      <add as="strokeColor" value="black"/>
+      <add as="shape" value="label"/>
+    </add>
+    <add as="straight">
+      <add as="align" value="center"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$1@2e773a06"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="white"/>
+      <add as="shape" value="connector"/>
+      <add as="strokeColor" value="black"/>
+      <add as="endArrow" value="classic"/>
+      <add as="verticalAlign" value="top"/>
+    </add>
+    <add as="configured">
+      <add as="align" value="center"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$1@2e773a06"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="white"/>
+      <add as="shape" value="label"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+    </add>
+    <add as="defaultEdge">
+      <add as="labelBorderColor" value="black"/>
+      <add as="align" value="center"/>
+      <add as="fontSize" value="10"/>
+      <add as="shape" value="connector"/>
+      <add as="strokeColor" value="black"/>
+      <add as="endArrow" value="classic"/>
+      <add as="verticalAlign" value="middle"/>
+      <add as="edgeStyle" value="com.mxgraph.view.mxEdgeStyle$3@24cfc8d2"/>
+      <add as="rounded" value="1"/>
+      <add as="labelBackgroundColor" value="white"/>
+    </add>
+    <add as="group">
+      <add as="align" value="center"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$1@2e773a06"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="white"/>
+      <add as="shape" value="label"/>
+      <add as="opacity" value="50"/>
+      <add as="strokeColor" value="black"/>
+      <add as="dashed" value="1"/>
+      <add as="verticalAlign" value="top"/>
+    </add>
+    <add as="defaultVertex">
+      <add as="align" value="center"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$1@2e773a06"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="white"/>
+      <add as="shape" value="label"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+    </add>
+    <add as="unscheduled">
+      <add as="align" value="center"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$1@2e773a06"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="#FF5555"/>
+      <add as="shape" value="label"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+    </add>
+    <add as="outparam">
+      <add as="align" value="right"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$2@670aa677"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="#FF0000"/>
+      <add as="shape" value="ellipse"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+      <add as="labelPosition" value="left"/>
+    </add>
+    <add as="swimlane">
+      <add as="align" value="center"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$1@2e773a06"/>
+      <add as="fontStyle" value="1"/>
+      <add as="fontSize" value="12"/>
+      <add as="fillColor" value="white"/>
+      <add as="startSize" value="23"/>
+      <add as="shape" value="swimlane"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+    </add>
+    <add as="roundImage">
+      <add as="fillColor" value="white"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$2@670aa677"/>
+      <add as="labelBackgroundColor" value="white"/>
+      <add as="align" value="center"/>
+      <add as="verticalAlign" value="top"/>
+      <add as="verticalLabelPosition" value="bottom"/>
+      <add as="fontSize" value="11"/>
+      <add as="strokeColor" value="black"/>
+      <add as="shape" value="image"/>
+    </add>
+    <add as="line">
+      <add as="align" value="center"/>
+      <add as="spacingTop" value="8"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$1@2e773a06"/>
+      <add as="strokeWidth" value="4"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="white"/>
+      <add as="shape" value="line"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+      <add as="labelBackgroundColor" value="white"/>
+    </add>
+    <add as="entity">
+      <add as="labelBackgroundColor" value="white"/>
+      <add as="endArrow" value="classic"/>
+      <add as="align" value="center"/>
+      <add as="strokeColor" value="black"/>
+      <add as="rounded" value="1"/>
+      <add as="shape" value="connector"/>
+      <add as="fontSize" value="10"/>
+      <add as="verticalAlign" value="middle"/>
+      <add as="labelBorderColor" value="black"/>
+      <add as="edgeStyle" value="com.mxgraph.view.mxEdgeStyle$1@3d596b1c"/>
+    </add>
+    <add as="unconfigured">
+      <add as="align" value="center"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$1@2e773a06"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="#00FFFF"/>
+      <add as="shape" value="label"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+    </add>
+    <add as="inparam">
+      <add as="align" value="left"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$2@670aa677"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="#00FF00"/>
+      <add as="shape" value="ellipse"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+      <add as="labelPosition" value="right"/>
+    </add>
+    <add as="image">
+      <add as="align" value="center"/>
+      <add as="verticalLabelPosition" value="bottom"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$1@2e773a06"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="white"/>
+      <add as="shape" value="image"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+      <add as="labelBackgroundColor" value="white"/>
+    </add>
+    <add as="rhombusImage">
+      <add as="fillColor" value="white"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$3@4c5ac28d"/>
+      <add as="labelBackgroundColor" value="white"/>
+      <add as="align" value="center"/>
+      <add as="verticalAlign" value="top"/>
+      <add as="verticalLabelPosition" value="bottom"/>
+      <add as="fontSize" value="11"/>
+      <add as="strokeColor" value="black"/>
+      <add as="shape" value="image"/>
+    </add>
+    <add as="triangle">
+      <add as="align" value="center"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$4@2a69c1bb"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="white"/>
+      <add as="shape" value="triangle"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+    </add>
+    <add as="ellipse">
+      <add as="align" value="center"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$2@670aa677"/>
+      <add as="fontSize" value="11"/>
+      <add as="fillColor" value="white"/>
+      <add as="shape" value="ellipse"/>
+      <add as="strokeColor" value="black"/>
+      <add as="verticalAlign" value="top"/>
+    </add>
+    <add as="parameterconnected">
+      <add as="verticalAlign" value="top"/>
+      <add as="labelPosition" value="right"/>
+      <add as="perimeter" value="com.mxgraph.view.mxPerimeter$2@670aa677"/>
+      <add as="strokeColor" value="black"/>
+      <add as="align" value="left"/>
+      <add as="shape" value="ellipse"/>
+      <add as="fillColor" value="#00FF00"/>
+      <add as="fontSize" value="11"/>
+    </add>
+  </mxStylesheet>
+  <mxCell as="defaultParent" id="1" parent="0"/>
+  <Array as="multiplicities"/>
+</org.barrelorgandiscovery.gui.etl.EtlMxGraph>

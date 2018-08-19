@@ -1,0 +1,19 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head></head>
+<body>
+Bug reporter ... Tools for the developper to report bugs, thank's to
+http report sending. this package is really simple to use,
+
+<pre>
+in the application at the beginning, 
+just put a BugReporter.init(name), with the name of the application, this call will init the log4j library to store all the debugging messages is a file, 
+that can be sent to an http address. In this case the http address is hardcoded.
+
+in a try catch block, at the user level, making a call to the BugReporter.sendBugReport() method will zip the logs and send them back to developers to improve the
+software.
+
+</pre>
+
+</body>
+</html>

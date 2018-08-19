@@ -1,0 +1,155 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head></head>
+<body>
+provide a Plugin Capability to the framework. This permit to implement
+new functionnalities when the application permit it. It drastically
+simplify the functionalities implementation and reduce the amount of
+knowledge to do it.
+<br>
+<br />
+Extension first point are a class implementing
+<b>IExtension</b>
+interface, this interface define :
+<br>
+<br>
+- a name to the plugin.
+
+<br />
+- a list of extension points
+<br>
+<h2>Extension Points:</h2>
+Extension point are entry points that can be used by the main
+application to call the plugin when needed. Extension Point is defined
+by the ExtensionPoint interface, this contain :
+<br>
+- a TypeID (type java interface type)
+<br>
+- a pointer to the interface that provide the entry point
+<br>
+<br>
+<br>
+a bag implementation of an entry point is proposed in the
+SeimplExtensionPoint class (taking type typeid and pointer in the
+constructor)
+<br>
+<br>
+<h2>Extension Point Example</h2>
+<br>
+Here is an example of the usage of the extension point in a plugin
+example ...
+<br>
+<br>
+
+<h3>Implementing an Extension Point</h3>
+
+<pre>
+public class AdvancedImporterExtension implements IExtension,
+		ImportersExtensionPoint, InformRepositoryExtensionPoint {
+
+	private static Logger logger = Logger
+			.getLogger(AdvancedImporterExtension.class);
+
+	public AdvancedImporterExtension() {
+		logger.debug("AdvancedImporterExtension");
+	}
+
+	public ExtensionPoint[] getExtensionPoints() {
+		return new ExtensionPoint[] {
+				new SimpleExtensionPoint(ImportersExtensionPoint.class, this),
+				new SimpleExtensionPoint(InformRepositoryExtensionPoint.class,
+						this) };
+	}
+
+	public String getName() {
+		return "Advanced Midi Importer";
+	}
+
+	public ArrayList&lt;AbstractMidiImporter&gt; getExtensionImporterInstance(
+			Scale destinationscale) {
+
+		logger.debug("getExtensionImporterInstance");
+
+		// get midi correspondance ...
+		if (rep == null) {
+			logger.warn("Rep is null ...");
+			return null;
+		}
+
+		Scale gmidi = Scale.getGammeMidiInstance();
+		ArrayList<AbstractTransformation> trans = rep.getTranspositionManager()
+				.findTransposition(gmidi, destinationscale);
+
+		if (trans == null || trans.size() == 0) {
+			logger.warn("no midi transposition for " + destinationscale);
+			return null;
+		}
+
+		if (!(trans.get(0) instanceof LinearTransposition))
+		{
+			logger.warn ("transposition is not a linear one");
+			return null;
+		}
+		LinearTransposition lt = (LinearTransposition)trans.get(0);
+
+		ArrayList&lt;AbstractMidiImporter&gt; l = new ArrayList&lt;AbstractMidiImporter&gt;();
+		l.add(new TranslatorImporter(destinationscale, lt));
+
+		return l;
+	}
+
+	private Repository rep = null;
+
+	public void informRepository(Repository repository) {
+		this.rep = repository;
+	}
+
+
+</pre>
+
+<br>
+In this example, the plugin provide two extension points, one for
+getting a repository reference from the main application (the
+InformRepositoryExtensionPoint interface), and one for proposing a new
+importer. (thanks to the ImportersExtensionPoint interface)
+<br>
+<br>
+
+
+<h3>Using a plugin Extension Point</h3>
+
+on the main application side, the usage of the ExtensionManager help a
+lot. This Class manage an Extension array of all the plugins loaded with
+the application. so in the main application, we have an ExtensionManager
+member
+
+<pre>private ExtensionManager extm;</pre>
+
+this member is initialized some where in the application.
+
+
+
+
+
+
+<br>
+<br>
+<br>
+When you want to call a plugin capability, do it that way :
+<br>
+<pre>InitExtensionPoint[] allInitPoints = ExtensionPointProvider
+				.getAllPoints(InitExtensionPoint.class, extm.getExtensions());
+		for (int i = 0; i < allInitPoints.length; i++) {
+			InitExtensionPoint init = allInitPoints[i];
+			init.init(this);
+		}</pre>
+
+
+ExtensionPointProvider is a helper class that filter the ExtensionPoint
+by type and automatically cast in with the proper interface
+<br>
+<br>
+<br>
+<br>
+</body>
+</html>
