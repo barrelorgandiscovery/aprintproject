@@ -52,7 +52,7 @@ public class JMainPanel extends JPanel {
                   new Runnable() {
                     public void run() {
 
-                      connectedStatus.setText(status);
+                      connectedStatus.setText(status + "-" + "(" + wx + "," + wy + ")");
                     };
                   });
 
