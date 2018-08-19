@@ -2,6 +2,7 @@ package org.barrelorgandiscovery.perfo.gui;
 
 import java.awt.BorderLayout;
 
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -11,20 +12,21 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineContr
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineStatus;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLMachine;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLMachineParameters;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.DisplacementCommand;
 
 public class JMainPanel extends JPanel {
 
   private JLabel connectedStatus = new JLabel();
 
   public JMainPanel() throws Exception {
-	  initComponents();
+    initComponents();
   }
 
   protected void initComponents() throws Exception {
     setLayout(new BorderLayout());
 
-    add(connectedStatus, BorderLayout.CENTER);
-    
+    add(connectedStatus, BorderLayout.SOUTH);
+
     GRBLMachine g = new GRBLMachine();
     GRBLMachineParameters p = new GRBLMachineParameters();
     p.setComPort("/dev/ttyUSB0");
@@ -57,6 +59,18 @@ public class JMainPanel extends JPanel {
             } catch (Exception ex) {
               ex.printStackTrace();
             }
+          }
+        });
+
+    JButton btn = new JButton("move");
+    add(btn, BorderLayout.EAST);
+    btn.addActionListener(
+        (e) -> {
+          try {
+            m.sendCommand(
+                new DisplacementCommand(Math.random() * 100 + 50, Math.random() * 100 + 50));
+          } catch (Exception ex) {
+            ex.printStackTrace();
           }
         });
   }
