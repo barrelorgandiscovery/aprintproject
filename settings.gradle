@@ -4,6 +4,8 @@ include 'aprint-core'
 include 'aprint-gui'
 
 include 'aprint-machine-control'
+include 'aprint-machine-control-gui'
+
 include 'aprint-punch-extension'
 
 include 'aprint-book-scanner'
