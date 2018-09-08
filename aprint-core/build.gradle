@@ -27,6 +27,11 @@ compileJava {
 	options.compilerArgs << "-XDignore.symbol.file"
 }
 
+
+configurations {
+	xmlbean
+}
+
 // In this section you declare the dependencies for your production and test code
 dependencies {
 	// The production code uses the SLF4J logging API at compile time
@@ -40,17 +45,17 @@ dependencies {
 	compile project(':aprint-gervill')
 	compile files(fileTree(dir:"${projectDir}/libs" , include:['**/*.jar']).toList())
 	testCompile 'junit:junit:4.12'
+	
+	xmlbean files(fileTree(dir:"${projectDir}/libs", include:['xbean.jar','jsr173_1.0_api.jar']).toList())
 }
 
 sourceSets {
 	main {
-		java { 
-			srcDir 'src/main/java' 
-		}
+		java {  srcDir 'src/main/java'  }
 
-		resources {  
+		resources {
 			srcDir 'src/main/java'
-			srcDir 'src/main/resources' 
+			srcDir 'src/main/resources'
 		}
 	}
 	tasks {
@@ -71,3 +76,30 @@ task listJars() {
 
 }
 
+task buildSpecJar() {
+
+	doLast {
+		// <taskdef name="xmlbean" classname="org.apache.xmlbeans.impl.tool.XMLBean" classpath="RD/xmlbean/xmlbeans-2.4.0/lib/xbean.jar:RD/xmlbean/xmlbeans-2.4.0/lib/jsr173_1.0_api.jar" />
+		
+		ant.taskdef(name: 'xmlbean',
+		classname: 'org.apache.xmlbeans.impl.tool.XMLBean',
+		classpath: configurations.xmlbean.asPath)
+//		
+//		<xmlbean verbose="true" destfile="lib/vbxml2016.jar" classpath="lib/xbean.jar;lib/jsr173_1.0_api.jar" failonerror="true">
+//			<fileset dir="specifications">
+//				<include name="VirtualBook2016.xsd" />
+//			</fileset>
+//		</xmlbean>
+//
+
+		ant.xmlbean(verbose: 'true',
+			destfile:"${projectDir}/build/punch.jar",
+			failonerror:'true',
+			classpath:configurations.xmlbean.asPath) {
+				
+				fileset(dir: 'specifications', includes: 'PunchPlan.xsd')
+			
+		}
+
+	}
+}

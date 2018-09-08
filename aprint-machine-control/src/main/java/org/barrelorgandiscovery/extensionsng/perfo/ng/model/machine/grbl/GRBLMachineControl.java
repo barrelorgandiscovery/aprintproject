@@ -121,7 +121,8 @@ class GRBLMachineControl implements MachineControl {
 		 */
 
 		serialPort = new SerialPort(portName);
-
+		
+		
 		logger.debug("opening " + portName);
 
 		serialPort.openPort();
@@ -250,10 +251,11 @@ class GRBLMachineControl implements MachineControl {
 						}
 
 						lastMachineStatus = current;
-						lastMachineStatusTime = System.currentTimeMillis();
+					
 					}
-
+					
 				} // null status
+				lastMachineStatusTime = System.currentTimeMillis();
 
 			}
 

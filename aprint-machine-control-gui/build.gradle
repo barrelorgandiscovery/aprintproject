@@ -37,6 +37,7 @@ dependencies {
 	// testCompile dependency to testCompile 'org.testng:testng:6.8.1' and add
 	// 'test.useTestNG()' to your build script.
 	compile project(":aprint-machine-control")
+	compile files(fileTree(dir:"${projectDir}/libs" , include:['**/*.jar']).toList())
 	testCompile 'junit:junit:4.12'
 }
 

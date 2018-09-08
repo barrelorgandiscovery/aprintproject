@@ -1,4 +1,4 @@
-package org.barrelorgandiscovery.perfo.gui;
+package org.barrelorgandiscovery.perfo.gui.old;
 
 import java.awt.BorderLayout;
 
@@ -73,5 +73,6 @@ public class JMainPanel extends JPanel {
             ex.printStackTrace();
           }
         });
+    
   }
 }

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<!-- saved from url=(0080)https://www.xgadget.de/anleitung/2-2-spi-display-ili9341-am-raspberry-betreiben/ -->
+<html class="translated-ltr"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script type="text/javascript" defer="" async="" src="./2.2 _Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de_files/14186.js.téléchargement"></script><script type="text/javascript" async="" src="./2.2 _Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de_files/analytics.js.téléchargement"></script><script async="" src="./2.2 _Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de_files/js"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'UA-767854-24', { 'anonymize_ip': true });
+</script>
+
+<link href="./2.2 _Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de_files/css" rel="stylesheet" type="text/css">
+<link rel="stylesheet" href="./2.2 _Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de_files/font-awesome.min.css">
+
+    
+ 
+    
+ 
+    <link rel="stylesheet" type="text/css" href="./2.2 _Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de_files/style-neu.css">
+ 
+     
+    
+      <script type="text/javascript">
+        (function(window, document){
+          window._blogfoster=window._blogfoster || {};
+          window._blogfoster.insights=window._blogfoster.insights || {};
+          window._blogfoster.insights.websiteId=14186;
+          var t="https://insights.blogfoster.com/v1/" + window._blogfoster.insights.websiteId + ".js";
+          var e=document, s=e.createElement("script"), a=e.getElementsByTagName("script")[0];
+          s.type="text/javascript"; s.defer=true; s.async=true; s.src=t; a.parentNode.insertBefore(s,a);
+        })(window, document);
+      </script>
+    
+<!-- This site is optimized with the Yoast SEO plugin v8.1.2 - https://yoast.com/wordpress/plugins/seo/ -->
+<title>2.2 "Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de</title>
+<meta name="description" content="Nachdem wir vor einigen Wochen schon einmal ein Tutorial über das 2.2&quot; SPI-TFT in Kombination mit dem Arduino veröffentlicht hatten, ist es nun auch für">
+<link rel="canonical" href="https://www.xgadget.de/anleitung/2-2-spi-display-ili9341-am-raspberry-betreiben/">
+<meta property="og:locale" content="de_DE">
+<meta property="og:type" content="article">
+<meta property="og:title" content="2.2“ SPI-Display (ILI9341) am Raspberry betreiben » Xgadget.de">
+<meta property="og:description" content="Nachdem wir vor einigen Wochen schon einmal ein Tutorial über das 2.2&quot; SPI-TFT in Kombination mit dem Arduino veröffentlicht hatten, ist es nun auch für">
+<meta property="og:url" content="https://www.xgadget.de/anleitung/2-2-spi-display-ili9341-am-raspberry-betreiben/">
+<meta property="og:site_name" content="Xgadget.de">
+<meta property="article:tag" content="Display">
+<meta property="article:tag" content="Raspberry">
+<meta property="article:tag" content="Raspberry Pi">
+<meta property="article:tag" content="SPI">
+<meta property="article:tag" content="SPI-Display">
+<meta property="article:tag" content="TFT">
+<meta property="article:section" content="Anleitungen">
+<meta property="article:published_time" content="2016-10-11T19:30:45+02:00">
+<meta property="article:modified_time" content="2018-04-12T01:10:21+02:00">
+<meta property="og:updated_time" content="2018-04-12T01:10:21+02:00">
+<meta property="og:image" content="https://www.xgadget.de/wp-content/uploads/2016/10/SPI-Display-Raspberry.jpg">
+<meta property="og:image:secure_url" content="https://www.xgadget.de/wp-content/uploads/2016/10/SPI-Display-Raspberry.jpg">
+<meta property="og:image:width" content="800">
+<meta property="og:image:height" content="500">
+<!-- / Yoast SEO plugin. -->
+
+<link rel="dns-prefetch" href="https://s.w.org/">
+<link rel="alternate" type="application/rss+xml" title="Xgadget.de »2.2&quot; SPI-Display (ILI9341) on the Raspberry operate Comment-Feed" href="https://www.xgadget.de/anleitung/2-2-spi-display-ili9341-am-raspberry-betreiben/feed/">
+		<script type="text/javascript">
+			window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/11\/72x72\/","ext":".png","svgUrl":"https:\/\/s.w.org\/images\/core\/emoji\/11\/svg\/","svgExt":".svg","source":{"concatemoji":"https:\/\/www.xgadget.de\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.9.8"}};
+			!function(a,b,c){function d(a,b){var c=String.fromCharCode;l.clearRect(0,0,k.width,k.height),l.fillText(c.apply(this,a),0,0);var d=k.toDataURL();l.clearRect(0,0,k.width,k.height),l.fillText(c.apply(this,b),0,0);var e=k.toDataURL();return d===e}function e(a){var b;if(!l||!l.fillText)return!1;switch(l.textBaseline="top",l.font="600 32px Arial",a){case"flag":return!(b=d([55356,56826,55356,56819],[55356,56826,8203,55356,56819]))&&(b=d([55356,57332,56128,56423,56128,56418,56128,56421,56128,56430,56128,56423,56128,56447],[55356,57332,8203,56128,56423,8203,56128,56418,8203,56128,56421,8203,56128,56430,8203,56128,56423,8203,56128,56447]),!b);case"emoji":return b=d([55358,56760,9792,65039],[55358,56760,8203,9792,65039]),!b}return!1}function f(a){var c=b.createElement("script");c.src=a,c.defer=c.type="text/javascript",b.getElementsByTagName("head")[0].appendChild(c)}var g,h,i,j,k=b.createElement("canvas"),l=k.getContext&&k.getContext("2d");for(j=Array("flag","emoji"),c.supports={everything:!0,everythingExceptFlag:!0},i=0;i<j.length;i++)c.supports[j[i]]=e(j[i]),c.supports.everything=c.supports.everything&&c.supports[j[i]],"flag"!==j[i]&&(c.supports.everythingExceptFlag=c.supports.everythingExceptFlag&&c.supports[j[i]]);c.supports.everythingExceptFlag=c.supports.everythingExceptFlag&&!c.supports.flag,c.DOMReady=!1,c.readyCallback=function(){c.DOMReady=!0},c.supports.everything||(h=function(){c.readyCallback()},b.addEventListener?(b.addEventListener("DOMContentLoaded",h,!1),a.addEventListener("load",h,!1)):(a.attachEvent("onload",h),b.attachEvent("onreadystatechange",function(){"complete"===b.readyState&&c.readyCallback()})),g=c.source||{},g.concatemoji?f(g.concatemoji):g.wpemoji&&g.twemoji&&(f(g.twemoji),f(g.wpemoji)))}(window,document,window._wpemojiSettings);
+		</script><script src="./2.2 _Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de_files/wp-emoji-release.min.js.téléchargement" type="text/javascript" defer=""></script>
+		<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 .07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+<link rel="https://api.w.org/" href="https://www.xgadget.de/wp-json/">
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="https://www.xgadget.de/xmlrpc.php?rsd">
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="https://www.xgadget.de/wp-includes/wlwmanifest.xml"> 
+<meta name="generator" content="WordPress 4.9.8">
+<link rel="shortlink" href="https://www.xgadget.de/?p=2404">
+<link rel="alternate" type="application/json+oembed" href="https://www.xgadget.de/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fwww.xgadget.de%2Fanleitung%2F2-2-spi-display-ili9341-am-raspberry-betreiben%2F">
+<link rel="alternate" type="text/xml+oembed" href="https://www.xgadget.de/wp-json/oembed/1.0/embed?url=https%3A%2F%2Fwww.xgadget.de%2Fanleitung%2F2-2-spi-display-ili9341-am-raspberry-betreiben%2F&amp;format=xml">
+	<meta name="robots" content="index, follow">
+ 	<meta name="viewport" content="width=1024">
+
+<link rel="shortcut icon" href="https://www.xgadget.de/favicon.ico">
+<link rel="apple-touch-icon" href="https://www.xgadget.de/wp-content/themes/xgadget/img/touch_icon.png">
+    <link rel="alternate" type="application/rss+xml" href="https://www.xgadget.de/feed/" title="Xgadget.de latest posts">
+    <link rel="alternate" type="application/rss+xml" href="https://www.xgadget.de/comments/feed/" title="Xgadget.de latest comments">
+    <link rel="pingback" href="https://www.xgadget.de/xmlrpc.php">
+    
+<script type="text/javascript" src="./2.2 _Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de_files/jquery.min.js.téléchargement"></script>
+<script type="text/javascript">
+function popup(url, width, height, name)
+{
+	if (!name)
+	{
+		name = '_popup';
+	}
+	window.open(url.replace(/&amp;/g, '&'), name, 'height=' + height + ',resizable=yes,scrollbars=yes, width=' + width);
+	return false;
+}
+</script>
+<script type="text/javascript">
+  if (/iphone|ipod|android|blackberry|opera mini|opera mobi|skyfire|maemo|windows phone|palm|iemobile|symbian|symbianos|fennec/i.test(navigator.userAgent.toLowerCase())) {
+    $("meta[name='viewport']").attr("content", "width=device-width, initial-scale=1.0, user-scalable=no");
+  }
+</script>
+<link rel="stylesheet" type="text/css" href="./2.2 _Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de_files/style.css"><link type="text/css" rel="stylesheet" charset="UTF-8" href="./2.2 _Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de_files/translateelement.css"></head>
+
+<body><div class="cc_banner-wrapper "><div class="cc_banner cc_container cc_container--open"><a href="https://www.xgadget.de/anleitung/2-2-spi-display-ili9341-am-raspberry-betreiben/#null" data-cc-event="click:dismiss" target="_blank" class="cc_btn cc_btn_accept_all cc_ok"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Accept </font></font></a><a href="https://www.xgadget.de/anleitung/2-2-spi-display-ili9341-am-raspberry-betreiben/#hide" data-cc-event="click:hide" class="cc_btn cc_btn_hide_all cc_hide"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Hide</font></font></a><p class="cc_message"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">By using our website, you agree to our privacy policy, we and affiliated services may set cookies. </font><font style="vertical-align: inherit;">By clicking on the Accept button, you also confirm that we may provide you with third-party personal advertising - if you do not want this, please select the Hide button. </font></font><a data-cc-if="options.link" target="_self" class="cc_more_info" href="https://www.xgadget.de/datenschutz/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">More info.</font></font></a></p></div></div>
+<div class="page">
+	<div class="header">
+    	<div class="logo"></div>
+        <div class="search">
+       	  <div class="spos">
+            	<form method="get" id="searchform" action="https://www.xgadget.de/index.php">
+        		<input name="s" type="search" id="searchfield"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"><input name="searchbutton" type="submit" id="searchbutton" value="search"></font></font>
+        </form>
+        	</div>
+        </div>
+        <div class="navi">
+        	<div class="mob_navbutton"><img src="./2.2 _Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de_files/misc_menu.svg" alt="" width="30" height="30"></div>
+        	<div class="mob_nav">
+                <a class="nav_home" href="https://www.xgadget.de/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Home </font></font></a>
+                <a class="nav_news" href="https://www.xgadget.de/news/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">News </font></font></a>
+                <a class="nav_test" href="https://www.xgadget.de/testbericht/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Reviews </font></font></a>
+                <a class="nav_app" href="https://www.xgadget.de/app-software/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">App's / Software </font></font></a>
+                <a class="nav_help" href="https://www.xgadget.de/anleitung/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Instructions </font></font></a>
+                <a class="nav_deal" href="https://www.xgadget.de/deal/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Deals </font></font></a>
+                <a class="nav_video" href="https://www.xgadget.de/video/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Videos</font></font></a>
+            </div>
+        </div>
+    </div><!-- End Header -->  <div class="content">
+						<div class="site-catline_4"></div>
+    	<div class="site-box">
+            	<div class="site-title"><h2><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">2.2 "SPI display (ILI9341) on the Raspberry</font></font></h2></div>
+            	<div class="site-txt">
+           	  <p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">After </font><font style="vertical-align: inherit;">&nbsp;releasing </font><font style="vertical-align: inherit;">a tutorial about the 2.2 "SPI-TFT in combination with the </font></font><a href="https://www.xgadget.de/anleitung/2-2-spi-tft-ili9341-am-arduino-anschliessen/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Arduino</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> a few weeks ago </font><font style="vertical-align: inherit;">, it is now time for our Raspberry Pi to get its own small screen. </font><font style="vertical-align: inherit;">So, in addition to simple status indicators, we can even play GameBoy games on the small SPI display. </font><font style="vertical-align: inherit;">In the following instructions we show you both the connection and the initial configuration of the mini display on the Raspberry Pi.&nbsp;</font></font><span id="more-2404"></span></p>
+    <!-- <div class="article-rectanglead">
+<script language="JavaScript" src="http://ads.w3hoster.de/adsi-j.php?s=11909&w=300&h=250&t=_blank"></script>
+</div> -->
+
+    
+<h3><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">What is needed?</font></font></h3>
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">For a better overview, we have compiled this time again a small shopping list for you:</font></font></p>
+<p><strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">2.2 "TFT ILI9341 SPI Display</font></font></strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> - </font></font><a href="https://goo.gl/wf24MU" target="_blank" rel="nofollow noopener"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Aliexpress</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> * (about 6,50 €) or </font></font><a href="http://www.amazon.de/dp/B01E0MGZU2/?tag=amazon-info-21" target="_blank" rel="nofollow noopener"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Amazon</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> * (about 13 €)</font></font><!-- https://goo.gl/VtPCDD --></p>
+<p><strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Raspberry Pi</font></font></strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> - about 30 - 40 € - see eg at&nbsp; </font></font><a href="http://www.amazon.de/dp/B01CEFWQFA/?tag=amazon-info-21" target="_blank" rel="nofollow noopener"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Amazon</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> *</font></font></p>
+<p><strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Power supply for Raspberry Pi</font></font></strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> - about 10 € - see eg at </font></font><a href="http://www.amazon.de/dp/B01K1WSKDA/?tag=amazon-info-21" target="_blank" rel="nofollow noopener"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Amazon</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> *</font></font></p>
+<p><strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Connection cable</font></font></strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> - approx. 4 € - see eg at </font></font><a href="http://www.amazon.de/dp/B00OL6JZ3C/?tag=amazon-info-21" target="_blank" rel="nofollow noopener"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Amazon</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> *</font></font></p>
+<p><strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">56 Ohm resistance</font></font></strong><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> - approx. 4 € - see eg at </font></font><a href="http://www.amazon.de/dp/B00I8T4ILC/?tag=amazon-info-21" target="_blank" rel="nofollow noopener"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Amazon</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> *</font></font></p>
+<h3><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Connect the display to the Raspberry</font></font></h3>
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">First, we have to connect the display to our Raspberry Pi, for a better overview, you will find below again the exact diagram before.</font></font></p>
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">We connect the first SDO / MISO pin of our display to the MISO pin (GPIO9 - pin 21) of our Raspberry, for the second LED pin of the display we also need a 56 Ohm resistor - this will be connected to the GPIO18 (pin 12 ) of the Pi (because it also supports PWM, we can later adjust the brightness of the backlight).</font></font></p>
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Now we come to the third display pin "SCK", this we connect to the SCLK pin (on pin 23) of our craft computer. </font><font style="vertical-align: inherit;">Now follows the "SDI / MOSI" connection of the SPI screen, this we connect to the MOSI (GPIO 10 - pin 19) of the mini PC. </font><font style="vertical-align: inherit;">It continues with the "DC / RS" pin, which is connected to GPIO 24 (pin 18), furthermore we have to connect the RESET pin to the GPIO 25 (pin 22).</font></font></p>
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">The third last "CS" display pin we need to connect to the GPIO 8 - this is pin 24 of the Raspberry's. </font><font style="vertical-align: inherit;">The GND pin, however, we can connect to any ground port (pin 6, 9, 14, 20, 25, 30, 34, 39) of our Raspberry. </font><font style="vertical-align: inherit;">Finally, we also need the VCC pin for the power supply, which we connect to one of the two existing 3.3 volt ports (pin 1 or 17).</font></font></p>
+<p><img class="aligncenter size-full wp-image-1903" src="./2.2 _Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de_files/raspberry-gpio-pins.jpg" alt="Raspberry GPIO Pins" width="620" height="263" srcset="https://www.xgadget.de/wp-content/uploads/2016/06/raspberry-gpio-pins.jpg 620w, https://www.xgadget.de/wp-content/uploads/2016/06/raspberry-gpio-pins-300x127.jpg 300w" sizes="(max-width: 620px) 100vw, 620px"></p>
+<p><img class="aligncenter size-full wp-image-2455" src="./2.2 _Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de_files/SPI-Display-Schaltplan.jpg" alt="SPI display - wiring diagram" width="620" height="349" srcset="https://www.xgadget.de/wp-content/uploads/2016/10/SPI-Display-Schaltplan.jpg 620w, https://www.xgadget.de/wp-content/uploads/2016/10/SPI-Display-Schaltplan-300x169.jpg 300w" sizes="(max-width: 620px) 100vw, 620px"></p>
+<h3><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">functional test</font></font></h3>
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">After everything was properly connected we can connect our Raspberry Pi to the power supply. </font><font style="vertical-align: inherit;">We perform our first functional test with the current Raspbian Jessie, you can </font><font style="vertical-align: inherit;">download </font><font style="vertical-align: inherit;">the corresponding image from the official website </font></font><a href="https://www.raspberrypi.org/downloads/raspbian/" target="_blank" rel="noopener"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">HERE</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> .</font></font></p>
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">First, if we have not already done so, we need to enable our SPI port in the operating system. </font><font style="vertical-align: inherit;">To do this we execute the following command to enter the configuration menu:</font></font></p>
+<pre id="codeblock_codeblock_0" class="codeblock codeblock_none"><code>sudo raspi-config</code></pre>
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Now switch to the "Advanced Options" submenu and select "SPI" - this activates you and then closes the configuration assistant. </font><font style="vertical-align: inherit;">Then we will update our system with the following command (this may take several minutes):</font></font></p>
+<pre id="codeblock_codeblock_1" class="codeblock codeblock_none"><code>sudo rpi-update</code></pre>
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Once the system has been updated successfully, you still have to restart the system with the following reboot command:</font></font></p>
+<pre id="codeblock_codeblock_2" class="codeblock codeblock_none"><code>sudo reboot</code></pre>
+<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Now re-connect with your Raspberry Pi, we'll do a first bump test with the following commands:</font></font></p>
+<pre id="codeblock_codeblock_3" class="codeblock codeblock_none"><code>sudo modprobe fbtft_device name=tm022hdh26 rotate=90 speed=80000000 fps=60<font></font>
+sudo FRAMEBUFFER=/dev/fb1 startx</code></pre>
+<p>Nach einem kurzen Moment sollte euer Display nun die typische Raspbian Desktopoberfläche&nbsp;anzeigen, damit hätte unser Display den ersten Funktionstest problemlos bestanden. Unsere komplette Anleitung haben wir hier auch nochmal als Video aufbereitet:</p>
+<div class="video-container"><iframe width="425" height="344" src="./2.2 _Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de_files/3vuK5w8o8dg.html" frameborder="0" allowfullscreen=""> </iframe></div>
+<h3>Autostart</h3>
+<p>Da wir das SPI-Display nicht jedesmal&nbsp;manuell über die Kommandozeile neu starten wollen, legen wir nun die entsprechende Befehle in den Autostart ab, dies funktioniert wie folgt: Zunächst müssen wir eine neue Datei im modules-load-Verzeichnis erstellen:</p>
+<pre id="codeblock_codeblock_4" class="codeblock codeblock_none"><code>sudo nano /etc/modules-load.d/fbtft.conf</code></pre>
+<p>Dieser“fbtft.conf“-Datei geben wir folgenden Inhalt und speichern diese anschließend ab:</p>
+<pre id="codeblock_codeblock_5" class="codeblock codeblock_none"><code>spi-bcm2835<font></font>
+fbtft_device</code></pre>
+<p>Nun erstellen wir noch eine&nbsp;weitere Datei im modprobe-Verzeichnis:</p>
+<pre id="codeblock_codeblock_6" class="codeblock codeblock_none"><code>sudo nano /etc/modprobe.d/fbtft.conf</code></pre>
+<p>Dieser geben wir den folgenden Inhalt&nbsp;und speichern auch diese ab:</p>
+<pre id="codeblock_codeblock_7" class="codeblock codeblock_none"><code>options fbtft_device name=tm022hdh26 rotate=90 speed=80000000 fps=60</code></pre>
+<p>Zuletzt müssen wir noch die bereits vorhandene rc.local Datei&nbsp;editieren:</p>
+<pre id="codeblock_codeblock_8" class="codeblock codeblock_none"><code>sudo nano /etc/rc.local</code></pre>
+<p>Vor dem „exit 0“-Absatz erweitern wir die Datei mit folgendem Inhalt:</p>
+<pre id="codeblock_codeblock_9" class="codeblock codeblock_none"><code>con2fbmap 1 1<font></font>
+sudo FRAMEBUFFER=/dev/fb1 startx</code></pre>
+<p>Speichert nun die gemachte Änderung und startet euren Raspberry Pi mit dem typischen Reboot-Befehl neu:</p>
+<pre id="codeblock_codeblock_2" class="codeblock codeblock_none"><code>sudo reboot</code></pre>
+<p>Das Display sollte nun ohne zusätzliche manuelle Eingaben komplett automatisch starten.</p>
+<h3>Helligkeit regulieren</h3>
+<p>Da wir den LED-Pin unseres Displays an einen PWM-Port (Pulsweitenmodulation) unseres Raspberrys angeschlossen haben, können wir nach belieben die Helligkeit der Hintergrundbeleuchtung verändern. Dazu müsst ihr lediglich folgenden Befehl eingeben, dadurch wird das Display zunächst dunkel:</p>
+<pre id="codeblock_codeblock_10" class="codeblock codeblock_none"><code>gpio -g mode 18 pwm</code></pre>
+<p>Um die Helligkeit auf die maximale Stufe zu setzen, gebt ihr den folgenden Befehl ein:</p>
+<pre id="codeblock_codeblock_11" class="codeblock codeblock_none"><code>gpio -g pwm 18 1024</code></pre>
+<p>Im Bereich von 0 – 1024 könnt ihr beliebig die Helligkeit regulieren, verändert einfach den Befehl dementsprechend.</p>
+<p></p>            
+	
+	<div id="pagelink"></div>
+</div> <!-- site txt -->
+
+<div class="adr-next-txt">
+			<script type="text/javascript" src="./2.2 _Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de_files/content-footer.js.téléchargement"></script>
+	</div>
+
+<br><br>
+<div class="adr-next-txt">
+<!-- ad4mat ad code START -->
+<!-- ad4mat ad code END -->
+</div>             
+            	<div class="site-tags"><br><p><b><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Tags: </font></font></b> <a href="https://www.xgadget.de/tag/display/" rel="tag"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Display</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> , </font></font><a href="https://www.xgadget.de/tag/raspberry/" rel="tag"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Raspberry</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> , </font></font><a href="https://www.xgadget.de/tag/raspberry-pi/" rel="tag"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Raspberry Pi</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> , </font></font><a href="https://www.xgadget.de/tag/spi/" rel="tag"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">SPI</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> , </font></font><a href="https://www.xgadget.de/tag/spi-display/" rel="tag"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">SPI display</font></font></a><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> , </font></font><a href="https://www.xgadget.de/tag/tft/" rel="tag"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">TFT</font></font></a></p></div>     
+            </div><!-- End Site-Box -->
+            
+
+            <div class="site-column">
+            	<div class="sc-img"><img width="300" height="150" src="./2.2 _Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de_files/SPI-Display-Raspberry-300x150.jpg" class="thumbnail_article wp-post-image" alt="" srcset="https://www.xgadget.de/wp-content/uploads/2016/10/SPI-Display-Raspberry-300x150.jpg 300w, https://www.xgadget.de/wp-content/uploads/2016/10/SPI-Display-Raspberry-600x300.jpg 600w" sizes="(max-width: 300px) 100vw, 300px"></div>
+                <div class="sc-desc"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Connect small color TFTs to the Raspberry - we'll show you how it works. </font><font style="vertical-align: inherit;">(Image: Xgadget.de)</font></font></div>
+                
+           	  <div class="sc-txt">
+                		<div class="sc-first"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Date:</font></font></div>
+                        <div class="sc-second"><div class="side-date-author"></div><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">11.10.2016, 19:30 clock</font></font></div>
+              </div>
+              <div class="sc-txt">
+           		<div class="sc-first"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Author:</font></font></div>
+                        <div class="sc-second"><div class="side-gp-author"></div><a href="https://plus.google.com/110324942174074480469?rel=author" rel="author"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Stefan Kroll</font></font></a></div>
+              </div>
+              <div class="sc-txt">
+                		<div class="sc-first"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Comments:</font></font></div>
+                        <div class="sc-second"><div class="side-comment-author"></div><a href="https://www.xgadget.de/anleitung/2-2-spi-display-ili9341-am-raspberry-betreiben/#comments"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">6</font></font></a></div>
+              </div>
+              
+             
+              <div class="break3"></div>
+
+<div style="height:90px; width:300px;">
+			<script type="text/javascript" src="./2.2 _Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de_files/content-sidebar.js.téléchargement"></script>
+	</div>
+
+
+<div class="break3"></div>
+				
+
+	
+<div class="social-article">
+	<a class="shfb" href="https://www.facebook.com/sharer/sharer.php?u=https://www.xgadget.de/anleitung/2-2-spi-display-ili9341-am-raspberry-betreiben/" onclick="popup(this.href, 800, 600); return false;"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Share on Facebook </font></font></a>
+	<a class="shtw" href="https://twitter.com/share?url=https://www.xgadget.de/anleitung/2-2-spi-display-ili9341-am-raspberry-betreiben/" onclick="popup(this.href, 800, 600); return false;"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Share on Twitter </font></font></a>
+	<a class="shgp" href="https://plus.google.com/share?url=https://www.xgadget.de/news/macos-mojave-das-neue-mac-betriebssystem/" onclick="popup(this.href, 800, 600); return false;"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Share on Google+</font></font></a>
+				</div>     
+      </div><!-- End Site-column -->
+
+<div class="site-clear"></div>        
+    
+    
+<div class="tc-box">
+             	<div class="site-trackback-box">
+            		<a href="https://www.xgadget.de/anleitung/2-2-spi-display-ili9341-am-raspberry-betreiben/trackback/" rel="trackback"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Trackback</font></font></a>      		    </div><!-- End Site-Trackback -->
+    
+    			<div class="site-comment-box">
+       				<div class="site-comment-box-title"><div class="communication"></div><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Comments</font></font></div>
+                <div class="comment-box">
+ 
+<div id="comments" class="comments-area">
+	
+	    	<div id="respond" class="comment-respond">
+		<h3 id="reply-title" class="comment-reply-title"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">write a comment </font></font><small><a rel="nofollow" id="cancel-comment-reply-link" href="https://www.xgadget.de/anleitung/2-2-spi-display-ili9341-am-raspberry-betreiben/#respond" style="display:none;"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Cancel answers</font></font></a></small></h3>			<form action="https://www.xgadget.de/wp-comments-post.php" method="post" id="commentform" class="comment-form">
+				<p class="comment-notes"><span id="email-notes"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Your email address will not be published. </font></font></span><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Required fields are </font><font style="vertical-align: inherit;">marked </font><font style="vertical-align: inherit;">with </font></font><span class="required"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">*</font></font></span><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> .</font></font></p><p class="comment-form-comment"><label for="comment"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">comment</font></font></label> <textarea autocomplete="nope" id="comment" name="2f7c3b3e5f" cols="45" rows="8" maxlength="65525" required="required"></textarea><textarea id="0206ed1339d33365e1ef9cb219595338" aria-hidden="true" name="comment" autocomplete="nope" style="padding:0;clip:rect(1px, 1px, 1px, 1px);position:absolute !important;white-space:nowrap;height:1px;width:1px;overflow:hidden;" tabindex="-1"></textarea><script type="text/javascript">document.getElementById("comment").setAttribute( "id", "0206ed1339d33365e1ef9cb219595338" );document.getElementById("86dfd83a63").setAttribute( "id", "comment" );</script></p><p class="comment-form-author"><label for="author"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Name </font></font><span class="required"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">*</font></font></span></label> <input id="author" name="author" type="text" value="" size="30" maxlength="245" required="required"></p>
+<p class="comment-form-email"><label for="email"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">E-mail </font></font><span class="required"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">*</font></font></span></label> <input id="email" name="email" type="text" value="" size="30" maxlength="100" aria-describedby="email-notes" required="required"></p>
+<p class="comment-form-url"><label for="url"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">website</font></font></label> <input id="url" name="url" type="text" value="" size="30" maxlength="200"></p>
+<p class="form-submit"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"><input name="submit" type="submit" id="submit" class="submit" value="Submit a comment"></font></font> <input type="hidden" name="comment_post_ID" value="2404" id="comment_post_ID">
+<input type="hidden" name="comment_parent" id="comment_parent" value="0">
+</p>			</form>
+			</div><!-- #respond -->
+	 
+            <h2 class="comments-title"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">
+            6 Comments on " </font></font><span><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">2.2" SPI Display (ILI9341) on Raspberry</font></font></span><font style="vertical-align: inherit;"><font style="vertical-align: inherit;"> "        </font></font></h2>
+ 
+        <ol class="comment-list">
+            		<li id="comment-401" class="pingback even thread-even depth-1">
+			<div class="comment-body"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">
+				Pingback: </font></font><a href="https://www.xgadget.de/anleitung/ili9341-spi-tft-display-fuer-arduino-und-raspberry/" rel="external nofollow" class="url"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">ILI9341 SPI-TFT - Display for Arduino and Raspberry »Xgadget.de</font></font></a> 			</div>
+</li><!-- #comment-## -->
+		<li class="comment odd alt thread-odd thread-alt depth-1 parent" id="comment-1244">
+				<div id="div-comment-1244" class="comment-body">
+				<div class="comment-author vcard">
+						<cite class="fn"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">mark</font></font></cite> <span class="says"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">says:</font></font></span>		</div>
+		
+		<div class="comment-meta commentmetadata"><a href="https://www.xgadget.de/anleitung/2-2-spi-display-ili9341-am-raspberry-betreiben/#comment-1244"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">
+			August 8, 2017 at 18:44</font></font></a>		</div>
+
+		<p>Ich habe mit dieser Anleitung keinen Erfolg gehabt. Alles so gemacht wie in der Anleitung. Nach dem Startx Befehl startet er entweder die Oberfläche über den normalen HDMI Ausgang oder gar nicht. Kann mir jemand sagen was ich falsch mache?</p>
+
+		<div class="reply"><a rel="nofollow" class="comment-reply-link" href="https://www.xgadget.de/anleitung/2-2-spi-display-ili9341-am-raspberry-betreiben/#comment-1244" onclick="return addComment.moveForm( &quot;div-comment-1244&quot;, &quot;1244&quot;, &quot;respond&quot;, &quot;2404&quot; )" aria-label="Antworte auf Mark">Antworten</a></div>
+				</div>
+		<ol class="children">
+		<li class="comment even depth-2 parent" id="comment-1254">
+				<div id="div-comment-1254" class="comment-body">
+				<div class="comment-author vcard">
+						<cite class="fn">Max</cite> <span class="says"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">says:</font></font></span>		</div>
+		
+		<div class="comment-meta commentmetadata"><a href="https://www.xgadget.de/anleitung/2-2-spi-display-ili9341-am-raspberry-betreiben/#comment-1254">
+			14. August 2017 um 21:56&nbsp;Uhr</a>		</div>
+
+		<p>Habe das selbe Problem..</p>
+
+		<div class="reply"><a rel="nofollow" class="comment-reply-link" href="https://www.xgadget.de/anleitung/2-2-spi-display-ili9341-am-raspberry-betreiben/#comment-1254" onclick="return addComment.moveForm( &quot;div-comment-1254&quot;, &quot;1254&quot;, &quot;respond&quot;, &quot;2404&quot; )" aria-label="Antworte auf Max">Antworten</a></div>
+				</div>
+		<ol class="children">
+		<li class="comment odd alt depth-3" id="comment-1833">
+				<div id="div-comment-1833" class="comment-body">
+				<div class="comment-author vcard">
+						<cite class="fn">Adam</cite> <span class="says"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">says:</font></font></span>		</div>
+		
+		<div class="comment-meta commentmetadata"><a href="https://www.xgadget.de/anleitung/2-2-spi-display-ili9341-am-raspberry-betreiben/#comment-1833">
+			5. März 2018 um 13:51&nbsp;Uhr</a>		</div>
+
+		<p>bei mir startet er auch nur die normale Oberfläche über den HDMI Ausgang…</p>
+
+		<div class="reply"><a rel="nofollow" class="comment-reply-link" href="https://www.xgadget.de/anleitung/2-2-spi-display-ili9341-am-raspberry-betreiben/#comment-1833" onclick="return addComment.moveForm( &quot;div-comment-1833&quot;, &quot;1833&quot;, &quot;respond&quot;, &quot;2404&quot; )" aria-label="Antworte auf Adam">Antworten</a></div>
+				</div>
+		</li><!-- #comment-## -->
+</ol><!-- .children -->
+</li><!-- #comment-## -->
+</ol><!-- .children -->
+</li><!-- #comment-## -->
+		<li class="comment even thread-even depth-1 parent" id="comment-1785">
+				<div id="div-comment-1785" class="comment-body">
+				<div class="comment-author vcard">
+						<cite class="fn">Joachim</cite> <span class="says"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">says:</font></font></span>		</div>
+		
+		<div class="comment-meta commentmetadata"><a href="https://www.xgadget.de/anleitung/2-2-spi-display-ili9341-am-raspberry-betreiben/#comment-1785">
+			12. Februar 2018 um 19:15&nbsp;Uhr</a>		</div>
+
+		<p>Danke für die Anleitung. Im Wesentlichen hat das bei mir genauso funktioniert, aber ich musste den speed-Wert kleiner wählen. (z.B. speed=40000000) Damit wird ja die SPI-Taktrate festgelegt, und bei mir ist da wohl der Aufbau ungünstig und eine Leitung zu lang. Der Effekt war, dass das Bild wenn überhaupt nur kurz erschienen ist und gleich wieder verschwand.</p>
+
+		<div class="reply"><a rel="nofollow" class="comment-reply-link" href="https://www.xgadget.de/anleitung/2-2-spi-display-ili9341-am-raspberry-betreiben/#comment-1785" onclick="return addComment.moveForm( &quot;div-comment-1785&quot;, &quot;1785&quot;, &quot;respond&quot;, &quot;2404&quot; )" aria-label="Antworte auf Joachim">Antworten</a></div>
+				</div>
+		<ol class="children">
+		<li class="comment odd alt depth-2" id="comment-1942">
+				<div id="div-comment-1942" class="comment-body">
+				<div class="comment-author vcard">
+						<cite class="fn">ano</cite> <span class="says"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">says:</font></font></span>		</div>
+		
+		<div class="comment-meta commentmetadata"><a href="https://www.xgadget.de/anleitung/2-2-spi-display-ili9341-am-raspberry-betreiben/#comment-1942">
+			28. März 2018 um 1:19&nbsp;Uhr</a>		</div>
+
+		<p><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">that does not work. </font><font style="vertical-align: inherit;">got me 3 hours </font><font style="vertical-align: inherit;">cost ..</font></font><img draggable="false" class="emoji" alt="🙁" src="./2.2 _Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de_files/1f641.svg"></p>
+
+		<div class="reply"><a rel="nofollow" class="comment-reply-link" href="https://www.xgadget.de/anleitung/2-2-spi-display-ili9341-am-raspberry-betreiben/#comment-1942" onclick="return addComment.moveForm( &quot;div-comment-1942&quot;, &quot;1942&quot;, &quot;respond&quot;, &quot;2404&quot; )" aria-label="Antworte auf ano"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">reply</font></font></a></div>
+				</div>
+		</li><!-- #comment-## -->
+</ol><!-- .children -->
+</li><!-- #comment-## -->
+        </ol><!-- .comment-list -->
+ 
+         
+         
+     
+
+ 
+</div><!-- #comments -->     </div>
+                </div><!-- End Site-Comment-Box -->
+</div><!-- End TC BOX -->    
+	  <div style="font-size:12px;padding:10px;"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">* sponsored link</font></font></div>
+
+            
+      <div class="content-end">
+            	<div class="navi-end"></div>
+      </div>
+        
+    
+    </div><!-- End Index-Content -->
+
+      <div class="footer">
+    	<div class="foot_left"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">© 2012-2018 Xgadget.com</font></font></div>
+        <div class="foot_right"><a class="f_link" href="https://www.xgadget.de/datenschutz/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Privacy </font></font></a> <a class="f_link" href="https://www.xgadget.de/impressum/"><font style="vertical-align: inherit;"><font style="vertical-align: inherit;">Imprint</font></font></a></div>
+    </div>
+</div><!-- End Page -->
+<script>$(".mob_navbutton").click(function () {$(".mob_nav").slideToggle("fast");});</script>
+<center><a href="http://www.bloggerei.de/bewertung_65257_blog.php" title="Bloggerei.de"><img src="./2.2 _Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de_files/bgpublicon.jpg" width="80" height="15" border="0" alt="Blog Directory - Bloggerei.de"></a></center>
+<br>
+ 
+<img style="-webkit-user-select: none" height="1" width="1" src="./2.2 _Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de_files/x_track.php">
+
+<!--
+TPC! Memory Usage (http://webjawns.com)
+Memory Usage: 8968400
+Memory Peak Usage: 9030536
+WP Memory Limit: 96M
+PHP Memory Limit: 128M
+Checkpoints: 11
+-->
+
+<script type="text/javascript" src="./2.2 _Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de_files/comment-reply.min.js.téléchargement"></script>
+<script type="text/javascript" src="./2.2 _Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de_files/wp-embed.min.js.téléchargement"></script>
+<img src="./2.2 _Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de_files/67bb7d0bce80464cb2a33dd9b3b4dfd9" width="1" height="1" alt="" style="display:none">
+
+
+<!-- 35 queries. 0,095 seconds. -->
+<script type="text/javascript" src="./2.2 _Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de_files/cookieconsent.js.téléchargement"></script><div id="goog-gt-tt" class="skiptranslate" dir="ltr"><div style="padding: 8px;"><div><div class="logo"><img src="./2.2 _Operating the SPI Display (ILI9341) on the Raspberry» Xgadget.de_files/translate_24dp.png" width="20" height="20" alt="Google Traduction"></div></div></div><div class="top" style="padding: 8px; float: left; width: 100%;"><h1 class="title gray">Texte d'origine</h1></div><div class="middle" style="padding: 8px;"><div class="original-text"></div></div><div class="bottom" style="padding: 8px;"><div class="activity-links"><span class="activity-link">Proposer une meilleure traduction</span><span class="activity-link"></span></div><div class="started-activity-container"><hr style="color: #CCC; background-color: #CCC; height: 1px; border: none;"><div class="activity-root"></div></div></div><div class="status-message" style="display: none;"></div></div>
+
+<div class="goog-te-spinner-pos"><div class="goog-te-spinner-animation"><svg xmlns="http://www.w3.org/2000/svg" class="goog-te-spinner" width="96px" height="96px" viewBox="0 0 66 66"><circle class="goog-te-spinner-path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle></svg></div></div></body></html>

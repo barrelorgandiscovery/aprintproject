@@ -1,0 +1,5 @@
+https://www.youtube.com/watch?v=3vuK5w8o8dg
+
+tech elements :
+
+https://www.xgadget.de/anleitung/2-2-spi-display-ili9341-am-raspberry-betreiben/

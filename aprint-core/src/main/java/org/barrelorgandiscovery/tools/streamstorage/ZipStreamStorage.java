@@ -20,7 +20,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException;
  * Stream storage that uncompress on demand a specific stream
  * 
  * for rewind capabilities, the hole zip file is remembered in memory, this is
- * too slow this is good for a small subset
+ * too slow for huge files, but conform for a small subset
  * 
  * @author Freydiere Patrice
  * 
