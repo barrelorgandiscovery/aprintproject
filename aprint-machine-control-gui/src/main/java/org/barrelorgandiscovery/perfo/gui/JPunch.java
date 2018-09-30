@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.io.File;
 
 import javax.swing.AbstractButton;
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -20,9 +21,8 @@ public class JPunch extends JPanel implements IPunchMachinePanelActivate {
   private JSelectFiles selectFilesComponent;
   private Navigation navigation;
 
-  public JPunch(PunchProcess punchProcess, 
-		  		JSelectFiles selectFilesComponent, 
-		  		Navigation navigation) throws Exception {
+  public JPunch(PunchProcess punchProcess, JSelectFiles selectFilesComponent, Navigation navigation)
+      throws Exception {
     super();
 
     this.punchProcess = punchProcess;
@@ -34,7 +34,9 @@ public class JPunch extends JPanel implements IPunchMachinePanelActivate {
   private JLabel lblFilePos;
   private JLabel lblpunchlabel;
   private JLabel lblmachineState;
-  
+  private AbstractButton cancelButton;
+  private AbstractButton btnpausetoggle;
+
   protected void initComponents() throws Exception {
 
     FormPanel p = new FormPanel(getClass().getResourceAsStream("punch.jfrm"));
@@ -46,21 +48,26 @@ public class JPunch extends JPanel implements IPunchMachinePanelActivate {
     lblpunchlabel = p.getLabel("punchlabel");
     lblmachineState = p.getLabel("machinestate");
 
-    AbstractButton cancelButton = p.getButton("cancel");
-    cancelButton.setText("Cancel");
-    cancelButton.addActionListener((e) -> {
-    	
-    	punchProcess.stop();
-    	navigation.navigateTo(this, PunchScreen.Hello);
-    	
-    });
+    cancelButton = p.getButton("cancel");
+    defineCancelButton();
+    cancelButton.addActionListener(
+        (e) -> {
+          punchProcess.stop();
+          navigation.navigateTo(this, PunchScreen.Hello);
+        });
 
-    AbstractButton btnpausetoggle = p.getButton("pausetoggle");
+    btnpausetoggle = p.getButton("pausetoggle");
+    btnpausetoggle.setIcon(new ImageIcon(getClass().getResource("player_pause.png")));
     btnpausetoggle.setText("Pause");
     btnpausetoggle.addActionListener(
         (e) -> {
           logger.debug("pause");
         });
+  }
+
+  private void defineCancelButton() {
+    cancelButton.setText("Cancel");
+    cancelButton.setIcon(new ImageIcon(getClass().getResource("cancel.png")));
   }
 
   private void setInformMessage(String message) {
@@ -69,14 +76,15 @@ public class JPunch extends JPanel implements IPunchMachinePanelActivate {
   }
 
   private void setMachineStatus(String message) {
-	  lblmachineState.setText(message);
-	  repaint();
+    lblmachineState.setText(message);
+    repaint();
   }
-  
+
   @Override
   public void activate() {
     // checking files
     setInformMessage("Verify punch files");
+    defineCancelButton();
     try {
       punchProcess.startPunch(
           new PunchListener() {
@@ -89,7 +97,6 @@ public class JPunch extends JPanel implements IPunchMachinePanelActivate {
             @Override
             public void message(String message) {
               setMachineStatus(message);
-
             }
 
             @Override
@@ -98,19 +105,30 @@ public class JPunch extends JPanel implements IPunchMachinePanelActivate {
             }
 
             @Override
-            public void informCurrentPunchPosition(File currentFile, int currentPunchIndex, int totalPunchNumber) {
-              lblFilePos.setText("" + currentPunchIndex + "/" + totalPunchNumber + " " + currentFile.getName());
+            public void informCurrentPunchPosition(
+                File currentFile, int currentPunchIndex, int totalPunchNumber) {
+              
+            	lblFilePos.setText(
+                  "" + currentPunchIndex + "/" + totalPunchNumber + " " + currentFile.getName());
               repaint();
             }
 
             @Override
-            public void finishedFile(File file) {
-            	
+            public void finishedFile(File file) {}
+
+            @Override
+            public void allFilesFinished() {
+              defineDoneButton();
             }
           },
           selectFilesComponent.getSelectedFiles());
     } catch (Exception ex) {
       logger.error("error in punch " + ex.getMessage(), ex);
     }
+  }
+
+  private void defineDoneButton() {
+    cancelButton.setText("Done");
+    cancelButton.setIcon(new ImageIcon(getClass().getResource("button_ok.png")));
   }
 }

@@ -19,4 +19,6 @@ public interface PunchListener {
   
   public void message(String message);
   
+  public void allFilesFinished();
+  
 }

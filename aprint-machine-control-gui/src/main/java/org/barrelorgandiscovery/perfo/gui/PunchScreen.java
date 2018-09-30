@@ -4,5 +4,6 @@ public enum PunchScreen {
   Hello,
   SelectFiles,
   Punch,
-  Parameters
+  Parameters,
+  MachineMove
 }

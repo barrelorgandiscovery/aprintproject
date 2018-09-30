@@ -35,7 +35,7 @@ public class PunchPlanIO {
                       Locale.ENGLISH,
                       "N%1$d G90 X%2$f Y%3$f\n", //$NON-NLS-1$
                       ai.addAndGet(1),
-                      displacementCommand.getY(),
+                      displacementCommand.getY(), // The X Axis (Y in punch plan)
                       displacementCommand.getX()));
             }
 
@@ -88,8 +88,9 @@ public class PunchPlanIO {
       if (m.matches()) {
     	  
         // handle displacement
-        x = Double.parseDouble(m.group(2));
-        y = Double.parseDouble(m.group(3));
+    	
+        x = Double.parseDouble(m.group(3));
+        y = Double.parseDouble(m.group(2));
 
       } else {
 

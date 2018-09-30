@@ -1,0 +1,77 @@
+
+# prérequis plateform RPI
+
+
+apt-get install openjdk-8-jdk
+
+## Ports série
+
+Tester le port série
+screen /dev/ttyUSB0 115200
+
+les ports séries sont sur 
+
+/dev/ttyUSB0
+
+
+## USB MOUNT
+
+
+
+clef USB -> sda
+sudo mount /dev/sda1 /media
+
+AutoMount 
+
+Pb on rpi debian :
+suivre ces instruction (reconstruction du package)
+https://www.raspberrypi.org/forums/viewtopic.php?t=192291
+
+tous les sicks sont montés automatiquement sur /media/usb?/
+
+=======
+
+I am on Stretch as well and had the same issue. usbmount won't work out of the box. To fix this issue I cloned the newest version (0.0.24) from github and built a new Debian package myself.
+
+Try this:
+
+• As we are going to create a Debian package on our own we have to install debhelper package
+
+sudo apt-get install debhelper
+• Clone usbmount from github
+
+
+git clone https://github.com/rbrito/usbmount.git
+• Creata Debian package
+
+cd usbmount
+sudo dpkg-buildpackage -us -uc -b
+• Install newly created package
+
+cd ..
+sudo apt install  ./usbmount_0.0.24_all.deb
+• Reboot
+
+sudo shutdown -r now
+
+======
+
+Ecran LCD + touch -> 
+origin  https://github.com/goodtft/LCD-show (fetch)
+origin  https://github.com/goodtft/LCD-show (push)
+
+clone the repo
+
+git clone
+
+./LCD35-show
+
+
+in /etc/inittab, 
+
+change to 5 
+id:5:initdefault:
+
+LightDM -> activate auto login
+
+===

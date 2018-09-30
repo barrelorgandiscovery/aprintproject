@@ -1,15 +1,15 @@
 package org.barrelorgandiscovery.perfo.gui;
 
 import java.awt.BorderLayout;
+import java.awt.EventQueue;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.UIManager;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.apache.log4j.lf5.LF5Appender;
 import org.barrelorgandiscovery.perfo.ConfigFactory;
 import org.barrelorgandiscovery.perfo.PunchProcess;
 
@@ -32,18 +32,22 @@ public class PerfoCommander extends JFrame implements Navigation {
   private IPunchMachinePanelActivate current;
 
   protected void initComponents() throws Exception {
-    setSize(320, 200);
+    setSize(480, 320);
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     getContentPane().setLayout(new BorderLayout());
 
     JHelloPanel hello = new JHelloPanel(this);
     JSelectFiles selectfiles = new JSelectFiles(punchProcess, this);
     JPunch punch = new JPunch(punchProcess, selectfiles, this);
+    JMachineMove machineMove = new JMachineMove(ConfigFactory.getInstance(), this);
+    JParameter parameter = new JParameter(this);
 
     panelList = new HashMap<>();
     panelList.put(PunchScreen.Hello, hello);
     panelList.put(PunchScreen.SelectFiles, selectfiles);
     panelList.put(PunchScreen.Punch, punch);
+    panelList.put(PunchScreen.Parameters, parameter);
+    panelList.put(PunchScreen.MachineMove, machineMove);
 
     current = panelList.get(PunchScreen.Hello);
     assert current != null;
@@ -53,10 +57,20 @@ public class PerfoCommander extends JFrame implements Navigation {
 
   public static void main(String[] args) throws Exception {
 
-    BasicConfigurator.configure(new LF5Appender());
+    // BasicConfigurator.configure(new LF5Appender());
 
-    JFrame f = new PerfoCommander();
-    f.setVisible(true);
+	  EventQueue.invokeLater(new Runnable() {
+          public void run() {
+              try {
+                  UIManager.setLookAndFeel(com.jgoodies.looks.plastic.Plastic3DLookAndFeel.class.getName());
+                  JFrame f = new PerfoCommander();
+                  f.setVisible(true);
+              } catch (Exception e) {
+                  e.printStackTrace();
+              }
+          }
+      });
+   
   }
 
   void changePanel(JPanel newPanel) {
@@ -66,7 +80,7 @@ public class PerfoCommander extends JFrame implements Navigation {
   }
 
   @Override
-  public void navigateTo(IPunchMachinePanelActivate punchPanel, PunchScreen newScreen) {
+  public void navigateTo(IPunchMachinePanelActivate panel, PunchScreen newScreen) {
     logger.debug("change screeen to " + newScreen);
     IPunchMachinePanelActivate newP = panelList.get(newScreen);
 

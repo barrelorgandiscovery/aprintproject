@@ -7,6 +7,7 @@ import java.io.File;
 
 import javax.swing.AbstractButton;
 import javax.swing.DefaultListSelectionModel;
+import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JList;
 import javax.swing.JPanel;
@@ -41,13 +42,18 @@ public class JSelectFiles extends JPanel implements IPunchMachinePanelActivate {
         (e) -> {
           navigation.navigateTo(this, PunchScreen.Hello);
         });
+    cancelbtn.setText("Cancel");
+    cancelbtn.setIcon(new ImageIcon(getClass().getResource("cancel.png")));
 
     AbstractButton punchButton = p.getButton("punch");
     punchButton.addActionListener(
         (e) -> {
           navigation.navigateTo(this, PunchScreen.Punch);
         });
+    punchButton.setText("Punch");
+    punchButton.setIcon(new ImageIcon(getClass().getResource("button_ok.png")));
 
+    
     setLayout(new BorderLayout());
     add(p, BorderLayout.CENTER);
 
@@ -63,6 +69,11 @@ public class JSelectFiles extends JPanel implements IPunchMachinePanelActivate {
               boolean cellHasFocus) {
 
             JCheckBox cb = new JCheckBox(value.getName());
+            
+            cb.setSelectedIcon(new ImageIcon(getClass().getResource("apply.png")));
+            cb.setIcon(new ImageIcon(getClass().getResource("ledlightblue.png")));
+            
+            cb.setFont(cb.getFont().deriveFont(30.0f));
             cb.setSelected(isSelected);
             return cb;
           }
@@ -83,8 +94,10 @@ public class JSelectFiles extends JPanel implements IPunchMachinePanelActivate {
     this.fileList = list;
 
     JScrollPane sp = new JScrollPane(fileList);
-    sp.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+    // sp.setHorizontalScrollBarPolicy(JScrollPane.);
     sp.getVerticalScrollBar().setPreferredSize(new Dimension(30, 0));
+    sp.getHorizontalScrollBar().setPreferredSize(new Dimension(0, 30));
+    
     p.getFormAccessor().replaceBean("fileselect", sp);
   }
 

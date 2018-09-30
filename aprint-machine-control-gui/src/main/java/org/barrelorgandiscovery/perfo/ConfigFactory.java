@@ -10,13 +10,12 @@ public class ConfigFactory {
     Config c = new Config();
     c.usbPort = "/dev/ttyUSB0";
     c.fileFolderPath = new File("/media");
-
     return c;
   }
   
   private static Config createTest() {
 	  Config c = new Config();
-	  c.usbPort = "COM4";
+	  c.usbPort = "COM5";
 	  c.fileFolderPath = new File("c:\\temp");
 	  return c;
   }

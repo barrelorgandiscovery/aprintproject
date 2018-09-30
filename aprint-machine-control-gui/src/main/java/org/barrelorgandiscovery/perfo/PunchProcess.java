@@ -21,8 +21,10 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLMac
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.Command;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.HomingCommand;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.MovePlanVisitor;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchPlan;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchPlanIO;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.RangeVisitor;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.punchio.PunchIO;
 import org.barrelorgandiscovery.gui.CancelTracker;
 import org.barrelorgandiscovery.gui.ICancelTracker;
@@ -85,6 +87,9 @@ public class PunchProcess {
     }
   }
 
+  /**
+   * search for files and remember the files
+   */
   public void searchForFile() {
 
     if (config.fileFolderPath == null) {
@@ -99,11 +104,15 @@ public class PunchProcess {
     this.files = a.toArray(new File[a.size()]);
   }
 
+  /**
+   * get the remembered files
+   * @return
+   */
   public File[] getFiles() {
     return this.files;
   }
 
-  Executor singleThreadExecutor;
+  private ExecutorService singleThreadExecutor;
 
   private CancelTracker cancelTracker;
 
@@ -112,10 +121,12 @@ public class PunchProcess {
    *
    * @param listener
    * @param filesToPunch
+   * @return error files, or null if successfull
    * @throws Exception
    */
-  public void startPunch(PunchListener listener, File[] filesToPunch) throws Exception {
+  public File[] startPunch(PunchListener listener, File[] filesToPunch) throws Exception {
 
+	  
     if (cancelTracker != null) {
       cancelTracker.cancel();
     }
@@ -125,7 +136,8 @@ public class PunchProcess {
     LinkedHashMap<File, PunchPlan> punchplan = new LinkedHashMap<>();
 
     ArrayList<String> messages = new ArrayList<>();
-
+    ArrayList<File> errorfiles = new ArrayList<>();
+    
     for (File f : filesToPunch) {
       logger.debug("evaluate file :" + f);
       try {
@@ -140,19 +152,28 @@ public class PunchProcess {
 
       } catch (Exception ex) {
         messages.add("error in reading " + f);
+        errorfiles.add(f);
         logger.error(ex.getMessage(), ex);
       }
+    }
+    if (messages.size() > 0) {
+    	return errorfiles.toArray(new File[errorfiles.size()]);
     }
 
     final CancelTracker finalCancelTracker = new CancelTracker();
     this.cancelTracker = finalCancelTracker;
 
+    if (singleThreadExecutor != null) {
+    	singleThreadExecutor.shutdownNow();
+    	this.singleThreadExecutor = null;
+    }
+    
     ExecutorService exec = Executors.newSingleThreadExecutor();
     exec.submit(
         new Runnable() {
           @Override
           public void run() {
-            // TODO Auto-generated method stub
+          
             try {
               for (Entry<File, PunchPlan> e : punchplan.entrySet()) {
 
@@ -174,6 +195,12 @@ public class PunchProcess {
                       });
                 }
               }
+              
+              logger.debug("all files punched");
+              
+              if (listener != null) {
+            	  listener.allFilesFinished();
+              }
 
             } catch (Exception ex) {
               // error
@@ -188,6 +215,8 @@ public class PunchProcess {
           }
         });
     this.singleThreadExecutor = exec;
+    
+    return null;
   }
 
   private void backgroundThreadProcessPunchPlan(
@@ -199,12 +228,14 @@ public class PunchProcess {
     logger.debug("existing com :");
     logger.debug(Arrays.asList(SerialPortList.getPortNames()));
     params.setComPort(config.usbPort);
+    
+    final PunchPlan finalp = p;
 
     if (listener != null) {
       SwingUtilities.invokeLater(
           () -> {
             listener.initializing("opening machine communication");
-            listener.informCurrentPunchPosition(file, 0, p.getCommandsByRef().size());
+            listener.informCurrentPunchPosition(file, 0, finalp.getCommandsByRef().size());
           });
     }
 
@@ -236,7 +267,7 @@ public class PunchProcess {
               if (listener != null) {
                 SwingUtilities.invokeLater(
                     () -> {
-                      listener.message(String.format("machine position %.2f %.2f ... ", wx, wy));
+                      listener.message(String.format("X %.2f Y %.2f ... - %s ", wx, wy, status));
                     });
               }
             }
@@ -249,9 +280,7 @@ public class PunchProcess {
               listener.initializing("Wait for the machine ... ");
             });
       }
-      // wait for the initialization
-      Thread.sleep(4000);
-
+     
       // homing
 
       if (listener != null) {
@@ -261,6 +290,10 @@ public class PunchProcess {
             });
       }
 
+      // wait for the initialization
+      Thread.sleep(4000);
+
+      
       HomingCommand homing = new HomingCommand();
       open.sendCommand(homing);
       open.flushCommands();
@@ -271,6 +304,18 @@ public class PunchProcess {
               listener.initializing("initializing done ... ");
             });
       }
+      
+      // shift the punch plan
+      RangeVisitor rv = new RangeVisitor();
+      rv.visit(p);
+      
+      logger.debug("range visitor elements " + rv.getXmin() + "," 
+      + rv.getYmin() + " " + rv.getXmax() + "," + rv.getYmax());
+      
+      MovePlanVisitor mpv = new MovePlanVisitor(p, 0, - rv.getYmin());
+      
+      p = mpv.getConstructedPunchPlan();
+    		  
 
       List<Command> l = p.getCommandsByRef();
       // send commands, blocking procedure
@@ -311,5 +356,11 @@ public class PunchProcess {
   }
 
   /** stop method for aborting the process, */
-  public void stop() {}
+  public void stop() {
+	  logger.debug("cancel");
+	  if (cancelTracker != null) {
+		  cancelTracker.cancel();
+		  cancelTracker = null;
+	  }
+  }
 }
