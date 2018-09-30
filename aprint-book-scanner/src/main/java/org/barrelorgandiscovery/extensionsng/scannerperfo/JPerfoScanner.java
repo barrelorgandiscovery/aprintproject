@@ -1,0 +1,248 @@
+package org.barrelorgandiscovery.extensionsng.scannerperfo;
+
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.util.Arrays;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JToggleButton;
+import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
+import org.apache.log4j.lf5.LF5Appender;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControl;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLMachine;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLMachineParameters;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.DisplacementCommand;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.HomingCommand;
+import org.barrelorgandiscovery.gui.CancelTracker;
+import org.barrelorgandiscovery.gui.ICancelTracker;
+import org.barrelorgandiscovery.tools.Disposable;
+
+import com.github.sarxos.webcam.Webcam;
+
+import jssc.SerialPortList;
+
+public class JPerfoScanner extends JPanel implements Disposable {
+
+  private static Logger logger = Logger.getLogger(JPerfoScanner.class);
+
+  private MachineControl machineControl;
+
+  private PerfoScanFolder perfoScan;
+
+  private final JLabel labelImage = new JLabel();
+
+  private AtomicBoolean onlyWebCam = new AtomicBoolean(true);
+
+  private ICancelTracker previewCancelTracker = new CancelTracker();
+
+  /**
+   * this class execute the bookscan
+   *
+   * @author use
+   */
+  class ScanBook implements Runnable {
+
+    private ICancelTracker cancelTracker;
+    private Webcam webCam;
+
+    public ScanBook(ICancelTracker cancelTracker, Webcam webCam) {
+      this.cancelTracker = cancelTracker;
+      this.webCam = webCam;
+    }
+
+    @Override
+    public void run() {
+
+      double y = 0.0;
+
+      while (!cancelTracker.isCanceled()) {
+        try {
+          logger.debug("take picture");
+          final BufferedImage picture = webCam.getDevice().getImage();
+          try {
+            SwingUtilities.invokeAndWait(
+                () -> {
+                  labelImage.setIcon(new ImageIcon(picture));
+                  JPerfoScanner.this.repaint();
+                });
+          } catch (Exception ex) {
+            logger.error("error while showing the image " + ex.getMessage(), ex);
+          }
+
+          if (!onlyWebCam.get()) {
+
+            logger.debug("save and move");
+            try {
+              perfoScan.addNewImage(picture);
+              machineControl.sendCommand(new DisplacementCommand(y, -50.0));
+              Thread.sleep(2000);
+              // machineControl.flushCommands();
+            } catch (Exception ex) {
+              logger.error(ex.getMessage(), ex);
+            }
+            y += 20.0;
+            try {
+              Thread.sleep(1000);
+            } catch (Exception ex) {
+
+            }
+          }
+        } catch (Exception _ex) {
+          _ex.printStackTrace();
+        }
+      }
+
+      if (webCam != null) {
+        webCam.close();
+        webCam = null;
+      }
+    }
+  }
+
+  ExecutorService exec = Executors.newSingleThreadExecutor();
+  CancelTracker cancelTracker = new CancelTracker();
+
+  Webcam defaultWebCam;
+
+  public JPerfoScanner(MachineControl machineControl, PerfoScanFolder perfoScan) throws Exception {
+    // assert machineControl != null;
+    this.machineControl = machineControl;
+    this.perfoScan = perfoScan;
+    initComponents();
+  }
+
+  protected void initComponents() throws Exception {
+
+    labelImage.setPreferredSize(new Dimension(700, 500));
+
+    setLayout(new BorderLayout());
+    add(labelImage, BorderLayout.CENTER);
+
+    JToggleButton tb = new JToggleButton();
+    tb.setText("Record");
+    tb.addChangeListener(
+        new ChangeListener() {
+          @Override
+          public void stateChanged(ChangeEvent e) {
+            JToggleButton t = (JToggleButton) e.getSource();
+            if (t.getModel().isSelected()) {
+              tb.setText("Record");
+              onlyWebCam.set(false);
+            } else {
+              tb.setText("Stop Record");
+              onlyWebCam.set(true);
+            }
+          }
+        });
+
+    final JButton btn = new JButton("Start");
+    btn.addActionListener(
+        new ActionListener() {
+          @Override
+          public void actionPerformed(ActionEvent e) {
+            try {
+
+              if (!cancelTracker.isCanceled()) {
+                cancelTracker.cancel();
+                btn.setText("Start");
+                defaultWebCam = null;
+                return;
+              }
+
+              btn.setText("Stop");
+              logger.debug("open web cam");
+              defaultWebCam = openWebCam();
+
+              cancelTracker = new CancelTracker();
+              logger.debug("start scan");
+              ScanBook taskToRun = new ScanBook(cancelTracker, defaultWebCam);
+
+              logger.debug("start job");
+              exec.submit(taskToRun);
+
+            } catch (Exception ex) {
+              logger.error("error in scan :" + ex.getMessage(), ex);
+            }
+          }
+
+          private Webcam openWebCam() {
+            // open webcam
+            Webcam defaultWebCam = Webcam.getWebcams().get(1);
+            //  defaultWebCam.setViewSize(new Dimension(800,600));
+            Dimension[] sizes = defaultWebCam.getViewSizes();
+            System.out.println(Arrays.asList(sizes));
+            defaultWebCam.setViewSize(sizes[sizes.length - 1]);
+            defaultWebCam.open();
+            return defaultWebCam;
+          }
+        });
+
+    JPanel btnPanel = new JPanel();
+    btnPanel.add(btn);
+    btnPanel.add(tb);
+    add(btnPanel, BorderLayout.SOUTH);
+
+    cancelTracker.cancel();
+  }
+
+  @Override
+  public void dispose() {
+
+    exec.shutdownNow();
+  }
+
+  /**
+   * main test scanner
+   *
+   * @param args
+   */
+  public static void main(String[] args) throws Exception {
+
+    JFrame f = new JFrame();
+
+    SwingUtilities.invokeAndWait(
+        () -> {
+          BasicConfigurator.configure(new LF5Appender());
+        });
+
+    GRBLMachine machine = new GRBLMachine();
+    GRBLMachineParameters params = new GRBLMachineParameters();
+    System.out.println("Available Port List :" + Arrays.asList(SerialPortList.getPortNames()));
+    params.setComPort("COM4");
+    MachineControl open = machine.open(params);
+
+    Thread.sleep(4000);
+
+    open.sendCommand(new HomingCommand());
+
+    File perfoImageFolder = new File("c:\\temp\\perfo20180903");
+    if (!perfoImageFolder.exists()) {
+      perfoImageFolder.mkdirs();
+    }
+    PerfoScanFolder psf = new PerfoScanFolder(perfoImageFolder);
+
+    f.getContentPane().setLayout(new BorderLayout());
+    f.getContentPane().add(new JPerfoScanner(open, psf), BorderLayout.CENTER);
+
+    f.setSize(600, 400);
+
+    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    f.setVisible(true);
+  }
+}

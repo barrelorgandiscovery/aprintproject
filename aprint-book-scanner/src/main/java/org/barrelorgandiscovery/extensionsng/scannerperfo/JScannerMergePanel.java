@@ -1,0 +1,694 @@
+package org.barrelorgandiscovery.extensionsng.scannerperfo;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Polygon;
+import java.awt.Shape;
+import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
+import java.awt.geom.Rectangle2D.Double;
+import java.awt.image.BufferedImage;
+import java.awt.image.Raster;
+import java.awt.image.WritableRaster;
+import java.io.File;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+
+import javax.imageio.ImageIO;
+import javax.swing.AbstractButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.JSpinner;
+import javax.swing.JToggleButton;
+import javax.swing.SpinnerNumberModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+
+import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.gui.CancelTracker;
+import org.barrelorgandiscovery.gui.ICancelTracker;
+import org.barrelorgandiscovery.math.MathVect;
+import org.barrelorgandiscovery.prefs.FilePrefsStorage;
+import org.barrelorgandiscovery.prefs.IPrefsStorage;
+import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JDisplay;
+import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JImageDisplayLayer;
+import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JShapeLayer;
+import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JShapeLayer.IShapeDrawer;
+import org.barrelorgandiscovery.recognition.gui.interactivecanvas.LayerChangedListener;
+import org.barrelorgandiscovery.recognition.gui.interactivecanvas.tools.CreatePointTool;
+import org.barrelorgandiscovery.recognition.gui.interactivecanvas.tools.IAnchorPointAdjuster;
+import org.barrelorgandiscovery.recognition.gui.interactivecanvas.tools.JViewingToolBar;
+import org.barrelorgandiscovery.tools.Disposable;
+import org.barrelorgandiscovery.tools.ImageTools;
+import org.barrelorgandiscovery.tools.JMessageBox;
+import org.barrelorgandiscovery.tools.SerializeTools;
+
+import com.jeta.forms.components.panel.FormPanel;
+import com.jeta.forms.gui.form.FormAccessor;
+
+public class JScannerMergePanel extends JPanel implements Disposable {
+
+  /** */
+  private static final long serialVersionUID = -7007011059478439720L;
+
+  private Logger logger = Logger.getLogger(JScannerMergePanel.class);
+
+  PerfoScanFolder perfoScanFolder;
+
+  JDisplay firstImage;
+
+  JDisplay resultImageDisplay;
+  private JImageDisplayLayer resultImageLayer;
+
+  private JImageDisplayLayer image1Layer;
+
+  private JCheckBox overlapLock;
+  private JSpinner overlappixelsspinner;
+
+  private JSlider currentresultimage;
+
+  private JShapeLayer<Rectangle2D.Double> shapePointsLayer;
+
+  private IPrefsStorage preferences;
+
+  private ExecutorService executor = Executors.newFixedThreadPool(3);
+  private AtomicReference<ICancelTracker> currentProcessing = new AtomicReference<ICancelTracker>(null);
+  
+  public JScannerMergePanel(PerfoScanFolder perfoScanFolder, IPrefsStorage preferences)
+      throws Exception {
+    assert perfoScanFolder != null;
+    this.perfoScanFolder = perfoScanFolder;
+    assert preferences != null;
+    this.preferences = preferences;
+    initComponent();
+  }
+  
+  @Override
+  public void dispose() {
+	  // free associated resources
+	  executor.shutdown();
+  }
+
+  protected void initComponent() throws Exception {
+    setLayout(new BorderLayout());
+
+    FormPanel fp = new FormPanel(getClass().getResourceAsStream("mergepanel.jfrm"));
+
+    fp.getLabel("positionning").setText("Positionning Elements");
+    fp.getLabel("previewresult").setText("Preview Result");
+
+    overlappixelsspinner = new JSpinner(new SpinnerNumberModel(52.0, 20.0, 70.0, 0.1));
+
+    FormAccessor formAccessorParameters = fp.getFormAccessor("parameters");
+
+    JLabel overlapppixelslabel = formAccessorParameters.getLabel("overlappixelslabel");
+    overlapppixelslabel.setText("Overlap Pixels");
+
+    formAccessorParameters.replaceBean("overlappixels", overlappixelsspinner);
+
+    overlapLock = new JCheckBox("Lock Overlap to resolution");
+    formAccessorParameters.replaceBean("overlaplock", overlapLock);
+
+    // load and save parameters
+    AbstractButton saveparameters = formAccessorParameters.getButton("saveparameters");
+    saveparameters.setText("Save Parameters ...");
+    saveparameters.addActionListener(
+        (e) -> {
+          try {
+
+            File preferenceStorage =
+                preferences.getFileProperty(
+                    "mergescannerpreferences",
+                    new File(System.getProperties().getProperty("user.home")));
+
+            JFileChooser fc = new JFileChooser(preferenceStorage);
+            int result = fc.showSaveDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+
+              File selectedFile = fc.getSelectedFile();
+              if (selectedFile != null) {
+                FilePrefsStorage filePrefsStorage = new FilePrefsStorage(selectedFile);
+                preferences.setFileProperty(
+                    "mergescannerpreferences", selectedFile.getParentFile());
+                preferences.save();
+                saveModel(filePrefsStorage);
+              }
+            }
+
+          } catch (Exception ex) {
+            logger.error("error in saving parameters :" + ex.getMessage(), ex);
+            JMessageBox.showError(this, ex);
+          }
+        });
+
+    AbstractButton loadparameters = formAccessorParameters.getButton("loadparameters");
+    loadparameters.setText("Load Parameters ...");
+    loadparameters.addActionListener(
+        (e) -> {
+          try {
+
+            File preferenceStorage =
+                preferences.getFileProperty(
+                    "mergescannerpreferences",
+                    new File(System.getProperties().getProperty("user.home")));
+
+            JFileChooser fc = new JFileChooser(preferenceStorage);
+            int result = fc.showOpenDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+
+              File selectedFile = fc.getSelectedFile();
+              if (selectedFile != null) {
+                FilePrefsStorage filePrefsStorage = new FilePrefsStorage(selectedFile);
+                filePrefsStorage.load();
+                loadModel(filePrefsStorage);
+              }
+            }
+
+          } catch (Exception ex) {
+            logger.error("error in saving parameters :" + ex.getMessage(), ex);
+            JMessageBox.showError(this, ex);
+          }
+        });
+
+    // construct result
+    resultImageDisplay = new JDisplay();
+    resultImageLayer = new JImageDisplayLayer();
+    resultImageDisplay.addLayer(resultImageLayer);
+
+    firstImage = new JDisplay();
+
+    image1Layer = new JImageDisplayLayer();
+    firstImage.addLayer(image1Layer);
+
+    FormAccessor resultfunctions = fp.getFormAccessor("resultfunctions");
+
+    currentresultimage = (JSlider) resultfunctions.getComponentByName("currentresultimage");
+    currentresultimage.setValue(1);
+    int folderimagecount = perfoScanFolder.getImageCount();
+    currentresultimage.setMaximum(folderimagecount);
+    currentresultimage.setMajorTickSpacing(150);
+    currentresultimage.setMinorTickSpacing(50);
+    currentresultimage.revalidate();
+    currentresultimage.addChangeListener(
+        new ChangeListener() {
+          @Override
+          public void stateChanged(ChangeEvent e) {
+            recomputeResult();
+          }
+        });
+
+    final JShapeLayer<Polygon> zoneLayer = new JShapeLayer<>();
+
+    shapePointsLayer = new JShapeLayer<>();
+    shapePointsLayer.setGraphicsDrawer(
+        new IShapeDrawer() {
+          @Override
+          public void draw(Shape s, Graphics2D g2d) {
+            Color old = g2d.getColor();
+            try {
+              g2d.setColor(Color.CYAN);
+              g2d.draw(s);
+            } finally {
+              g2d.setColor(old);
+            }
+          }
+        });
+
+    shapePointsLayer.addLayerChangedListener(
+        new LayerChangedListener() {
+
+          @Override
+          public void layerSelectionChanged() {}
+
+          @Override
+          public void layerContentChanged() {
+
+            // construct associated shape
+            zoneLayer.clear();
+            Polygon p = new Polygon();
+            List<Double> graphics = shapePointsLayer.getGraphics();
+            for (Shape s : graphics) {
+              Rectangle2D.Double d = (Rectangle2D.Double) s;
+              p.addPoint((int) d.getCenterX(), (int) d.getCenterY());
+            }
+
+            zoneLayer.add(p);
+            updateModel();
+            recomputeResult();
+          }
+        });
+    firstImage.addLayer(shapePointsLayer);
+    firstImage.addLayer(zoneLayer);
+
+    CreatePointTool createPointTool = new CreatePointTool(firstImage, shapePointsLayer, 3);
+    createPointTool.setAnchorPointAdjuster(
+        new IAnchorPointAdjuster() {
+          @Override
+          public <T extends Shape> void adjust(
+              List<T> shapes, Set<T> selectedShape, MathVect displacement) {
+
+            // origin point
+            Rectangle2D.Double p1 = (Rectangle2D.Double) shapes.get(0);
+            // angle point
+            Rectangle2D.Double p2 = (Rectangle2D.Double) shapes.get(1);
+            // distance point
+            Rectangle2D.Double p3 = (Rectangle2D.Double) shapes.get(2);
+
+            if (selectedShape.size() != 1) {
+              return; // multiple modifications, don't allow modifications
+            }
+
+            // adjust points
+            Rectangle2D.Double p = (Rectangle2D.Double) selectedShape.iterator().next();
+            if (p == p1) {
+
+              p2.setRect(
+                  p2.getX() + displacement.getX(),
+                  p2.getY() + displacement.getY(),
+                  p2.getWidth(),
+                  p2.getHeight());
+
+              p3.setRect(
+                  p3.getX() + displacement.getX(),
+                  p3.getY() + displacement.getY(),
+                  p3.getWidth(),
+                  p3.getHeight());
+            }
+
+            if (p == p3 && overlapLock.isSelected()) {
+              // prop, delta
+
+              MathVect newdist = new MathVect(p3.getX() - p1.getX(), p3.getY() - p1.getY());
+              MathVect oldDist = newdist.moins(displacement);
+
+              Number n = (Number) overlappixelsspinner.getValue();
+              double d = n.doubleValue();
+
+              double newD = /*old */
+                  (1.0 - (newdist.norme() - oldDist.norme()) / oldDist.norme()) * d;
+              overlappixelsspinner.setValue(newD);
+            }
+          }
+        });
+
+    fp.getFormAccessor().replaceBean("displaypositionning", firstImage);
+
+    // add toolbar for 1
+    JViewingToolBar tb1 = new JViewingToolBar(firstImage);
+    JToggleButton tbpointtool = tb1.addTool(createPointTool);
+    tbpointtool.setIcon(new ImageTools().loadIcon(createPointTool.getClass(), "kedit.png"));
+
+    firstImage.setCurrentTool(createPointTool);
+
+    fp.getFormAccessor().replaceBean("positionningimagetoolbar", tb1);
+
+    add(fp, BorderLayout.CENTER);
+
+    //  resultImageDisplay.setPreferredSize(new Dimension(400, 300));
+    fp.getFormAccessor().replaceBean("displayresult", resultImageDisplay);
+
+    JViewingToolBar tb2 = new JViewingToolBar(resultImageDisplay);
+
+    fp.getFormAccessor().replaceBean("toolbarResults", tb2);
+
+    AbstractButton saveresult = fp.getButton("saveresult");
+    saveresult.setText("Save Images ...");
+    saveresult.addActionListener(
+        (e) -> {
+          try {
+
+            File preferenceStorage =
+                preferences.getFileProperty(
+                    "mergescannerfolder",
+                    new File(System.getProperties().getProperty("user.home")));
+
+            JFileChooser f = new JFileChooser(preferenceStorage);
+
+            int result = f.showSaveDialog(this);
+            if (result == JFileChooser.APPROVE_OPTION) {
+              File savedFile = f.getSelectedFile();
+              if (savedFile != null) {
+                logger.debug("saving images");
+                saveWholeImage(savedFile);
+                preferences.setFileProperty("mergescannerfolder", savedFile.getParentFile());
+              }
+            }
+
+          } catch (Exception ex) {
+            logger.error("error in saving files :" + ex.getMessage(), ex);
+            JMessageBox.showError(this, ex);
+          }
+        });
+
+    ///////////////////////////////////////////////////////////////
+
+    overlappixelsspinner.addChangeListener(
+        (e) -> {
+          updateModel();
+          recomputeResult(); // this update the model
+        });
+
+    shapePointsLayer.add(new Rectangle2D.Double(100, 100, 10, 10));
+    shapePointsLayer.add(new Rectangle2D.Double(100, 150, 10, 10));
+    shapePointsLayer.add(new Rectangle2D.Double(300, 100, 10, 10));
+
+    updateModel();
+  }
+
+  private ImageBookMergeModel model;
+
+  /** update internal model from the gui elements */
+  private void updateModel() {
+
+    List<Double> graphics = shapePointsLayer.getGraphics();
+
+    Rectangle2D.Double p1 = (Rectangle2D.Double) graphics.get(0);
+    Rectangle2D.Double p2 = (Rectangle2D.Double) graphics.get(1);
+    Rectangle2D.Double p3 = (Rectangle2D.Double) graphics.get(2);
+
+    ImageBookMergeModel mm = new ImageBookMergeModel();
+    mm.origin = new Point2D.Double(p1.getCenterX(), p1.getCenterY());
+    mm.pointforAngleAndImageWidth = new Point2D.Double(p2.getCenterX(), p2.getCenterY());
+    mm.pointforBookWidth = new Point2D.Double(p3.getCenterX(), p3.getCenterY());
+
+    model = mm;
+    model.overlappDistance = ((Number) overlappixelsspinner.getValue()).doubleValue();
+  }
+
+  public void setCurrentImage(int i) throws Exception {
+    BufferedImage i1 = perfoScanFolder.loadImage(i);
+    image1Layer.setImageToDisplay(i1);
+    resultImageLayer.setImageToDisplay(i1);
+
+    firstImage.repaint();
+    resultImageDisplay.repaint();
+  }
+
+  final int FINAL_IMAGE_HEIGHT = 600;
+  final int FINAL_IMAGE_WIDTH = 800;
+  final int IMAGE_SLICE = 200;
+
+  private class ComputeResultImage implements Runnable {
+
+    private ICancelTracker cancelTracker;
+    private Function<ICancelTracker, BufferedImage> f;
+    
+    public ComputeResultImage(
+        ICancelTracker cancelTracker, Function<ICancelTracker, BufferedImage> f) {
+      this.cancelTracker = cancelTracker;
+      this.f = f;
+    }
+
+    @Override
+    public void run() {
+    	
+    	BufferedImage image = f.apply(cancelTracker);
+    	if (image != null && !cancelTracker.isCanceled())
+    	{
+    		resultImageLayer.setImageToDisplay(image);
+    		resultImageDisplay.repaint();
+    	}
+    	
+    	
+    }
+  }
+
+  /** recompute the result in the result window */
+  private void recomputeResult() {
+
+    List<Double> graphics = shapePointsLayer.getGraphics();
+
+    if (graphics.size() >= 3) {
+      // Construct transform
+      updateModel();
+
+      // compute
+      MathVect m = model.getAngleAndImageWidthVector();
+
+      int pixelsForEachImage = (int) m.norme();
+      if (pixelsForEachImage < 30) pixelsForEachImage = 30;
+
+      // overlap value
+      Number o = (Number) overlappixelsspinner.getValue();
+      int start = currentresultimage.getValue();
+
+      
+      final int finalpixelsforeachimage = pixelsForEachImage;
+      ICancelTracker currentCancelTracker = new CancelTracker();
+      ICancelTracker old = currentProcessing.getAndSet(currentCancelTracker);
+      if (old != null) {
+    	  old.cancel();
+      }
+      
+      executor.execute(
+          new ComputeResultImage(
+              currentCancelTracker,
+              (c) -> {
+            	  try {
+               return
+                    constructMergeImage(
+                        finalpixelsforeachimage, 
+                        FINAL_IMAGE_WIDTH, o, 
+                        start, start + 20, 0, c);
+            	  } catch(Exception ex) {
+            		  return null;
+            	  }
+              }));
+
+    
+    }
+  }
+
+  /**
+   * internal method to construct a result image
+   *
+   * @param pixelsForEachImage
+   * @param output_final_image_width
+   * @param overlapPixels
+   * @param startImage
+   * @param lastImage
+   * @param offsetForFirstImage
+   * @return
+   * @throws Exception
+   */
+  private BufferedImage constructMergeImage(
+      int pixelsForEachImage,
+      int output_final_image_width,
+      Number overlapPixels,
+      int startImage,
+      int lastImage,
+      int offsetForFirstImage,
+      ICancelTracker cancelTracker)
+      throws Exception {
+
+    // clone the model
+    final ImageBookMergeModel innerModel = (ImageBookMergeModel) SerializeTools.deepClone(model);
+
+    // RAZ
+    int NBCOMPONENTS = 4;
+    int[][][] fullImage = new int[output_final_image_width][FINAL_IMAGE_HEIGHT][NBCOMPONENTS];
+    int[][] nbpixels = new int[output_final_image_width][FINAL_IMAGE_HEIGHT];
+    for (int x = 0; x < output_final_image_width; x++) {
+      for (int y = 0; y < FINAL_IMAGE_HEIGHT; y++) {
+        for (int j = 0; j < NBCOMPONENTS; j++) {
+          fullImage[x][y][j] = 0;
+        }
+        nbpixels[x][y] = 0;
+      }
+    }
+
+    for (int j = startImage; j < lastImage; j++) {
+
+      if (cancelTracker != null && cancelTracker.isCanceled()) {
+        return null; // aborted
+      }
+
+      File f = perfoScanFolder.constructImageFile(j);
+      if (!f.exists()) {
+        continue;
+      }
+      BufferedImage current = perfoScanFolder.loadImage(j);
+
+      BufferedImage newImage =
+          innerModel.createSlice(current, pixelsForEachImage, FINAL_IMAGE_HEIGHT);
+
+      Raster sliceData = newImage.getData();
+      for (int x = 0; x < newImage.getWidth(); x++) {
+        int xpixel =
+            (int) (x + (j - startImage) * overlapPixels.doubleValue() + offsetForFirstImage);
+
+        if (xpixel > output_final_image_width - 1) continue;
+        if (xpixel < 0) continue;
+
+        for (int y = 0; y < newImage.getHeight(); y++) {
+
+          // get pixel value
+          int[] values = new int[NBCOMPONENTS];
+          sliceData.getPixel(x, y, values);
+
+          for (int i = 0; i < NBCOMPONENTS; i++) {
+            fullImage[xpixel][y][i] += values[i];
+          }
+          nbpixels[xpixel][y] += 1;
+        }
+      }
+    } // for
+
+    // construct result image, making means on pixel values (rgb)
+
+    BufferedImage image =
+        new BufferedImage(
+            output_final_image_width, FINAL_IMAGE_HEIGHT, BufferedImage.TYPE_4BYTE_ABGR);
+    WritableRaster imageRaster = image.getRaster();
+
+    for (int x = 0; x < image.getWidth(); x++) {
+      for (int y = 0; y < image.getHeight(); y++) {
+
+        if (nbpixels[x][y] > 0) {
+          int r = fullImage[x][y][0] / nbpixels[x][y];
+          int g = fullImage[x][y][1] / nbpixels[x][y];
+          int b = fullImage[x][y][2] / nbpixels[x][y];
+
+          imageRaster.setPixels(x, y, 1, 1, new int[] {r, g, b, 255});
+        }
+      }
+    }
+    return image;
+  }
+
+  /**
+   * save result image in folder, to be able to display it
+   *
+   * @param folder
+   * @throws Exception
+   */
+  public void saveImage(File folder) throws Exception {
+    assert folder != null;
+    assert folder.exists();
+    assert folder.isDirectory();
+
+    boolean endreach = false;
+    int currentimageindex = 0;
+
+    while (!endreach) {
+      logger.debug("writing image " + currentimageindex);
+      double l = currentimageindex * FINAL_IMAGE_HEIGHT;
+      int indexFirstImage = (int) Math.ceil(l / model.overlappDistance);
+      indexFirstImage -=
+          (int) Math.floor(FINAL_IMAGE_HEIGHT / model.getAngleAndImageWidthVector().norme());
+      int lastIndexImage = (int) Math.floor((l + FINAL_IMAGE_HEIGHT) / model.overlappDistance);
+
+      BufferedImage img =
+          constructMergeImage(
+              (int) model.getAngleAndImageWidthVector().norme(),
+              FINAL_IMAGE_HEIGHT,
+              model.overlappDistance,
+              indexFirstImage,
+              indexFirstImage + 30,
+              (int) ((indexFirstImage) * model.overlappDistance - l),
+              null);
+
+      ImageIO.write(img, "JPEG", new File(folder, "" + currentimageindex + ".jpg"));
+
+      if (lastIndexImage >= perfoScanFolder.getImageCount()) {
+        endreach = true;
+      }
+      currentimageindex++;
+    }
+  }
+
+  /**
+   * Save the image on one big image
+   *
+   * @param folder
+   * @throws Exception
+   */
+  public void saveWholeImage(File outfile) throws Exception {
+    int width =
+        (int)
+            (model.overlappDistance * perfoScanFolder.getImageCount()
+                + model.getAngleAndImageWidthVector().norme());
+
+    BufferedImage img =
+        constructMergeImage(
+            (int) model.getAngleAndImageWidthVector().norme(),
+            width,
+            model.overlappDistance,
+            0,
+            perfoScanFolder.getImageCount(),
+            0, null);
+
+    ImageIO.write(img, "JPEG", outfile);
+  }
+
+  /**
+   * load a parameter model and apply it to the current frame
+   *
+   * @param storage
+   */
+  public void loadModel(IPrefsStorage storage) {
+    assert storage != null;
+    logger.debug("load from storage " + storage);
+    model.loadFrom(storage);
+    // update the ui
+
+    List<Double> graphics = shapePointsLayer.getGraphics();
+    moveRectTo(graphics.get(0), model.origin);
+    moveRectTo(graphics.get(1), model.pointforAngleAndImageWidth);
+    moveRectTo(graphics.get(2), model.pointforBookWidth);
+    overlappixelsspinner.setValue(model.overlappDistance);
+    shapePointsLayer.signalLayerContentChanged();
+  }
+
+  private void moveRectTo(Rectangle2D.Double r, Point2D p) {
+    r.setRect(p.getX() - 10 / 2, p.getY() - 10 / 2, 10, 10);
+  }
+
+  public void saveModel(IPrefsStorage storage) {
+    assert storage != null;
+    logger.debug("save to storage " + storage);
+    model.saveTo(storage);
+  }
+
+  public static void main(String[] args) throws Exception {
+
+    // File scanfolder = new File("C:\\temp\\perfo20180721");
+
+    // File scanfolder = new File("C:\\projets\\APrint\\contributions\\patrice\\2018_numerisation_josephine");
+
+    //    File scanfolder =
+    //        new File(
+    //            "C:\\projets\\APrint\\contributions\\patrice\\2018_numerisation_machine_faiscapourmoi\\perfo");
+
+    File scanfolder =
+        new File("C:\\projets\\APrint\\contributions\\patrice\\2018_josephine_90degres\\perfo");
+    PerfoScanFolder perfoScanFolder = new PerfoScanFolder(scanfolder);
+
+    JFrame f = new JFrame();
+
+    f.setSize(800, 800);
+
+    f.getContentPane().setLayout(new BorderLayout());
+
+    FilePrefsStorage p = new FilePrefsStorage(new File("c:\\temp\\preferencesStorage.properties"));
+    p.load();
+
+    JScannerMergePanel scanMergePanel = new JScannerMergePanel(perfoScanFolder, p);
+    f.getContentPane().add(scanMergePanel, BorderLayout.CENTER);
+
+    scanMergePanel.setCurrentImage(1);
+
+    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+    f.setVisible(true);
+  }
+}
