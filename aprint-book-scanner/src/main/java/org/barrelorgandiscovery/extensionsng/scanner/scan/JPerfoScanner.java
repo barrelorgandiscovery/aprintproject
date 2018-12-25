@@ -1,4 +1,4 @@
-package org.barrelorgandiscovery.extensionsng.scannerperfo;
+package org.barrelorgandiscovery.extensionsng.scanner.scan;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -29,6 +29,7 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLMac
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.DisplacementCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.HomingCommand;
+import org.barrelorgandiscovery.extensionsng.scanner.PerfoScanFolder;
 import org.barrelorgandiscovery.gui.CancelTracker;
 import org.barrelorgandiscovery.gui.ICancelTracker;
 import org.barrelorgandiscovery.tools.Disposable;
@@ -37,7 +38,16 @@ import com.github.sarxos.webcam.Webcam;
 
 import jssc.SerialPortList;
 
+/**
+ * Scanning panel
+ * 
+ * @author pfreydiere
+ *
+ */
 public class JPerfoScanner extends JPanel implements Disposable {
+
+  /** */
+  private static final long serialVersionUID = 5453676730276044987L;
 
   private static Logger logger = Logger.getLogger(JPerfoScanner.class);
 
@@ -76,6 +86,7 @@ public class JPerfoScanner extends JPanel implements Disposable {
           logger.debug("take picture");
           final BufferedImage picture = webCam.getDevice().getImage();
           try {
+        	  // display image
             SwingUtilities.invokeAndWait(
                 () -> {
                   labelImage.setIcon(new ImageIcon(picture));
@@ -86,7 +97,7 @@ public class JPerfoScanner extends JPanel implements Disposable {
           }
 
           if (!onlyWebCam.get()) {
-
+        	  // save the image only in record mode
             logger.debug("save and move");
             try {
               perfoScan.addNewImage(picture);
@@ -203,7 +214,6 @@ public class JPerfoScanner extends JPanel implements Disposable {
 
   @Override
   public void dispose() {
-
     exec.shutdownNow();
   }
 
@@ -224,7 +234,7 @@ public class JPerfoScanner extends JPanel implements Disposable {
     GRBLMachine machine = new GRBLMachine();
     GRBLMachineParameters params = new GRBLMachineParameters();
     System.out.println("Available Port List :" + Arrays.asList(SerialPortList.getPortNames()));
-    params.setComPort("COM4");
+    params.setComPort("COM5");
     MachineControl open = machine.open(params);
 
     Thread.sleep(4000);

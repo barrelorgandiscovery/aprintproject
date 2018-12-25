@@ -1,4 +1,4 @@
-package org.barrelorgandiscovery.extensionsng.scannerperfo;
+package org.barrelorgandiscovery.extensionsng.scanner.merge;
 
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -98,6 +98,7 @@ public class ImageBookMergeModel implements Serializable{
   }
   
   public void saveTo(IPrefsStorage storage) {
+	  
 	  storage.setDoubleProperty("originx", origin.x);
 	  storage.setDoubleProperty("originy", origin.y);
 	  

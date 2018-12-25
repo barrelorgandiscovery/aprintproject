@@ -27,7 +27,7 @@ public class JHelloPanel extends JPanel implements IPunchMachinePanelActivate {
     FormPanel p = new FormPanel(getClass().getResourceAsStream("hello.jfrm"));
     
     JLabel label = p.getLabel("lblaprintmachine");
-    label.setText("APrint Commander - 2018");
+    label.setText("APrint Commander - 10.2018");
     label.setIcon(new ImageIcon(getClass().getResource("pda_black.png")));
     
     AbstractButton fileselectbtn = p.getButton("fileselect");

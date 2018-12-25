@@ -125,7 +125,7 @@ public class JDisplay extends JComponent implements CurrentToolChangedAware {
           public void mouseWheelMoved(MouseWheelEvent e) {
             try {
 
-              double factor = 1 / (1 + (Math.abs(e.getPreciseWheelRotation()) + 1.0) / 20);
+              double factor = (1 + (Math.abs(e.getPreciseWheelRotation()) + 1.0) / 20);
               if (e.getPreciseWheelRotation() > 0) factor = 1 / factor;
 
               scaleAndCenterOnScreenCoordinates(factor, e.getX(), e.getY());

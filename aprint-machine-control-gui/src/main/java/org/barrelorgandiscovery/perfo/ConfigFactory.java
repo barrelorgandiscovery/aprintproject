@@ -8,7 +8,10 @@ public class ConfigFactory {
 
   private static Config createUnix() {
     Config c = new Config();
-    c.usbPort = "/dev/ttyUSB0";
+    c.usbPort = "/dev/ttyUSB0"; 
+    		// "/dev/ttyACM0";
+    		// "/dev/ttyUSB0"; // chinois
+    // uno normal : /dev/ttyACM0
     c.fileFolderPath = new File("/media");
     return c;
   }
@@ -21,7 +24,7 @@ public class ConfigFactory {
   }
 
   public static Config getInstance() {
-    return createTest();
+    return createUnix();
   }
   
 }

@@ -11,7 +11,7 @@ public class MovePlanVisitor extends CommandVisitor {
     this.constructedPunchPlan = new PunchPlan();
     this.constructedPunchPlan.setOptimizerClass(punchPlan.getOptimizerClass());
     this.constructedPunchPlan.setOptimizerParameters(punchPlan.getOptimizerParmeters());
-	this.deltaX = deltaX;
+    this.deltaX = deltaX;
     this.deltaY = deltaY;
   }
 

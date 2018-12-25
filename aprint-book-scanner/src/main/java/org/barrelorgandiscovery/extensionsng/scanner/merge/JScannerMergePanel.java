@@ -1,4 +1,4 @@
-package org.barrelorgandiscovery.extensionsng.scannerperfo;
+package org.barrelorgandiscovery.extensionsng.scanner.merge;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -34,6 +34,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.extensionsng.scanner.PerfoScanFolder;
 import org.barrelorgandiscovery.gui.CancelTracker;
 import org.barrelorgandiscovery.gui.ICancelTracker;
 import org.barrelorgandiscovery.math.MathVect;
@@ -55,6 +56,11 @@ import org.barrelorgandiscovery.tools.SerializeTools;
 import com.jeta.forms.components.panel.FormPanel;
 import com.jeta.forms.gui.form.FormAccessor;
 
+/**
+ * Panel for constructing a unique image from regular images
+ *
+ * @author pfreydiere
+ */
 public class JScannerMergePanel extends JPanel implements Disposable {
 
   /** */
@@ -64,8 +70,9 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 
   PerfoScanFolder perfoScanFolder;
 
-  JDisplay firstImage;
+  JDisplay workImage;
 
+  /** preview of result image **/
   JDisplay resultImageDisplay;
   private JImageDisplayLayer resultImageLayer;
 
@@ -76,13 +83,20 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 
   private JSlider currentresultimage;
 
-  private JShapeLayer<Rectangle2D.Double> shapePointsLayer;
+  private JShapeLayer<Rectangle2D.Double> workImageShapePointsLayer;
 
   private IPrefsStorage preferences;
 
   private ExecutorService executor = Executors.newFixedThreadPool(3);
-  private AtomicReference<ICancelTracker> currentProcessing = new AtomicReference<ICancelTracker>(null);
-  
+  private AtomicReference<ICancelTracker> currentProcessing =
+      new AtomicReference<ICancelTracker>(null);
+
+  /**
+   * Constructor
+   * @param perfoScanFolder
+   * @param preferences
+   * @throws Exception
+   */
   public JScannerMergePanel(PerfoScanFolder perfoScanFolder, IPrefsStorage preferences)
       throws Exception {
     assert perfoScanFolder != null;
@@ -91,11 +105,11 @@ public class JScannerMergePanel extends JPanel implements Disposable {
     this.preferences = preferences;
     initComponent();
   }
-  
+
   @Override
   public void dispose() {
-	  // free associated resources
-	  executor.shutdown();
+    // free associated resources
+    executor.shutdown();
   }
 
   protected void initComponent() throws Exception {
@@ -184,10 +198,10 @@ public class JScannerMergePanel extends JPanel implements Disposable {
     resultImageLayer = new JImageDisplayLayer();
     resultImageDisplay.addLayer(resultImageLayer);
 
-    firstImage = new JDisplay();
+    workImage = new JDisplay();
 
     image1Layer = new JImageDisplayLayer();
-    firstImage.addLayer(image1Layer);
+    workImage.addLayer(image1Layer);
 
     FormAccessor resultfunctions = fp.getFormAccessor("resultfunctions");
 
@@ -208,8 +222,8 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 
     final JShapeLayer<Polygon> zoneLayer = new JShapeLayer<>();
 
-    shapePointsLayer = new JShapeLayer<>();
-    shapePointsLayer.setGraphicsDrawer(
+    workImageShapePointsLayer = new JShapeLayer<>();
+    workImageShapePointsLayer.setGraphicsDrawer(
         new IShapeDrawer() {
           @Override
           public void draw(Shape s, Graphics2D g2d) {
@@ -223,7 +237,7 @@ public class JScannerMergePanel extends JPanel implements Disposable {
           }
         });
 
-    shapePointsLayer.addLayerChangedListener(
+    workImageShapePointsLayer.addLayerChangedListener(
         new LayerChangedListener() {
 
           @Override
@@ -232,10 +246,10 @@ public class JScannerMergePanel extends JPanel implements Disposable {
           @Override
           public void layerContentChanged() {
 
-            // construct associated shape
+            // construct associated zone
             zoneLayer.clear();
             Polygon p = new Polygon();
-            List<Double> graphics = shapePointsLayer.getGraphics();
+            List<Double> graphics = workImageShapePointsLayer.getGraphics();
             for (Shape s : graphics) {
               Rectangle2D.Double d = (Rectangle2D.Double) s;
               p.addPoint((int) d.getCenterX(), (int) d.getCenterY());
@@ -246,10 +260,10 @@ public class JScannerMergePanel extends JPanel implements Disposable {
             recomputeResult();
           }
         });
-    firstImage.addLayer(shapePointsLayer);
-    firstImage.addLayer(zoneLayer);
+    workImage.addLayer(workImageShapePointsLayer);
+    workImage.addLayer(zoneLayer);
 
-    CreatePointTool createPointTool = new CreatePointTool(firstImage, shapePointsLayer, 3);
+    CreatePointTool createPointTool = new CreatePointTool(workImage, workImageShapePointsLayer, 3);
     createPointTool.setAnchorPointAdjuster(
         new IAnchorPointAdjuster() {
           @Override
@@ -300,14 +314,14 @@ public class JScannerMergePanel extends JPanel implements Disposable {
           }
         });
 
-    fp.getFormAccessor().replaceBean("displaypositionning", firstImage);
+    fp.getFormAccessor().replaceBean("displaypositionning", workImage);
 
     // add toolbar for 1
-    JViewingToolBar tb1 = new JViewingToolBar(firstImage);
+    JViewingToolBar tb1 = new JViewingToolBar(workImage);
     JToggleButton tbpointtool = tb1.addTool(createPointTool);
     tbpointtool.setIcon(new ImageTools().loadIcon(createPointTool.getClass(), "kedit.png"));
 
-    firstImage.setCurrentTool(createPointTool);
+    workImage.setCurrentTool(createPointTool);
 
     fp.getFormAccessor().replaceBean("positionningimagetoolbar", tb1);
 
@@ -357,9 +371,9 @@ public class JScannerMergePanel extends JPanel implements Disposable {
           recomputeResult(); // this update the model
         });
 
-    shapePointsLayer.add(new Rectangle2D.Double(100, 100, 10, 10));
-    shapePointsLayer.add(new Rectangle2D.Double(100, 150, 10, 10));
-    shapePointsLayer.add(new Rectangle2D.Double(300, 100, 10, 10));
+    workImageShapePointsLayer.add(new Rectangle2D.Double(100, 100, 10, 10));
+    workImageShapePointsLayer.add(new Rectangle2D.Double(100, 150, 10, 10));
+    workImageShapePointsLayer.add(new Rectangle2D.Double(300, 100, 10, 10));
 
     updateModel();
   }
@@ -369,7 +383,7 @@ public class JScannerMergePanel extends JPanel implements Disposable {
   /** update internal model from the gui elements */
   private void updateModel() {
 
-    List<Double> graphics = shapePointsLayer.getGraphics();
+    List<Double> graphics = workImageShapePointsLayer.getGraphics();
 
     Rectangle2D.Double p1 = (Rectangle2D.Double) graphics.get(0);
     Rectangle2D.Double p2 = (Rectangle2D.Double) graphics.get(1);
@@ -389,7 +403,7 @@ public class JScannerMergePanel extends JPanel implements Disposable {
     image1Layer.setImageToDisplay(i1);
     resultImageLayer.setImageToDisplay(i1);
 
-    firstImage.repaint();
+    workImage.repaint();
     resultImageDisplay.repaint();
   }
 
@@ -401,7 +415,7 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 
     private ICancelTracker cancelTracker;
     private Function<ICancelTracker, BufferedImage> f;
-    
+
     public ComputeResultImage(
         ICancelTracker cancelTracker, Function<ICancelTracker, BufferedImage> f) {
       this.cancelTracker = cancelTracker;
@@ -410,22 +424,19 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 
     @Override
     public void run() {
-    	
-    	BufferedImage image = f.apply(cancelTracker);
-    	if (image != null && !cancelTracker.isCanceled())
-    	{
-    		resultImageLayer.setImageToDisplay(image);
-    		resultImageDisplay.repaint();
-    	}
-    	
-    	
+
+      BufferedImage image = f.apply(cancelTracker);
+      if (image != null && !cancelTracker.isCanceled()) {
+        resultImageLayer.setImageToDisplay(image);
+        resultImageDisplay.repaint();
+      }
     }
   }
 
   /** recompute the result in the result window */
   private void recomputeResult() {
 
-    List<Double> graphics = shapePointsLayer.getGraphics();
+    List<Double> graphics = workImageShapePointsLayer.getGraphics();
 
     if (graphics.size() >= 3) {
       // Construct transform
@@ -441,30 +452,24 @@ public class JScannerMergePanel extends JPanel implements Disposable {
       Number o = (Number) overlappixelsspinner.getValue();
       int start = currentresultimage.getValue();
 
-      
       final int finalpixelsforeachimage = pixelsForEachImage;
       ICancelTracker currentCancelTracker = new CancelTracker();
       ICancelTracker old = currentProcessing.getAndSet(currentCancelTracker);
       if (old != null) {
-    	  old.cancel();
+        old.cancel();
       }
-      
+
       executor.execute(
           new ComputeResultImage(
               currentCancelTracker,
               (c) -> {
-            	  try {
-               return
-                    constructMergeImage(
-                        finalpixelsforeachimage, 
-                        FINAL_IMAGE_WIDTH, o, 
-                        start, start + 20, 0, c);
-            	  } catch(Exception ex) {
-            		  return null;
-            	  }
+                try {
+                  return constructMergeImage(
+                      finalpixelsforeachimage, FINAL_IMAGE_WIDTH, o, start, start + 20, 0, c);
+                } catch (Exception ex) {
+                  return null;
+                }
               }));
-
-    
     }
   }
 
@@ -625,7 +630,8 @@ public class JScannerMergePanel extends JPanel implements Disposable {
             model.overlappDistance,
             0,
             perfoScanFolder.getImageCount(),
-            0, null);
+            0,
+            null);
 
     ImageIO.write(img, "JPEG", outfile);
   }
@@ -641,12 +647,12 @@ public class JScannerMergePanel extends JPanel implements Disposable {
     model.loadFrom(storage);
     // update the ui
 
-    List<Double> graphics = shapePointsLayer.getGraphics();
+    List<Double> graphics = workImageShapePointsLayer.getGraphics();
     moveRectTo(graphics.get(0), model.origin);
     moveRectTo(graphics.get(1), model.pointforAngleAndImageWidth);
     moveRectTo(graphics.get(2), model.pointforBookWidth);
     overlappixelsspinner.setValue(model.overlappDistance);
-    shapePointsLayer.signalLayerContentChanged();
+    workImageShapePointsLayer.signalLayerContentChanged();
   }
 
   private void moveRectTo(Rectangle2D.Double r, Point2D p) {
