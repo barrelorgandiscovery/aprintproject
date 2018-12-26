@@ -299,6 +299,7 @@ public class APrintNGInternalFrame extends JFrame implements IAPrintWait, Dirtya
     return true;
   }
 
+  private boolean frameDisposed = false;
   @Override
   public void dispose() {
     logger.debug("dispose frame");
@@ -317,6 +318,12 @@ public class APrintNGInternalFrame extends JFrame implements IAPrintWait, Dirtya
     }
 
     clearDirty();
+    frameDisposed = true;
     super.dispose();
   }
+  
+  public boolean isDisposed() {
+	  return frameDisposed;
+  }
+  
 }

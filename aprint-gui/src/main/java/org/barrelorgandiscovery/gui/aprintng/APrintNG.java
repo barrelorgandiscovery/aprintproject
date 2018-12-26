@@ -2377,7 +2377,7 @@ public class APrintNG extends APrintNGInternalFrame
       WeakReference<APrintNGInternalFrame> wr =
           (WeakReference<APrintNGInternalFrame>) iterator.next();
       APrintNGInternalFrame a = wr.get();
-      if (a != null) {
+      if (a != null && !a.isDisposed()) {
         ret.add(a);
       }
     }
