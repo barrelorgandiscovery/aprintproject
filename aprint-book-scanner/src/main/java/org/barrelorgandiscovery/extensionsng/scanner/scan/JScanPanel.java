@@ -14,6 +14,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
 import org.apache.log4j.BasicConfigurator;
@@ -24,11 +25,17 @@ import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.ITriggerFactor
 import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.TimeTrigger;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.Trigger;
 import org.barrelorgandiscovery.tools.Disposable;
+import org.barrelorgandiscovery.tools.ImageTools;
 
 import com.github.sarxos.webcam.Webcam;
 import com.jeta.forms.components.panel.FormPanel;
 
 public class JScanPanel extends JPanel implements Disposable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7948210921186182119L;
 
 	private static Logger logger = Logger.getLogger(JScanPanel.class);
 
@@ -81,14 +88,18 @@ public class JScanPanel extends JPanel implements Disposable {
 		FormPanel fp = new FormPanel(inputStream);
 
 		JLabel lblFolder = fp.getLabel("lblfolder");
-		lblFolder.setText("");
-
-		JLabel lblpreview = fp.getLabel("lblpreview");
-		lblpreview.setText("Preview latests snapshots");
+		lblFolder.setText(perfoScanFolder.getFolder().getAbsolutePath());
+		
+		JLabel lblfolderLabel = fp.getLabel("lblfolderlabel");
+		assert lblfolderLabel != null;
+		lblfolderLabel.setText("Folder in which the images will be saved");
 
 		btnStart = fp.getButton("btnstart");
 		assert btnStart != null;
 		btnStart.setText("Start Record");
+		btnStart.setToolTipText("Start record the images in the folder");
+		btnStart.setIcon(new ImageIcon(ImageTools.loadImage(JScanPanel.class, "krec_record.png")));
+
 		btnStart.addActionListener((e) -> {
 			try {
 				start();
@@ -100,19 +111,26 @@ public class JScanPanel extends JPanel implements Disposable {
 
 		btneraseimagefiles = fp.getButton("eraseimagefiles");
 		btneraseimagefiles.setText("Erase all imagefiles");
-		btneraseimagefiles.addActionListener( (e) -> {
-			
+		btneraseimagefiles.setIcon(new ImageIcon(ImageTools.loadImage(JScanPanel.class, "stop.png")));
+		btneraseimagefiles.setToolTipText("Erase all images in the folder to restart the record");
+
+		btneraseimagefiles.addActionListener((e) -> {
+
 			// erase all folder images
 			perfoScanFolder.deleteAllImages();
-			
+
 			// clean image stack
 			imageStack.clearImages();
-			
+
 		});
 
 		btnStop = fp.getButton("btnstop");
 		assert btnStop != null;
 		btnStop.setText("Stop");
+		btnStop.setToolTipText("End record images");
+
+		btnStop.setIcon(new ImageIcon(ImageTools.loadImage(JScanPanel.class, "player_stop.png")));
+
 		btnStop.addActionListener((e) -> {
 			try {
 				stop();
@@ -121,13 +139,19 @@ public class JScanPanel extends JPanel implements Disposable {
 				logger.error("error stoping recording :" + ex.getMessage(), ex);
 			}
 		});
-		
-		
-		imageLabel = new JLabel();
-		fp.getFormAccessor().replaceBean("webcampreview", imageLabel);
+		btnStop.setEnabled(false);
 
+		imageLabel = new JLabel();
+		fp.getFormAccessor("gridwebcam").replaceBean("webcampreview", imageLabel);
+		imageLabel.setAlignmentX(0.5f);
+		imageLabel.setAlignmentY(0.5f);
+		imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
+		imageLabel.setVerticalAlignment(SwingConstants.CENTER);
+		
+		
+		
 		imageStack = new JImagePreviewStack();
-		fp.getFormAccessor().replaceBean("imagespreview", imageStack);
+		fp.getFormAccessor("gridpreview").replaceBean("imagespreview", imageStack);
 
 		setLayout(new BorderLayout());
 		add(fp, BorderLayout.CENTER);
@@ -156,16 +180,16 @@ public class JScanPanel extends JPanel implements Disposable {
 			scheduleWithFixedDelay = null;
 		}
 	}
-	
+
 	private void updateUIState() {
-		btnStop.setEnabled( trigger != null);
-		btnStart.setEnabled(  trigger == null);
-		btneraseimagefiles.setEnabled(btnStart.isEnabled());	
+		btnStop.setEnabled(trigger != null);
+		btnStart.setEnabled(trigger == null);
+		btneraseimagefiles.setEnabled(btnStart.isEnabled());
 	}
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////
 	// manage the acquisition life cycle
-	
+
 	private Trigger trigger = null;
 
 	private AbstractButton btneraseimagefiles;
@@ -189,7 +213,7 @@ public class JScanPanel extends JPanel implements Disposable {
 		}, perfoScanFolder);
 
 		trigger.start();
-		
+
 	}
 
 	public void stop() {
@@ -203,7 +227,7 @@ public class JScanPanel extends JPanel implements Disposable {
 		}
 		triggerLivePreview();
 	}
-	
+
 	@Override
 	public void dispose() {
 		if (trigger != null) {
@@ -214,14 +238,14 @@ public class JScanPanel extends JPanel implements Disposable {
 			}
 			trigger = null;
 		}
-		
+
 		stopLivePreview();
 	}
-	
+
 	public static void main(String[] args) throws Exception {
 
 		BasicConfigurator.configure(new LF5Appender());
-		
+
 		JFrame f = new JFrame();
 		f.getContentPane().setLayout(new BorderLayout());
 

@@ -109,4 +109,12 @@ public class PerfoScanFolder {
 		return ImageTools.loadImage(constructImageFile(sequence).toURL());
 	}
 
+	/**
+	 * get wurrent working folder
+	 * @return
+	 */
+	public File getFolder() {
+		return folder;
+	}
+	
 }

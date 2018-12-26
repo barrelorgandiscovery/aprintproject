@@ -11,6 +11,7 @@ import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.model.comparators.ModelLinkComparator;
 import org.barrelorgandiscovery.model.comparators.ModelParameterComparator;
 import org.barrelorgandiscovery.model.comparators.ModelStepComparator;
+import org.barrelorgandiscovery.model.steps.scripts.GroovyScriptModelStep;
 
 /**
  * Model mainting a processing model, a collection of modelstep and modellink
@@ -441,6 +442,12 @@ public class Model implements Serializable {
 				SinkSource ss = (SinkSource) modelStep;
 				if (ss.isSink()) {
 					logger.debug("compute schedule for step :" + modelStep);
+					computeSchedule(modelStep);
+				}
+			} else if (modelStep instanceof GroovyScriptModelStep) {
+				GroovyScriptModelStep gsms = (GroovyScriptModelStep)modelStep;
+				if (gsms.doesGroovyScriptIsSink()) {
+					logger.debug("compte schedule for step :" + modelStep);
 					computeSchedule(modelStep);
 				}
 			}

@@ -11,7 +11,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import org.apache.log4j.Logger;
-import org.barrelorgandiscovery.exec.IConsoleLog;
 import org.barrelorgandiscovery.groovy.APrintGroovyShell;
 import org.barrelorgandiscovery.gui.script.groovy.IScriptConsole;
 import org.barrelorgandiscovery.model.AbstractParameter;
@@ -19,6 +18,7 @@ import org.barrelorgandiscovery.model.ContextVariables;
 import org.barrelorgandiscovery.model.IModelStepContextAware;
 import org.barrelorgandiscovery.model.ModelParameter;
 import org.barrelorgandiscovery.model.ModelStep;
+import org.barrelorgandiscovery.model.SinkSource;
 import org.codehaus.groovy.control.CompilerConfiguration;
 
 import groovy.lang.Binding;
@@ -26,227 +26,236 @@ import groovy.lang.Script;
 
 public class GroovyScriptModelStep extends ModelStep implements IModelStepContextAware {
 
-  /**
-   * 
-   */
-  private static final long serialVersionUID = 2652958322654071573L;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2652958322654071573L;
 
-  private static Logger logger = Logger.getLogger(GroovyScriptModelStep.class);
+	private static Logger logger = Logger.getLogger(GroovyScriptModelStep.class);
 
-  private IScriptConsole console = null;
-  
-  /**
-   * given context
-   */
-  private Map<String, Object> context = null;
+	private IScriptConsole console = null;
 
-  @Override
-  public String getLabel() {
-    return "Script Box";
-  }
-  
-  @Override
-  public void defineContext(Map<String, Object> context) {
-    if (context != null) {
-      Object o = context.get(ContextVariables.CONTEXT_CONSOLE);
-      if (o != null && (o instanceof IScriptConsole)) {
-        this.console = (IScriptConsole) o;
-      }
-    }
-    this.context = context;
-  }
+	/**
+	 * given context
+	 */
+	private Map<String, Object> context = null;
 
-  @Override
-  public ModelParameter[] getAllParametersByRef() {
-    if (modelParameters == null) {
-      if (compiledScript == null) {
+	@Override
+	public String getLabel() {
+		return "Script Box";
+	}
 
-        try {
-        	if (scriptContent != null) {
-        		compileScript();
-        		applyConfig();
-        	}
+	@Override
+	public void defineContext(Map<String, Object> context) {
+		if (context != null) {
+			Object o = context.get(ContextVariables.CONTEXT_CONSOLE);
+			if (o != null && (o instanceof IScriptConsole)) {
+				this.console = (IScriptConsole) o;
+			}
+		}
+		this.context = context;
+	}
 
-        } catch (Exception ex) {
-          logger.error("error in applying config for processor :" + this);
-        }
-      }
+	@Override
+	public ModelParameter[] getAllParametersByRef() {
+		if (modelParameters == null) {
+			if (compiledScript == null) {
 
-      if (modelParameters == null) {
-        return new ModelParameter[0];
-      }
-    }
-    return modelParameters;
-  }
+				try {
+					if (scriptContent != null) {
+						compileScript();
+						applyConfig();
+					}
 
-  @Override
-  public String getName() {
-    return null;
-  }
+				} catch (Exception ex) {
+					logger.error("error in applying config for processor :" + this);
+				}
+			}
 
-  @Override
-  public void applyConfig() throws Exception {
+			if (modelParameters == null) {
+				return new ModelParameter[0];
+			}
+		}
+		return modelParameters;
+	}
 
-    if (compiledScript == null) return;
+	@Override
+	public String getName() {
+		return null;
+	}
 
-    logger.debug("call the groovy script");
-    assert compiledScript != null;
+	@Override
+	public void applyConfig() throws Exception {
 
-    ModelParameter[] parameters = compiledScript.configureParameters();
-    if (parameters != null) {
-      for (ModelParameter m : parameters) {
-        m.setStep(this);
-      }
-    }
+		if (compiledScript == null)
+			return;
 
-    this.modelParameters = parameters;
-  }
+		logger.debug("call the groovy script");
+		assert compiledScript != null;
 
-  @Override
-  public Map<AbstractParameter, Object> execute(Map<AbstractParameter, Object> inputValues)
-      throws Exception {
+		ModelParameter[] parameters = compiledScript.configureParameters();
+		if (parameters != null) {
+			for (ModelParameter m : parameters) {
+				m.setStep(this);
+			}
+		}
 
-    if (!isCompiled()) throw new Exception("script is not compiled");
+		this.modelParameters = parameters;
+	}
 
-    logger.debug("execute");
-    Map<String, ModelParameter> Res =
-        Arrays.stream(modelParameters)
-            .collect(Collectors.toMap(AbstractParameter::getName, Function.identity()));
-    Map<ModelParameter, String> revRes =
-        Arrays.stream(modelParameters)
-            .collect(Collectors.toMap(Function.identity(), AbstractParameter::getName));
+	@Override
+	public Map<AbstractParameter, Object> execute(Map<AbstractParameter, Object> inputValues) throws Exception {
 
-    // grab input parameters
-    HashMap<String, Object> collectedValues = new HashMap<String, Object>();
+		if (!isCompiled())
+			throw new Exception("script is not compiled");
 
-    for (Entry<AbstractParameter, Object> e : inputValues.entrySet()) {
-      String k = revRes.get(e.getKey());
-      if (k != null) {
-        if (collectedValues.containsKey(k)) {
-          logger.warn("value for input :" + k + " already exists, it will be overriden");
-        }
-        collectedValues.put(k, e.getValue());
-      }
-    }
+		if (compiledScript != null && compiledScript instanceof IModelStepContextAware) {
+			IModelStepContextAware contextAware = (IModelStepContextAware) compiledScript;
+			logger.debug("define context for script");
+			contextAware.defineContext(context);
+		}
 
-    // call script
-    Map<String, Object> scriptReturnedValues = compiledScript.execute(collectedValues);
+		logger.debug("execute");
+		Map<String, ModelParameter> Res = Arrays.stream(modelParameters)
+				.collect(Collectors.toMap(AbstractParameter::getName, Function.identity()));
+		Map<ModelParameter, String> revRes = Arrays.stream(modelParameters)
+				.collect(Collectors.toMap(Function.identity(), AbstractParameter::getName));
 
-    // transform result
-    HashMap<AbstractParameter, Object> result = new HashMap<>();
-    for (String k : scriptReturnedValues.keySet()) {
-      AbstractParameter p = Res.get(k);
-      result.put(p, scriptReturnedValues.get(k));
-    }
-    logger.debug("end of script execution");
-    return result;
-  }
+		// grab input parameters
+		HashMap<String, Object> collectedValues = new HashMap<String, Object>();
 
-  ///////////////////////////////////////////////////////////////////////
-  // script implementation
+		for (Entry<AbstractParameter, Object> e : inputValues.entrySet()) {
+			String k = revRes.get(e.getKey());
+			if (k != null) {
+				if (collectedValues.containsKey(k)) {
+					logger.warn("value for input :" + k + " already exists, it will be overriden");
+				}
+				collectedValues.put(k, e.getValue());
+			}
+		}
 
-  private String scriptContent;
+		// call script
+		Map<String, Object> scriptReturnedValues = compiledScript.execute(collectedValues);
 
-  /** compiled version of the script if script does not compile, this member is null */
-  private ModelGroovyScript compiledScript;
+		// transform result
+		HashMap<AbstractParameter, Object> result = new HashMap<>();
+		for (String k : scriptReturnedValues.keySet()) {
+			AbstractParameter p = Res.get(k);
+			result.put(p, scriptReturnedValues.get(k));
+		}
+		logger.debug("end of script execution");
+		return result;
+	}
 
-  private ModelParameter[] modelParameters;
+	///////////////////////////////////////////////////////////////////////
+	// script implementation
 
-  public void setScriptContent(String scriptContent) {
-    this.scriptContent = scriptContent;
-    razScriptAssociatedStructures();
-  }
+	private String scriptContent;
 
-  private void razScriptAssociatedStructures() {
-    this.compiledScript = null;
-    this.modelParameters = null;
-  }
+	/**
+	 * compiled version of the script if script does not compile, this member is
+	 * null
+	 */
+	private ModelGroovyScript compiledScript;
 
-  public String getScriptContent() {
-    return scriptContent;
-  }
+	private ModelParameter[] modelParameters;
 
-  public boolean isCompiled() {
-    return compiledScript != null;
-  }
+	public void setScriptContent(String scriptContent) {
+		this.scriptContent = scriptContent;
+		razScriptAssociatedStructures();
+	}
 
-  /**
-   * compile the script Content, and define the compiledScript member
-   *
-   * @throws Exception
-   */
-  public void compileScript() throws Exception {
+	private void razScriptAssociatedStructures() {
+		this.compiledScript = null;
+		this.modelParameters = null;
+	}
 
-    if (scriptContent == null || scriptContent.isEmpty())
-      throw new Exception("script content is not defined");
+	public String getScriptContent() {
+		return scriptContent;
+	}
 
-    logger.debug("compiling script " + scriptContent);
-    Binding binding = new Binding();
-    
- // binding for the output in the console ...
-    binding.setProperty(
-        "out",
-        new PrintStream(
-            new OutputStream() { //$NON-NLS-1$
+	public boolean isCompiled() {
+		return compiledScript != null;
+	}
 
-              @Override
-              public void write(byte[] b, int off, int len) throws IOException {
-                if (console == null) {
-                  // no console available
-                  logger.debug("no console available");
-                  return;
-                }
+	public boolean doesGroovyScriptIsSink() {
+		if (compiledScript != null) {
+			if (compiledScript instanceof SinkSource) {
+				return ((SinkSource)compiledScript).isSink();
+			}
+		}
+		return false;
+	}
 
-                String s = new String(b, off, len);
-                try {
-                  console.appendOutput(s, null);
-                } catch (Exception ex) {
-                  ex.printStackTrace(System.err);
-                }
-              }
+	/**
+	 * compile the script Content, and define the compiledScript member
+	 *
+	 * @throws Exception
+	 */
+	public void compileScript() throws Exception {
 
-              @Override
-              public void write(int b) throws IOException {
-                if (console == null) {
-            		  // no console available
-                      logger.debug("no console available");
-            		  return;
-                }
-                try {
-                  console.appendOutput("" + (char) b, null);
-                } catch (Exception ex) {
-                  ex.printStackTrace(System.err);
-                }
-              }
-            }));
+		if (scriptContent == null || scriptContent.isEmpty())
+			throw new Exception("script content is not defined");
 
-    
+		logger.debug("compiling script " + scriptContent);
+		Binding binding = new Binding();
 
-   
-    CompilerConfiguration conf = new CompilerConfiguration();
+		// binding for the output in the console ...
+		binding.setProperty("out", new PrintStream(new OutputStream() { // $NON-NLS-1$
 
-    // Add imports for script.
-    // ImportCustomizer importCustomizer = new ImportCustomizer();
-    // import static com.mrhaki.blog.Type.*
+			@Override
+			public void write(byte[] b, int off, int len) throws IOException {
+				if (console == null) {
+					// no console available
+					logger.debug("no console available");
+					return;
+				}
 
-    // importCustomizer.addStaticStars 'com.mrhaki.blog.Type'
+				String s = new String(b, off, len);
+				try {
+					console.appendOutput(s, null);
+				} catch (Exception ex) {
+					ex.printStackTrace(System.err);
+				}
+			}
 
-    // import com.mrhaki.blog.Post as Article
-    //importCustomizer.addImport 'Article', 'com.mrhaki.blog.Post'
+			@Override
+			public void write(int b) throws IOException {
+				if (console == null) {
+					// no console available
+					logger.debug("no console available");
+					return;
+				}
+				try {
+					console.appendOutput("" + (char) b, null);
+				} catch (Exception ex) {
+					ex.printStackTrace(System.err);
+				}
+			}
+		}));
 
-    // conf.addCompilationCustomizers(importCustomizer);
+		CompilerConfiguration conf = new CompilerConfiguration();
 
-    APrintGroovyShell gs = new APrintGroovyShell(binding);
-    
+		// Add imports for script.
+		// ImportCustomizer importCustomizer = new ImportCustomizer();
+		// import static com.mrhaki.blog.Type.*
 
-    Script parsedScript = gs.parse(scriptContent);
-    parsedScript.setBinding(binding);
-    Object ret = parsedScript.run();
-    if (ret == null || !(ret instanceof ModelGroovyScript)) {
-      throw new Exception(
-          "bad script, must return a " + ModelGroovyScript.class.getName() + " instance");
-    }
+		// importCustomizer.addStaticStars 'com.mrhaki.blog.Type'
 
-    compiledScript = (ModelGroovyScript) ret;
-  }
+		// import com.mrhaki.blog.Post as Article
+		// importCustomizer.addImport 'Article', 'com.mrhaki.blog.Post'
+
+		// conf.addCompilationCustomizers(importCustomizer);
+
+		APrintGroovyShell gs = new APrintGroovyShell(binding);
+
+		Script parsedScript = gs.parse(scriptContent);
+		parsedScript.setBinding(binding);
+		Object ret = parsedScript.run();
+		if (ret == null || !(ret instanceof ModelGroovyScript)) {
+			throw new Exception("bad script, must return a " + ModelGroovyScript.class.getName() + " instance");
+		}
+
+		compiledScript = (ModelGroovyScript) ret;
+	}
 }

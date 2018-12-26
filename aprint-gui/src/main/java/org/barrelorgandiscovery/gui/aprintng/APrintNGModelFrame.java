@@ -12,6 +12,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 
 import org.apache.log4j.Logger;
@@ -73,13 +74,14 @@ public class APrintNGModelFrame extends APrintNGInternalFrame {
     this.toolWindowManager = myDoggyToolWindowManager;
 
     JTextPane textArea = new JTextPane();
+    JScrollPane textScrollPane = new JScrollPane(textArea);
     aSyncConsoleOutput = new ASyncConsoleOutput(textArea, null);
 
     tConsolewindow=toolWindowManager.registerToolWindow(
       "console", // Id //$NON-NLS-1$
       "Execution Console", // Title //$NON-NLS-1$
       null, // Icon
-      textArea, // Component
+      textScrollPane, // Component
       ToolWindowAnchor.BOTTOM);
 
     
