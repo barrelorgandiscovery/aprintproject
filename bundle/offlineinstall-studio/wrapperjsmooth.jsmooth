@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<jsmoothproject>
+<JVMSearchPath>registry</JVMSearchPath>
+<JVMSearchPath>javahome</JVMSearchPath>
+<JVMSearchPath>jrepath</JVMSearchPath>
+<JVMSearchPath>jdkpath</JVMSearchPath>
+<JVMSearchPath>exepath</JVMSearchPath>
+<JVMSearchPath>jview</JVMSearchPath>
+<arguments></arguments>
+<currentDirectory>${EXECUTABLEPATH}</currentDirectory>
+<embeddedJar>true</embeddedJar>
+<executableName>install-studio.exe</executableName>
+<iconLocation>aprinticon.ico</iconLocation>
+<initialMemoryHeap>-1</initialMemoryHeap>
+<jarLocation>install-studio.jar</jarLocation>
+<mainClassName>com.izforge.izpack.installer.Installer</mainClassName>
+<maximumMemoryHeap>-1</maximumMemoryHeap>
+<maximumVersion></maximumVersion>
+<minimumVersion>1.5</minimumVersion>
+<skeletonName>Autodownload Wrapper</skeletonName>
+<skeletonProperties>
+<key>Message</key>
+<value>This program needs Java to run.
+Please download it at http://www.java.com</value>
+</skeletonProperties>
+<skeletonProperties>
+<key>DownloadURL</key>
+<value>http://java.sun.com/update/1.6.0/jinstall-6-windows-i586.cab</value>
+</skeletonProperties>
+<skeletonProperties>
+<key>SingleProcess</key>
+<value>0</value>
+</skeletonProperties>
+<skeletonProperties>
+<key>SingleInstance</key>
+<value>0</value>
+</skeletonProperties>
+<skeletonProperties>
+<key>JniSmooth</key>
+<value>0</value>
+</skeletonProperties>
+<skeletonProperties>
+<key>Debug</key>
+<value>0</value>
+</skeletonProperties>
+</jsmoothproject>

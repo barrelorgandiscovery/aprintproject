@@ -1,0 +1,13 @@
+
+import org.barrelorgandiscovery.virtualbook.*
+
+def holes = virtualbook.holesCopy
+
+holes.each { 
+    
+    Hole h = new Hole(it.track, it.timestamp + 1000000, it.length)
+
+    virtualbook.removeHole(it)
+    virtualbook.addHole(h)
+
+}

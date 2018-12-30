@@ -1,0 +1,242 @@
+/*
+
+   Script PF, pour permettre d'envoyer directement sur des périphérique midi
+   des commandes afin de pouvoir mettre au point ou redécouvrir les commandes des instruments
+   midifiés
+
+    peut également servir à accorder des instruments
+    
+    Note 2011 Novembre : Ajout du support d'envoi de CC
+    
+
+*/
+
+if (services.version < "2011.6")
+    throw new Exception("il faut la version 2011.6.prerelease.135 au minimum")
+
+import javax.sound.midi.*
+import groovy.aprint.tools.*
+import groovy.swing.*
+import javax.swing.*
+import java.awt.*
+import groovy.beans.Bindable
+
+
+
+class MyModel {
+
+    MidiDevice openedDevice = null
+    @Bindable boolean isOpened = false
+
+    @Bindable def device
+    @Bindable int canal
+    @Bindable int note
+
+    @Bindable int control
+    @Bindable int controlValue
+
+}
+
+def devices = MidiSystem.getMidiDeviceInfo()
+
+def sb = new SwingBuilder()
+
+def model = new MyModel()
+model.device = devices[0]
+
+def openCurrentDevice(model, currentDeviceInfo)
+{
+
+    try {
+            if (model.openedDevice != null)
+            {
+                println("Fermeture du périphérique")
+                model.openedDevice.close()
+                println("Done")
+                model.openedDevice = null;
+            }
+             model.isOpened = false
+            if (currentDeviceInfo == null)
+            {
+                return;
+            }
+            
+            MidiDevice d = MidiSystem.getMidiDevice(currentDeviceInfo)
+            println("open the Midi device")
+            d.open()
+            
+            model.openedDevice = d
+            model.isOpened = true
+            
+    } catch(Exception ex) {
+        println("Erreur dans le programme :" + ex.message)
+        ex.printStackTrace(out)
+    
+    }
+
+}
+
+void sendMidiShortMessage(MidiDevice d,int cmd, int canal, int data1, int data2)
+{
+    try {
+        Receiver r = d.getReceiver()
+        println("sending on " + d + " canal :" + canal + " command : " + cmd + " data1 :" + data1  + " data2 :" + data2)
+     
+        ShortMessage m = new ShortMessage()
+        m.setMessage(    cmd, 
+                         canal, 
+                         data1, 
+                         data2)
+        println("m message ok")
+        r.send(m,(long)0)
+        
+        println("message sent")
+    } catch(Throwable t)
+    {
+        t.printStackTrace(out)
+    }
+
+}
+
+void sendMidiNote(MidiDevice d, int canal, int note, boolean on)
+{
+try {
+
+    sendMidiShortMessage(d, (on ? ShortMessage.NOTE_ON : ShortMessage.NOTE_OFF), canal, note, 126)
+
+    } catch(Throwable t)
+    {
+        t.printStackTrace(out)
+    }
+}
+
+def f
+
+def choixSystemMidi = sb.panel() {
+
+        vbox()
+        
+        sb.comboBox(model:new DefaultComboBoxModel(devices), 
+                                selectedItem : sb.bind([target:model, targetProperty:"device"]) )
+        button(text:"Connecter", actionPerformed : {  
+        
+            openCurrentDevice(model, model.device)
+        
+         })
+}
+
+
+def iconv = {  v -> "".equals(v) ? 0 : Integer.parseInt(v) }
+
+def choixCanalMidi = sb.panel(enabled:sb.bind(source:model, sourceProperty:"isOpened")) {
+    vbox()
+    label(text:"Canal Midi (0-15) :")
+    textField( 
+        text : bind(target:model, targetProperty:"canal", converter: {  v -> Integer.parseInt(v) }),
+        preferredSize:[200,20], 
+        enabled:sb.bind(source:model, sourceProperty:"isOpened"))
+   
+        
+}
+
+def btn = sb.panel() {
+    vbox()
+    
+     label(text:"Note Midi :")        
+    textField( 
+        text : bind(target:model, targetProperty:"note", converter: {  v -> Integer.parseInt(v) }),
+        preferredSize:[200,20], enabled:sb.bind(source:model, sourceProperty:"isOpened"))
+    
+    
+    
+    button(text:"Activer la note",enabled:sb.bind(source:model, sourceProperty:"isOpened"), 
+            actionPerformed: { 
+                println "Activer" 
+                try {
+                    sendMidiNote(model.openedDevice, model.canal, model.note, true)
+                } catch (Throwable t)
+                {
+                    t.printStackTrace(out)
+                }
+            })
+    button(text:"Desactiver la note",enabled:sb.bind(source:model, sourceProperty:"isOpened"), actionPerformed: { 
+                println "Désactiver" 
+                try {
+                sendMidiNote(model.openedDevice, model.canal, model.note, false)
+                } catch (Throwable t)
+                {
+                    t.printStackTrace(out)
+                }
+            })
+
+}
+
+def btncmd = sb.panel() {
+    vbox()
+    
+     label(text:"Control Change Midi :")        
+    textField( 
+        text : bind(target:model, targetProperty:"control", converter: iconv ),
+        preferredSize:[200,20], enabled:sb.bind(source:model, sourceProperty:"isOpened"))
+        
+         label(text:"valeur :")        
+    textField( 
+        text : bind(target:model, targetProperty:"controlValue", converter: iconv ),
+        preferredSize:[200,20], enabled:sb.bind(source:model, sourceProperty:"isOpened"))
+
+     button(text:"Envoyer CC",enabled:sb.bind(source:model, sourceProperty:"isOpened"), actionPerformed: { 
+                println "Désactiver" 
+                try {
+                sendMidiShortMessage(model.openedDevice, ShortMessage.CONTROL_CHANGE  , model.canal,  model.control, model.controlValue)
+                } catch (Throwable t)
+                {
+                    t.printStackTrace(out)
+                }
+            })
+
+
+}
+
+def addBtnCC = { label,  control, controlValue ->
+
+  sb.button(text:"->" + label,enabled:sb.bind(source:model, sourceProperty:"isOpened"), actionPerformed: { 
+                try {
+                    sendMidiShortMessage(model.openedDevice, ShortMessage.CONTROL_CHANGE  , model.canal, control,controlValue)
+                } catch (Throwable t)
+                {
+                    t.printStackTrace(out)
+                }
+            })
+}
+
+def btncmdauto = sb.panel() {
+   // ICI ajout autant de bouton que tu souhaites pour automatiser en copiant collant la ligne ..
+   // et modifiant les valeur 
+   addBtnCC( "Volume 0", 7, 0)
+   addBtnCC( "Volume 100%", 7, 127)
+   
+}
+
+
+def b = sb.button(text:"Fermer la fenêtre", actionPerformed:{
+                try {
+                    println("closing the window")
+                    openCurrentDevice(model ,  null) // fermeture du périphérique ouvert
+                    println model.dump()
+                    f.dispose() 
+                } catch(Throwable ex)
+                {
+                    ex.printStackTrace()
+                }
+            }
+        )
+
+def c = ["1" : choixSystemMidi, "2" : choixCanalMidi, "3" : btn, "4":btncmd , "5":btncmdauto]
+
+f = GUIHelper.showFrame(c, b)
+f.title = "Pilotage de commande Midi"
+f.iconImage = org.barrelorgandiscovery.gui.aprintng.APrintNG.getAPrintApplicationIcon()
+f.size = [500,600]
+f.pack()
+f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE)
+f.visible = true

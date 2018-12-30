@@ -68,9 +68,9 @@ task listJars() {
 
 
 task fatJar(type: Jar, dependsOn: jar) {
-  baseName = "APrint"
+  baseName = "aprint"
   def conf = configurations.runtime
-  def l = conf.findAll { !it.name.startsWith("APrint.jar") }
+  def l = conf.findAll { !it.name.startsWith("aprint.jar") }
   def deps = l.collect { it.isDirectory() ? it : zipTree(it) }
   from(deps) {
 	exclude 'META-INF/MANIFEST.MF'

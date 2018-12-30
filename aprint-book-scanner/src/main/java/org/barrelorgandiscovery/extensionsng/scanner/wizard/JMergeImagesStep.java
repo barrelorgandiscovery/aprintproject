@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.io.File;
 import java.io.Serializable;
 
+import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensionsng.scanner.PerfoScanFolder;
 import org.barrelorgandiscovery.extensionsng.scanner.merge.JScannerMergePanel;
 import org.barrelorgandiscovery.gui.wizard.BasePanelStep;
@@ -14,61 +15,69 @@ import org.barrelorgandiscovery.prefs.IPrefsStorage;
 
 public class JMergeImagesStep extends BasePanelStep {
 
-  private JScannerMergePanel mergePanel;
+	private static Logger logger = Logger.getLogger(JMergeImagesStep.class);
+	
+	private JScannerMergePanel mergePanel;
 
-  private PerfoScanFolder perfoScanFolder;
+	private PerfoScanFolder perfoScanFolder;
 
-  private IPrefsStorage ps;
+	private IPrefsStorage ps;
 
-  public JMergeImagesStep(Step parent, IPrefsStorage prefsStorage) throws Exception {
-    super("mergeimagestep", parent);
-    this.ps = prefsStorage;
-    initComponents();
-  }
+	public JMergeImagesStep(Step parent, IPrefsStorage prefsStorage) throws Exception {
+		super("mergeimagestep", parent);
+		this.ps = prefsStorage;
+		initComponents();
+	}
 
-  protected void initComponents() throws Exception {
-    setLayout(new BorderLayout());
-  }
+	protected void initComponents() throws Exception {
+		setLayout(new BorderLayout());
+	}
 
-  /*
-   * (non-Javadoc)
-   * @see org.barrelorgandiscovery.gui.wizard.Step#activate(java.io.Serializable, org.barrelorgandiscovery.gui.wizard.WizardStates, org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener)
-   */
-  @Override
-  public void activate(
-      Serializable state, WizardStates allStepsStates, StepStatusChangedListener stepListener)
-      throws Exception {
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.barrelorgandiscovery.gui.wizard.Step#activate(java.io.Serializable,
+	 * org.barrelorgandiscovery.gui.wizard.WizardStates,
+	 * org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener)
+	 */
+	@Override
+	public void activate(Serializable state, WizardStates allStepsStates, StepStatusChangedListener stepListener)
+			throws Exception {
 
-    File passedFolder = allStepsStates.getPreviousStateImplementing(this, File.class);
+		File passedFolder = allStepsStates.getPreviousStateImplementing(this, File.class);
 
-    assert passedFolder != null;
+		assert passedFolder != null;
 
-    if (mergePanel != null) {
-      mergePanel.dispose();
-      remove(mergePanel);
-    }
+		if (mergePanel != null) {
+			mergePanel.dispose();
+			remove(mergePanel);
+		}
 
-    File scanfolder = passedFolder;
-    PerfoScanFolder perfoScanFolder = new PerfoScanFolder(scanfolder);
+		File scanfolder = passedFolder;
+		PerfoScanFolder perfoScanFolder = new PerfoScanFolder(scanfolder);
 
-    mergePanel = new JScannerMergePanel(perfoScanFolder, ps);
-    mergePanel.setCurrentImage(1);
-    add(mergePanel, BorderLayout.CENTER);
-  }
+		mergePanel = new JScannerMergePanel(perfoScanFolder, ps);
+		int firstIndex = perfoScanFolder.getFirstImageIndex();
+		if (firstIndex != -1) {
+			logger.warn("no images in the folder");
+			mergePanel.setCurrentImage(firstIndex);
+		}
+		add(mergePanel, BorderLayout.CENTER);
+	}
 
-  @Override
-  public String getLabel() {
-    return "Construct Image from acquisition";
-  }
+	@Override
+	public String getLabel() {
+		return "Construct Image from acquisition";
+	}
 
-  @Override
-  public Serializable unActivateAndGetSavedState() throws Exception {
-    // no saved state
-    return null;
-  }
+	@Override
+	public Serializable unActivateAndGetSavedState() throws Exception {
+		// no saved state
+		return null;
+	}
 
-  @Override
-  public boolean isStepCompleted() {
-    return false;
-  }
+	@Override
+	public boolean isStepCompleted() {
+		return false;
+	}
 }

@@ -33,11 +33,12 @@ dependencies {
     compile project(':aprint-machine-control')
 	
 	// see if 
-	compile project(':aprint-punch-extension')
+	// compile project(':aprint-punch-extension')
 	
-	compile project(':aprint-gui')
+	compileOnly project(':aprint-gui')
 	
-    compile files(fileTree(dir:"${projectDir}/libs" , include:['**/*.jar']).toList())
+    compile files(fileTree(dir:"${projectDir}/libs" , 
+                    include:['**/*.jar']).toList())
     testCompile 'junit:junit:4.12'
 }
 
@@ -61,9 +62,24 @@ task listJars() {
    doLast {
      println "start ${projectDir}"
      
-     print fileTree(dir: "${projectDir}/libs", include:['**/*.jar']).toList()
-
+     print fileTree(dir: "${projectDir}/libs", include:['**/*.jar']).toList() 
    }
-
 }
+
+task fatJar(type: Jar, dependsOn: jar) {
+  baseName = project.name + '-all'
+  extension="extension"
+  def conf = configurations.runtime
+  def l = conf.findAll { ! (it.name.toLowerCase().startsWith("aprint-core") || it.name.toLowerCase().startsWith("aprint-gui")) }
+  def deps = l.collect { it.isDirectory() ? it : zipTree(it) }
+  from(deps) { 
+    exclude 'META-INF/MANIFEST.MF'
+	exclude 'META-INF/*.RSA'
+	exclude 'META-INF/*.PF'
+    exclude 'version.properties'
+    exclude 'extensions.properties'
+    exclude 'extensionng.properties'
+  } with jar
+}
+
 

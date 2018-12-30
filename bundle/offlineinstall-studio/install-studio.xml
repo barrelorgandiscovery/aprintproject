@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>
+
+<!-- Installation offline APrint To compile it : - go in the bin directory 
+	where you installed IzPack - call "compile ../sample/install.xml -b ../sample" -->
+
+<installation version="1.0">
+
+	<!-- The info section. The meaning of the tags should be natural ... -->
+	<info>
+		<appname>APrint Studio</appname>
+		<appversion>current</appversion>
+		<authors>
+			<author name="frett27" email="frett27@free.fr" />
+			<author name="olivier" email="webmaster@barrel-organ-discovery.org" />
+		</authors>
+		<url>http://www.barrel-organ-discovery.org</url>
+	</info>
+
+	<!-- The gui preferences indication. Sets the installer window to 640x480. 
+		It will not be able to change the size. -->
+	<guiprefs width="640" height="480" resizable="no" />
+
+	<!-- The locale section. Asks here to include the English and French langpacks. -->
+	<locale>
+		<langpack iso3="eng" />
+		<langpack iso3="fra" />
+	</locale>
+
+	<!-- The resources section. The ids must be these ones if you want to use 
+		the LicencePanel and/or the InfoPanel. -->
+	<resources>
+		<res id="HTMLLicencePanel.licence" src="Licence.html" />
+		<res id="HTMLLicencePanel.licence_fra" src="Licence.html_fra" />
+		<res id="HTMLInfoPanel.info" src="Readme.html" />
+
+		<res src="default_shortcut_specification.xml" id="shortcutSpec.xml" />
+		<res src="unix_shortcut_specification.xml" id="Unix_shortcutSpec.xml" />
+		<res id="Installer.image" src="left-image.png" />
+	</resources>
+
+	<!-- The panels section. We indicate here which panels we want to use. The 
+		order will be respected. -->
+	<panels>
+		<panel classname="HelloPanel" />
+		<panel classname="HTMLInfoPanel" />
+		<panel classname="HTMLLicencePanel" />
+		<panel classname="TargetPanel" />
+		<panel classname="PacksPanel" />
+		<panel classname="ShortcutPanel" />
+		<panel classname="InstallPanel" />
+		<panel classname="FinishPanel" />
+	</panels>
+
+	<!-- The packs section. We specify here our packs. -->
+	<packs>
+		<pack name="APrint Studio" required="yes">
+			<description>Program</description>
+			<file src="../build/aprint.jar" targetdir="$INSTALL_PATH" />
+			<file src="Licence.html" targetdir="$INSTALL_PATH" />
+			<file src="aprinticon.ico" targetdir="$INSTALL_PATH" />
+			<file src="trashcan.ico" targetdir="$INSTALL_PATH" />
+
+			<!-- <file src="script.bat" targetdir="$INSTALL_PATH"/> -->
+			<!-- <parsable targetfile="$INSTALL_PATH/script.bat"/> -->
+			<!-- The file will be parsed -->
+		</pack>
+
+		<pack name="Extension - Acces Web au pilotage APrint Studio" preselected="no" required="no">
+			<description>Extension permettant de piloter sur un mobile ou par une
+				page web un instrument midi ou APrint Studio</description>
+				<fileset dir="../offlineinstall-extensions/WebServer"  targetdir="$USER_HOME/aprintstudio"  >
+					<include name="**/*.*" /> 
+				
+				</fileset>
+		</pack>
+
+		<pack name="Advanced - Source and Developper documentation" preselected="no" required="no">
+			<description>Developper documentation</description>
+			<file src="../build/aprint-javadoc.jar" targetdir="$INSTALL_PATH/dev" />
+		</pack>
+		<pack name="Advanced - Groovy Help" preselected="no" required="no">
+			<description>Groovy Help Documentation</description>
+			<file src="../RD/groovy/docs/groovy-1.7.3/pdf/wiki-snapshot.pdf"
+				targetdir="$INSTALL_PATH/dev" />
+		</pack>
+
+
+	</packs>
+
+	<native type="izpack" name="ShellLink.dll" />
+
+</installation>

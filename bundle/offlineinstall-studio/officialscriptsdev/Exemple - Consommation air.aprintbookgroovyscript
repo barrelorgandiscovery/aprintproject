@@ -1,0 +1,64 @@
+
+if (services.version < "2011.6")
+{
+   throw new  Exception("vous devez avoir une version 2011.6 ou ulterieure");
+}
+
+
+import org.barrelorgandiscovery.gui.aedit.*
+import java.awt.geom.*
+
+
+//
+
+
+def vb = virtualbook.flattenVirtualBook()
+
+long delta = 10000; // calcul toutes les 10ms
+long perteParNote = 3; // lorsqu'une note est activée, on perds 3 unités par pas
+long soufflerie = perteParNote * 5; // la soufflerie fait gagner 5 unité par pas
+long courant = 100; // au départ, le niveau est à 100
+long max = 100; // le max est à 100
+
+double ratio = max / virtualbook.scale.width; // pour le dessins
+
+def pts = [] as List;
+
+for(int i = 0; i < vb.length ; i = i + delta)
+{
+    def h = vb.findHoles(i,0); // recherche du nombre de trou au timing i
+    
+    // Calculs grossiers
+    courant += soufflerie
+    courant = Math.min(courant, max)
+    courant -= perteParNote * h.size()
+    
+    courant = Math.max(courant, 0)
+    
+    // println ("" + i + " micros : " + courant);
+    pts.add([i,virtualbook.scale.width + (max-courant) * ratio ])
+}
+
+def l = new GraphicsLayer("Consommation Air")
+
+def last = null
+
+pts.each { 
+
+  if (last != null)
+  {
+      l.add(new Line2D.Double(virtualbook.scale.timeToMM(last[0]),last[1],
+                 virtualbook.scale.timeToMM(it[0]),it[1]))
+  }
+ 
+  last = it;
+ 
+}
+
+pianoroll.addLayer(l)
+
+/*
+l.add(new Rectangle2D.Double(30,30,50,50))
+
+pianoroll.addLayer(l)
+*/

@@ -1,0 +1,91 @@
+body {
+	background-color: #fff;
+	font-family: serif;
+	width: 480px;
+	margin:0px auto;
+}
+
+.header,.footer {
+	width: 100%;
+}
+
+.sidebar {
+	display: none;
+}
+
+.detail {
+	font-size: smaller;
+	padding-left: 1px;
+}
+
+#cadre {
+	border-style: solid;
+	border-width: 1px;
+	padding: 7px;
+	background-image: -moz-gradient(linear, upper left, lower right, from(white),to(black) );
+	-moz-border-radius: 5px;
+	-moz-box-shadow: inset 0 5px 10px rgba(0, 0, 0, 0.5);
+	-moz-border-radius: 5px;
+}
+
+#table-control {
+	display: block;
+	text-decoration:none;
+	width: 78px;
+	padding: 0px 0px 0px 0px;
+	border-width: 0px;
+	margin: 0px;
+}
+
+#bt-control {
+	background-color: #000000;
+	text-decoration:none;	
+	width: 26px;
+	height: 52px;
+	border: 0px 0px 0px 0px;
+	margin: 0px;
+	display: block;
+	padding: 0px 0px 0px 0px;	
+	vertical-align: middle;
+}
+
+#search {
+	width: 100%;
+}
+
+#searchbutton {
+	position:relative;
+	float: left;
+}
+
+#searchresult {
+	margin: 0px
+}
+
+#searchresult td {
+	border-width: 1px;
+	padding: 7px;
+	background-image: -moz-gradient(linear, upper left, lower right, from(white),to(black) );
+	-moz-border-radius: 5px;
+	-moz-box-shadow: inset 0 5px 10px rgba(0, 0, 0, 0.5);
+	-moz-border-radius: 5px;
+}
+
+#searchresult a {
+	display: block; /* Set the href to be a block rather than inline */
+	/* The padding properties adjust the text content within the href block */
+	padding-top: 0px;
+	padding-right: 140px;
+	padding-bottom: 12px;
+	padding-left: 0px;
+	text-decoration: none;
+	color: black;
+}
+
+.add-playlist {
+	margin-right: 5px;
+	padding-right: 8px; 
+	background-image: url(add-playlist.png);
+	background-repeat: no-repeat;
+	background-position: right;
+}

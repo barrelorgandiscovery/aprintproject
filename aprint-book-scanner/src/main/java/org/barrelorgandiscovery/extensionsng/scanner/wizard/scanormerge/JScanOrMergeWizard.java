@@ -11,8 +11,9 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.lf5.LF5Appender;
 import org.barrelorgandiscovery.extensionsng.scanner.wizard.JChooseFolderStep;
 import org.barrelorgandiscovery.extensionsng.scanner.wizard.JMergeImagesStep;
-import org.barrelorgandiscovery.extensionsng.scanner.wizard.JOutputFolderChooser;
+import org.barrelorgandiscovery.extensionsng.scanner.wizard.JOutputFolderChooserStep;
 import org.barrelorgandiscovery.extensionsng.scanner.wizardscan.JScanParameterStep;
+import org.barrelorgandiscovery.extensionsng.scanner.wizardscan.JScanStep;
 import org.barrelorgandiscovery.gui.wizard.Wizard;
 import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
@@ -31,9 +32,10 @@ public class JScanOrMergeWizard extends JPanel {
   protected void initComponents() throws Exception {
 
     // scan steps
-    JOutputFolderChooser s = new JOutputFolderChooser(null, ps);
+    JOutputFolderChooserStep s = new JOutputFolderChooserStep(null, ps);
     s.setLabelOutputFolder("Choose Written Output Folder for images ...");
     JScanParameterStep p = new JScanParameterStep(s, ps);
+    JScanStep scanStep = new JScanStep(p, s);
 
     // merge steps
 
@@ -43,10 +45,12 @@ public class JScanOrMergeWizard extends JPanel {
     JMergeImagesStep m = new JMergeImagesStep(sf, ps);
 
     JScanOrMergeStep scanOrmergeStep =
-        new JScanOrMergeStep(null, Arrays.asList(sf, m), Arrays.asList(s, p), ps);
+        new JScanOrMergeStep(null, Arrays.asList(sf, m), Arrays.asList(s, p, scanStep), ps);
 
     wizard = new Wizard(Arrays.asList(scanOrmergeStep), null);
+    // give the context to step
     scanOrmergeStep.initWizard(wizard);
+    
     setLayout(new BorderLayout());
     add(wizard, BorderLayout.CENTER);
 

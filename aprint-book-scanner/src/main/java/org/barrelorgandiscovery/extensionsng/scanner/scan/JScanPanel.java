@@ -77,7 +77,8 @@ public class JScanPanel extends JPanel implements Disposable {
 				logger.debug("webcam is not opened");
 				return;
 			}
-			imageLabel.setIcon(new ImageIcon(previewImage));
+			final BufferedImage boxedImage = ImageTools.crop(300, 300, previewImage);
+			imageLabel.setIcon(new ImageIcon(boxedImage));
 			imageLabel.repaint();
 		});
 	}
@@ -89,7 +90,7 @@ public class JScanPanel extends JPanel implements Disposable {
 
 		JLabel lblFolder = fp.getLabel("lblfolder");
 		lblFolder.setText(perfoScanFolder.getFolder().getAbsolutePath());
-		
+
 		JLabel lblfolderLabel = fp.getLabel("lblfolderlabel");
 		assert lblfolderLabel != null;
 		lblfolderLabel.setText("Folder in which the images will be saved");
@@ -147,9 +148,7 @@ public class JScanPanel extends JPanel implements Disposable {
 		imageLabel.setAlignmentY(0.5f);
 		imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		imageLabel.setVerticalAlignment(SwingConstants.CENTER);
-		
-		
-		
+
 		imageStack = new JImagePreviewStack();
 		fp.getFormAccessor("gridpreview").replaceBean("imagespreview", imageStack);
 
@@ -214,6 +213,10 @@ public class JScanPanel extends JPanel implements Disposable {
 
 		trigger.start();
 
+	}
+
+	public boolean isStarted() {
+		return trigger == null;
 	}
 
 	public void stop() {

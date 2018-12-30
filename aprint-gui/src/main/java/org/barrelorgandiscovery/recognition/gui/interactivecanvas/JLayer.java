@@ -54,7 +54,7 @@ public abstract class JLayer {
 				layerChanged.layerContentChanged();
 			} catch(Exception ex)
 			{
-				logger.error("error in layerchanged listener "+layerChanged);
+				logger.error("error in layerchanged listener " + layerChanged, ex);
 			}
 		}
 	}

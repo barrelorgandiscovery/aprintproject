@@ -1,0 +1,89 @@
+
+/*
+
+    Petit script pour ajouter des couleurs sur les notes
+
+
+*/
+
+
+
+if (services.version < "2012.01")
+{
+    throw new Exception("vous devez avoir une version 2012.01 ou ulterieure");
+}
+
+import org.barrelorgandiscovery.gui.aedit.*
+import java.awt.geom.*
+import java.awt.*
+import org.barrelorgandiscovery.virtualbook.*
+import org.barrelorgandiscovery.scale.*
+import org.barrelorgandiscovery.tools.*
+
+
+
+//
+
+    def vb = virtualbook.flattenVirtualBook()
+
+    def colors = [ "C" : Color.blue, 
+                    "C#" : Color.pink,
+                    "D" : Color.red,
+                    "D#" : Color.white,
+                    "E" : Color.yellow,
+                    "F" : Color.black,
+                    "F#" : Color.orange,
+                    "G" : Color.magenta,
+                    "G#" : Color.cyan,
+                    "A" : Color.green,
+                    "A#" : Color.gray,
+                    "B" : Color.lightGray]
+                 
+    def lyrs = [:]   
+    colors.each { k,v ->
+        def gl = new GraphicsLayer(k)
+        gl.setColor(v)
+        lyrs[k] = gl
+    }
+
+    println lyrs
+
+    def holes = vb.holesCopy
+
+
+   
+    def last = null
+    def scale = vb.scale
+    def tks = scale.tracksDefinition
+    
+    holes.each {
+        def h = it
+        
+        def td = tks[h.track]
+        
+        if (td instanceof NoteDef)
+        {
+            def n = td.midiNote
+          
+            def nn = MidiHelper.getMidiNote(n)
+            
+            if (lyrs.containsKey(nn))
+            {
+                def gl = lyrs[nn]
+                def y = scale.firstTrackAxis + h.track * scale.getIntertrackHeight() + 2
+                def he = scale.getIntertrackHeight() / 2
+                
+                gl.add(new Rectangle2D.Double(virtualbook.scale.timeToMM(h.timestamp) + 2,
+                            y - he,   scale.timeToMM(h.length),2*he))
+            } else 
+            {
+                println("layer " + MidiHelper.getMidiNote(n) + " not found");
+            }
+        }
+    }
+    
+lyrs.each { k,v ->
+    pianoroll.addLayer(v)
+}
+
+void

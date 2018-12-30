@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<shortcuts>
+  <skipIfNotSupported/>
+  <programGroup defaultName="APrint Studio"
+                location="applications"/>
+  <shortcut
+    name="APrint Studio"
+    target="javaw"
+    commandLine="-Xmx1024m -cp &quot;$INSTALL_PATH/aprint.jar&quot; org.barrelorgandiscovery.gui.aprintng.APrintApplication"
+    workingDirectory=""
+    description="Application APrint Studio"
+    iconFile="$INSTALL_PATH\aprinticon.ico"
+    iconIndex="0"
+    initialState="normal"
+    programGroup="yes"
+    desktop="yes"
+    applications="no"
+    startMenu="no"
+    startup="no">
+    <createForPack name="Base"/>
+  </shortcut>
+  
+  <shortcut
+    name="Uninstaller"
+    target="javaw"
+    commandLine="-jar &quot;$INSTALL_PATH/Uninstaller/uninstaller.jar&quot;"
+    workingDirectory=""
+    description="Uninstall APrint Studio"
+    iconFile="$INSTALL_PATH\trashcan.ico"
+    iconIndex="0"
+    initialState="normal"
+    programGroup="yes"
+    desktop="yes"
+    applications="no"
+    startMenu="no"
+    startup="no">
+    <createForPack name="Base"/>
+  </shortcut>
+  
+</shortcuts>

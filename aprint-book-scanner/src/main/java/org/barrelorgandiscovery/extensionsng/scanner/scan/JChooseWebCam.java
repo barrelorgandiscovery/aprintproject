@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,7 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.lf5.LF5Appender;
 import org.barrelorgandiscovery.tools.Disposable;
+import org.barrelorgandiscovery.tools.ImageTools;
 
 import com.github.sarxos.webcam.Webcam;
 import com.jeta.forms.components.panel.FormPanel;
@@ -44,6 +46,12 @@ public class JChooseWebCam extends JPanel implements Disposable {
 	private JLabel previewPanel;
 
 	private JComboBox combo;
+
+	private IChooseWebCamListener chooseWebCamListener;
+	
+	public void setChooseWebCamListener(IChooseWebCamListener chooseWebCamListener) {
+		this.chooseWebCamListener = chooseWebCamListener;
+	}
 
 	public static class WebCamConfig {
 		public Webcam webcam;
@@ -70,6 +78,9 @@ public class JChooseWebCam extends JPanel implements Disposable {
 
 		previewPanel = fp.getLabel("preview");
 		previewPanel.setText("");
+
+		JLabel lblchooseWebCam = fp.getLabel("lblchoosewebcam");
+		lblchooseWebCam.setText("Choose Webcam ..");
 
 		combo = fp.getComboBox("cbwebcam");
 
@@ -99,6 +110,13 @@ public class JChooseWebCam extends JPanel implements Disposable {
 					} catch (Exception ex) {
 						logger.error(ex.getMessage(), ex);
 					}
+					if (chooseWebCamListener != null) {
+						try {
+							chooseWebCamListener.choosedWebCamChanged(i);
+						} catch (Exception ex) {
+							logger.error("error in choosewebcam listener :" + ex.getMessage(), ex);
+						}
+					}
 				}
 			}
 		});
@@ -119,25 +137,43 @@ public class JChooseWebCam extends JPanel implements Disposable {
 				w.setViewSize(webcamdisplay.d);
 			}
 			w.open();
-			WebCamPictureTake wt = new WebCamPictureTake(w, (i, t) -> {
-				SwingUtilities.invokeLater(() -> {
-					previewPanel.setIcon(new ImageIcon(i));
-					previewPanel.repaint();
-				});
-			});
-			s = Executors.newSingleThreadScheduledExecutor();
-			s.scheduleWithFixedDelay(wt, 0, 100, TimeUnit.MILLISECONDS);
 
 			this.current = w;
+			startPreview();
 		}
 	}
 
-	@Override
-	public void dispose() {
+	public void startPreview() {
+		if (this.current == null) {
+			return;
+		}
+		assert this.current != null;
+		assert this.current.isOpen();
+		WebCamPictureTake wt = new WebCamPictureTake(current, (i, t) -> {
+
+			final BufferedImage transformed = ImageTools.crop(300, 300, i);
+
+			SwingUtilities.invokeLater(() -> {
+				previewPanel.setIcon(new ImageIcon(transformed));
+				previewPanel.repaint();
+			});
+		});
+		s = Executors.newSingleThreadScheduledExecutor();
+		s.scheduleWithFixedDelay(wt, 0, 100, TimeUnit.MILLISECONDS);
+
+	}
+
+	public void stopPreview() {
 		if (s != null) {
 			s.shutdownNow();
 			s = null;
 		}
+
+	}
+
+	@Override
+	public void dispose() {
+		stopPreview();
 		if (current != null) {
 			current.close();
 			current = null;

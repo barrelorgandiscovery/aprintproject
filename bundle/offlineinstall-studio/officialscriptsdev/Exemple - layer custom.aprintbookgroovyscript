@@ -1,0 +1,40 @@
+
+/**
+
+Cet exemple montre comment ajouter un calque sur le carton en developpement
+par l'implementation de la classe : VirtualBookComponentLayer
+
+*/
+
+
+import org.barrelorgandiscovery.gui.aedit.*
+import java.awt.*
+
+
+def layer = [
+
+
+     draw : { Graphics g, j ->
+              try {
+              
+                  int x = pianoroll.convertCartonToScreenX(10)
+                  int y = pianoroll.convertCartonToScreenX(10)
+                  g.drawString("hello",x,y) 
+              
+              
+              } catch(Throwable t)
+              {
+                  println("error : " + t);
+              }
+          
+          } ,
+
+  
+     setVisible : { visible -> null },
+
+     isVisible : {  true} 
+     
+      ] as VirtualBookComponentLayer;
+
+
+pianoroll.addLayer(layer)

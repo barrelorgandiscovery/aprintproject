@@ -58,6 +58,7 @@ public class JTriggerComponent extends JPanel {
     rdTime.addActionListener((e) -> updateState());
 
     txtseconds = (JTextField) fp.getTextComponent("txtvalue");
+    txtseconds.setText("2");
 
     rdMachine = fp.getRadioButton("machine");
     rdMachine.addActionListener((e) -> updateState());
