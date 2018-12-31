@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://barrelorgandiscovery.org/punch/2016"
+	elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:tns="http://barrelorgandiscovery.org/punch/2016"
+	xmlns:metadata="http://barrelorgandiscovery.org/virtualbook/2016">
+
+<import namespace="http://barrelorgandiscovery.org/virtualbook/2016" schemaLocation="Metadata.xsd" />
+
+	<annotation>
+		<documentation>
+			Description of a punch plan
+		</documentation>
+	</annotation>
+	<element name="metadata" type="metadata:VirtualBookMetadata"></element>
+
+	<complexType name="Information">
+		<attribute name="name" type="string"></attribute>
+	</complexType>
+
+	<complexType name="PunchPlan">
+		<sequence>
+		<element ref="tns:metadata"></element>
+		<sequence minOccurs="0" maxOccurs="unbounded">
+			<element name="punchcommand" type="tns:PunchCommand"></element>
+		</sequence>
+		</sequence>
+		<attribute name="punchwidth" type="double"></attribute>
+	</complexType>
+
+	<complexType name="PunchDisplacement">
+		<complexContent>
+			<extension base="tns:PunchCommand">
+				<attribute name="x" type="double" use="required"></attribute>
+
+				<attribute name="y" type="double" use="required"></attribute>
+
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<complexType name="Punch">
+		<complexContent>
+			<extension base="tns:PunchDisplacement"></extension>
+		</complexContent>
+	</complexType>
+
+	<element name="punchplan" type="tns:PunchPlan"></element>
+
+    <complexType name="PunchCommand" abstract="true"></complexType>
+</schema>

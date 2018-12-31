@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://barrelorgandiscovery.org/virtualbook/2016"
+	elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:tns="http://barrelorgandiscovery.org/virtualbook/2016">
+
+	<annotation>
+		<documentation>
+			Description of metadata associated to the virtual book
+		</documentation>
+	</annotation>
+	
+	<complexType name="VirtualBookMetadata">
+		<sequence>
+			<element name="Author" type="string"></element>
+			<element name="Arranger" type="string"></element>
+			<element name="CreationDate" type="date">
+				<annotation>
+					<documentation>
+						Creation date of the music (year)
+					</documentation>
+				</annotation>
+			</element>
+			<element name="LastModificationDate" type="dateTime"></element>
+			<element name="Genre" type="string"></element>
+			<element name="DesignedInstrumentName" type="string"></element>
+			<element name="Description" type="string" maxOccurs="1"
+				minOccurs="0">
+			</element>
+		</sequence>
+	</complexType>
+
+	
+
+</schema>

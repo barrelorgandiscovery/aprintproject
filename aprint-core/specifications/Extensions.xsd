@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://extensions.pfreydiere.fr/Extensions" elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://extensions.pfreydiere.fr/Extensions">
+
+
+
+    <element name="Configuration" type="tns:Configuration"></element>
+    
+    <complexType name="ExtensionRef">
+    	<sequence maxOccurs="unbounded" minOccurs="0">
+    		<element name="description" type="tns:Description"></element>
+    	</sequence>
+    	<attribute name="name" type="string"></attribute>
+    	<attribute name="url" type="string"></attribute>
+    	<attribute name="checksum" type="string"></attribute>
+    	<attribute name="version" type="string"></attribute>
+    	<attribute name="author" type="string"></attribute>
+    </complexType>
+
+    <complexType name="ExtensionRefList">
+    	<sequence maxOccurs="unbounded" minOccurs="0">
+    		<element name="ExtensionRef" type="tns:ExtensionRef"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="Configuration">
+    	<sequence maxOccurs="1" minOccurs="0">
+    		<element name="Extensions" type="tns:ExtensionRefList"></element>
+    	</sequence>
+    </complexType>
+
+    <complexType name="Description">
+
+    	<sequence>
+    		<element name="lang" type="string" minOccurs="0"></element>
+    		<element name="description" type="string" minOccurs="1"></element>
+    	</sequence>
+    </complexType>
+</schema>
