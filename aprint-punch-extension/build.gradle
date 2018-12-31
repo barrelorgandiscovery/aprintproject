@@ -63,3 +63,21 @@ task listJars() {
 
 }
 
+
+task fatJar(type: Jar, dependsOn: jar) {
+  baseName = project.name + '-all'
+  extension="extension"
+  def conf = configurations.runtime
+  def l = conf.findAll { ! (it.name.toLowerCase().startsWith("aprint-core") || it.name.toLowerCase().startsWith("aprint-gui")) }
+  def deps = l.collect { it.isDirectory() ? it : zipTree(it) }
+  from(deps) { 
+    exclude 'META-INF/MANIFEST.MF'
+	exclude 'META-INF/*.RSA'
+	exclude 'META-INF/*.PF'
+    exclude 'version.properties'
+    exclude 'extensions.properties'
+    exclude 'extensionng.properties'
+  } with jar
+}
+
+

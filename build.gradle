@@ -70,6 +70,26 @@ rootProject.ext.currentVersion = "UNKNOWN"
 
 project(':bundle') {
 
+    task copyExtensionJars(type:Copy, dependsOn: [':aprint-book-scanner:fatJar', ':aprint-punch-extension:fatJar', ':aprint-recognition-extension:fatJar']) {
+        into 'offlineinstall-extensions'
+        into ('Scan') {
+            from project(':aprint-book-scanner').fileTree('build/libs') {
+                include "*.extension"
+            }
+        }
+        into ('Punch') {
+            from project(':aprint-punch-extension').fileTree('build/libs') {
+                include "*.extension"
+            }
+        }
+        into ('DiskAndBookRecognition') {
+            from project(':aprint-recognition-extension').fileTree('build/libs') {
+                include "*.extension"
+            }
+        }
+    }
+
+
     task copyOutputJars(type:Copy,dependsOn: [':aprint-gui:fatJar', 
                             ':aprint-core:jar',':aprint-core:sourcesJar',
                             ':aprint-core:javadocJar',
