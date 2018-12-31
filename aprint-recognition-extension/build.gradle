@@ -45,7 +45,7 @@ repositories {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    compile project(':aprint-gui')
+    compileOnly project(':aprint-gui')
 	
 	testCompile name:'junit', group:'junit', version:'3.8'
 //    compile name: 'Jama-1.0.3'

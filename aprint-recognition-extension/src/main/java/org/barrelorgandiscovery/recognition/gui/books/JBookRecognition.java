@@ -25,6 +25,7 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
+import org.apache.log4j.lf5.LF5Appender;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
 import org.barrelorgandiscovery.gui.aprintng.APrintNGGeneralServices;
 import org.barrelorgandiscovery.gui.aprintng.APrintNGVirtualBookFrame;
@@ -270,7 +271,7 @@ public class JBookRecognition extends JPanel {
 
 				try {
 
-					BasicConfigurator.configure(new ConsoleAppender(new PatternLayout()));
+					BasicConfigurator.configure(new LF5Appender());
 
 					APrintProperties aPrintProperties = new APrintProperties("aprintstudio",false);
 					System.out.println(aPrintProperties.getAprintFolder() ); 

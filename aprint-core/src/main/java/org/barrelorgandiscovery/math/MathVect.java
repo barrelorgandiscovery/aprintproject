@@ -94,7 +94,7 @@ public class MathVect {
   /**
    * rotate from origin
    *
-   * @param angle
+   * @param angle in rad
    * @return
    */
   public MathVect rotate(double angle) {

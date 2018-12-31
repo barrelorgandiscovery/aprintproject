@@ -4,67 +4,99 @@ import java.awt.BorderLayout;
 import java.io.InputStream;
 import java.io.Serializable;
 
+import org.barrelorgandiscovery.extensionsng.scanner.scan.IChooseWebCamListener;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.JChooseWebCam;
+import org.barrelorgandiscovery.extensionsng.scanner.scan.JChooseWebCam.WebCamConfig;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.JTriggerComponent;
+import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.ITriggerFactory;
 import org.barrelorgandiscovery.gui.wizard.BasePanelStep;
 import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener;
 import org.barrelorgandiscovery.gui.wizard.WizardStates;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 
+import com.github.sarxos.webcam.Webcam;
 import com.jeta.forms.components.panel.FormPanel;
 
 public class JScanParameterStep extends BasePanelStep {
 
-  /** */
-  private static final long serialVersionUID = -7296047711004950598L;
+	/** */
+	private static final long serialVersionUID = -7296047711004950598L;
 
-  private IPrefsStorage preferences;
+	private IPrefsStorage preferences;
 
-private JChooseWebCam webcamChooser;
+	private JChooseWebCam webcamChooser;
 
-private JTriggerComponent jTriggerComponent;
+	private JTriggerComponent jTriggerComponent;
 
-  public JScanParameterStep(Step parent, IPrefsStorage preferences) throws Exception {
-    super("scanparameter", parent);
-    this.preferences = preferences;
-    initComponents();
-  }
+	public JScanParameterStep(Step parent, IPrefsStorage preferences) throws Exception {
+		super("scanparameter", parent);
+		this.preferences = preferences;
+		initComponents();
+	}
 
-  protected void initComponents() throws Exception {
-    InputStream isform = getClass().getResourceAsStream("parameterpanel.jfrm");
-    assert isform != null;
-    FormPanel fp = new FormPanel(isform);
+	protected void initComponents() throws Exception {
+		InputStream isform = getClass().getResourceAsStream("parameterpanel.jfrm");
+		assert isform != null;
+		FormPanel fp = new FormPanel(isform);
 
-    webcamChooser = new JChooseWebCam();
-    jTriggerComponent = new JTriggerComponent(preferences);
+		webcamChooser = new JChooseWebCam();
+		webcamChooser.setChooseWebCamListener(new IChooseWebCamListener() {
+			@Override
+			public void choosedWebCamChanged(WebCamConfig webcamConfig) {
+				if (stepListener != null) {
+					stepListener.stepStatusChanged();
+				}
+			}
+		});
 
-    fp.getFormAccessor().replaceBean("lblwebcam", webcamChooser);
-    fp.getFormAccessor().replaceBean("lbltrigger", jTriggerComponent);
+		jTriggerComponent = new JTriggerComponent(preferences);
 
-    setLayout(new BorderLayout());
-    add(fp, BorderLayout.CENTER);
-  }
+		fp.getFormAccessor().replaceBean("lblwebcam", webcamChooser);
+		fp.getFormAccessor().replaceBean("lbltrigger", jTriggerComponent);
 
-  @Override
-  public String getLabel() {
-    return "Choose scan parameters";
-  }
+		setLayout(new BorderLayout());
+		add(fp, BorderLayout.CENTER);
+	}
 
-  @Override
-  public boolean isStepCompleted() {
+	@Override
+	public String getLabel() {
+		return "Choose scan parameters";
+	}
 
-    return true;
-  }
+	public ITriggerFactory getTriggerFactory() throws Exception {
+		return jTriggerComponent.createTriggerFactory();
+	}
 
-  @Override
-  public void activate(
-      Serializable state, WizardStates allStepsStates, StepStatusChangedListener stepListener)
-      throws Exception {}
+	public Webcam getOpenedWebCam() {
+		WebCamConfig config = webcamChooser.getSelectedWebCamConfig();
+		if (config == null) {
+			return null;
+		}
 
-  @Override
-  public Serializable unActivateAndGetSavedState() throws Exception {
+		Webcam currentWebCam = config.webcam;
+		assert currentWebCam.isOpen();
+		return currentWebCam;
+	}
 
-    return null;
-  }
+	@Override
+	public boolean isStepCompleted() {
+		WebCamConfig currentConfig = webcamChooser.getSelectedWebCamConfig();
+		return currentConfig != null && currentConfig.webcam != null;
+	}
+
+	StepStatusChangedListener stepListener;
+
+	@Override
+	public void activate(Serializable state, WizardStates allStepsStates, StepStatusChangedListener stepListener)
+			throws Exception {
+		this.stepListener = stepListener;
+		webcamChooser.startPreview();
+	}
+
+	@Override
+	public Serializable unActivateAndGetSavedState() throws Exception {
+		webcamChooser.stopPreview();
+		return null;
+	}
 }

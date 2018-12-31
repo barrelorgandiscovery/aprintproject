@@ -46,6 +46,19 @@ public class PerfoScanFolder {
 		}
 		return 0;
 	}
+	
+	/**
+	 * find the first index in the image
+	 * @return
+	 */
+	public int getFirstImageIndex() {
+		for (int i = 0 ; i < MAX_IMAGE_IN_FOLDER ; i++) {
+			if (constructImageFile(i).exists()) {
+				return i;
+			}
+		}
+		return -1;
+	}
 
 	/**
 	 * delete all images

@@ -34,16 +34,13 @@ configurations {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-	// The production code uses the SLF4J logging API at compile time
-	// compile 'org.slf4j:slf4j-api:1.7.12'
-
-	// Declare the dependency for your favourite test framework you want to use in your tests.
-	// TestNG is also supported by the Gradle Test task. Just change the
-	// testCompile dependency to testCompile 'org.testng:testng:6.8.1' and add
-	// 'test.useTestNG()' to your build script.
 
 	compile project(':aprint-gervill')
 	compile files(fileTree(dir:"${projectDir}/libs" , include:['**/*.jar']).toList())
+	
+	// https://mvnrepository.com/artifact/log4j/log4j
+	compile group: 'log4j', name: 'log4j', version: '1.2.14'
+
 	testCompile 'junit:junit:4.12'
 	
 	xmlbean files(fileTree(dir:"${projectDir}/libs", include:['xbean.jar','jsr173_1.0_api.jar']).toList())
@@ -93,7 +90,7 @@ task buildSpecJar() {
 //
 
 		ant.xmlbean(verbose: 'true',
-			destfile:"${projectDir}/build/punch.jar",
+			destfile:"${projectDir}/build/punch_specs.jar",
 			failonerror:'true',
 			classpath:configurations.xmlbean.asPath) {
 				

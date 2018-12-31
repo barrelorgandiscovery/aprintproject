@@ -11,5 +11,7 @@ include 'aprint-punch-extension'
 include 'aprint-book-scanner'
 include 'aprint-recognition-extension'
 
+include 'bundle'
+
 
 rootProject.name = 'APrintProject'

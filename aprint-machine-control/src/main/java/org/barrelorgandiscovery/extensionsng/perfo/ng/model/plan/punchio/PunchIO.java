@@ -14,13 +14,13 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.DisplacementCom
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.HomingCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchPlan;
+import org.barrelorgandiscovery.punch.x2016.Punch;
+import org.barrelorgandiscovery.punch.x2016.PunchDisplacement;
+import org.barrelorgandiscovery.punch.x2016.PunchplanDocument;
 import org.barrelorgandiscovery.tools.StreamsTools;
 import org.barrelorgandiscovery.tools.streamstorage.FolderStreamStorage;
 import org.barrelorgandiscovery.tools.streamstorage.ZipStreamMarshaller;
 import org.barrelorgandiscovery.tools.streamstorage.ZipStreamStorage;
-import org.barrelorgandiscovery.virtualbook.x2016.Punch;
-import org.barrelorgandiscovery.virtualbook.x2016.PunchDisplacement;
-import org.barrelorgandiscovery.virtualbook.x2016.PunchplanDocument;
 import org.barrelorgandiscovery.xml.VirtualBookXmlIO;
 import org.barrelorgandiscovery.xml.VirtualBookXmlIO.VirtualBookResult;
 
@@ -35,7 +35,7 @@ public class PunchIO {
     logger.debug("convert punchplan " + p);
 
     PunchplanDocument doc = PunchplanDocument.Factory.newInstance();
-    final org.barrelorgandiscovery.virtualbook.x2016.PunchPlan punchplan = doc.addNewPunchplan();
+    final org.barrelorgandiscovery.punch.x2016.PunchPlan punchplan = doc.addNewPunchplan();
 
     CommandVisitor v =
         new CommandVisitor() {
@@ -67,11 +67,11 @@ public class PunchIO {
   }
 
   public static PunchPlan fromPunchPlan(
-      org.barrelorgandiscovery.virtualbook.x2016.PunchPlan xmlPunch) throws Exception {
+      org.barrelorgandiscovery.punch.x2016.PunchPlan xmlPunch) throws Exception {
     logger.debug("from punch plan " + xmlPunch);
     PunchPlan p = new PunchPlan();
-    org.barrelorgandiscovery.virtualbook.x2016.PunchCommand[] pcs = xmlPunch.getPunchcommandArray();
-    for (org.barrelorgandiscovery.virtualbook.x2016.PunchCommand pc : pcs) {
+    org.barrelorgandiscovery.punch.x2016.PunchCommand[] pcs = xmlPunch.getPunchcommandArray();
+    for (org.barrelorgandiscovery.punch.x2016.PunchCommand pc : pcs) {
       logger.debug("element " + pc);
       if (pc instanceof Punch) {
         Punch punch = (Punch) pc;

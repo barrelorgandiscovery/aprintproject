@@ -16,6 +16,11 @@ import org.barrelorgandiscovery.tools.ImageTools;
  */
 public class VirtualBookMetadata implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3886800800537942826L;
+
 	private static Logger logger = Logger.getLogger(VirtualBookMetadata.class);
 	
 	private String name; // for editing in bean info ...

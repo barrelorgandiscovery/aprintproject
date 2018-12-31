@@ -102,6 +102,7 @@ public class ModelRunner implements IExecute {
 			AbstractParameter inputParameter = modelLink.getTo();
 			
 			// @@@ Merge input , must define a reduce operator
+			// here we adopt a last read parameters overwrite
 			
 			inputValuesForStep.put(inputParameter, linkValues.get(modelLink));
 		}

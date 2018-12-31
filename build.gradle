@@ -1,18 +1,96 @@
-
+import java.text.*
 
 subprojects {
 
-     apply plugin: 'eclipse'
-     apply plugin: 'java'
-    /* 
-     compileJava {
-                options.encoding = 'UTF-8'
-                //enable incremental compilation
-                //options.incremental = true
-		options.fork=true
-		options.forkOptions.executable =  System.getenv('JAVA_HOME') + File.separator + "bin" + File.separator + "javac"
-                options.compilerArgs << "-XDignore.symbol.file"
-     }
-     */
+    apply plugin: 'eclipse'
+    apply plugin: 'java'
+
+    task sourcesJar(type: Jar, dependsOn: classes) {
+       classifier = 'sources'
+       from sourceSets.main.allSource
+    }
+
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+       classifier = 'javadoc'
+       from javadoc.destinationDir
+    }
+
+    javadoc {
+       failOnError = false 
+    }
+
+    // put sources into jar
+    jar {
+        from sourceSets.main.allSource
+    }
+
+    artifacts {
+        archives sourcesJar
+        archives javadocJar
+    }
+}
+
+
+rootProject.ext.execAndGetOutput = { String command ->
+  try {
+    def stdout = new ByteArrayOutputStream()
+ 
+    exec {
+      workingDir rootProject.projectDir
+      commandLine command.split()
+      standardOutput = stdout
+    }
+ 
+    return stdout.toString().trim()
+  }
+  catch (Exception e) {
+    return null
+  }
+}
+ 
+rootProject.ext.asUTC = { Date date, String format ->
+  def snapshotDateFormat = new SimpleDateFormat(format)
+  snapshotDateFormat.setTimeZone(TimeZone.getTimeZone('UTC'))
+  
+  return snapshotDateFormat.format(date)
+}
+ 
+rootProject.ext.getRevision = {
+  String currentCommit = execAndGetOutput("git rev-parse HEAD")
+  return (currentCommit != null) ? currentCommit : "UNKNOWN"
+}
+ 
+rootProject.ext.isApplicationRelease = {
+  String currentBranches = execAndGetOutput("git log -n 1 --pretty=%d HEAD")
+  return currentBranches.contains("master")
+}
+
+rootProject.ext.currentVersion = "UNKNOWN" 
+
+project(':bundle') {
+
+    task copyOutputJars(type:Copy,dependsOn: [':aprint-gui:fatJar', 
+                            ':aprint-core:jar',':aprint-core:sourcesJar',
+                            ':aprint-core:javadocJar',
+                           ':aprint-gui:javadocJar',
+                           ':aprint-gui:sourcesJar' ] ) {
+        from project(':aprint-gui').file('build/libs')
+        from project(':aprint-core').file('build/libs')
+        into 'build'
+    }
+    // create installer
+    task createBundles(type: Exec, dependsOn: copyOutputJars) {
+        commandLine 'C:\\Program Files (x86)\\NSIS\\makensis.exe',
+           "${project.projectDir}/offlineinstall-studio/aprint_studio.nsi"
+        workingDir = 'offlineinstall-studio'
+    }
+    task createInstaller(dependsOn: ['createBundles']) { 
+        doLast {
+            def f = file('offlineinstall-studio/APrintStudioInstall.exe')
+            assert f.exists()
+            assert f.renameTo(new File('APrintStudioInstall_' + rootProject.ext.currentVersion + ".exe"))
+        }
+    }
 }
 

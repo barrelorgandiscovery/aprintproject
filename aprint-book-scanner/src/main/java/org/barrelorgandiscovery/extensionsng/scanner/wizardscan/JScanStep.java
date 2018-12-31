@@ -1,38 +1,76 @@
 package org.barrelorgandiscovery.extensionsng.scanner.wizardscan;
 
+import java.awt.BorderLayout;
+import java.io.File;
 import java.io.Serializable;
 
+import org.barrelorgandiscovery.extensionsng.scanner.PerfoScanFolder;
+import org.barrelorgandiscovery.extensionsng.scanner.scan.JScanPanel;
+import org.barrelorgandiscovery.extensionsng.scanner.wizard.JOutputFolderChooserStep;
 import org.barrelorgandiscovery.gui.wizard.BasePanelStep;
 import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener;
 import org.barrelorgandiscovery.gui.wizard.WizardStates;
 
+import com.github.sarxos.webcam.Webcam;
+
 public class JScanStep extends BasePanelStep {
 
-  public JScanStep(Step parent) {
-    super("scan", parent);
-  }
+	private JScanPanel scanPanel;
 
-  @Override
-  public String getLabel() {
-    return "Launch Scan";
-  }
+	private JScanParameterStep previousScanParameterStep;
+	private JOutputFolderChooserStep folderChooserStep;
 
-  @Override
-  public void activate(
-      Serializable state, WizardStates allStepsStates, StepStatusChangedListener stepListener)
-      throws Exception {
-	  
-  }
+	public JScanStep(Step parent, JOutputFolderChooserStep folderChooserStep) throws Exception {
+		super("scan", parent);
+		assert parent instanceof JScanParameterStep;
+		this.previousScanParameterStep = (JScanParameterStep) parent;
+		assert folderChooserStep != null;
+		this.folderChooserStep = folderChooserStep;
+		this.initComponents();
+	}
 
-  @Override
-  public Serializable unActivateAndGetSavedState() throws Exception {
-    // TODO Auto-generated method stub
-    return null;
-  }
+	protected void initComponents() throws Exception {
 
-  @Override
-  public boolean isStepCompleted() {
-    return true;
-  }
+	}
+
+	@Override
+	public String getLabel() {
+		return "Launch Scan";
+	}
+
+	@Override
+	public void activate(Serializable state, WizardStates allStepsStates, StepStatusChangedListener stepListener)
+			throws Exception {
+
+		if (scanPanel != null) {
+			remove(scanPanel);
+			scanPanel.dispose();
+		}
+
+		Webcam webcam = previousScanParameterStep.getOpenedWebCam();
+
+		// get selected folder
+		File folder = folderChooserStep.getFolder();
+		assert folder != null;
+		PerfoScanFolder psf = new PerfoScanFolder(folder);
+
+		scanPanel = new JScanPanel(webcam, previousScanParameterStep.getTriggerFactory(), psf);
+
+		setLayout(new BorderLayout());
+		add(scanPanel, BorderLayout.CENTER);
+
+	}
+
+	@Override
+	public Serializable unActivateAndGetSavedState() throws Exception {
+		// stop record if the user move
+		scanPanel.stop();
+		return null;
+	}
+
+	@Override
+	public boolean isStepCompleted() {
+		return scanPanel != null && !scanPanel.isStarted();
+	}
 }

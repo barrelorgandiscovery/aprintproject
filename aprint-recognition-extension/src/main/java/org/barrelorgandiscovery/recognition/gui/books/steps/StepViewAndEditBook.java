@@ -92,6 +92,8 @@ public class StepViewAndEditBook extends BasePanelStep implements Disposable {
 
 	private JSlider decisionThreshold;
 
+	private boolean invertedReference;
+
 	public StepViewAndEditBook(String id, Step parent, Repository2 repository, IAPrintWait wizardFrame,
 			APrintNGGeneralServices services) throws Exception {
 		super(id, parent);
@@ -125,21 +127,18 @@ public class StepViewAndEditBook extends BasePanelStep implements Disposable {
 
 		JPanel toolbarPanel = new JPanel();
 		toolbarPanel.setLayout(new WrappingLayout());
-		
+
 		recognitionToolbar = new JToolBar();
-		
-		
+
 		toolbar = new JVBToolingToolbar(editableVirtualbookComponent, us, snappingEnvironment);
-		
+
 		toolbarPanel.add(toolbar);
 		toolbarPanel.add(recognitionToolbar);
-		
+
 		add(toolbarPanel, BorderLayout.NORTH);
 
 		// add save image informations button
 
-
-	
 		JButton autoRecognition = new JButton(Messages.getString("StepViewAndEditDisk.1")); //$NON-NLS-1$
 		autoRecognition.setIcon(ImageTools.loadIcon(StepViewAndEditBook.class, "auto.png")); //$NON-NLS-1$
 		autoRecognition.setToolTipText(Messages.getString("StepViewAndEditDisk.3")); //$NON-NLS-1$
@@ -186,7 +185,7 @@ public class StepViewAndEditBook extends BasePanelStep implements Disposable {
 							BufferedImage bi = ImageTools.loadImage(f.toURL());
 
 							Scale scale = editableVirtualbookComponent.getVirtualBook().getScale();
-							
+
 							double pixelSize = 1.0 * scale.getWidth() / meanBookWidthInImage; // mm
 																								// per
 																								// pixel
@@ -196,13 +195,13 @@ public class StepViewAndEditBook extends BasePanelStep implements Disposable {
 																					// micros
 							// double factor = 1 -
 							// 1/BookReadProcessor.ratioPtsPerMm() ;
-							
+
 //							double factor = 0.6d / 1.00427d / ((1803 + 3.4) / 1803); // magix
 //																						// number
 //																						// ???
 
 							double factor = 1.0;
-							
+
 							ReadResultBag result = BookReadProcessor.readResult2(bi, rec.getHeight() * i,
 									pixeltime * pixelSize * factor, scale, state, true, d);
 
@@ -262,11 +261,8 @@ public class StepViewAndEditBook extends BasePanelStep implements Disposable {
 
 		});
 
-		
 		recognitionToolbar.add(new JLabel("Transparency :"));
-		
-		
-		
+
 		JSlider sl = new JSlider(JSlider.HORIZONTAL, 10, 90, 50);
 		sl.setToolTipText("select transparency");
 		sl.setMaximumSize(new Dimension(100, 30));
@@ -371,8 +367,8 @@ public class StepViewAndEditBook extends BasePanelStep implements Disposable {
 
 					BufferedImage result = BookReadProcessor.correctImage(tile, index * originModel.getHeight(),
 							originModel.getHeight(), edgesState.top, edgesState.bottom, originModel.getHeight(),
-							edgesState.viewInverted );
-// ^ instrument.getScale().isPreferredViewedInversed()
+							edgesState.viewInverted != instrument.getScale().isPreferredViewedInversed());
+
 					ImageIO.write(result, "JPEG", output);
 
 					return null;
