@@ -1,0 +1,169 @@
+import groovy.swing.SwingBuilder;
+import javax.swing.WindowConstants
+import javax.swing.JOptionPane
+import javax.swing.BoxLayout as BXL
+import java.awt.FlowLayout as FL
+import java.awt.BorderLayout
+import com.l2fprod.common.swing.*;
+import javax.swing.*;
+import groovy.beans.Bindable;
+import groovy.aprint.tools.*;
+import groovy.aprint.transform.*;
+import org.barrelorgandiscovery.gui.aprint.instrumentchoice.*;
+import org.barrelorgandiscovery.instrument.*;
+import org.barrelorgandiscovery.scale.*;
+import org.barrelorgandiscovery.virtualbook.*;
+import org.barrelorgandiscovery.virtualbook.checker.*
+import org.barrelorgandiscovery.virtualbook.io.*;
+import org.barrelorgandiscovery.virtualbook.transformation.*;
+import org.barrelorgandiscovery.virtualbook.transformation.importer.*;
+import org.barrelorgandiscovery.xml.VirtualBookXmlIO;
+import org.barrelorgandiscovery.issues.*
+
+  
+// Conversion du virtualbook depuis l'instrument source vers l'instrument destination 
+def convert(String inst_source,String inst_dest)
+{
+    def instrumentsource = services.repository.getInstrument(inst_source)
+    def instrumentdestination = services.repository.getInstrument(inst_dest)
+    
+    def source = new ScaleHelper(instrumentsource)
+    def destination = new ScaleHelper(instrumentdestination)
+ 
+    // si l'instrument SOURCE n'est pas "typé" (melodie, accompagnement, basse)
+    // la transformation ne peut fonctionner -> affichage d'un message d'information
+    boolean hasSourceRegistres = source.melody.notes.size() > 0
+    if (hasSourceRegistres == false){
+    JOptionPane.showMessageDialog(services.ownerForDialog, "Ce script fonctionne uniquement que si les notes de la gamme ont été 'typées' (melodie, accompagnement, basse). L'instrument SOURCE ne correspond pas aux critéres.");
+    throw new Exception("Ce script fonctionne uniquement que si les notes de la gamme ont été 'typées' (melodie, accompagnement, basse). L'instrument SOURCE ne correspond pas aux critéres.")
+    }  
+  
+    boolean hasDestinationRegistres = destination.melody.notes.size() > 0
+
+    println "Has Destination Registres :" + hasDestinationRegistres
+
+             
+     def vb = virtualbook
+    
+     def t = new TransformHelper(source, destination)
+     println "Mapping Melody"
+     println t.map(source.melody.tracks, destination.tracks(source.melody.notes, hasDestinationRegistres ? "CHANT" : null))
+     
+     println "Mapping Accompagnement"
+     Note[] nacc = source.accompagnement.notes.collect { it } // .octaveP()
+     println t.map(source.accompagnement.tracks, destination.tracks(nacc, hasDestinationRegistres ? "ACCOMPAGNEMENT" : null))
+     
+     println "Mapping Bass"
+     println t.map(source.bass.tracks, destination.tracksWithoutOctave(source.bass.notes,hasDestinationRegistres? "BASSE":null))
+     println t.map(source.bass.tracks, destination.tracks(source.bass.notes, hasDestinationRegistres?"BASSE":null))
+         
+     def res = t.transform(vb)
+     
+     // res.virtualbook qui contient le carton
+     // res.untransposedholes
+     
+     def erreurs_non_transposee = res.untransposedholes
+          
+    // création d'un objet permettant la vérification des problèmes en fonction de la description de la gamme
+    def checker = new CompositeChecker(CheckerFactory.createCheckers(instrumentdestination.scale))
+
+    // on lance la vérification et on récupère la liste des erreurs
+    def pbs = checker.check(res.virtualbook)
+  
+    erreurs_non_transposee.each {
+        
+         def td = source.scale.tracksDefinition[it.track]
+        
+             if (td instanceof NoteDef)
+             {
+                 // on ne met en erreur que les notes, pas les commandes de registres
+                 def i = new IssueMissing(it.timestamp, it.length, td, 0 )
+                 
+                 pbs.add i
+             }
+    }
+  
+  
+    resultat = res.virtualbook
+    // Conservation des "proprietes" (nom, genre, ...) du book d'origine pour les inserer dans le book de destination
+    resultat.metadata = virtualbook.metadata
+  
+    def window = services.newVirtualBook(resultat, services.repository.getInstrument(inst_dest), pbs)    
+}   
+   
+
+// Affichage de la fenêtre "interface"
+def swing = new SwingBuilder()
+frame = swing.frame(title: "Conversion d'un fichier BOOK vers un instrument.", location:[410,200], size:[410,180])
+{
+
+menuBar  {
+    menu(mnemonic: 'Q', 'Quitter') { menuItem(text: 'Fermer la fenêtre', actionPerformed: {frame.dispose() }) }
+    menu(mnemonic: 'V', 'Version') { menuItem(text: 'Version : 0.1')} }
+
+
+panel(constraints: BorderLayout.CENTER, border: compoundBorder([emptyBorder(5), titledBorder('')])) {
+boxLayout(axis:BXL.Y_AXIS)
+
+panel(alignmentX:0f,constraints: BorderLayout.CENTER, border: compoundBorder([emptyBorder(2), titledBorder("Sélectionnez l'instrument de destination :")]))
+  {
+    flowLayout(alignment:FL.LEFT)
+            // Constitution de la ComboBox des Instruments disponibles, triée par ordre Alpha
+            def instru_select
+            
+            combo_instru_destination = comboBox()             
+            
+            def repository = services.repository
+            def instruments = repository.listInstruments().sort { a,b -> a.name <=> b.name   }
+            
+            if (combo_instru_destination != null) combo_instru_destination.removeAllItems()
+            
+            instruments.each { combo_instru_destination.addItem(it.name )  }            
+
+            instru_select = combo_instru_destination.selectedItem
+            
+            def d = [:]            
+             d[" Sélection de l'instrument destination "] = combo_instru_destination 
+                         
+  }
+
+  
+panel(alignmentX:0f,constraints: BorderLayout.CENTER)
+  {
+    flowLayout(alignment:FL.CENTER)
+    button('Convertir',preferredSize:[90,24],
+    actionPerformed: { 
+                         try {
+                             if (combo_instru_destination.selectedItem == null) {
+                             
+                               println("Vous Devez sélectionner un instrument.")
+                             
+                             } else {   
+                                 convert(currentinstrument.name, combo_instru_destination.selectedItem)
+                                 //gestion_erreur (currentinstrument)
+                                 // Fermeture de la fenetre apres conversion du VirtualBook
+                                 frame.dispose()                
+                                 // Affiche un message d'information : "Conversion terminée"
+                                 JOptionPane.showMessageDialog(services.ownerForDialog, "Conversion terminée.");
+                                 
+                             } 
+                             
+                             } catch (Throwable t) {  
+                                println t
+                                println t.stackTrace
+                                frame.dispose()
+                             }
+                    })
+                    
+    button('Annuler',preferredSize:[80,24],
+    actionPerformed:
+        {
+            frame.dispose()
+        })
+  }                   
+  
+}
+}
+
+frame.resizable=false
+frame.show()

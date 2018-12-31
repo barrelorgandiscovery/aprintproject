@@ -1,0 +1,22 @@
+
+import groovy.aprint.*
+import groovy.aprint.transform.*
+
+use (HoleCategory, ScaleCategory) {
+
+    long l = virtualbook.scale.mmToTime(3.3d)
+
+    def h = virtualbook.scale.helper
+    def hls = virtualbook.holesCopy.findAll {
+        it.length < l
+    }
+
+    // on les agrandits
+    
+    hls.each {
+        virtualbook.removeHole(it)
+        virtualbook.addHole(it.newLength(l))
+    }
+
+    pianoroll.repaint()
+}

@@ -1,0 +1,6 @@
+Folder Content :
+
+Official Scripts for using with APrint Studio Install
+
+These will be Generic Scripts and VirtualBook Scripts (quick scripts)
+

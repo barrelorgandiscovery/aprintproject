@@ -1,0 +1,15 @@
+
+
+def newvb = virtualbook.flattenVirtualBook()
+
+virtualbook.holesCopy.each {
+    virtualbook.removeHole(it)
+}
+
+newvb.holesCopy.each {
+    virtualbook.addHole(it)
+}
+
+pianoroll.repaint()
+
+void

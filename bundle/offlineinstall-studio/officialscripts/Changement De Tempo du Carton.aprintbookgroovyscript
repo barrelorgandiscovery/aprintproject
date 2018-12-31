@@ -1,0 +1,90 @@
+
+if (services.version < "2011.6")
+    throw new Exception("Vous devez avoir la version 2011.6 pour utiliser ce script");
+
+
+
+import org.barrelorgandiscovery.virtualbook.*
+import groovy.aprint.tools.*
+import groovy.swing.*
+import org.barrelorgandiscovery.tools.*
+
+
+// Accelerer le carton
+
+def changeTempo(virtualbook, currentinstrument, facteur)
+{
+
+    def h = virtualbook.holesCopy
+    
+    
+    
+    use(groovy.aprint.transform.HoleCategory)
+    {
+        def nh = h.collect{
+            it.newLength((long)(it.length * facteur)).newTs((long) (it.timestamp * facteur))
+        }
+    
+        def nvb = new VirtualBook(virtualbook.scale)
+        nh.each { 
+          nvb.addHole(it);
+        }
+        
+        services.newVirtualBook(nvb,currentinstrument)
+    }
+
+}
+
+
+new SwingBuilder().edt {
+
+    def c = [:]
+    def sl
+    def s =  panel() {
+        sl = slider(maximum:100, minimum : 1, value:50 )
+        label(text: bind(source: sl, sourceProperty: "value", 
+                converter: { v -> 
+                         v? (
+                             {
+                                 double ca = ( (sl.value - 1.0) / (100) * (2 - 0.5) + 0.5 )
+                                 def s = "Accelerer" 
+                                 if (ca < 1.0) {
+                                   s = "Ralentir"
+                                 }
+                                  
+                                    s + " " +  String.format("%3.1f",ca)
+                                     
+                                 }.call() ) : ''
+                             
+                             })
+             )
+        }
+   
+    c["Changement de tempo"] = s
+    def f
+    def b = button(text:"Changer le tempo",actionPerformed:{
+      try {
+        double facteur = (sl.value - 1.0) / (100) * (0.5 - 2) + 2
+        
+        
+        changeTempo(virtualbook,currentinstrument,facteur)
+        
+        f.dispose()
+        
+       } catch(Exception e)
+       {
+           println e
+       }
+    })
+    
+    f = GUIHelper.showFrame(c,b)
+    SwingUtils.center(f)
+    f.pack()
+   
+     f.resizable=false;
+    f.visible = true
+   
+
+}
+
+

@@ -1,0 +1,6 @@
+Options +Indexes
+AddType application/x-msdownload .jar
+AddType application/x-msdownload .exe
+
+AddHandler default-handler .jar
+AddHandler default-handler .exe

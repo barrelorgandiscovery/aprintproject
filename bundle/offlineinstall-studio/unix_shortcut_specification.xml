@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+
+<shortcuts>
+
+  <programGroup defaultName="APrint Studio"
+  location="applications"/>
+
+   <shortcut
+     name="APrint Studio"
+     programGroup="yes"
+     desktop="yes"
+     applications="no"
+     startMenu="yes"
+     startup="no"
+     target="/usr/bin/java"
+     workingDirectory=""
+     commandLine="-Xmx1024m -cp &quot;$INSTALL_PATH/aprint.jar&quot; org.barrelorgandiscovery.gui.aprintng.APrintApplication"
+     initialState="noShow"
+     iconFile="help"
+     iconIndex="0"
+     url="$INSTALL_PATH/doc/izpack/html/izpack-doc.html"
+     type="Application"
+     encoding="UTF-8"
+     description="APrint">
+
+     <createForPack name="Base"/>
+   </shortcut>
+
+   <shortcut
+     name="Uninstaller"
+     programGroup="yes"
+     desktop="yes"
+     applications="no"
+     startMenu="no"
+     startup="no"
+     target="/usr/bin/java"
+     commandLine="-jar
+     &quot;$INSTALL_PATH/Uninstaller/uninstaller.jar&quot;"
+     initialState="noShow"
+     iconFile="trashcan_full"
+     iconIndex="0"
+     workingDirectory=""
+     type="Application"
+     encoding="UTF-8"
+     description="IzPack uninstaller">
+     <createForPack name="Base" />
+   </shortcut>
+
+</shortcuts>
