@@ -1,0 +1,413 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://barrelorgandiscovery.org/virtualbook/2016"
+	elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:tns="http://barrelorgandiscovery.org/virtualbook/2016"
+	xmlns:metadata="http://barrelorgandiscovery.org/virtualbook/2016">
+
+	<import namespace="http://barrelorgandiscovery.org/virtualbook/2016" schemaLocation="Metadata.xsd" />
+
+	<annotation>
+		<documentation>
+			Description of a Virtual Book with all associated
+			elements
+			(Instrument , metadata associated to the virtual book for
+			indexing)
+		</documentation>
+	</annotation>
+	<complexType name="Scale">
+		<annotation>
+			<documentation>
+				Scale definition, it contains general information of
+				the
+				kind of organ and the definition of all the tracks
+			</documentation>
+		</annotation>
+		<sequence>
+			<element name="infos" type="tns:ScaleInformations"></element>
+			<element name="definition" type="tns:ScaleDefinition"></element>
+		</sequence>
+		<attribute name="name" type="string" use="required"></attribute>
+	</complexType>
+
+	<complexType name="ScaleInformations">
+		<sequence>
+			<element name="contact" type="string"></element>
+			<element name="state" type="string"></element>
+			<element name="description" type="string"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="ScaleDefinition">
+		<annotation>
+			<documentation>definition of the scale</documentation>
+		</annotation>
+		<sequence>
+			<element name="speed" type="double">
+				<annotation>
+					<documentation>
+						speed of the reading for the organ in (mm/s)
+					</documentation>
+				</annotation>
+			</element>
+			<element name="width" type="double">
+				<annotation>
+					<documentation>Book width in mm</documentation>
+				</annotation>
+			</element>
+			<element name="firsttrackdistance" type="double">
+				<annotation>
+					<documentation>
+						distance of the first track axis from the edge
+						of the book
+					</documentation>
+				</annotation>
+			</element>
+			<element name="intertrackdistance" type="double">
+				<annotation>
+					<documentation>
+						distance between tracks
+					</documentation>
+				</annotation>
+			</element>
+			<element name="defaulttrackheight" type="double">
+				<annotation>
+					<documentation>
+						default height of the holes
+					</documentation>
+				</annotation>
+			</element>
+			<element name="tracks" type="tns:TracksDefinition">
+				<annotation>
+					<documentation>
+						definition of each tracks in the book
+					</documentation>
+				</annotation>
+			</element>
+
+			<sequence maxOccurs="unbounded" minOccurs="0">
+				<element name="pipestopsets" type="tns:PipeStopSet"></element>
+			</sequence>
+			<element name="scaletype" type="string"></element>
+			<element name="ispreferredviewinverted" type="boolean"
+				maxOccurs="1" minOccurs="0">
+			</element>
+			<sequence minOccurs="0" maxOccurs="1"><element name="tracknb" type="int" minOccurs="0" maxOccurs="1"></element></sequence>			<element name="bookmovefromrighttoleft" type="boolean"
+				maxOccurs="1" minOccurs="0"></element>
+		</sequence>
+
+	</complexType>
+
+	<complexType name="TracksDefinition">
+		<annotation>
+			<documentation>
+				collection of the track definition
+			</documentation>
+		</annotation>
+		<sequence>
+			<element name="track" type="tns:TrackDef" maxOccurs="unbounded"
+				minOccurs="0">
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="TrackDef" abstract="true">
+		<annotation>
+			<documentation>
+				this is an "abstract" definition of the track, each
+				track has a number (starting with 0)
+			</documentation>
+		</annotation>
+		<sequence>
+			<element name="no" type="int"></element>
+		</sequence>
+
+	</complexType>
+
+	<complexType name="TrackNoteDef">
+		<annotation>
+			<documentation>
+				this is a track note definition
+			</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="tns:TrackDef">
+				<sequence>
+					<element name="note" type="string">
+						<annotation>
+							<documentation>
+								this is the note defined in this term :
+								it use the
+								ABCDEFG notation, followed by
+								the octave number for example A3,
+								B3 ...
+
+								if an accident has to be specified, only
+								the # is
+								supported, the accident is
+								specified between the note and the
+								octave for exemple A#3 C#3 ...
+							</documentation>
+						</annotation>
+					</element>
+					<element name="pipestopsetname" type="string" minOccurs="0">
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<complexType name="TrackCommandDef" abstract="true">
+		<annotation>
+			<documentation>
+				this track definition define a "command" track, for
+				example : drums, registers controls ...
+			</documentation>
+		</annotation>
+		<complexContent>
+			<extension base="tns:TrackDef">
+				<sequence>
+					<element name="delay" type="double" minOccurs="0">
+						<annotation>
+							<documentation>
+								this is the delay of the control (in mm)
+							</documentation>
+						</annotation>
+					</element>
+					<element name="fixedlength" type="double" minOccurs="0">
+						<annotation>
+							<documentation>
+								if the track control has a fixed size,
+								this is the
+								fixed length in mm
+							</documentation>
+						</annotation>
+					</element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<complexType name="TrackDrum">
+		<complexContent>
+			<extension base="tns:TrackCommandDef">
+				<sequence>
+					<element name="mididef" type="string"></element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<element name="virtualBook" type="tns:VirtualBook">
+		<annotation>
+			<documentation>
+				Virtual Organ Book Definition, it include instrument
+				capability (scale), and the "punches"
+			</documentation>
+		</annotation>
+	</element>
+
+	<complexType name="Holes">
+		<annotation>
+			<documentation>Collection of holes</documentation>
+		</annotation>
+		<sequence minOccurs="0" maxOccurs="unbounded">
+			<element name="hole" type="tns:Hole"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="Hole">
+		<attribute name="timestamp" type="long" use="required"></attribute>
+		<attribute name="length" type="long" use="required"></attribute>
+		<attribute name="track" type="int" use="required"></attribute>
+	</complexType>
+
+	<complexType name="VirtualBook">
+		<annotation>
+			<documentation>
+				Definition of the virtual book definition
+			</documentation>
+		</annotation>
+		<sequence>
+			<element name="metadata" type="metadata:VirtualBookMetadata"
+				minOccurs="0">
+				<annotation>
+					<documentation>
+						Metadata associated to the virtual book
+					</documentation>
+				</annotation>
+			</element>
+			<element name="frontimage" type="hexBinary" minOccurs="0">
+				<annotation>
+					<documentation>
+						image of the front virtual book (for printing or
+						rendering)
+					</documentation>
+				</annotation>
+			</element>
+			<element name="scale" type="tns:Scale">
+				<annotation>
+					<documentation>Scale definition</documentation>
+				</annotation>
+			</element>
+			<element name="holes" type="tns:Holes">
+				<annotation>
+					<documentation>
+						Collection of the holes of the book
+					</documentation>
+				</annotation>
+			</element>
+
+			<element name="annotations" type="tns:Annotation" minOccurs="0"
+				maxOccurs="unbounded">
+				<annotation>
+					<documentation>Annotation linked to the virtualbook</documentation>
+				</annotation>
+			</element>
+		</sequence>
+		<attribute name="title" type="string" use="required">
+			<annotation>
+				<documentation>Name of the book</documentation>
+			</annotation>
+		</attribute>
+
+	</complexType>
+
+
+	<complexType name="PipeStop">
+		<annotation>
+			<documentation>PipeStop definition</documentation>
+		</annotation>
+		<sequence>
+			<element name="name" type="string">
+				<annotation>
+					<documentation>
+						normalized pipestop name
+					</documentation>
+				</annotation>
+			</element>
+			<element name="isPartOfRegister" type="boolean">
+				<annotation>
+					<documentation>
+						a boolean indicated that the pipestop is
+						controlled
+						by a register
+					</documentation>
+				</annotation>
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="PipeStopSet">
+		<annotation>
+			<documentation>
+				a set of pipe stops, generally SING / ACCOMPAGNEMENT /
+				BASS ..
+			</documentation>
+		</annotation>
+		<sequence>
+			<element name="name" type="string"></element>
+
+
+			<sequence maxOccurs="unbounded" minOccurs="0">
+				<element name="pipestop" type="tns:PipeStop"></element>
+			</sequence>
+		</sequence>
+	</complexType>
+
+	<complexType name="TrackRegisterControlDef" abstract="true">
+		<complexContent>
+			<extension base="tns:TrackCommandDef"></extension>
+		</complexContent>
+	</complexType>
+
+	<complexType name="TrackRegisterControlStartDef">
+		<complexContent>
+			<extension base="tns:TrackRegisterControlDef">
+				<sequence>
+					<element name="pipestopsetname" type="string"></element>
+					<element name="pipestopnameinset" type="string"></element>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<complexType name="TrackRegisterControlResetDef">
+		<complexContent>
+			<extension base="tns:TrackRegisterControlDef">
+				<choice>
+					<element name="resetall" type="boolean"></element>
+					<element name="resetpipestopsetname" type="string">
+					</element>
+				</choice>
+			</extension>
+		</complexContent>
+	</complexType>
+
+
+	<element name="scale" type="tns:Scale"></element>
+
+
+
+	<complexType name="Instrument">
+		<sequence>
+			<element name="scale" type="tns:Scale"></element>
+			<element name="soundmapping" type="tns:SoundMapping"></element>
+		</sequence>
+		<attribute name="instrumentname" type="string"></attribute>
+	</complexType>
+
+	<complexType name="SoundMapping">
+		<sequence>
+			<element name="sounddef" type="tns:Sample" minOccurs="1"></element>
+		</sequence>
+		<attribute name="name" type="string"></attribute>
+		<attribute name="registersetname" type="string"></attribute>
+		<attribute name="registernameinset" type="string" use="optional">
+		</attribute>
+		<attribute name="rootkey" type="int"></attribute>
+		<attribute name="loopstart" type="int" use="optional"></attribute>
+		<attribute name="loopend" type="int" use="optional"></attribute>
+	</complexType>
+
+	<complexType name="Sample">
+		<sequence>
+			<element name="content" type="hexBinary"></element>
+		</sequence>
+		<attribute name="format" type="string" use="required"></attribute>
+	</complexType>
+
+	<complexType name="Annotation" abstract="true">
+		<annotation>
+			<documentation>
+				Annotation on the book, to add extra informations
+			</documentation>
+		</annotation>
+		<attribute name="timestamp" type="long"></attribute>
+	</complexType>
+
+	<complexType name="TempoAnnotation">
+		<complexContent>
+			<extension base="tns:Annotation">
+				<attribute name="beatlength" type="long"></attribute>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<complexType name="SignatureAnnotation">
+		<complexContent>
+			<extension base="tns:Annotation">
+				<attribute name="numerator" type="int"></attribute>
+				<attribute name="denominator" type="int"></attribute>
+			</extension>
+		</complexContent>
+	</complexType>
+
+	<complexType name="MarkerAnnotation">
+		<complexContent>
+			<extension base="tns:Annotation">
+				<attribute name="name" type="string"></attribute>
+			</extension>
+		</complexContent>
+	</complexType>
+
+</schema>

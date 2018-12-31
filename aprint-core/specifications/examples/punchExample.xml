@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<tns:punchplan xmlns:tns="http://barrelorgandiscovery.org/virtualbook/2016"
+	xmlns:tns1="http://barrelorgandiscovery.org/virtualbook" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://barrelorgandiscovery.org/virtualbook/2016 ../PunchPlan.xsd ">
+	<tns:metadata>
+		<tns1:Author>tns1:Author</tns1:Author>
+		<tns1:Arranger>tns1:Arranger</tns1:Arranger>
+		<tns1:CreationDate>2001-01-01</tns1:CreationDate>
+		<tns1:LastModificationDate>2001-12-31T12:00:00</tns1:LastModificationDate>
+		<tns1:Genre>tns1:Genre</tns1:Genre>
+		<tns1:DesignedInstrumentName>tns1:DesignedInstrumentName</tns1:DesignedInstrumentName>
+		<tns1:Description>tns1:Description</tns1:Description>
+	</tns:metadata>
+
+	<tns:punchcommand xsi:type="tns:PunchDisplacement" x="1" y="0" />
+	<tns:punchcommand xsi:type="tns:Punch"  x="1" y="0"/>
+
+</tns:punchplan>
