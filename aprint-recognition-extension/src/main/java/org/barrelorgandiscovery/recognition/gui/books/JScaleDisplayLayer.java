@@ -7,14 +7,24 @@ import java.awt.geom.Point2D.Double;
 import java.awt.geom.Rectangle2D;
 import java.util.List;
 
+import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.recognition.gui.books.BookReadProcessor.Extremum;
 import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JDisplay;
 import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JLayer;
 import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JLinesLayer;
+import org.barrelorgandiscovery.scale.AbstractTrackDef;
 import org.barrelorgandiscovery.scale.Scale;
 
+/**
+ * Display the scale on the book
+ * 
+ * @author pfreydiere
+ *
+ */
 public class JScaleDisplayLayer extends JLayer {
 
+	private static Logger logger = Logger.getLogger(JScaleDisplayLayer.class);
+	
 	private JDisplay display;
 	private Scale instrumentScale;
 	private JLinesLayer top;
@@ -64,7 +74,7 @@ public class JScaleDisplayLayer extends JLayer {
 		if (instrumentScale == null)
 			return;
 
-		Rectangle cb = g2d.getClipBounds();
+		Rectangle clipBounds = g2d.getClipBounds();
 
 		List<Double> ptop = BookReadProcessor.toPoint(top.getGraphics());
 		List<Double> pbottom = BookReadProcessor.toPoint(bottom.getGraphics());
@@ -72,7 +82,6 @@ public class JScaleDisplayLayer extends JLayer {
 		// draw arrow
 		Extremum e = BookReadProcessor.getEdges(10, ptop, pbottom);
 		if (!java.lang.Double.isNaN(e.min) && !java.lang.Double.isNaN(e.max)) {
-
 			double r = factor(0.3, e, viewInverted);
 			g2d.drawLine(10, factor(0.3, e, viewInverted), 10, factor(0, e, viewInverted));
 			g2d.drawLine(13, factor(0.1, e, viewInverted), 10, factor(0, e, viewInverted));
@@ -80,7 +89,7 @@ public class JScaleDisplayLayer extends JLayer {
 
 		}
 
-		if (cb != null) {
+		if (clipBounds != null) {
 
 			for (int i = 0; i < instrumentScale.getTrackNb() + 1; i++) {
 				Path2D.Double p = null;
@@ -92,7 +101,7 @@ public class JScaleDisplayLayer extends JLayer {
 //				if (viewInverted)
 //					ratio = 1.0 - ratio;
 
-				for (double d = cb.getMinX(); d < cb.getMaxX(); d += cb.getWidth() / 100) {
+				for (double d = clipBounds.getMinX(); d < clipBounds.getMaxX(); d += clipBounds.getWidth() / 100) {
 
 					e = BookReadProcessor.getEdges(d, ptop, pbottom);
 
@@ -126,6 +135,47 @@ public class JScaleDisplayLayer extends JLayer {
 
 	@Override
 	public Rectangle2D getExtent() {
+		return null;
+	}
+
+	@Override
+	public String getTooltip(Double position) {
+		if (position == null) {
+			return null;
+		}
+logger.debug("query tooltip at " + position);
+		for (int i = 0; i < instrumentScale.getTrackNb(); i++) {
+
+			double baselineRatio = (1.0 * instrumentScale.getFirstTrackAxis()
+					+ instrumentScale.getIntertrackHeight() * i - instrumentScale.getIntertrackHeight() / 2)
+					/ instrumentScale.getWidth();
+			double baselineRatio2 = (1.0 * instrumentScale.getFirstTrackAxis()
+					+ instrumentScale.getIntertrackHeight() * (i + 1) - instrumentScale.getIntertrackHeight() / 2)
+					/ instrumentScale.getWidth();
+
+			double d = position.x;
+
+			List<Double> ptop = BookReadProcessor.toPoint(top.getGraphics());
+			List<Double> pbottom = BookReadProcessor.toPoint(bottom.getGraphics());
+
+			Extremum e = BookReadProcessor.getEdges(d, ptop, pbottom);
+
+			if (!java.lang.Double.isNaN(e.min) && !java.lang.Double.isNaN(e.max)) {
+
+				double y = factor(baselineRatio, e, viewInverted);
+				double y2 = factor(baselineRatio2, e, viewInverted);
+				double ymin = Math.min(y2, y);
+				double ymax = Math.max(y2, y);
+				
+				logger.debug(" y :" + ymin + " y2 :" + ymax);
+				if (position.y >= ymin && position.y < ymax) {
+					AbstractTrackDef td = instrumentScale.getTracksDefinition()[i];
+					return "track :" + i + (td != null ? " " + td.toString() : "");
+				}
+
+			}
+
+		}
 		return null;
 	}
 

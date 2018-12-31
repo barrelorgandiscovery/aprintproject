@@ -57,7 +57,7 @@ rootProject.ext.asUTC = { Date date, String format ->
 }
  
 rootProject.ext.getRevision = {
-  String currentCommit = execAndGetOutput("git rev-parse --short HEAD")
+  String currentCommit = execAndGetOutput("git rev-parse HEAD")
   return (currentCommit != null) ? currentCommit : "UNKNOWN"
 }
  
@@ -66,17 +66,31 @@ rootProject.ext.isApplicationRelease = {
   return currentBranches.contains("master")
 }
 
-project(':bundle') {
-    task copyOutputJars(type:Copy,dependsOn: [':aprint-gui:fatJar', ':aprint-core:jar','sourcesJar','javadocJar'] ) {
-        from project(':aprint-gui').file('build/libs')
-        into 'build'
+rootProject.ext.currentVersion = "UNKNOWN" 
 
+project(':bundle') {
+
+    task copyOutputJars(type:Copy,dependsOn: [':aprint-gui:fatJar', 
+                            ':aprint-core:jar',':aprint-core:sourcesJar',
+                            ':aprint-core:javadocJar',
+                           ':aprint-gui:javadocJar',
+                           ':aprint-gui:sourcesJar' ] ) {
+        from project(':aprint-gui').file('build/libs')
         from project(':aprint-core').file('build/libs')
         into 'build'
     }
-    task createBundles(type: Exec) {
+    // create installer
+    task createBundles(type: Exec, dependsOn: copyOutputJars) {
         commandLine 'C:\\Program Files (x86)\\NSIS\\makensis.exe',
            "${project.projectDir}/offlineinstall-studio/aprint_studio.nsi"
+        workingDir = 'offlineinstall-studio'
+    }
+    task createInstaller(dependsOn: ['createBundles']) { 
+        doLast {
+            def f = file('offlineinstall-studio/APrintStudioInstall.exe')
+            assert f.exists()
+            assert f.renameTo(new File('APrintStudioInstall_' + rootProject.ext.currentVersion + ".exe"))
+        }
     }
 }
 
