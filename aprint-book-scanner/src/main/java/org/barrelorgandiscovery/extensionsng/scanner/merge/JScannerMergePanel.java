@@ -72,7 +72,7 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 
 	PerfoScanFolder perfoScanFolder;
 
-	JDisplay workImage;
+	JDisplay workImageDisplay;
 
 	/** preview of result image **/
 	JDisplay resultImageDisplay;
@@ -83,7 +83,7 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 	private JCheckBox overlapLock;
 	private JSpinner overlappixelsspinner;
 
-	private JSlider currentresultimage;
+	private JSlider currentResultImageSlider;
 
 	private JShapeLayer<Rectangle2D.Double> workImageShapePointsLayer;
 
@@ -194,21 +194,21 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 		resultImageLayer = new JImageDisplayLayer();
 		resultImageDisplay.addLayer(resultImageLayer);
 
-		workImage = new JDisplay();
+		workImageDisplay = new JDisplay();
 
 		image1Layer = new JImageDisplayLayer();
-		workImage.addLayer(image1Layer);
+		workImageDisplay.addLayer(image1Layer);
 
 		FormAccessor resultfunctions = fp.getFormAccessor("resultfunctions");
 
-		currentresultimage = (JSlider) resultfunctions.getComponentByName("currentresultimage");
-		currentresultimage.setValue(1);
+		currentResultImageSlider = (JSlider) resultfunctions.getComponentByName("currentresultimage");
+		currentResultImageSlider.setValue(1);
 		int folderimagecount = perfoScanFolder.getImageCount();
-		currentresultimage.setMaximum(folderimagecount);
-		currentresultimage.setMajorTickSpacing(150);
-		currentresultimage.setMinorTickSpacing(50);
-		currentresultimage.revalidate();
-		currentresultimage.addChangeListener(new ChangeListener() {
+		currentResultImageSlider.setMaximum(folderimagecount);
+		currentResultImageSlider.setMajorTickSpacing(150);
+		currentResultImageSlider.setMinorTickSpacing(50);
+		currentResultImageSlider.revalidate();
+		currentResultImageSlider.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				try {
@@ -258,11 +258,11 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 				recomputeResult();
 			}
 		});
-		workImage.addLayer(workImageShapePointsLayer);
-		workImage.addLayer(zoneLayer);
+		workImageDisplay.addLayer(workImageShapePointsLayer);
+		workImageDisplay.addLayer(zoneLayer);
 
 		matriceShapesLayer = new JShapeLayer<>();
-		workImage.addLayer(matriceShapesLayer);
+		workImageDisplay.addLayer(matriceShapesLayer);
 		matriceShapesLayer.setGraphicsDrawer(new IShapeDrawer() {
 			@Override
 			public void draw(Shape s, Graphics2D g2d) {
@@ -276,13 +276,14 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 			}
 		});
 
-		CreatePointTool createPointTool = new CreatePointTool(workImage, workImageShapePointsLayer, 3);
+		CreatePointTool createPointTool = new CreatePointTool(workImageDisplay, workImageShapePointsLayer, 3);
 		createPointTool.setAnchorPointAdjuster(new IAnchorPointAdjuster() {
 			@Override
 			public <T extends Shape> void adjust(List<T> shapes, Set<T> selectedShape, MathVect displacement) {
 
 				// origin point
 				Rectangle2D.Double p1 = (Rectangle2D.Double) shapes.get(0);
+				
 				// angle point
 				Rectangle2D.Double p2 = (Rectangle2D.Double) shapes.get(1);
 				// distance point
@@ -295,7 +296,7 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 				// adjust points
 				Rectangle2D.Double p = (Rectangle2D.Double) selectedShape.iterator().next();
 				if (p == p1) {
-
+					// origin displacement
 					p2.setRect(p2.getX() + displacement.getX(), p2.getY() + displacement.getY(), p2.getWidth(),
 							p2.getHeight());
 
@@ -303,6 +304,26 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 							p3.getHeight());
 				}
 
+				if (p == p2) {
+					// angle displacement
+					
+					// rotate the length also
+					
+					// compute rotation
+					MathVect mp2 = new MathVect(p2.x, p2.y);
+					MathVect mp1 = new MathVect(p1.x, p1.y);
+					MathVect v1 = mp2.moins(mp1);
+					MathVect v2 = displacement.plus(mp2).moins(mp1);
+					
+					double angle = v2.angle(v1);
+					
+					MathVect mp3 = new MathVect(p3.x, p3.y);
+					MathVect final3 = mp3.moins(mp1).rotate(-angle).plus(mp1);
+					
+					p3.setRect(final3.getX(), final3.getY(), p3.getWidth(), p3.getHeight());
+				}
+				
+				
 				if (p == p3 && overlapLock.isSelected()) {
 					// prop, delta
 
@@ -319,14 +340,14 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 			}
 		});
 
-		fp.getFormAccessor().replaceBean("displaypositionning", workImage);
+		fp.getFormAccessor().replaceBean("displaypositionning", workImageDisplay);
 
 		// add toolbar for 1
-		JViewingToolBar tb1 = new JViewingToolBar(workImage);
+		JViewingToolBar tb1 = new JViewingToolBar(workImageDisplay);
 		JToggleButton tbpointtool = tb1.addTool(createPointTool);
 		tbpointtool.setIcon(new ImageTools().loadIcon(createPointTool.getClass(), "kedit.png"));
 
-		workImage.setCurrentTool(createPointTool);
+		workImageDisplay.setCurrentTool(createPointTool);
 
 		fp.getFormAccessor().replaceBean("positionningimagetoolbar", tb1);
 
@@ -413,6 +434,13 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 		model.overlappDistance = ((Number) overlappixelsspinner.getValue()).doubleValue();
 	}
 
+	/**
+	 * update automatic draws from anchor points
+	 * 
+	 * @param origin
+	 * @param anglePoint
+	 * @param distancePoint
+	 */
 	private void updateDrawing(Point2D.Double origin, Point2D.Double anglePoint, Point2D.Double distancePoint) {
 		matriceShapesLayer.clear();
 
@@ -420,10 +448,13 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 		MathVect angleVect = new MathVect(anglePoint.x, anglePoint.y).moins(originVect);
 		MathVect distanceVect = new MathVect(distancePoint.x, distancePoint.y).moins(originVect);
 
+		
+		// draw rectangle
+		
 		Path2D.Double p = new Path2D.Double();
 		p.moveTo(originVect.getX(), originVect.getY());
 
-		// end
+		// draw to angle point
 		p.lineTo(anglePoint.x, anglePoint.y);
 
 		MathVect topVect = angleVect.rotate(-Math.PI / 2).orthoNorme().scale(distanceVect.norme());
@@ -438,6 +469,27 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 
 		matriceShapesLayer.add(p);
 
+		// draw arrow for book move
+		
+		Path2D.Double p2 = new Path2D.Double();
+		MathVect mid = topVect.scale(0.5).plus(originVect);
+				MathVect startMid = mid.plus(angleVect.scale(0.1));
+		MathVect midL = mid.plus(angleVect.scale(0.9));
+		
+		MathVect arrowEl = angleVect.scale(0.2);
+		
+		
+		p2.moveTo(midL.getX(), midL.getY());
+		p2.lineTo(startMid.getX(), startMid.getY());
+		p2.lineTo(startMid.plus(arrowEl.rotate(0.2)).getX(), startMid.plus(arrowEl.rotate(0.2)).getY());
+		p2.lineTo(startMid.getX(), startMid.getY());
+		p2.lineTo(startMid.plus(arrowEl.rotate(-0.2)).getX(), startMid.plus(arrowEl.rotate(-0.2)).getY());
+		
+		
+		matriceShapesLayer.add(p2);
+
+		
+
 		p = new Path2D.Double();
 		double radius = 20.0;
 		// draw Origin circle
@@ -451,6 +503,7 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 			}
 		}
 		p.closePath();
+		
 		matriceShapesLayer.add(p);
 
 	}
@@ -460,7 +513,7 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 		image1Layer.setImageToDisplay(i1);
 		resultImageLayer.setImageToDisplay(i1);
 
-		workImage.repaint();
+		workImageDisplay.repaint();
 		resultImageDisplay.repaint();
 	}
 
@@ -507,7 +560,7 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 
 			// overlap value
 			Number o = (Number) overlappixelsspinner.getValue();
-			int start = currentresultimage.getValue();
+			int start = currentResultImageSlider.getValue();
 
 			final int finalpixelsforeachimage = pixelsForEachImage;
 			ICancelTracker currentCancelTracker = new CancelTracker();

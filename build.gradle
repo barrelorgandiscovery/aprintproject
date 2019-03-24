@@ -68,6 +68,7 @@ rootProject.ext.isApplicationRelease = {
 
 rootProject.ext.currentVersion = "UNKNOWN" 
 
+// define here the bundle project
 project(':bundle') {
 
     task copyExtensionJars(type:Copy, dependsOn: [':aprint-book-scanner:fatJar', ':aprint-punch-extension:fatJar', ':aprint-recognition-extension:fatJar']) {
@@ -100,7 +101,7 @@ project(':bundle') {
         into 'build'
     }
     // create installer
-    task createBundles(type: Exec, dependsOn: copyOutputJars) {
+    task createBundles(type: Exec, dependsOn: [copyOutputJars,copyExtensionJars] ) {
         commandLine 'C:\\Program Files (x86)\\NSIS\\makensis.exe',
            "${project.projectDir}/offlineinstall-studio/aprint_studio.nsi"
         workingDir = 'offlineinstall-studio'

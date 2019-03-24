@@ -1,9 +1,12 @@
 package org.barrelorgandiscovery.extensionsng.scanner.scan;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -28,6 +31,7 @@ import org.barrelorgandiscovery.tools.Disposable;
 import org.barrelorgandiscovery.tools.ImageTools;
 
 import com.github.sarxos.webcam.Webcam;
+import com.github.sarxos.webcam.WebcamDevice;
 import com.jeta.forms.components.panel.FormPanel;
 
 public class JScanPanel extends JPanel implements Disposable {
@@ -65,16 +69,20 @@ public class JScanPanel extends JPanel implements Disposable {
 		this.triggerFactory = snapshotTriggerFactory;
 
 		this.previewWebCamPictureTake = new WebCamPictureTake(webCam, (i, t) -> {
-			asyncPreviewImage(i);
+			try {
+				asyncPreviewImage(i);
+			} catch(Exception ex) {
+				logger.error(ex.getMessage(), ex);
+			}
 		});
 		initComponents();
 
 	}
 
-	private void asyncPreviewImage(BufferedImage previewImage) {
-		SwingUtilities.invokeLater(() -> {
+	private void asyncPreviewImage(BufferedImage previewImage) throws Exception {
+		SwingUtilities.invokeAndWait(() -> {
 			if (previewImage == null) {
-				logger.debug("webcam is not opened");
+				logger.debug("webcam is not opened");//$NON-NLS-1$
 				return;
 			}
 			final BufferedImage boxedImage = ImageTools.crop(300, 300, previewImage);
@@ -85,34 +93,34 @@ public class JScanPanel extends JPanel implements Disposable {
 
 	protected void initComponents() throws Exception {
 
-		InputStream inputStream = getClass().getResourceAsStream("scanphase.jfrm");
+		InputStream inputStream = getClass().getResourceAsStream("scanphase.jfrm");//$NON-NLS-1$
 		FormPanel fp = new FormPanel(inputStream);
 
-		JLabel lblFolder = fp.getLabel("lblfolder");
+		JLabel lblFolder = fp.getLabel("lblfolder");//$NON-NLS-1$
 		lblFolder.setText(perfoScanFolder.getFolder().getAbsolutePath());
 
-		JLabel lblfolderLabel = fp.getLabel("lblfolderlabel");
+		JLabel lblfolderLabel = fp.getLabel("lblfolderlabel");//$NON-NLS-1$
 		assert lblfolderLabel != null;
 		lblfolderLabel.setText("Folder in which the images will be saved");
 
-		btnStart = fp.getButton("btnstart");
+		btnStart = fp.getButton("btnstart");//$NON-NLS-1$
 		assert btnStart != null;
 		btnStart.setText("Start Record");
 		btnStart.setToolTipText("Start record the images in the folder");
-		btnStart.setIcon(new ImageIcon(ImageTools.loadImage(JScanPanel.class, "krec_record.png")));
+		btnStart.setIcon(new ImageIcon(ImageTools.loadImage(JScanPanel.class, "krec_record.png")));//$NON-NLS-1$
 
 		btnStart.addActionListener((e) -> {
 			try {
 				start();
 				updateUIState();
 			} catch (Exception ex) {
-				logger.error("error starting recording :" + ex.getMessage(), ex);
+				logger.error("error starting recording :" + ex.getMessage(), ex);//$NON-NLS-1$
 			}
 		});
 
-		btneraseimagefiles = fp.getButton("eraseimagefiles");
+		btneraseimagefiles = fp.getButton("eraseimagefiles");//$NON-NLS-1$
 		btneraseimagefiles.setText("Erase all imagefiles");
-		btneraseimagefiles.setIcon(new ImageIcon(ImageTools.loadImage(JScanPanel.class, "stop.png")));
+		btneraseimagefiles.setIcon(new ImageIcon(ImageTools.loadImage(JScanPanel.class, "stop.png")));//$NON-NLS-1$
 		btneraseimagefiles.setToolTipText("Erase all images in the folder to restart the record");
 
 		btneraseimagefiles.addActionListener((e) -> {
@@ -125,32 +133,34 @@ public class JScanPanel extends JPanel implements Disposable {
 
 		});
 
-		btnStop = fp.getButton("btnstop");
+		btnStop = fp.getButton("btnstop");//$NON-NLS-1$
 		assert btnStop != null;
 		btnStop.setText("Stop");
 		btnStop.setToolTipText("End record images");
 
-		btnStop.setIcon(new ImageIcon(ImageTools.loadImage(JScanPanel.class, "player_stop.png")));
+		btnStop.setIcon(new ImageIcon(ImageTools.loadImage(JScanPanel.class, "player_stop.png")));//$NON-NLS-1$
 
 		btnStop.addActionListener((e) -> {
 			try {
 				stop();
 				updateUIState();
 			} catch (Exception ex) {
-				logger.error("error stoping recording :" + ex.getMessage(), ex);
+				logger.error("error stoping recording :" + ex.getMessage(), ex);//$NON-NLS-1$
 			}
 		});
 		btnStop.setEnabled(false);
 
 		imageLabel = new JLabel();
-		fp.getFormAccessor("gridwebcam").replaceBean("webcampreview", imageLabel);
+		fp.getFormAccessor("gridwebcam")//$NON-NLS-1$
+			.replaceBean("webcampreview", imageLabel);//$NON-NLS-1$
 		imageLabel.setAlignmentX(0.5f);
 		imageLabel.setAlignmentY(0.5f);
 		imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
 		imageLabel.setVerticalAlignment(SwingConstants.CENTER);
 
 		imageStack = new JImagePreviewStack();
-		fp.getFormAccessor("gridpreview").replaceBean("imagespreview", imageStack);
+		fp.getFormAccessor("gridpreview")//$NON-NLS-1$
+			.replaceBean("imagespreview", imageStack);//$NON-NLS-1$
 
 		setLayout(new BorderLayout());
 		add(fp, BorderLayout.CENTER);
@@ -174,7 +184,7 @@ public class JScanPanel extends JPanel implements Disposable {
 
 	private void stopLivePreview() {
 		if (scheduleWithFixedDelay != null) {
-			logger.debug("cancel the livepreview");
+			logger.debug("cancel the livepreview"); //$NON-NLS-1$
 			scheduleWithFixedDelay.cancel(true);
 			scheduleWithFixedDelay = null;
 		}
@@ -200,14 +210,23 @@ public class JScanPanel extends JPanel implements Disposable {
 	public void start() throws Exception {
 
 		stopLivePreview();
-		logger.debug("start the record");
+		Thread.sleep(1000);
+		logger.debug("start the record");//$NON-NLS-1$
 		trigger = triggerFactory.create(webcam, new IWebCamListener() {
 
 			@Override
 			public void imageReceived(BufferedImage image, long timestamp) {
-				imageStack.addImage(image);
-				asyncPreviewImage(image);
-
+				
+				try {
+					logger.debug("add image");
+					SwingUtilities.invokeAndWait(() -> {
+						imageStack.addImage(image);
+							
+					});
+					asyncPreviewImage(image);
+				} catch(Exception ex) {
+					logger.error(ex.getMessage(), ex);
+				}
 			}
 		}, perfoScanFolder);
 
@@ -224,7 +243,7 @@ public class JScanPanel extends JPanel implements Disposable {
 			try {
 				trigger.stop();
 			} catch (Exception ex) {
-				logger.error("error closing web cam trigger :" + ex.getMessage(), ex);
+				logger.error("error closing web cam trigger :" + ex.getMessage(), ex);//$NON-NLS-1$
 			}
 			trigger = null;
 		}
@@ -237,7 +256,7 @@ public class JScanPanel extends JPanel implements Disposable {
 			try {
 				trigger.stop();
 			} catch (Exception ex) {
-				logger.error("error closing web cam trigger :" + ex.getMessage(), ex);
+				logger.error("error closing web cam trigger :" + ex.getMessage(), ex);//$NON-NLS-1$
 			}
 			trigger = null;
 		}
@@ -252,10 +271,23 @@ public class JScanPanel extends JPanel implements Disposable {
 		JFrame f = new JFrame();
 		f.getContentPane().setLayout(new BorderLayout());
 
-		Webcam w = Webcam.getDefault();
+		List<Webcam> list = Webcam.getWebcams(10000);
+		System.out.println(list);
+		
+		Webcam w = list.get(2);
+		WebcamDevice dev = w.getDevice();
+		dev.setResolution(new Dimension(3672 , 2856));
+		System.out.println(Arrays.asList(dev.getResolutions()));
+		//dev.open();
+		
+		
+		Dimension[] sizes = w.getCustomViewSizes();
+		System.out.println(Arrays.asList(sizes));
+	
 		w.open();
 
-		File t = File.createTempFile("testtrigger", ".folder");
+		File t = File.createTempFile("testtrigger",//$NON-NLS-1$ 
+				".folder");//$NON-NLS-1$
 		t.delete();
 		t.mkdirs();
 

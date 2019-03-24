@@ -47,20 +47,20 @@ public class JTriggerComponent extends JPanel {
    */
   protected void initComponents() throws Exception {
 
-    InputStream formIs = getClass().getResourceAsStream("triggerparameters.jfrm");
+    InputStream formIs = getClass().getResourceAsStream("triggerparameters.jfrm");//$NON-NLS-1$
     assert formIs != null;
     FormPanel fp = new FormPanel(formIs);
 
     chooser = new JMachineWithParametersChooser(ps);
-    fp.getFormAccessor().replaceBean("lblmachinechoose", chooser);
+    fp.getFormAccessor().replaceBean("lblmachinechoose", chooser);//$NON-NLS-1$
 
-    rdTime = fp.getRadioButton("rdtime");
+    rdTime = fp.getRadioButton("rdtime");//$NON-NLS-1$
     rdTime.addActionListener((e) -> updateState());
 
-    txtseconds = (JTextField) fp.getTextComponent("txtvalue");
+    txtseconds = (JTextField) fp.getTextComponent("txtvalue");//$NON-NLS-1$
     txtseconds.setText("2");
 
-    rdMachine = fp.getRadioButton("machine");
+    rdMachine = fp.getRadioButton("machine");//$NON-NLS-1$
     rdMachine.addActionListener((e) -> updateState());
 
     rdgroup = new ButtonGroup();
@@ -130,7 +130,7 @@ public class JTriggerComponent extends JPanel {
     f.getContentPane().setLayout(new BorderLayout());
 
     FilePrefsStorage p =
-        new FilePrefsStorage(new File("c:\\temp\\testTriggerComponents.properties"));
+        new FilePrefsStorage(new File("c:\\temp\\testTriggerComponents.properties")); //$NON-NLS-1$
     p.load();
     f.getContentPane().add(new JTriggerComponent(p), BorderLayout.CENTER);
     f.setVisible(true);

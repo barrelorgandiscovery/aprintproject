@@ -33,7 +33,7 @@ public class NewBookFrame extends TerminalParameterModelStep implements IModelSt
   private static Logger logger = Logger.getLogger(NewBookFrame.class);
 
   private APrintNGGeneralServices services;
-  private String instrumentName;
+  private String instrumentName; 
   private ModelValuedParameter instrumentParameter;
 
   public NewBookFrame() throws Exception {
@@ -96,9 +96,9 @@ public class NewBookFrame extends TerminalParameterModelStep implements IModelSt
       assert h != null;
 
       logger.debug("get the instrument");
-      Instrument instrument = services.getRepository().getInstrument(instrumentName);
+      Instrument instrument = services.getRepository().getInstrument(instrumentName) ;
 
-      logger.debug("instrument loaded :" + instrument);
+      logger.debug("instrument loaded :" + instrumentName);
       if (instrument == null) throw new Exception("instrument " + instrumentName + " not found");
       logger.debug("opening virtual book");
 
@@ -121,6 +121,7 @@ public class NewBookFrame extends TerminalParameterModelStep implements IModelSt
   public void setInstrumentName(String instrumentName) {
     this.instrumentName = instrumentName;
   }
+  
 
   @Override
   public void applyConfig() throws Exception {
@@ -130,6 +131,7 @@ public class NewBookFrame extends TerminalParameterModelStep implements IModelSt
   }
 
   public void updateConfig() {
+	  
     instrumentParameter = new ModelValuedParameter();
     instrumentParameter.setName("instrumentname");
     instrumentParameter.setLabel("Instrument Name");

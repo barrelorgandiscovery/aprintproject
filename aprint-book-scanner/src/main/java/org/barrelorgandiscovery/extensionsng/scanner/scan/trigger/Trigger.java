@@ -30,10 +30,10 @@ public abstract class Trigger {
 			public void imageReceived(BufferedImage image, long timestamp) {
 				// add image
 				try {
-					logger.debug("take a new image");
+					logger.debug("take a new image");//$NON-NLS-1$
 					psf.addNewImage(image);
 				} catch (Exception ex) {
-					logger.error("error saving picture :" + ex.getMessage(), ex);
+					logger.error("error saving picture :" + ex.getMessage(), ex); //$NON-NLS-1$
 				}
 				// relaunch
 				if (listener != null) {

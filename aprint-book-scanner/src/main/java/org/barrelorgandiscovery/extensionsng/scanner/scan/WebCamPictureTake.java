@@ -23,8 +23,8 @@ public class WebCamPictureTake implements Runnable {
 	}
 
 	@Override
-	public void run() {
-		logger.debug("take picture");
+	public synchronized void run() {
+		logger.debug("take picture");//$NON-NLS-1$
 		final BufferedImage picture = webCam.getDevice().getImage();
 		try {
 
@@ -34,7 +34,7 @@ public class WebCamPictureTake implements Runnable {
 			// display image
 
 		} catch (Exception ex) {
-			logger.error("error while showing the image " + ex.getMessage(), ex);
+			logger.error("error while showing the image " + ex.getMessage(), ex);//$NON-NLS-1$
 		}
 	}
 }

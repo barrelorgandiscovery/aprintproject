@@ -7,6 +7,8 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.barrelorgandiscovery.tools.VersionTools;
+
 import com.jeta.forms.components.panel.FormPanel;
 
 public class JHelloPanel extends JPanel implements IPunchMachinePanelActivate {
@@ -27,7 +29,7 @@ public class JHelloPanel extends JPanel implements IPunchMachinePanelActivate {
     FormPanel p = new FormPanel(getClass().getResourceAsStream("hello.jfrm"));
     
     JLabel label = p.getLabel("lblaprintmachine");
-    label.setText("APrint Commander - 10.2018");
+    label.setText("APrint Commander - " + VersionTools.getVersion());
     label.setIcon(new ImageIcon(getClass().getResource("pda_black.png")));
     
     AbstractButton fileselectbtn = p.getButton("fileselect");

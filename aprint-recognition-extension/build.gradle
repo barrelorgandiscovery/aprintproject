@@ -46,9 +46,8 @@ repositories {
 // In this section you declare the dependencies for your production and test code
 dependencies {
     compileOnly project(':aprint-gui')
-	
 	testCompile name:'junit', group:'junit', version:'3.8'
-//    compile name: 'Jama-1.0.3'
+	//    compile name: 'Jama-1.0.3'
 	compile name: 'Gray_Morphology-2.3.2'
     compile name: 'Trainable_Segmentation', group:'sc.fiji', version:'2.1.7-PF-PATCH' 
 }

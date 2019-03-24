@@ -78,38 +78,3 @@ task fatJar(type: Jar, dependsOn: jar) {
   }
 }
 
-task changeVersion() { 
-
-	inputs.files(file("src/main/resources/version.properties"))
-	outputs.files(file("src/main/resources/version.properties"))
-	doLast {
-		def props = new Properties()
-		def f = file("src/main/resources/version.properties")
-		assert f.exists()
-		f.withInputStream { props.load(it) }
-		def storedVersion = props.getProperty("version")
-		String fullstring
-		String year
-		String month
-		String build
-		(fullstring, year, month, build) = (storedVersion =~ /([0-9]+)\.([0-9]+).([0-9]+)/) [0]
-		build = Integer.toString( Integer.parseInt(build) + 1 ) // increment build
-		def newDate = new SimpleDateFormat('YYYY/MM/dd hh:mm').format(new Date());
-		
-		props.setProperty("date",newDate)
-		props.setProperty("version", "$year.$month.$build")
-		props.save(System.out, "Software Version")
-		props.setProperty("githash", getRevision())
-		f.withOutputStream { props.save(it,"APrint Version") }
-		
-		rootProject.ext.currentVersion = props.getProperty("version")
-		
-		println "version modified to ${rootProject.ext.currentVersion}"
-	}
-
-}
-
-build.dependsOn(changeVersion)
-processResources.dependsOn(changeVersion)
-
-

@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.io.InputStream;
 import java.io.Serializable;
 
+import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.IChooseWebCamListener;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.JChooseWebCam;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.JChooseWebCam.WebCamConfig;
@@ -22,6 +23,8 @@ public class JScanParameterStep extends BasePanelStep {
 
 	/** */
 	private static final long serialVersionUID = -7296047711004950598L;
+	
+	private static Logger logger = Logger.getLogger(JScanParameterStep.class);
 
 	private IPrefsStorage preferences;
 
@@ -96,6 +99,7 @@ public class JScanParameterStep extends BasePanelStep {
 
 	@Override
 	public Serializable unActivateAndGetSavedState() throws Exception {
+		logger.debug("stop the preview");
 		webcamChooser.stopPreview();
 		return null;
 	}

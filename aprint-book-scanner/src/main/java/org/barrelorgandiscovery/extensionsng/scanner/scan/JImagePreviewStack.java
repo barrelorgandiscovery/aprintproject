@@ -70,13 +70,14 @@ public class JImagePreviewStack extends JPanel {
 		f.getContentPane().setLayout(new BorderLayout());
 		JImagePreviewStack scanPanel = new JImagePreviewStack();
 
-		File folder = new File("C:\\projets\\APrint\\contributions\\patrice\\2018_numerisation_josephine");
+		File folder = new File("C:\\projets\\APrint\\contributions\\patrice\\2018_numerisation_josephine");//$NON-NLS-1$
 		assert folder.exists() && folder.isDirectory();
 
 		ScheduledExecutorService scheduleExecutor = Executors.newSingleThreadScheduledExecutor();
 
 		for (int i = 0; i < 10; i++) {
-			final File imageFile = new File(folder, "scan_image_" + i + ".jpg");
+			final File imageFile = new File(folder, "scan_image_"//$NON-NLS-1$ 
+												+ i + ".jpg");//$NON-NLS-1$
 			assert imageFile.exists();
 			
 			scheduleExecutor.execute(() -> {

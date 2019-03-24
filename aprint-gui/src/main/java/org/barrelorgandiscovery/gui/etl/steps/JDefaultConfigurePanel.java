@@ -10,12 +10,14 @@ import java.util.ArrayList;
 import javax.swing.JButton;
 
 import org.barrelorgandiscovery.gui.etl.JConfigurePanel;
+import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.model.ModelStep;
 import org.barrelorgandiscovery.model.ModelValuedParameter;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.tools.BeanAsk;
 import org.barrelorgandiscovery.tools.ImageCellRenderer;
+import org.barrelorgandiscovery.tools.InstrumentChooserPropertyEditor;
 import org.barrelorgandiscovery.tools.ScaleChooserPropertyEditor;
 import org.barrelorgandiscovery.tools.SwingUtils;
 import org.barrelorgandiscovery.virtualbook.transformation.importer.MidiFile;
@@ -49,17 +51,22 @@ public class JDefaultConfigurePanel extends JConfigurePanel {
 		propertySheetPanel.setDescriptionVisible(true);
 		propertySheetPanel.setSortingCategories(true);
 
+		
+		PropertyRendererRegistry prr = new PropertyRendererRegistry();
+		prr.registerDefaults();
+		prr.registerRenderer(Image.class, ImageCellRenderer.class);
+		
 		PropertyEditorRegistry pr = new PropertyEditorRegistry();
 		pr.registerDefaults();
 		pr.registerEditor(MidiFile.class, MidiFilePropertyEditor.class);
 
-		PropertyRendererRegistry prr = new PropertyRendererRegistry();
-		prr.registerDefaults();
-		prr.registerRenderer(Image.class, ImageCellRenderer.class);
-
 		pr.registerEditor(Scale.class,
 				new ScaleChooserPropertyEditor(env.getRepository()));
 
+		pr.registerEditor(Instrument.class,
+				new InstrumentChooserPropertyEditor(env.getRepository()));
+
+		
 		propertySheetPanel.setEditorFactory(pr);
 		propertySheetPanel.setRendererFactory(prr);
 

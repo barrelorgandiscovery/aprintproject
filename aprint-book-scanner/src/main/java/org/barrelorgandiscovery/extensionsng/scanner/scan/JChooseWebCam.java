@@ -37,6 +37,11 @@ import com.jeta.forms.components.panel.FormPanel;
  */
 public class JChooseWebCam extends JPanel implements Disposable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2121928714524074850L;
+
 	private static Logger logger = Logger.getLogger(JChooseWebCam.class);
 
 	public JChooseWebCam() throws Exception {
@@ -66,34 +71,41 @@ public class JChooseWebCam extends JPanel implements Disposable {
 
 		@Override
 		public String toString() {
-			return label + (d != null ? " - " + d.toString() : "");
+			return label + (d != null ? " - "//$NON-NLS-1$ 
+						+ d.toString() : "");//$NON-NLS-1$
 		}
 	}
 
 	protected void initComponents() throws Exception {
 
-		InputStream is = getClass().getResourceAsStream("choosewebcam.jfrm");
+		InputStream is = getClass().getResourceAsStream("choosewebcam.jfrm");//$NON-NLS-1$
 		assert is != null;
 		FormPanel fp = new FormPanel(is);
 
-		previewPanel = fp.getLabel("preview");
+		previewPanel = fp.getLabel("preview");//$NON-NLS-1$
 		previewPanel.setText("");
 
-		JLabel lblchooseWebCam = fp.getLabel("lblchoosewebcam");
+		JLabel lblchooseWebCam = fp.getLabel("lblchoosewebcam");//$NON-NLS-1$
 		lblchooseWebCam.setText("Choose Webcam ..");
 
-		combo = fp.getComboBox("cbwebcam");
+		combo = fp.getComboBox("cbwebcam");//$NON-NLS-1$
 
 		List<Webcam> webcams = Webcam.getWebcams();
-		logger.debug("cams :" + webcams);
+		logger.debug("cams :" + webcams);//$NON-NLS-1$
 
 		ArrayList<WebCamConfig> webcamdisplay = new ArrayList<>();
 		webcamdisplay.add(new WebCamConfig(null, null, "<Not Selected>"));
 		webcams.forEach((w) -> {
+			// for each webcam, add the view sizes
 			Dimension[] sizes = w.getViewSizes();
 			for (Dimension d : sizes) {
 				webcamdisplay.add(new WebCamConfig(w, d, w.toString()));
 			}
+			
+			
+			webcamdisplay.add(new WebCamConfig(w, new Dimension(3000,3000), w.toString()));
+			
+			
 		});
 
 		combo.setModel(new DefaultComboBoxModel<>(webcamdisplay.toArray()));
@@ -102,7 +114,7 @@ public class JChooseWebCam extends JPanel implements Disposable {
 
 			@Override
 			public void itemStateChanged(ItemEvent e) {
-				logger.debug("item changed listener " + e);
+				logger.debug("item changed listener " + e);//$NON-NLS-1$
 				if (e.getStateChange() == ItemEvent.SELECTED) {
 					WebCamConfig i = (WebCamConfig) e.getItem();
 					try {
@@ -114,7 +126,7 @@ public class JChooseWebCam extends JPanel implements Disposable {
 						try {
 							chooseWebCamListener.choosedWebCamChanged(i);
 						} catch (Exception ex) {
-							logger.error("error in choosewebcam listener :" + ex.getMessage(), ex);
+							logger.error("error in choosewebcam listener :" + ex.getMessage(), ex);//$NON-NLS-1$
 						}
 					}
 				}
@@ -134,7 +146,8 @@ public class JChooseWebCam extends JPanel implements Disposable {
 		if (webcamdisplay != null && webcamdisplay.webcam != null) {
 			Webcam w = webcamdisplay.webcam;
 			if (webcamdisplay != null) {
-				w.setViewSize(webcamdisplay.d);
+				w.getDevice().setResolution(webcamdisplay.d);
+				//  w.setViewSize(webcamdisplay.d);
 			}
 			w.open();
 
@@ -150,7 +163,8 @@ public class JChooseWebCam extends JPanel implements Disposable {
 		assert this.current != null;
 		assert this.current.isOpen();
 		WebCamPictureTake wt = new WebCamPictureTake(current, (i, t) -> {
-
+			logger.debug("image size :" + i.getWidth() + "x" + i.getHeight());
+			// thumbnail
 			final BufferedImage transformed = ImageTools.crop(300, 300, i);
 
 			SwingUtilities.invokeLater(() -> {
@@ -193,7 +207,7 @@ public class JChooseWebCam extends JPanel implements Disposable {
 		BasicConfigurator.configure(new LF5Appender());
 
 		List<Webcam> webcams = Webcam.getWebcams();
-		logger.debug("cams :" + webcams);
+		logger.debug("cams :" + webcams);//$NON-NLS-1$
 
 		JFrame f = new JFrame();
 		f.setSize(800, 600);

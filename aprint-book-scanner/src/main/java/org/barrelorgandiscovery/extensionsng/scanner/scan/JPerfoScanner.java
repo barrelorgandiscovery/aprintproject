@@ -83,7 +83,7 @@ public class JPerfoScanner extends JPanel implements Disposable {
 
       while (!cancelTracker.isCanceled()) {
         try {
-          logger.debug("take picture");
+          logger.debug("take picture");//$NON-NLS-1$
           final BufferedImage picture = webCam.getDevice().getImage();
           try {
         	  // display image
@@ -93,12 +93,12 @@ public class JPerfoScanner extends JPanel implements Disposable {
                   JPerfoScanner.this.repaint();
                 });
           } catch (Exception ex) {
-            logger.error("error while showing the image " + ex.getMessage(), ex);
+            logger.error("error while showing the image " + ex.getMessage(), ex);//$NON-NLS-1$
           }
 
           if (!onlyWebCam.get()) {
         	  // save the image only in record mode
-            logger.debug("save and move");
+            logger.debug("save and move");//$NON-NLS-1$
             try {
               perfoScan.addNewImage(picture);
               machineControl.sendCommand(new DisplacementCommand(y, -50.0));
@@ -177,18 +177,18 @@ public class JPerfoScanner extends JPanel implements Disposable {
               }
 
               btn.setText("Stop");
-              logger.debug("open web cam");
+              logger.debug("open web cam");//$NON-NLS-1$
               defaultWebCam = openWebCam();
 
               cancelTracker = new CancelTracker();
-              logger.debug("start scan");
+              logger.debug("start scan");//$NON-NLS-1$
               ScanBook taskToRun = new ScanBook(cancelTracker, defaultWebCam);
 
-              logger.debug("start job");
+              logger.debug("start job");//$NON-NLS-1$
               exec.submit(taskToRun);
 
             } catch (Exception ex) {
-              logger.error("error in scan :" + ex.getMessage(), ex);
+              logger.error("error in scan :" + ex.getMessage(), ex);//$NON-NLS-1$
             }
           }
 
@@ -233,15 +233,15 @@ public class JPerfoScanner extends JPanel implements Disposable {
 
     GRBLMachine machine = new GRBLMachine();
     GRBLMachineParameters params = new GRBLMachineParameters();
-    System.out.println("Available Port List :" + Arrays.asList(SerialPortList.getPortNames()));
-    params.setComPort("COM5");
+    System.out.println("Available Port List :" + Arrays.asList(SerialPortList.getPortNames()));//$NON-NLS-1$
+    params.setComPort("COM5");//$NON-NLS-1$
     MachineControl open = machine.open(params);
 
     Thread.sleep(4000);
 
     open.sendCommand(new HomingCommand());
 
-    File perfoImageFolder = new File("c:\\temp\\perfo20180903");
+    File perfoImageFolder = new File("c:\\temp\\perfo20180903");//$NON-NLS-1$
     if (!perfoImageFolder.exists()) {
       perfoImageFolder.mkdirs();
     }

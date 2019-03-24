@@ -40,12 +40,13 @@ public class MachineTrigger extends Trigger implements Disposable {
     dispose();
     AbstractMachine machine = parameters.createAssociatedMachineInstance();
     MachineControl mc = machine.open(parameters);
-    logger.debug("machine opened");
+    logger.debug("machine opened");//$NON-NLS-1$
     Thread.sleep(3000);
-    logger.debug("homing ...");
+    logger.debug("homing ...");//$NON-NLS-1$
     mc.sendCommand(new HomingCommand());
-    logger.debug("... homing done");
-    Thread.sleep(1000);
+    logger.debug("... homing done");//$NON-NLS-1$
+    Thread.sleep(3000);
+    logger.debug("homing ended");
     if (cancelTracker != null) {
       cancelTracker.cancel();
       cancelTracker = null;
@@ -59,23 +60,31 @@ public class MachineTrigger extends Trigger implements Disposable {
             try {
               double y = 0.0;
               while (!cancelTracker.isCanceled()) {
+                y +=30;
                 mc.sendCommand(new DisplacementCommand(y, -50.0));
+                
+                //Thread.sleep(2000);
+                
+                Thread.sleep(3000); // for hi res ...
+                
                 takePicture();
+                logger.debug("picture taken");
               }
-              logger.debug("advance ended");
-            } catch (Exception ex) {
-              logger.error("error while scanning :" + ex.getMessage(), ex);
+              logger.debug("advance ended"); //$NON-NLS-1$
+            } catch (Throwable ex) {
+              logger.error("error while scanning :" + ex.getMessage(), ex); //$NON-NLS-1$
               dispose();
             }
           }
         };
     executor = Executors.newSingleThreadExecutor();
-    logger.debug("start advance");
+    logger.debug("start advance");//$NON-NLS-1$
     executor.submit(r);
   }
 
   @Override
   public void dispose() {
+	  logger.debug("dispose the machine trigger");
     if (cancelTracker != null) {
       cancelTracker.cancel();
       cancelTracker = null;

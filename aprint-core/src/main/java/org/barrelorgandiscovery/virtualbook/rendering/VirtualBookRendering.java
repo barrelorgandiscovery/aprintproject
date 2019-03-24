@@ -29,7 +29,7 @@ public class VirtualBookRendering implements Serializable {
 		return carton_color;
 	}
 
-	private Color shallow = new Color(30,30,30);
+	private Color shadow = new Color(80,80,80);
 	
 	/**
 	 * This function render a hole
@@ -41,12 +41,12 @@ public class VirtualBookRendering implements Serializable {
 			boolean isSelected) {
 
 		if (!isSelected) {
-			g2d.setColor(shallow);
+			g2d.setColor(shadow);
 			g2d.fillRoundRect(x, y, width, height, 3, 3);
 			g2d.setColor(Color.white);
 			g2d.fillRoundRect(x + 2, y + 2, width - 2, height - 2, 3, 3);
 		} else {
-			g2d.setColor(shallow);
+			g2d.setColor(shadow);
 			g2d.fillRoundRect(x, y, width, height, 3, 3);
 			g2d.setColor(Color.red);
 			g2d.fillRoundRect(x + 2, y + 2, width - 2, height - 2, 3, 3);

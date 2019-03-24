@@ -25,6 +25,7 @@ public class ConfigFactory {
 
   public static Config getInstance() {
     return createUnix();
+    		//createTest();
   }
   
 }
