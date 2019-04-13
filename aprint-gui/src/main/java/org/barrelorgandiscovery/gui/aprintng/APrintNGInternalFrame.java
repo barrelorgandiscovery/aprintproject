@@ -8,6 +8,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.ArrayList;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -114,7 +115,7 @@ public class APrintNGInternalFrame extends JFrame implements IAPrintWait, Dirtya
   protected void initializeComponents() throws Exception {
     setupIcon();
     setGlassPane(infiniteprogresspanel);
-
+  
     Point windowPosition = prefixedNamePrefsStorage.getPoint("windowposition"); //$NON-NLS-1$
     if (windowPosition != null) {
       setLocation(windowPosition);
@@ -130,7 +131,7 @@ public class APrintNGInternalFrame extends JFrame implements IAPrintWait, Dirtya
       setSize(800, 600);
     }
 
-    setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+    // setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
     // add hooks for windows preference saving
 
@@ -148,18 +149,26 @@ public class APrintNGInternalFrame extends JFrame implements IAPrintWait, Dirtya
           public void componentShown(ComponentEvent e) {}
         });
 
-    addWindowListener(
-        new WindowAdapter() {
-          @Override
-          public void windowClosing(WindowEvent e) {
+    
+    wadapter = new WindowAdapter() {
+	  @Override
+	  public void windowClosing(WindowEvent e) {
 
-            saveDimensionPreferences();
+	    saveDimensionPreferences();
 
-            if (!askForClose()) {
-            	setVisible(true);
-            }
-          }
-        });
+	    if (!askForClose()) {
+	    	// keep the window
+	    	setVisible(true);
+	    } else {
+	    	try {
+	    		dispose();
+	    	} catch(Throwable t) {
+	    		
+	    	}
+	    }
+	  }
+	};
+	addWindowListener(wadapter);
   }
 
   /*
@@ -300,24 +309,33 @@ public class APrintNGInternalFrame extends JFrame implements IAPrintWait, Dirtya
   }
 
   private boolean frameDisposed = false;
+  private WindowAdapter wadapter;
+  
   @Override
   public void dispose() {
     logger.debug("dispose frame");
+    
+    removeWindowListener(wadapter);
+    
+    try {
 
-    Container panel = getContentPane();
-    Component[] allComponents = panel.getComponents();
-    if (allComponents != null) {
-      for (Component c : allComponents) {
-        if (c instanceof Disposable) {
-          try {
-            ((Disposable) c).dispose();
-          } catch (Throwable ex) {
-          }
-        }
-      }
+	    Container panel = getContentPane();
+	    Component[] allComponents = panel.getComponents();
+	    if (allComponents != null) {
+	      for (Component c : allComponents) {
+	        if (c instanceof Disposable) {
+	          try {
+	            ((Disposable) c).dispose();
+	          } catch (Throwable ex) {
+	          }
+	        }
+	      }
+	    }
+	
+	    clearDirty();
+    } catch(Throwable t) {
+    	logger.error(t.getMessage(), t);
     }
-
-    clearDirty();
     frameDisposed = true;
     super.dispose();
   }

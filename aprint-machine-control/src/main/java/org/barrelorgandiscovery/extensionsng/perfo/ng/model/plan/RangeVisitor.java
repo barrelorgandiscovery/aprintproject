@@ -32,20 +32,38 @@ public class RangeVisitor extends CommandVisitor {
 
   @Override
   public void visit(int index, PunchCommand punchCommand) throws Exception {
-    xmin = Math.min(xmin, punchCommand.getX());
-    xmax = Math.max(xmax, punchCommand.getX());
-    ymin = Math.min(ymin, punchCommand.getY());
-    ymax = Math.max(ymax, punchCommand.getY());
+    xmin = minNotNan(xmin, punchCommand.getX());
+    xmax = maxNotNan(xmax, punchCommand.getX());
+    ymin = minNotNan(ymin, punchCommand.getY());
+    ymax = maxNotNan(ymax, punchCommand.getY());
   }
 
   @Override
   public void visit(int index, DisplacementCommand displacementCommand) throws Exception {
-    xmin = Math.min(xmin, displacementCommand.getX());
-    xmax = Math.max(xmax, displacementCommand.getX());
-    ymin = Math.min(ymin, displacementCommand.getY());
-    ymax = Math.max(ymax, displacementCommand.getY());
+    xmin = minNotNan(xmin, displacementCommand.getX());
+    xmax = maxNotNan(xmax, displacementCommand.getX());
+    ymin = minNotNan(ymin, displacementCommand.getY());
+    ymax = maxNotNan(ymax, displacementCommand.getY());
+  }
+  
+  
+  private double minNotNan(double a,double b) {
+	  if (Double.isNaN(a))
+		  return b;
+	  if (Double.isNaN(b))
+		  return a;
+	  return Math.min(a,b);
   }
 
+  private double maxNotNan(double a,double b) {
+	  if (Double.isNaN(a))
+		  return b;
+	  if (Double.isNaN(b))
+		  return a;
+	  return Math.max(a,b);
+  }
+
+  
   @Override
   public void visit(int index, HomingCommand command)
       throws Exception { // TODO Auto-generated method stub

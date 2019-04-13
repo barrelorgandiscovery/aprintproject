@@ -313,6 +313,7 @@ public class PunchProcess {
       + rv.getYmin() + " " + rv.getXmax() + "," + rv.getYmax());
       
       MovePlanVisitor mpv = new MovePlanVisitor(p, 0, - rv.getYmin());
+      mpv.visit(p);
       
       p = mpv.getConstructedPunchPlan();
     		  
@@ -325,6 +326,7 @@ public class PunchProcess {
           if (cancelTracker.isCanceled()) {
             return;
           }
+          logger.debug("send command :" + c);
           open.sendCommand(c);
           // feedback
           if ((cpt % 20) == 0 && listener != null) {

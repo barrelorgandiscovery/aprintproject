@@ -1230,6 +1230,8 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
     // editingToolbar.add(modify);
 
     editingToolbar.add(createQuickScriptAccess());
+    
+    
 
     toolbarPanel.add(editingToolbar);
     editingToolbar.setVisible(aprintproperties.getToolbarVisibility(editingToolbar.getName()));
@@ -1547,6 +1549,8 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
   private IPlaySubSystemManagerListener psslistener;
 
   private ASyncPreparePlayin aSyncPreparePlayin;
+
+private IScriptManagerListener scriptRefreeshListener;
 
   /**
    * Touch layer visibility from existing preferences
@@ -2864,44 +2868,58 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
     // save toolbar
     saveToolbarPreferences();
 
-    for (JDialog d : associatedFrames) {
-      try {
-        logger.debug("dispose dialog " + d); //$NON-NLS-1$
-        d.dispose();
-      } catch (Exception ex) {
-        logger.debug("error in disposing the dialog " + d); //$NON-NLS-1$
-      }
+    if (this.associatedFrames != null) {
+	    for (JDialog d : associatedFrames) {
+	      try {
+	        logger.debug("dispose dialog " + d); //$NON-NLS-1$
+	        d.dispose();
+	      } catch (Exception ex) {
+	        logger.debug("error in disposing the dialog " + d); //$NON-NLS-1$
+	      }
+	    }
+	    this.associatedFrames.clear();
+	    this.associatedFrames = null;
     }
-
+    
     recurseDisposeComponent(this.getContentPane());
 
     Container c = toolWindowManager.getMainContainer();
+    
     recurseDisposeComponent(c);
 
     logger.debug("dispose the play subsystem"); //$NON-NLS-1$
-    PlaySubSystem current = playsubsystem.getCurrent();
-    if (current != null) {
-      // stop the play
-      if (current.getOwner() == this) {
-        try {
-          current.stop();
-        } catch (Exception ex) {
-          logger.warn(
-              "exception in stopping the play ..." //$NON-NLS-1$
-                  + ex.getMessage(),
-              ex);
-        }
-      }
+    if (playsubsystem != null) {
+    	PlaySubSystem current = playsubsystem.getCurrent();
+	    if (current != null) {
+	      // stop the play
+	      if (current.getOwner() == this) {
+	        try {
+	          current.stop();
+	        } catch (Exception ex) {
+	          logger.warn(
+	              "exception in stopping the play ..." //$NON-NLS-1$
+	                  + ex.getMessage(),
+	              ex);
+	        }
+	      }
+	    }
     }
-
     // stop the listening
     if (psslistener != null && playsubsystem != null) {
       logger.debug("unregister the events"); //$NON-NLS-1$
       playsubsystem.removePlaySubSystemManagerListener(psslistener);
     }
 
+    if (scriptManager != null) {
+    	scriptManager.removeScriptManagerListener( scriptRefreeshListener);
+    }
+    
+    scriptManager = null;
+    
     aSyncPreparePlayin.dispose();
 
+    playsubsystem = null;
+    
     // dispose extensions
 
     if (this.exts != null) {
@@ -2917,6 +2935,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
           logger.error("error while disposing " + ext);
         }
       }
+      this.exts = null;
     }
 
     super.dispose();
@@ -3363,14 +3382,14 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
           }
         });
 
-    scriptManager.addScriptManagerListener(
-        new IScriptManagerListener() {
-          public void scriptChanged(String scriptname) {}
+    scriptRefreeshListener = new IScriptManagerListener() {
+  	  public void scriptChanged(String scriptname) {}
 
-          public void scriptListChanged(String[] newScriptList) {
-            reloadScriptList(qscriptExecuteCombo);
-          }
-        });
+  	  public void scriptListChanged(String[] newScriptList) {
+  	    reloadScriptList(qscriptExecuteCombo);
+  	  }
+  	};
+  	scriptManager.addScriptManagerListener(scriptRefreeshListener);
 
     return qscriptExecuteCombo;
   }

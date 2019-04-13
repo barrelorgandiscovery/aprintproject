@@ -2360,17 +2360,35 @@ public class APrintNG extends APrintNGInternalFrame
 
   // /////////////////////////////////////////////////////////////////////////
 
+  // weak references to the dialogs
   ArrayList<WeakReference<APrintNGInternalFrame>> internalFrames =
       new ArrayList<WeakReference<APrintNGInternalFrame>>();
 
+  private void cleanUp() {
+	  int cpt = 0;
+	  while (cpt < internalFrames.size()) {
+		  WeakReference<APrintNGInternalFrame> f = internalFrames.get(cpt);
+		  if (f != null) {
+			  APrintNGInternalFrame ref = f.get();
+			  if (ref != null && ref.isDisposed()) {
+				  internalFrames.remove(cpt);
+				  continue; // next
+			  }
+		  }
+		  cpt++;
+	  }
+  }
+  
   public void addNewInternalFrame(APrintNGInternalFrame internalFrame) {
-
+	cleanUp();
     if (internalFrame == null) return;
 
     internalFrames.add(new WeakReference<APrintNGInternalFrame>(internalFrame));
   }
 
   public APrintNGInternalFrame[] listInternalFrames() {
+	cleanUp();
+	  
     ArrayList<APrintNGInternalFrame> ret = new ArrayList<APrintNGInternalFrame>();
 
     for (Iterator iterator = internalFrames.iterator(); iterator.hasNext(); ) {
@@ -2384,27 +2402,6 @@ public class APrintNG extends APrintNGInternalFrame
 
     return ret.toArray(new APrintNGInternalFrame[0]);
   }
-
-  // /*
-  // * (non-Javadoc)
-  // *
-  // * @see org.barrelorgandiscovery.gui.aprintng.APrintNGGeneralServices#
-  // * listInternaFrames()
-  // */
-  // private APrintNGInternalFrame[] old_listInternalFrames() {
-  // int c = desktopPane.getComponentCount();
-  // ArrayList<APrintNGInternalFrame> l = new
-  // ArrayList<APrintNGInternalFrame>();
-  //
-  // for (int i = 0; i < c; i++) {
-  // Component component = desktopPane.getComponent(i);
-  // if (component instanceof APrintNGInternalFrame) {
-  // l.add((APrintNGInternalFrame) component);
-  // }
-  // }
-  //
-  // return l.toArray(new APrintNGInternalFrame[0]);
-  // }
 
   /*
    * (non-Javadoc)

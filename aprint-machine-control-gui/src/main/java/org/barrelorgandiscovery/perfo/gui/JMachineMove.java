@@ -220,8 +220,8 @@ public class JMachineMove extends JPanel implements IPunchMachinePanelActivate {
                 SwingUtilities.invokeLater(
                     () -> {
                       poslabel.setText("" + status + ":" + wx + ";" + wy);
-                      currentX = wx;
-                      currentY = wy;
+                      currentX = wy;
+                      currentY = wx;
                     });
 
               } catch (Exception ex) {

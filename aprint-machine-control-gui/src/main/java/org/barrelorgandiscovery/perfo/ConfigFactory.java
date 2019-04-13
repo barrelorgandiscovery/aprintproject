@@ -18,14 +18,14 @@ public class ConfigFactory {
   
   private static Config createTest() {
 	  Config c = new Config();
-	  c.usbPort = "COM5";
+	  c.usbPort = "COM7";
 	  c.fileFolderPath = new File("c:\\temp");
 	  return c;
   }
 
   public static Config getInstance() {
     return createUnix();
-    		//createTest();
+    		// createTest();
   }
   
 }
