@@ -47,9 +47,9 @@ new SwingBuilder().edt {
                          v? (
                              {
                                  double ca = ( (sl.value - 1.0) / (100) * (2 - 0.5) + 0.5 )
-                                 def s = "Accelerer" 
+                                 def s = "Ralentir  " 
                                  if (ca < 1.0) {
-                                   s = "Ralentir"
+                                   s = "Accelerer"
                                  }
                                   
                                     s + " " +  String.format("%3.1f",ca)
@@ -64,7 +64,7 @@ new SwingBuilder().edt {
     def f
     def b = button(text:"Changer le tempo",actionPerformed:{
       try {
-        double facteur = (sl.value - 1.0) / (100) * (0.5 - 2) + 2
+        double facteur = ( (sl.value - 1.0) / (100) * (2 - 0.5) + 0.5 )
         
         
         changeTempo(virtualbook,currentinstrument,facteur)
@@ -79,9 +79,9 @@ new SwingBuilder().edt {
     
     f = GUIHelper.showFrame(c,b)
     SwingUtils.center(f)
-    f.pack()
-   
-     f.resizable=false;
+    // f.pack()
+    f.size = [500,180];
+     f.resizable=true;
     f.visible = true
    
 

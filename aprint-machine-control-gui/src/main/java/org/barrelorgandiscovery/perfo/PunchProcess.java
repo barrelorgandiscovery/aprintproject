@@ -10,6 +10,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.SwingUtilities;
 
@@ -28,6 +29,7 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.RangeVisitor;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.punchio.PunchIO;
 import org.barrelorgandiscovery.gui.CancelTracker;
 import org.barrelorgandiscovery.gui.ICancelTracker;
+import org.barrelorgandiscovery.perfo.gui.IPunchParameters;
 
 import jssc.SerialPortList;
 
@@ -124,7 +126,7 @@ public class PunchProcess {
    * @return error files, or null if successfull
    * @throws Exception
    */
-  public File[] startPunch(PunchListener listener, File[] filesToPunch) throws Exception {
+  public File[] startPunch(PunchListener listener, File[] filesToPunch, final IPunchParameters punchParameters) throws Exception {
 
 	  
     if (cancelTracker != null) {
@@ -185,8 +187,9 @@ public class PunchProcess {
                       });
                 }
 
+                PunchPlan punchPlan = e.getValue();
                 backgroundThreadProcessPunchPlan(
-                    fileToProcess, e.getValue(), listener, finalCancelTracker);
+                    fileToProcess, punchPlan, punchParameters,  listener, finalCancelTracker);
 
                 if (listener != null) {
                   SwingUtilities.invokeLater(
@@ -218,9 +221,17 @@ public class PunchProcess {
     
     return null;
   }
+  
+  private AtomicBoolean pause = new AtomicBoolean(false);
+  
+  public void pause() {
+	  pause.getAndSet(!pause.get());
+  }
 
   private void backgroundThreadProcessPunchPlan(
-      final File file, PunchPlan p, PunchListener listener, ICancelTracker cancelTracker)
+      final File file, PunchPlan p, IPunchParameters punchParameters, 
+      PunchListener listener, 
+      ICancelTracker cancelTracker)
       throws Exception {
 
     GRBLMachine machine = new GRBLMachine();
@@ -238,9 +249,10 @@ public class PunchProcess {
             listener.informCurrentPunchPosition(file, 0, finalp.getCommandsByRef().size());
           });
     }
-
+    logger.debug("open machine");
     MachineControl open = machine.open(params);
     try {
+      logger.debug("machine opened");
       open.setMachineControlListener(
           new MachineControlListener() {
 
@@ -274,7 +286,6 @@ public class PunchProcess {
           });
 
       if (listener != null) {
-     
         SwingUtilities.invokeLater(
             () -> {
               listener.initializing("Wait for the machine ... ");
@@ -293,7 +304,7 @@ public class PunchProcess {
       // wait for the initialization
       Thread.sleep(4000);
 
-      
+      logger.debug("sending homing");
       HomingCommand homing = new HomingCommand();
       open.sendCommand(homing);
       open.flushCommands();
@@ -305,14 +316,14 @@ public class PunchProcess {
             });
       }
       
-      // shift the punch plan
+      // shift the punch plan for y
       RangeVisitor rv = new RangeVisitor();
       rv.visit(p);
       
       logger.debug("range visitor elements " + rv.getXmin() + "," 
       + rv.getYmin() + " " + rv.getXmax() + "," + rv.getYmax());
       
-      MovePlanVisitor mpv = new MovePlanVisitor(p, 0, - rv.getYmin());
+      MovePlanVisitor mpv = new MovePlanVisitor(p, punchParameters.getOffset(), - rv.getYmin() + punchParameters.getSpace());
       mpv.visit(p);
       
       p = mpv.getConstructedPunchPlan();
@@ -326,6 +337,16 @@ public class PunchProcess {
           if (cancelTracker.isCanceled()) {
             return;
           }
+          
+          while(pause.get()) {
+        	  Thread.sleep(1000);
+        	  if (cancelTracker.isCanceled()) {
+                  return;
+              }
+        	  listener.message("Pause");
+          }
+          
+          
           logger.debug("send command :" + c);
           open.sendCommand(c);
           // feedback
@@ -355,6 +376,8 @@ public class PunchProcess {
       // switch off the machine
       open.close();
     }
+    
+    
   }
 
   /** stop method for aborting the process, */

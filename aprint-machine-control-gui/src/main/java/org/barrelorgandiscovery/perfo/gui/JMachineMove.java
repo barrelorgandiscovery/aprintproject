@@ -331,6 +331,12 @@ public class JMachineMove extends JPanel implements IPunchMachinePanelActivate {
     setEnable(this, isActivate());
   }
 
+  /**
+   * Test procedure
+   * 
+   * @param args
+   * @throws Exception
+   */
   public static void main(String[] args) throws Exception {
     BasicConfigurator.configure(new LF5Appender());
     JFrame f = new JFrame();
@@ -343,7 +349,7 @@ public class JMachineMove extends JPanel implements IPunchMachinePanelActivate {
 
           @Override
           public void navigateTo(IPunchMachinePanelActivate punchPanel, PunchScreen newScreen) {
-            // TODO Auto-generated method stub
+            
 
           }
         };

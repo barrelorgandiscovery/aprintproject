@@ -16,119 +16,126 @@ import com.jeta.forms.components.panel.FormPanel;
 
 public class JPunch extends JPanel implements IPunchMachinePanelActivate {
 
-  private static Logger logger = Logger.getLogger(JPunch.class);
-  private PunchProcess punchProcess;
-  private JSelectFiles selectFilesComponent;
-  private Navigation navigation;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4632775753095012058L;
 
-  public JPunch(PunchProcess punchProcess, JSelectFiles selectFilesComponent, Navigation navigation)
-      throws Exception {
-    super();
+	private static Logger logger = Logger.getLogger(JPunch.class);
+	private PunchProcess punchProcess;
+	private JSelectFiles selectFilesComponent;
+	private Navigation navigation;
+	private IPunchParameters punchParameters;
 
-    this.punchProcess = punchProcess;
-    this.selectFilesComponent = selectFilesComponent;
-    this.navigation = navigation;
-    initComponents();
-  }
+	public JPunch(PunchProcess punchProcess, 
+			      JSelectFiles selectFilesComponent, 
+			      IPunchParameters punchParameters,
+			      Navigation navigation)
+			throws Exception {
+		super();
+		this.punchParameters = punchParameters;
+		this.punchProcess = punchProcess;
+		this.selectFilesComponent = selectFilesComponent;
+		this.navigation = navigation;
+		initComponents();
+	}
 
-  private JLabel lblFilePos;
-  private JLabel lblpunchlabel;
-  private JLabel lblmachineState;
-  private AbstractButton cancelButton;
-  private AbstractButton btnpausetoggle;
+	private JLabel lblFilePos;
+	private JLabel lblpunchlabel;
+	private JLabel lblmachineState;
+	private AbstractButton cancelButton;
+	private AbstractButton btnpausetoggle;
 
-  protected void initComponents() throws Exception {
+	protected void initComponents() throws Exception {
 
-    FormPanel p = new FormPanel(getClass().getResourceAsStream("punch.jfrm"));
+		FormPanel p = new FormPanel(getClass().getResourceAsStream("punch.jfrm"));
 
-    setLayout(new BorderLayout());
-    add(p, BorderLayout.CENTER);
+		setLayout(new BorderLayout());
+		add(p, BorderLayout.CENTER);
 
-    lblFilePos = p.getLabel("filepos");
-    lblpunchlabel = p.getLabel("punchlabel");
-    lblmachineState = p.getLabel("machinestate");
+		lblFilePos = p.getLabel("filepos");
+		lblpunchlabel = p.getLabel("punchlabel");
+		lblmachineState = p.getLabel("machinestate");
 
-    cancelButton = p.getButton("cancel");
-    defineCancelButton();
-    cancelButton.addActionListener(
-        (e) -> {
-          punchProcess.stop();
-          navigation.navigateTo(this, PunchScreen.Hello);
-        });
+		cancelButton = p.getButton("cancel");
+		defineCancelButton();
+		cancelButton.addActionListener((e) -> {
+			punchProcess.stop();
+			navigation.navigateTo(this, PunchScreen.Hello);
+		});
 
-    btnpausetoggle = p.getButton("pausetoggle");
-    btnpausetoggle.setIcon(new ImageIcon(getClass().getResource("player_pause.png")));
-    btnpausetoggle.setText("Pause");
-    btnpausetoggle.addActionListener(
-        (e) -> {
-          logger.debug("pause");
-        });
-  }
+		btnpausetoggle = p.getButton("pausetoggle");
+		btnpausetoggle.setIcon(new ImageIcon(getClass().getResource("player_pause.png")));
+		btnpausetoggle.setText("Pause");
+		btnpausetoggle.addActionListener((e) -> {
+			logger.debug("pause");
+			punchProcess.pause();
+		});
+	}
 
-  private void defineCancelButton() {
-    cancelButton.setText("Cancel");
-    cancelButton.setIcon(new ImageIcon(getClass().getResource("cancel.png")));
-  }
+	private void defineCancelButton() {
+		cancelButton.setText("Cancel");
+		cancelButton.setIcon(new ImageIcon(getClass().getResource("cancel.png")));
+	}
 
-  private void setInformMessage(String message) {
-    lblpunchlabel.setText(message);
-    repaint();
-  }
+	private void setInformMessage(String message) {
+		lblpunchlabel.setText(message);
+		repaint();
+	}
 
-  private void setMachineStatus(String message) {
-    lblmachineState.setText(message);
-    repaint();
-  }
+	private void setMachineStatus(String message) {
+		lblmachineState.setText(message);
+		repaint();
+	}
 
-  @Override
-  public void activate() {
-    // checking files
-    setInformMessage("Verify punch files");
-    defineCancelButton();
-    try {
-      punchProcess.startPunch(
-          new PunchListener() {
+	@Override
+	public void activate() {
+		// checking files
+		setInformMessage("Verify punch files");
+		defineCancelButton();
+		try {
+			
+			logger.debug("launch the punch");
+			punchProcess.startPunch(new PunchListener() {
 
-            @Override
-            public void startFile(File punchFile) {
-              setInformMessage("Punching " + punchFile.getName());
-            }
+				@Override
+				public void startFile(File punchFile) {
+					setInformMessage("Punching " + punchFile.getName());
+				}
 
-            @Override
-            public void message(String message) {
-              setMachineStatus(message);
-            }
+				@Override
+				public void message(String message) {
+					setMachineStatus(message);
+				}
 
-            @Override
-            public void initializing(String status) {
-              setMachineStatus(status);
-            }
+				@Override
+				public void initializing(String status) {
+					setMachineStatus(status);
+				}
 
-            @Override
-            public void informCurrentPunchPosition(
-                File currentFile, int currentPunchIndex, int totalPunchNumber) {
-              
-            	lblFilePos.setText(
-                  "" + currentPunchIndex + "/" + totalPunchNumber + " " + currentFile.getName());
-              repaint();
-            }
+				@Override
+				public void informCurrentPunchPosition(File currentFile, int currentPunchIndex, int totalPunchNumber) {
 
-            @Override
-            public void finishedFile(File file) {}
+					lblFilePos.setText("" + currentPunchIndex + "/" + totalPunchNumber + " " + currentFile.getName());
+					repaint();
+				}
 
-            @Override
-            public void allFilesFinished() {
-              defineDoneButton();
-            }
-          },
-          selectFilesComponent.getSelectedFiles());
-    } catch (Exception ex) {
-      logger.error("error in punch " + ex.getMessage(), ex);
-    }
-  }
+				@Override
+				public void finishedFile(File file) {
+				}
 
-  private void defineDoneButton() {
-    cancelButton.setText("Done");
-    cancelButton.setIcon(new ImageIcon(getClass().getResource("button_ok.png")));
-  }
+				@Override
+				public void allFilesFinished() {
+					defineDoneButton();
+				}
+			}, selectFilesComponent.getSelectedFiles(), punchParameters);
+		} catch (Exception ex) {
+			logger.error("error in punch " + ex.getMessage(), ex);
+		}
+	}
+
+	private void defineDoneButton() {
+		cancelButton.setText("Done");
+		cancelButton.setIcon(new ImageIcon(getClass().getResource("button_ok.png")));
+	}
 }

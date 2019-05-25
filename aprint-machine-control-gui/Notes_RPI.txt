@@ -75,3 +75,27 @@ id:5:initdefault:
 LightDM -> activate auto login
 
 ===
+
+
+Tester l'image, modifier des fichiers :
+
+fdisk -l fichierimge.img
+
+creer le loopback
+
+sudo losetup -fP fichierimge -o $((SECTEURDEBUT * 512))
+
+sudo losetup -a
+
+mount /dev/loop0 mnt
+
+supprimer le loopback 
+
+losetup -d /dev/loop0
+
+
+
+
+
+
+

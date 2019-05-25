@@ -9,15 +9,15 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
-import org.apache.log4j.lf5.LF5Appender;
 import org.barrelorgandiscovery.perfo.ConfigFactory;
 import org.barrelorgandiscovery.perfo.PunchProcess;
 
 public class PerfoCommander extends JFrame implements Navigation {
 
-  /** */
+  /**
+   *  
+   **/
   private static final long serialVersionUID = -327201276216073491L;
 
   private static Logger logger = Logger.getLogger(PerfoCommander.class);
@@ -40,9 +40,10 @@ public class PerfoCommander extends JFrame implements Navigation {
 
     JHelloPanel hello = new JHelloPanel(this);
     JSelectFiles selectfiles = new JSelectFiles(punchProcess, this);
-    JPunch punch = new JPunch(punchProcess, selectfiles, this);
-    JMachineMove machineMove = new JMachineMove(ConfigFactory.getInstance(), this);
     JParameter parameter = new JParameter(this);
+    JPunch punch = new JPunch(punchProcess, selectfiles,parameter,this);
+    JMachineMove machineMove = new JMachineMove(ConfigFactory.getInstance(), this);
+    
 
     panelList = new HashMap<>();
     panelList.put(PunchScreen.Hello, hello);
@@ -59,7 +60,7 @@ public class PerfoCommander extends JFrame implements Navigation {
 
   public static void main(String[] args) throws Exception {
 
-    //BasicConfigurator.configure(new LF5Appender());
+      //BasicConfigurator.configure(new LF5Appender());
 
 	  EventQueue.invokeLater(new Runnable() {
           public void run() {

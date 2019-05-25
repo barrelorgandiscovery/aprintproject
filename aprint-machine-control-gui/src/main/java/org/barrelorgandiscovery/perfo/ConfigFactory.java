@@ -11,7 +11,7 @@ public class ConfigFactory {
     c.usbPort = "/dev/ttyUSB0"; 
     		// "/dev/ttyACM0";
     		// "/dev/ttyUSB0"; // chinois
-    // uno normal : /dev/ttyACM0
+    // uno normal : /dev/ttyACM0 // non validé pour l'instant
     c.fileFolderPath = new File("/media");
     return c;
   }
@@ -24,8 +24,8 @@ public class ConfigFactory {
   }
 
   public static Config getInstance() {
-    return createUnix();
-    		// createTest();
+    return //createUnix();
+    		 createTest();
   }
   
 }
