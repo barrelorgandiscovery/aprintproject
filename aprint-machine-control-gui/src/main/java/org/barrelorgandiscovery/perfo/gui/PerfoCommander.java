@@ -9,7 +9,10 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
+import org.apache.log4j.lf5.LF5Appender;
+import org.barrelorgandiscovery.perfo.Config;
 import org.barrelorgandiscovery.perfo.ConfigFactory;
 import org.barrelorgandiscovery.perfo.PunchProcess;
 
@@ -60,8 +63,12 @@ public class PerfoCommander extends JFrame implements Navigation {
 
   public static void main(String[] args) throws Exception {
 
-      //BasicConfigurator.configure(new LF5Appender());
-
+	  Config config = ConfigFactory.getInstance();
+      
+	  if (config != null && config.isDebug) {
+		  BasicConfigurator.configure(new LF5Appender());
+	  }
+	  
 	  EventQueue.invokeLater(new Runnable() {
           public void run() {
               try {

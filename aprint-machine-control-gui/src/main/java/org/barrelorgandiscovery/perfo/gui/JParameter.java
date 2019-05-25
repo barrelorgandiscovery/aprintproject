@@ -59,7 +59,7 @@ public class JParameter extends JPanel implements IPunchMachinePanelActivate, IP
 		});
 
 		spaceComponent = new JNumericValue();
-		spaceComponent.setValue(prefsStorage.getDoubleProperty(SPACEPROPERTY_PROPERTY, 120.0));
+		spaceComponent.setValue(prefsStorage.getDoubleProperty(SPACEPROPERTY_PROPERTY, 3 * 160.0));
 		spaceComponent.setChangeListener((e) -> {
 			try {
 				prefsStorage.setDoubleProperty(SPACEPROPERTY_PROPERTY, spaceComponent.getValue());

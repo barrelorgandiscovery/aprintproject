@@ -19,13 +19,14 @@ public class ConfigFactory {
   private static Config createTest() {
 	  Config c = new Config();
 	  c.usbPort = "COM7";
-	  c.fileFolderPath = new File("c:\\temp");
+	  c.fileFolderPath = new File("c:\\temp\\testfreddy");
+	  c.isDebug = true;
 	  return c;
   }
 
   public static Config getInstance() {
-    return //createUnix();
-    		 createTest();
+    return createUnix();
+    		// createTest();
   }
   
 }

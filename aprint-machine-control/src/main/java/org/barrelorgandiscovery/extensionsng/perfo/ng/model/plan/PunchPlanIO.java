@@ -89,7 +89,9 @@ public class PunchPlanIO {
     	  
         // handle displacement
     	
+    	  // x -> it's the Y in the GCode file
         x = Double.parseDouble(m.group(3));
+        // it's the X in the GCode
         y = Double.parseDouble(m.group(2));
 
       } else {

@@ -7,5 +7,6 @@ public class Config {
 	public String usbPort;
 	public File fileFolderPath;
 	public double startWidth;
+	public boolean isDebug = false;
 	
 }

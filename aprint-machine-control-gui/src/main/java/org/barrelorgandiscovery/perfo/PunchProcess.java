@@ -18,6 +18,7 @@ import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControl;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControlListener;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineStatus;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLCommandVisitor;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLMachine;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.Command;
@@ -177,6 +178,8 @@ public class PunchProcess {
           public void run() {
           
             try {
+            	
+              boolean isFirst = true;
               for (Entry<File, PunchPlan> e : punchplan.entrySet()) {
 
                 File fileToProcess = e.getKey();
@@ -189,7 +192,7 @@ public class PunchProcess {
 
                 PunchPlan punchPlan = e.getValue();
                 backgroundThreadProcessPunchPlan(
-                    fileToProcess, punchPlan, punchParameters,  listener, finalCancelTracker);
+                    fileToProcess, punchPlan, punchParameters, isFirst ,  listener, finalCancelTracker);
 
                 if (listener != null) {
                   SwingUtilities.invokeLater(
@@ -197,6 +200,7 @@ public class PunchProcess {
                         listener.finishedFile(fileToProcess);
                       });
                 }
+                isFirst = false;
               }
               
               logger.debug("all files punched");
@@ -230,6 +234,7 @@ public class PunchProcess {
 
   private void backgroundThreadProcessPunchPlan(
       final File file, PunchPlan p, IPunchParameters punchParameters, 
+      boolean isFirstFile,
       PunchListener listener, 
       ICancelTracker cancelTracker)
       throws Exception {
@@ -240,8 +245,51 @@ public class PunchProcess {
     logger.debug(Arrays.asList(SerialPortList.getPortNames()));
     params.setComPort(config.usbPort);
     
+   
+    ////////////////////////////////////////////////////////////////
+    
+    
+    
+    RangeVisitor rv = new RangeVisitor();
+    rv.visit(p);
+    
+    logger.debug("range visitor elements " + rv.getXmin() + "," 
+  		  	+ rv.getYmin() + " " + rv.getXmax() + "," + rv.getYmax());
+    
+    // Nota : we are in cartesian mode for the Plan, 
+    // X / Y are properly encoded for CNC machine
+    // shift the punch plan for y
+    
+    //
+    // if we are on the first file, we don't apply the space between the files
+    //
+    
+    MovePlanVisitor mpv = new MovePlanVisitor(p, 
+    									/*X*/ - rv.getXmin() + (!isFirstFile?punchParameters.getSpace():0.0), 
+    									/*Y*/ punchParameters.getOffset());
+    
+    mpv.visit(p);
+    
+    p = mpv.getConstructedPunchPlan();
+  	
+    if (logger.isDebugEnabled()) {
+  	  logger.debug("debug the punch plan");
+  	  GRBLCommandVisitor cmdVisitor = new GRBLCommandVisitor();
+  	  cmdVisitor.visit(p);
+  	  List<String> allCommands = cmdVisitor.getGRBLCommands();
+  	  if (allCommands != null) {
+  		  int cpt = 0;
+  		   for (String l : allCommands) {
+  			   logger.debug("line :" + (cpt ++) + " -> " + l );
+  		   }
+  	  }
+    }
+    
+    ///////////////////////////////////////////////////////////////////////////////////:
+    
     final PunchPlan finalp = p;
 
+    
     if (listener != null) {
       SwingUtilities.invokeLater(
           () -> {
@@ -316,18 +364,7 @@ public class PunchProcess {
             });
       }
       
-      // shift the punch plan for y
-      RangeVisitor rv = new RangeVisitor();
-      rv.visit(p);
-      
-      logger.debug("range visitor elements " + rv.getXmin() + "," 
-      + rv.getYmin() + " " + rv.getXmax() + "," + rv.getYmax());
-      
-      MovePlanVisitor mpv = new MovePlanVisitor(p, punchParameters.getOffset(), - rv.getYmin() + punchParameters.getSpace());
-      mpv.visit(p);
-      
-      p = mpv.getConstructedPunchPlan();
-    		  
+  
 
       List<Command> l = p.getCommandsByRef();
       // send commands, blocking procedure

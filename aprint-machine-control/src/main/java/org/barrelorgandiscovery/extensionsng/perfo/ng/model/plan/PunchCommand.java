@@ -9,6 +9,11 @@ public class PunchCommand extends Command implements XYCommand {
 	private double x;
 	private double y;
 	
+	/**
+	 * PunchCommand, we are in screen cartesian coordinates
+	 * @param x
+	 * @param y
+	 */
 	public PunchCommand(double x, double y)
 	{
 		this.x = x;
