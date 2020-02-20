@@ -241,8 +241,10 @@ public class EditableInstrument implements Disposable, IEditableInstrument {
 		if (pipeStopGroup == null)
 			pipeStopGroup = DEFAULT_PIPESTOPGROUPNAME;
 		List<SoundSample> list = soundsample_by_pipestop.get(pipeStopGroup);
-		if (list == null)
+		if (list == null) {
+			// return empty
 			list = new ArrayList<SoundSample>();
+		}
 		return list;
 	}
 

@@ -20,6 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 import javax.swing.AbstractButton;
@@ -36,6 +37,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.extensionsng.scanner.FamilyImageFolder;
 import org.barrelorgandiscovery.extensionsng.scanner.PerfoScanFolder;
 import org.barrelorgandiscovery.gui.CancelTracker;
 import org.barrelorgandiscovery.gui.ICancelTracker;
@@ -70,7 +72,7 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 
 	private Logger logger = Logger.getLogger(JScannerMergePanel.class);
 
-	PerfoScanFolder perfoScanFolder;
+	FamilyImageFolder perfoScanFolder;
 
 	JDisplay workImageDisplay;
 
@@ -81,7 +83,9 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 	private JImageDisplayLayer image1Layer;
 
 	private JCheckBox overlapLock;
+	
 	private JSpinner overlappixelsspinner;
+
 
 	private JSlider currentResultImageSlider;
 
@@ -101,7 +105,7 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 	 * @param preferences
 	 * @throws Exception
 	 */
-	public JScannerMergePanel(PerfoScanFolder perfoScanFolder, IPrefsStorage preferences) throws Exception {
+	public JScannerMergePanel(FamilyImageFolder perfoScanFolder, IPrefsStorage preferences) throws Exception {
 		assert perfoScanFolder != null;
 		this.perfoScanFolder = perfoScanFolder;
 		assert preferences != null;
@@ -123,7 +127,7 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 		fp.getLabel("positionning").setText("Positionning Elements");
 		fp.getLabel("previewresult").setText("Preview Result");
 
-		overlappixelsspinner = new JSpinner(new SpinnerNumberModel(52.0, 20.0, 70.0, 0.1));
+		overlappixelsspinner = new JSpinner(new SpinnerNumberModel(52.0, 20.0, 300.0, 0.1));
 
 		FormAccessor formAccessorParameters = fp.getFormAccessor("parameters");
 
@@ -198,12 +202,14 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 
 		image1Layer = new JImageDisplayLayer();
 		workImageDisplay.addLayer(image1Layer);
-
+		
+		int folderimagecount = perfoScanFolder.getImageCount();
+		
 		FormAccessor resultfunctions = fp.getFormAccessor("resultfunctions");
 
 		currentResultImageSlider = (JSlider) resultfunctions.getComponentByName("currentresultimage");
 		currentResultImageSlider.setValue(1);
-		int folderimagecount = perfoScanFolder.getImageCount();
+		
 		currentResultImageSlider.setMaximum(folderimagecount);
 		currentResultImageSlider.setMajorTickSpacing(150);
 		currentResultImageSlider.setMinorTickSpacing(50);
@@ -212,12 +218,14 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				try {
+					setCurrentImage(currentResultImageSlider.getValue());
 					recomputeResult();
 				} catch (Exception ex) {
 					logger.error(ex.getMessage(), ex);
 				}
 			}
 		});
+		
 
 		final JShapeLayer<Polygon> zoneLayer = new JShapeLayer<>();
 
@@ -628,10 +636,12 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 				return null; // aborted
 			}
 
+			/*
 			File f = perfoScanFolder.constructImageFile(j);
 			if (!f.exists()) {
 				continue;
 			}
+			*/
 			BufferedImage current = perfoScanFolder.loadImage(j);
 
 			BufferedImage newImage = innerModel.createSlice(current, pixelsForEachImage, FINAL_IMAGE_HEIGHT);
@@ -776,8 +786,8 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 		// new File(
 		// "C:\\projets\\APrint\\contributions\\patrice\\2018_numerisation_machine_faiscapourmoi\\perfo");
 
-		File scanfolder = new File("C:\\projets\\APrint\\contributions\\patrice\\2018_josephine_90degres\\perfo");
-		PerfoScanFolder perfoScanFolder = new PerfoScanFolder(scanfolder);
+		File scanfolder = new File("C:\\projets\\APrint\\contributions\\plf\\2019-07-19_scan_video_popcorn_52");
+		FamilyImageFolder perfoScanFolder = new FamilyImageFolder(scanfolder, Pattern.compile("exported.*"));
 
 		JFrame f = new JFrame();
 

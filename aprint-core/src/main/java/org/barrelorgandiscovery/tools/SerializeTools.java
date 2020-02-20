@@ -67,11 +67,13 @@ public class SerializeTools {
 	 *            l'objet à cloner
 	 * @return la copie de l'objet
 	 */
-	public static Object deepClone(Serializable object) {
+	public static <T extends Serializable> T deepClone(T object) {
 
 		if (object == null)
 			return null;
 
+		assert object instanceof Serializable;
+		
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			ObjectOutputStream oos = new ObjectOutputStream(baos);
@@ -85,7 +87,7 @@ public class SerializeTools {
 					baos.toByteArray());
 			ObjectInputStream ois = new ObjectInputStream(bais);
 			try {
-				return ois.readObject();
+				return (T)ois.readObject();
 			} finally {
 				ois.close();
 			}

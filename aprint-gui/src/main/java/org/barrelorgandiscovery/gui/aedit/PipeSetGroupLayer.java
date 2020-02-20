@@ -22,19 +22,22 @@ public class PipeSetGroupLayer implements VirtualBookComponentLayer {
 
 	private static Logger logger = Logger.getLogger(PipeSetGroupLayer.class);
 
-	private HashMap<String, Color> colors = new HashMap<String, Color>();
-
-	private Color DECLENCHEMENT = Color.pink;
-	private Color REGISTERS = Color.orange;
+	public static HashMap<String, Color> COLORS = new HashMap<String, Color>();
+	static {
+		COLORS.put(PipeStopListReference.REGISTERSET_ACCOMPAGNEMENT,
+				Color.green);
+		COLORS.put(PipeStopListReference.REGISTERSET_CHANT, Color.red);
+		COLORS.put(PipeStopListReference.REGISTERSET_CHANT3, Color.cyan);
+		COLORS.put(PipeStopListReference.REGISTERSET_CONTRECHAMP, Color.blue);
+		COLORS.put(PipeStopListReference.REGISTERSET_BASSE, Color.DARK_GRAY);
+	}
+	
+	public static Color DECLENCHEMENT = Color.pink;
+	public static Color REGISTERS = Color.orange;
 
 	public PipeSetGroupLayer() {
 
-		colors.put(PipeStopListReference.REGISTERSET_ACCOMPAGNEMENT,
-				Color.green);
-		colors.put(PipeStopListReference.REGISTERSET_CHANT, Color.red);
-		colors.put(PipeStopListReference.REGISTERSET_CHANT3, Color.cyan);
-		colors.put(PipeStopListReference.REGISTERSET_CONTRECHAMP, Color.blue);
-		colors.put(PipeStopListReference.REGISTERSET_BASSE, Color.DARK_GRAY);
+		
 
 	}
 
@@ -110,24 +113,7 @@ public class PipeSetGroupLayer implements VirtualBookComponentLayer {
 
 				AbstractTrackDef td = tracksDefinition[i];
 
-				Color c = Color.LIGHT_GRAY;
-
-				if (td instanceof NoteDef) {
-
-					NoteDef d = (NoteDef) td;
-
-					if (d.getRegisterSetName() != null) {
-						if (colors.containsKey(d.getRegisterSetName())) {
-							c = colors.get(d.getRegisterSetName());
-						}
-					}
-				} else if (td instanceof AbstractRegisterCommandDef) {
-					if (td instanceof RegisterSetCommandResetDef) {
-						c = DECLENCHEMENT;
-					} else {
-						c = REGISTERS;
-					}
-				}
+				Color c = getColor(td);
 
 				int y = jbookcomponentreference
 						.convertCartonToScreenY(jbookcomponentreference
@@ -148,6 +134,28 @@ public class PipeSetGroupLayer implements VirtualBookComponentLayer {
 		} finally {
 			g2d.setComposite(oldComposite);
 		}
+	}
+
+	public static  Color getColor(AbstractTrackDef td) {
+		Color c = Color.LIGHT_GRAY;
+
+		if (td instanceof NoteDef) {
+
+			NoteDef d = (NoteDef) td;
+
+			if (d.getRegisterSetName() != null) {
+				if (COLORS.containsKey(d.getRegisterSetName())) {
+					c = COLORS.get(d.getRegisterSetName());
+				}
+			}
+		} else if (td instanceof AbstractRegisterCommandDef) {
+			if (td instanceof RegisterSetCommandResetDef) {
+				c = DECLENCHEMENT;
+			} else {
+				c = REGISTERS;
+			}
+		}
+		return c;
 	}
 
 	private boolean visible = true;

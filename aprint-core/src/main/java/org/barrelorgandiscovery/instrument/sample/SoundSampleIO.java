@@ -24,7 +24,6 @@ public class SoundSampleIO {
 
 	public static final String SOUNDSAMPLEEXTENSION = "soundsample";
 	
-	
 	/**
 	 * save a sample in a stream
 	 * 

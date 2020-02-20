@@ -105,6 +105,7 @@ public class VirtualBookDemultiplexer extends BaseVirtualBookModelStep {
 			throw new Exception("implementation error, null inVirtualBook parameter");
 		}
 		logger.debug("start demux");
+		log("start virtual book demultiplexer");
 
 		Collection<Hole> holes = null;
 
@@ -135,6 +136,8 @@ public class VirtualBookDemultiplexer extends BaseVirtualBookModelStep {
 			returnedValues.put(outByTrack.get(e.getKey()), e.getValue());
 		}
 		logger.debug("end of demux");
+		log("end of virtual book demultiplexer");
+
 		return returnedValues;
 	}
 

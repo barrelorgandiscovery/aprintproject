@@ -4,12 +4,12 @@ import java.util.Map;
 
 import org.barrelorgandiscovery.model.AbstractParameter;
 import org.barrelorgandiscovery.model.ModelParameter;
-import org.barrelorgandiscovery.model.ModelStep;
+import org.barrelorgandiscovery.model.ModelStepWithConsole;
 import org.barrelorgandiscovery.model.ModelValuedParameter;
 import org.barrelorgandiscovery.model.type.JavaType;
 import org.barrelorgandiscovery.scale.Scale;
 
-public abstract class BaseVirtualBookModelStep extends ModelStep {
+public abstract class BaseVirtualBookModelStep extends ModelStepWithConsole {
 
 	/**
 	 * 

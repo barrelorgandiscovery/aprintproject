@@ -3,6 +3,7 @@ package org.barrelorgandiscovery.extensionsng.scanner;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 
@@ -14,11 +15,11 @@ import org.barrelorgandiscovery.tools.ImageTools;
  * @author pfreydiere
  *
  */
-public class PerfoScanFolder {
+public class PerfoScanFolder extends FamilyImageFolder {
 
-	private static final int MAX_IMAGE_IN_FOLDER = 500;
-	private File folder;
-	private int count = 0;
+
+	public static final String SCAN_IMAGE = "scan_image_";
+	public static final String DEFAULT_SCAN_PATTERN = "^" + SCAN_IMAGE + ".*";
 
 	/**
 	 * Constructor
@@ -26,33 +27,16 @@ public class PerfoScanFolder {
 	 * @param folder
 	 */
 	public PerfoScanFolder(File folder) {
-		assert folder != null;
-		assert folder.exists();
-		assert folder.isDirectory();
-		this.folder = folder;
-		this.count = getImageCount();
+		super(folder, Pattern.compile("^" + SCAN_IMAGE + ".*"));
 	}
 
 	/**
-	 * count the number of images in folder assuming there are continuous
+	 * find the first index in the image
 	 * 
 	 * @return
 	 */
-	public int getImageCount() {
-		for (int i = MAX_IMAGE_IN_FOLDER; i > 0; i--) {
-			if (constructImageFile(i).exists()) {
-				return i;
-			}
-		}
-		return 0;
-	}
-	
-	/**
-	 * find the first index in the image
-	 * @return
-	 */
 	public int getFirstImageIndex() {
-		for (int i = 0 ; i < MAX_IMAGE_IN_FOLDER ; i++) {
+		for (int i = 0; i < MAX_IMAGE_IN_FOLDER; i++) {
 			if (constructImageFile(i).exists()) {
 				return i;
 			}
@@ -98,7 +82,7 @@ public class PerfoScanFolder {
 	 * @return
 	 */
 	public String constructImageName(int sequence) {
-		return "scan_image_" + sequence;
+		return SCAN_IMAGE + sequence;
 	}
 
 	/**
@@ -110,24 +94,19 @@ public class PerfoScanFolder {
 	public File constructImageFile(int sequence) {
 		return new File(folder, constructImageName(sequence) + ".jpg");
 	}
-
+	
 	/**
-	 * load the image from index
+	 * count the number of images in folder assuming there are continuous
 	 * 
-	 * @param sequence
-	 * @return the full image
-	 * @throws Exception
-	 */
-	public BufferedImage loadImage(int sequence) throws Exception {
-		return ImageTools.loadImage(constructImageFile(sequence).toURL());
-	}
-
-	/**
-	 * get wurrent working folder
 	 * @return
 	 */
-	public File getFolder() {
-		return folder;
+	public int getImageCount() {
+		for (int i = MAX_IMAGE_IN_FOLDER; i > 0; i--) {
+			if (constructImageFile(i).exists()) {
+				return i;
+			}
+		}
+		return 0;
 	}
-	
+
 }

@@ -11,7 +11,7 @@ import org.barrelorgandiscovery.model.type.JavaType;
  * 
  * @author pfreydiere
  */
-public class TerminalParameterModelStep extends ModelStep implements SinkSource {
+public class TerminalParameterModelStep extends ModelStepWithConsole implements SinkSource {
 
 	/**
 	 * 

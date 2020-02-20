@@ -37,6 +37,12 @@ public class ThumbnailDatabase {
 		File tf = new File(folder, THUMBNAILFOLDER);
 		return new File(tf, name);
 	}
+	
+	public boolean thumbnailExists(File f) throws Exception {
+		File tf = constructThumbnailFile(f);
+
+		return tf.exists();
+	}
 
 	public BufferedImage getOrCreate(File f) throws Exception {
 

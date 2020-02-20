@@ -30,6 +30,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.barrelorgandiscovery.gui.aedit.CurrentToolChanged;
 import org.barrelorgandiscovery.gui.aedit.Tool;
+import org.barrelorgandiscovery.recognition.gui.interactivecanvas.tools.PanTool;
 import org.barrelorgandiscovery.recognition.gui.interactivecanvas.tools.ZoomTool;
 import org.barrelorgandiscovery.tools.ImageTools;
 
@@ -54,40 +55,96 @@ public class JDisplay extends JComponent implements CurrentToolChangedAware {
 
 	private InnerLayerChangedListener refresh = new InnerLayerChangedListener();
 
+	private Tool defaultTool = null;
+
+	private Tool panTool = null;
+
 	public JDisplay() {
 		super();
 		setToolTipText(""); // activate tooltips
+
+		try {
+			this.defaultTool = new PanTool(this);
+			this.panTool = new PanTool(this);
+		} catch (Exception ex) {
+			logger.error("error instanciating the default tool :" + ex.getMessage(), ex);
+		}
+
 		// Adding tools events
 		addMouseListener(new MouseListener() {
 
 			public void mouseReleased(MouseEvent e) {
-				if (currentTool != null) {
-					currentTool.mouseReleased(e);
+				if ((e.getModifiersEx() & MouseEvent.BUTTON2_DOWN_MASK) != 0) {
+					panTool.mouseReleased(e);
+				} else {
+					if (currentTool != null) {
+						currentTool.mouseReleased(e);
+					} else {
+						if (defaultTool != null) {
+							defaultTool.mouseReleased(e);
+						}
+					}
 				}
 			}
 
 			public void mousePressed(MouseEvent e) {
-				if (currentTool != null) {
-					currentTool.mousePressed(e);
+				if ((e.getModifiersEx() & MouseEvent.BUTTON2_DOWN_MASK) != 0) {
+					panTool.mousePressed(e);
+				} else {
+
+					if (currentTool != null) {
+						currentTool.mousePressed(e);
+					} else {
+						if (defaultTool != null) {
+							defaultTool.mousePressed(e);
+						}
+					}
 				}
 			}
 
 			public void mouseExited(MouseEvent e) {
-				if (currentTool != null) {
-					currentTool.mouseExited(e);
+				if ((e.getModifiersEx() & MouseEvent.BUTTON2_DOWN_MASK) != 0) {
+					panTool.mouseExited(e);
+				} else {
+
+					if (currentTool != null) {
+						currentTool.mouseExited(e);
+					} else {
+						if (defaultTool != null) {
+							defaultTool.mouseExited(e);
+						}
+					}
 				}
 			}
 
 			public void mouseEntered(MouseEvent e) {
-				if (currentTool != null) {
-					currentTool.mouseEnter(e);
+				if ((e.getModifiersEx() & MouseEvent.BUTTON2_DOWN_MASK) != 0) {
+					panTool.mouseEnter(e);
+				} else {
+
+					if (currentTool != null) {
+						currentTool.mouseEnter(e);
+					} else {
+						if (defaultTool != null) {
+							defaultTool.mouseEnter(e);
+						}
+					}
 				}
 				requestFocus();
 			}
 
 			public void mouseClicked(MouseEvent e) {
-				if (currentTool != null) {
-					currentTool.mouseClicked(e);
+				if ((e.getModifiersEx() & MouseEvent.BUTTON2_DOWN_MASK) != 0) {
+					panTool.mouseClicked(e);
+				} else {
+
+					if (currentTool != null) {
+						currentTool.mouseClicked(e);
+					} else {
+						if (defaultTool != null) {
+							defaultTool.mouseClicked(e);
+						}
+					}
 				}
 			}
 		});
@@ -95,14 +152,32 @@ public class JDisplay extends JComponent implements CurrentToolChangedAware {
 		addMouseMotionListener(new MouseMotionListener() {
 
 			public void mouseMoved(MouseEvent e) {
-				if (currentTool != null) {
-					currentTool.mouseMoved(e);
+				if ((e.getModifiersEx() & MouseEvent.BUTTON2_DOWN_MASK) != 0) {
+					panTool.mouseMoved(e);
+				} else {
+
+					if (currentTool != null) {
+						currentTool.mouseMoved(e);
+					} else {
+						if (defaultTool != null) {
+							defaultTool.mouseMoved(e);
+						}
+					}
 				}
 			}
 
 			public void mouseDragged(MouseEvent e) {
-				if (currentTool != null) {
-					currentTool.mouseDragged(e);
+				if ((e.getModifiersEx() & MouseEvent.BUTTON2_DOWN_MASK) != 0) {
+					panTool.mouseDragged(e);
+				} else {
+
+					if (currentTool != null) {
+						currentTool.mouseDragged(e);
+					} else {
+						if (defaultTool != null) {
+							defaultTool.mouseDragged(e);
+						}
+					}
 				}
 			}
 		});
@@ -110,8 +185,17 @@ public class JDisplay extends JComponent implements CurrentToolChangedAware {
 		addMouseWheelListener(new MouseWheelListener() {
 
 			public void mouseWheelMoved(MouseWheelEvent e) {
-				if (currentTool != null) {
-					currentTool.mouseWheel(e);
+				if ((e.getButton() == MouseEvent.BUTTON2)) {
+					panTool.mouseWheel(e);
+				} else {
+
+					if (currentTool != null) {
+						currentTool.mouseWheel(e);
+					} else {
+						if (defaultTool != null) {
+							defaultTool.mouseWheel(e);
+						}
+					}
 				}
 			}
 		});
@@ -138,6 +222,10 @@ public class JDisplay extends JComponent implements CurrentToolChangedAware {
 			public void keyTyped(KeyEvent e) {
 				if (currentTool != null) {
 					currentTool.keyTyped(e);
+				} else {
+					if (defaultTool != null) {
+						defaultTool.keyTyped(e);
+					}
 				}
 			}
 
@@ -145,6 +233,10 @@ public class JDisplay extends JComponent implements CurrentToolChangedAware {
 			public void keyReleased(KeyEvent e) {
 				if (currentTool != null) {
 					currentTool.keyReleased(e);
+				} else {
+					if (defaultTool != null) {
+						defaultTool.keyReleased(e);
+					}
 				}
 			}
 
@@ -152,6 +244,10 @@ public class JDisplay extends JComponent implements CurrentToolChangedAware {
 			public void keyPressed(KeyEvent e) {
 				if (currentTool != null) {
 					currentTool.keyPressed(e);
+				} else {
+					if (defaultTool != null) {
+						defaultTool.keyPressed(e);
+					}
 				}
 			}
 		});
@@ -551,6 +647,19 @@ public class JDisplay extends JComponent implements CurrentToolChangedAware {
 
 	public void setTransformRef(AffineTransform transform) {
 		currentTransform = transform;
+	}
+
+	public void setDefaultTool(Tool t) {
+		if (this.defaultTool != null)
+			this.defaultTool.unactivated();
+
+		this.defaultTool = t;
+		if (this.defaultTool != null)
+			t.activated();
+	}
+
+	public Tool getDefaultTool() {
+		return defaultTool;
 	}
 
 }

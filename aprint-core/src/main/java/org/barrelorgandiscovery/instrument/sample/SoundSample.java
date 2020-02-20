@@ -94,6 +94,13 @@ public class SoundSample {
 		return ais.getFormat();
 	}
 
+	/**
+	 * create a new ManagedStream for the sound, 
+	 * managed audio stream contains the sound, 
+	 * the stream is ready to play
+	 * @return
+	 * @throws Exception
+	 */
 	public ManagedAudioInputStream getManagedAudioInputStream()
 			throws Exception {
 		ManagedAudioInputStream retvalue = new ManagedAudioInputStream(ais);

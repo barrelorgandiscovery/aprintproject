@@ -19,6 +19,7 @@ import org.barrelorgandiscovery.virtualbook.transformation.AbstractTransformatio
  * @author pfreydiere
  *
  */
+@Deprecated
 public abstract class AbstractEditableInstrumentRepository implements Repository2, EditableInstrumentManagerRepository {
 
 	protected EditableInstrumentManagerRepository2Adapter adapter;

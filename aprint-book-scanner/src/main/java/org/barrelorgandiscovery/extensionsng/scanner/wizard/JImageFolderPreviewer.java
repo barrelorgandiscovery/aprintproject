@@ -7,6 +7,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.swing.DefaultListModel;
@@ -20,188 +23,233 @@ import javax.swing.JScrollPane;
 import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
 import org.apache.log4j.lf5.LF5Appender;
-import org.barrelorgandiscovery.tools.ImageTools;
+import org.barrelorgandiscovery.tools.Disposable;
 
-public class JImageFolderPreviewer extends JPanel {
+/**
+ * this class permit to view a folder and display associated images
+ * 
+ * @author pfreydiere
+ *
+ */
+public class JImageFolderPreviewer extends JPanel implements Disposable {
 
-  public JImageFolderPreviewer() throws Exception {
-    initComponents();
-  }
+	private static Logger logger = Logger.getLogger(JImageFolderPreviewer.class);
 
-  private File folder;
-  private ThumbnailDatabase thumbnailDatabase;
+	ExecutorService executor;
+	
+	public JImageFolderPreviewer() throws Exception {
+		this.executor = Executors.newSingleThreadExecutor();
+		initComponents();
+	}
 
-  public void loadFolder(File folder) throws Exception {
-    this.folder = folder;
-    this.thumbnailDatabase = new ThumbnailDatabase(folder, 150, 150);
-    updateComponent();
-  }
+	@Override
+	public void dispose() {
+		if (executor != null) {
+			executor.shutdownNow();
+			executor = null;
+		}
+	}
 
-  private JList list;
+	private File folder;
 
-  protected void initComponents() throws Exception {
+	private ThumbnailDatabase thumbnailDatabase;
 
-    setLayout(new BorderLayout());
-    list = new JList<>();
+	public void loadFolder(File folder) throws Exception {
+		this.folder = folder;
+		this.thumbnailDatabase = new ThumbnailDatabase(folder, 150, 150);
+		updateComponent();
+	}
+	
+	private Pattern filePatternFiltering = null;
+	public void setFilePattern(Pattern filePattern) {
+		this.filePatternFiltering = filePattern;
+		updateComponent();
+	}
 
-    list.setLayoutOrientation(JList.VERTICAL_WRAP);
+	private JList list;
 
-    list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-    list.setSelectionModel(new DefaultListSelectionModel());
+	protected void initComponents() throws Exception {
 
-    list.addListSelectionListener(
-        new ListSelectionListener() {
+		setLayout(new BorderLayout());
+		list = new JList<>();
 
-          @Override
-          public void valueChanged(ListSelectionEvent e) {
-            // TODO Auto-generated method stub
+		list.setLayoutOrientation(JList.VERTICAL_WRAP);
 
-          }
-        });
+		list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		list.setSelectionModel(new DefaultListSelectionModel());
 
-    JScrollPane sp = new JScrollPane(list);
-    sp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
-    add(sp, BorderLayout.CENTER);
-  }
+		list.addListSelectionListener(new ListSelectionListener() {
 
-  private void updateComponent() {
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
 
-    if (folder != null && folder.isDirectory()) {
-      File[] l = folder.listFiles();
-      List<File> collectedList =
-          Arrays.stream(l)
-              .filter(
-                  (e) -> {
-                    if (e == null) {
-                      return false;
-                    }
+			}
+		});
 
-                    return e.getName().endsWith(".jpg");
-                  })
-              .collect(Collectors.toList());
-      DefaultListModel<Object> dm = new DefaultListModel<>();
-      collectedList.forEach(
-          (e) -> {
-            dm.addElement(e);
-          });
-      list.setModel(dm);
-      list.setCellRenderer(new ImageVerticalRenderer(thumbnailDatabase));
-    }
-  }
+		JScrollPane sp = new JScrollPane(list);
+		sp.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		add(sp, BorderLayout.CENTER);
+	}
 
-  @Override
-  public void doLayout() {
+	private void updateComponent() {
 
-    // System.out.println("Width :" + getWidth());
-    // System.out.println("Height :" + getHeight());
-    //
-    // System.out.println("typical cell value :" +
-    // l.getPrototypeCellValue());
+		if (folder != null && folder.isDirectory()) {
+			File[] l = folder.listFiles();
+			List<File> collectedList = Arrays.stream(l).filter((e) -> {
+				if (e == null) {
+					return false;
+				}
+				String filename = e.getName();
+				boolean isImage = filename.endsWith(".jpg") || e.getName().endsWith(".png");
+				
+				boolean filtered = true;
+				if (filePatternFiltering != null) {
+					filtered =  filePatternFiltering.matcher(filename).matches();
+				}
+				
+				return isImage && filtered;
+			}).collect(Collectors.toList());
+			DefaultListModel<Object> dm = new DefaultListModel<>();
+			collectedList.forEach((e) -> {
+				dm.addElement(e);
+			});
+			list.setModel(dm);
+			list.setCellRenderer(new ImageVerticalRenderer(thumbnailDatabase));
+		}
+	}
 
-    // récupération de la dimension d'un élément (en largeur)
-    // preferred Size est calculée en fonction des éléments à l'intérieur
-    // on récupère (aux inset près), la taille en largeur
-    // d'une element pour ajuster le nombre de colonnes
+	@Override
+	public void doLayout() {
 
-    if (list != null && list.getModel() != null) {
-      int instrumentNumber = list.getModel().getSize();
-      if (instrumentNumber > 0) {
+		// System.out.println("Width :" + getWidth());
+		// System.out.println("Height :" + getHeight());
+		//
+		// System.out.println("typical cell value :" +
+		// l.getPrototypeCellValue());
 
-        Component c =
-            list.getCellRenderer()
-                .getListCellRendererComponent(
-                    list, list.getModel().getElementAt(0), 0, false, false);
+		// récupération de la dimension d'un élément (en largeur)
+		// preferred Size est calculée en fonction des éléments à l'intérieur
+		// on récupère (aux inset près), la taille en largeur
+		// d'une element pour ajuster le nombre de colonnes
 
-        Dimension preferredSizeOfOneTile = c.getPreferredSize();
-        if (preferredSizeOfOneTile.height > 0) {
-          // System.out.println("preferred height :" +
-          // preferredSize.height);
-          int newrowCount = getHeight() / preferredSizeOfOneTile.height;
-          // System.out.println("new row count :" + newrowCount);
-          list.setVisibleRowCount(newrowCount);
-        }
-      }
-    }
-    super.doLayout();
-  }
+		if (list != null && list.getModel() != null) {
+			int instrumentNumber = list.getModel().getSize();
+			if (instrumentNumber > 0) {
 
-  private static class ImageVerticalRenderer implements ListCellRenderer {
+				Component c = list.getCellRenderer().getListCellRendererComponent(list, list.getModel().getElementAt(0),
+						0, false, false);
 
-    private JLabel labelImage = new JLabel();
-    private JLabel labelText = new JLabel();
+				Dimension preferredSizeOfOneTile = c.getPreferredSize();
+				if (preferredSizeOfOneTile.height > 0) {
+					int newrowCount = getHeight() / preferredSizeOfOneTile.height;
+					list.setVisibleRowCount(newrowCount);
+				}
+			}
+		}
+		super.doLayout();
+	}
+	
+	private static BufferedImage EMPTY_IMAGE = new BufferedImage(100,100,BufferedImage.TYPE_4BYTE_ABGR);
 
-    public JPanel p = new JPanel();
+	private class ImageVerticalRenderer implements ListCellRenderer {
 
-    private ThumbnailDatabase td;
+		private JLabel labelImage = new JLabel();
+		private JLabel labelText = new JLabel();
+		
+		
+		public JPanel p = new JPanel();
 
-    public ImageVerticalRenderer(ThumbnailDatabase td) {
-      assert td != null;
-      this.td = td;
-      BorderLayout bl = new BorderLayout();
-      bl.setHgap(3);
-      p.setLayout(bl);
-      labelImage.setAlignmentY(BOTTOM_ALIGNMENT);
-      p.add(labelImage, BorderLayout.CENTER);
-      labelImage.setHorizontalAlignment(SwingConstants.CENTER);
-      p.add(labelText, BorderLayout.SOUTH);
-      labelText.setHorizontalAlignment(SwingConstants.CENTER);
-      // small space in the bottom
-      p.setBorder(new EmptyBorder(2, 2, 10, 2));
-    }
+		private ThumbnailDatabase td;
 
-    public Component getListCellRendererComponent(
-        JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+		public ImageVerticalRenderer(ThumbnailDatabase td) {
+			assert td != null;
+			this.td = td;
+			BorderLayout bl = new BorderLayout();
+			bl.setHgap(3);
+			p.setLayout(bl);
+			labelImage.setAlignmentY(BOTTOM_ALIGNMENT);
+			p.add(labelImage, BorderLayout.CENTER);
+			labelImage.setHorizontalAlignment(SwingConstants.CENTER);
+			p.add(labelText, BorderLayout.SOUTH);
+			labelText.setHorizontalAlignment(SwingConstants.CENTER);
+			// small space in the bottom
+			p.setBorder(new EmptyBorder(2, 2, 10, 2));
+		}
+		
+		
 
-      try {
+		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
+				boolean cellHasFocus) {
 
-        File ins = (File) value;
+			try {
 
-        BufferedImage i = td.getOrCreate(ins);
+				File ins = (File) value;
 
-        labelImage.setIcon(new ImageIcon(i));
-        labelImage.setMaximumSize(new Dimension(200, 200));
+				BufferedImage i = EMPTY_IMAGE;
+				if (td.thumbnailExists(ins)) {
+					 i = td.getOrCreate(ins);
+				} else {
+					//push to be computed
+					JImageFolderPreviewer.this.executor.submit( () -> {
+						try {
+							td.getOrCreate(ins);
+						
+							SwingUtilities.invokeLater( () -> {
+								JImageFolderPreviewer.this.repaint();
+							});
+							logger.debug("image generated");
+						
+						} catch(Exception ex) {
+							logger.error(ex.getMessage(), ex);
+						}
+						
+					});
+					
+				}
+				
+				labelImage.setIcon(new ImageIcon(i));
+				labelImage.setMaximumSize(new Dimension(200, 200));
 
-        labelText.setText(ins.getName());
+				labelText.setText(ins.getName());
 
-        p.setBackground(
-            isSelected
-                ? UIManager.getColor("Table.selectionBackground")
-                : UIManager.getColor("Table.background"));
+				p.setBackground(isSelected ? UIManager.getColor("Table.selectionBackground")
+						: UIManager.getColor("Table.background"));
 
-        return p;
+				return p;
 
-      } catch (Exception ex) {
-        ex.printStackTrace(System.err);
-        return p;
-      }
-    }
-  }
+			} catch (Exception ex) {
+				ex.printStackTrace(System.err);
+				return p;
+			}
+		}
+	}
 
-  // test method
-  public static void main(String[] args) throws Exception {
+	// test method
+	public static void main(String[] args) throws Exception {
 
-    BasicConfigurator.configure(new LF5Appender());
+		BasicConfigurator.configure(new LF5Appender());
 
-    File f =
-        new File("C:\\projets\\APrint\\contributions\\patrice\\2018_josephine_90degres\\perfo");
+		File f = new File("C:\\projets\\APrint\\contributions\\patrice\\2018_josephine_90degres\\perfo");
 
-    JFrame frame = new JFrame();
-    frame.setSize(800, 600);
+		JFrame frame = new JFrame();
+		frame.setSize(800, 600);
 
-    frame.getContentPane().setLayout(new BorderLayout());
-    JImageFolderPreviewer imagepreviewer = new JImageFolderPreviewer();
+		frame.getContentPane().setLayout(new BorderLayout());
+		JImageFolderPreviewer imagepreviewer = new JImageFolderPreviewer();
 
-    frame.getContentPane().add(imagepreviewer, BorderLayout.CENTER);
+		frame.getContentPane().add(imagepreviewer, BorderLayout.CENTER);
 
-    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-    frame.setVisible(true);
-    imagepreviewer.loadFolder(f);
-  }
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setVisible(true);
+		imagepreviewer.loadFolder(f);
+	}
 }

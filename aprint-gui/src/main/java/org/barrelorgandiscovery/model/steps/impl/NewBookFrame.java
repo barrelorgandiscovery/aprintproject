@@ -1,5 +1,6 @@
 package org.barrelorgandiscovery.model.steps.impl;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Map;
 
@@ -20,8 +21,13 @@ import org.barrelorgandiscovery.model.TerminalParameterModelStep;
 import org.barrelorgandiscovery.model.type.CompositeType;
 import org.barrelorgandiscovery.model.type.GenericSimpleType;
 import org.barrelorgandiscovery.model.type.JavaType;
+import org.barrelorgandiscovery.tools.InstrumentNameChooserPropertyEditor;
 import org.barrelorgandiscovery.virtualbook.Hole;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
+
+import com.l2fprod.common.propertysheet.Property;
+import com.l2fprod.common.propertysheet.PropertyEditorRegistry;
+import com.l2fprod.common.propertysheet.PropertySheetPanel;
 
 /**
  * Terminal for display a book at the end
@@ -30,141 +36,159 @@ import org.barrelorgandiscovery.virtualbook.VirtualBook;
  */
 public class NewBookFrame extends TerminalParameterModelStep implements IModelStepContextAware {
 
-  private static Logger logger = Logger.getLogger(NewBookFrame.class);
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3294758481433232042L;
 
-  private APrintNGGeneralServices services;
-  private String instrumentName; 
-  private ModelValuedParameter instrumentParameter;
+	private static Logger logger = Logger.getLogger(NewBookFrame.class);
 
-  public NewBookFrame() throws Exception {
-    super(
-        false,
-        new CompositeType(
-            new ModelType[] {
-              new JavaType(VirtualBook.class),
-              new GenericSimpleType(Collection.class, new Class[] {Hole.class})
-            },
-            "virtualBook",
-            "Book or Holes"),
-        "virtualbook",
-        "Virtual Book",
-        null);
-    updateConfig();
-    // fromConfig();
-  }
+	private APrintNGGeneralServices services;
+	private String instrumentName;
+	private ModelValuedParameter instrumentParameter;
 
-  @Override
-  public String getLabel() {
-    return "Open VirtualBook in Frame";
-  }
+	public NewBookFrame() throws Exception {
+		super(false,
+				new CompositeType(
+						new ModelType[] { new JavaType(VirtualBook.class),
+								new GenericSimpleType(Collection.class, new Class[] { Hole.class }) },
+						"virtualBook", "Book or Holes"),
+				"virtualbook", "Virtual Book", null);
+		updateConfig();
+		// fromConfig();
+	}
 
-  @Override
-  public void defineContext(Map<String, Object> context) {
+	@Override
+	public String getLabel() {
+		return "Open VirtualBook in Frame";
+	}
 
-    if (context == null) return;
+	@Override
+	public void defineContext(Map<String, Object> context) {
 
-    Object p = context.get(ContextVariables.CONTEXT_SERVICES);
-    if (p != null && p instanceof APrintNGGeneralServices) {
-      services = (APrintNGGeneralServices) p;
-    }
-  }
+		if (context == null)
+			return;
 
-  @Override
-  public ModelParameter[] getOutputParametersByRef() {
-    return new ModelParameter[] {};
-  }
+		super.defineContext(context);
 
-  public JConfigurePanel getUIToConfigureStep(JConfigurePanelEnvironment env) {
-    return new JDefaultConfigurePanel(this, env);
-  }
+		Object p = context.get(ContextVariables.CONTEXT_SERVICES);
+		if (p != null && p instanceof APrintNGGeneralServices) {
+			services = (APrintNGGeneralServices) p;
+		}
+	}
 
-  @Override
-  public Map<AbstractParameter, Object> execute(Map<AbstractParameter, Object> values)
-      throws Exception {
-    Map<AbstractParameter, Object> result = super.execute(values);
+	@Override
+	public ModelParameter[] getOutputParametersByRef() {
+		return new ModelParameter[] {};
+	}
 
-    if (services != null && getValue() != null) {
-    
-      logger.debug("open the virtual book");
-    	
-      Collection<Hole> h = null;
-      if (getValue() instanceof VirtualBook) {
-        h = ((VirtualBook) getValue()).getHolesCopy();
-      } else {
-        h = (Collection<Hole>) getValue();
-      }
-      assert h != null;
+	/**
+	 * this method is call if present, for the moment, due to dependencies, there
+	 * are no links between UI and core. @see 
+	 * 
+	 * @param env
+	 * @return
+	 */
+	public JConfigurePanel getUIToConfigureStep(JConfigurePanelEnvironment env) {
+		
+		JDefaultConfigurePanel confPanel = new JDefaultConfigurePanel(this, env);
+		PropertySheetPanel p = confPanel.getPropertySheetPanel();
 
-      logger.debug("get the instrument");
-      Instrument instrument = services.getRepository().getInstrument(instrumentName) ;
+		PropertyEditorRegistry ef = (PropertyEditorRegistry) p.getEditorFactory();
 
-      logger.debug("instrument loaded :" + instrumentName);
-      if (instrument == null) throw new Exception("instrument " + instrumentName + " not found");
-      logger.debug("opening virtual book");
+		Property[] properties = p.getProperties();
+		logger.debug("properties :" + Arrays.asList(properties));
+		assert properties.length == 1;
 
-      VirtualBook vb = new VirtualBook(instrument.getScale());
-      vb.addHole(h);
-      logger.debug("open frame");
-      APrintNGVirtualBookFrame frame = services.newVirtualBook(vb, instrument);
+		ef.registerEditor(properties[0], new InstrumentNameChooserPropertyEditor(env.getRepository()));
 
-    } else {
-      logger.info("context variable services not defined, or null value");
-    }
+		return confPanel;
+	}
 
-    return result;
-  }
+	@Override
+	public Map<AbstractParameter, Object> execute(Map<AbstractParameter, Object> values) throws Exception {
+		Map<AbstractParameter, Object> result = super.execute(values);
 
-  public String getInstrumentName() {
-    return instrumentName;
-  }
+		if (services != null && getValue() != null) {
 
-  public void setInstrumentName(String instrumentName) {
-    this.instrumentName = instrumentName;
-  }
-  
+			logger.debug("open the virtual book");
 
-  @Override
-  public void applyConfig() throws Exception {
-    // super.applyConfigOnParameters();
+			Collection<Hole> h = null;
+			if (getValue() instanceof VirtualBook) {
+				h = ((VirtualBook) getValue()).getHolesCopy();
+			} else {
+				h = (Collection<Hole>) getValue();
+			}
+			assert h != null;
 
-    fromConfig();
-  }
+			logger.debug("get the instrument");
+			log("get instrument :" + instrumentName);
+			Instrument instrument = services.getRepository().getInstrument(instrumentName);
 
-  public void updateConfig() {
-	  
-    instrumentParameter = new ModelValuedParameter();
-    instrumentParameter.setName("instrumentname");
-    instrumentParameter.setLabel("Instrument Name");
-    instrumentParameter.setType(new JavaType(String.class));
-    instrumentParameter.setValue(instrumentName);
-    instrumentParameter.setStep(this);
+			logger.debug("instrument loaded :" + instrumentName);
+			if (instrument == null)
+				throw new Exception("instrument " + instrumentName + " not found");
+			logger.debug("opening virtual book");
 
-    configureParameters = new ModelValuedParameter[] {instrumentParameter};
-  }
+			VirtualBook vb = new VirtualBook(instrument.getScale());
+			vb.addHole(h);
+			logger.debug("open frame");
+			APrintNGVirtualBookFrame frame = services.newVirtualBook(vb, instrument);
 
-  private void fromConfig() throws Exception {
-    this.instrumentName = (String) instrumentParameter.getValue();
-  }
+		} else {
+			logger.info("context variable services not defined, or null value");
+		}
 
-  @Override
-  protected ParameterError[] validateConfigValues() {
-    assert instrumentParameter != null;
+		return result;
+	}
 
-    logger.debug("validate config values");
+	public String getInstrumentName() {
+		return instrumentName;
+	}
 
-    ParameterError[] validateConfigValues = super.validateConfigValues();
-    if (validateConfigValues != null && validateConfigValues.length > 0) {
-      return validateConfigValues;
-    }
+	public void setInstrumentName(String instrumentName) {
+		this.instrumentName = instrumentName;
+	}
 
-    if (configureParameters == null
-        || instrumentParameter.getValue() == null
-        || !(instrumentParameter.getValue() instanceof String)
-        || (((String) instrumentParameter.getValue()).trim().equals(""))) {
-      return new ParameterError[] {
-        new ParameterError(instrumentParameter, "no instrument selected")
-      };
-    }
-    return new ParameterError[0];
-  }
+	@Override
+	public void applyConfig() throws Exception {
+		// super.applyConfigOnParameters();
+
+		fromConfig();
+	}
+
+	public void updateConfig() {
+
+		instrumentParameter = new ModelValuedParameter();
+		instrumentParameter.setName("instrumentname");
+		instrumentParameter.setLabel("Instrument Name");
+		instrumentParameter.setType(new JavaType(String.class));
+		instrumentParameter.setValue(instrumentName);
+		instrumentParameter.setStep(this);
+
+		configureParameters = new ModelValuedParameter[] { instrumentParameter };
+	}
+
+	private void fromConfig() throws Exception {
+		this.instrumentName = (String) instrumentParameter.getValue();
+	}
+
+	@Override
+	protected ParameterError[] validateConfigValues() {
+		assert instrumentParameter != null;
+
+		logger.debug("validate config values");
+
+		ParameterError[] validateConfigValues = super.validateConfigValues();
+		if (validateConfigValues != null && validateConfigValues.length > 0) {
+			return validateConfigValues;
+		}
+
+		if (configureParameters == null || instrumentParameter.getValue() == null
+				|| !(instrumentParameter.getValue() instanceof String)
+				|| (((String) instrumentParameter.getValue()).trim().equals(""))) {
+			return new ParameterError[] { new ParameterError(instrumentParameter, "no instrument selected") };
+		}
+		return new ParameterError[0];
+	}
 }

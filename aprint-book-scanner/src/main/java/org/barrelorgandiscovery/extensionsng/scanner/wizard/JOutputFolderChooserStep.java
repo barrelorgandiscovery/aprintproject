@@ -22,6 +22,12 @@ import org.barrelorgandiscovery.tools.ImageTools;
 import com.jeta.forms.components.panel.FormPanel;
 import com.l2fprod.common.swing.JDirectoryChooser;
 
+/**
+ * Step for choosing the output folder for generating image files
+ * 
+ * @author pfreydiere
+ *
+ */
 public class JOutputFolderChooserStep extends BasePanelStep {
 
 	private static Logger logger = Logger.getLogger(JOutputFolderChooserStep.class);
@@ -35,6 +41,7 @@ public class JOutputFolderChooserStep extends BasePanelStep {
 	private JLabel folderLabel;
 
 	private AbstractButton btnfolder;
+	
 	private IPrefsStorage ps;
 	
 	private static final String DEFAULTCURRENTFOLDER = "defaultfolderstorage";
@@ -129,7 +136,6 @@ public class JOutputFolderChooserStep extends BasePanelStep {
 		}
 
 		updateState();
-
 		this.listener = stepListener;
 	}
 

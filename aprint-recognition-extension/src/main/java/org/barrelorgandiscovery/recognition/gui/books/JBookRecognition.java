@@ -39,6 +39,7 @@ import org.barrelorgandiscovery.gui.wizard.Wizard;
 import org.barrelorgandiscovery.gui.wizard.WizardStates;
 import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.prefs.DummyPrefsStorage;
+import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.recognition.gui.books.steps.StepChooseEdges;
 import org.barrelorgandiscovery.recognition.gui.books.steps.StepModelChooseChoice;
@@ -280,8 +281,12 @@ public class JBookRecognition extends JPanel {
 					JFrame f = new JFrame();
 					f.setSize(800, 500);
 					f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-
-					JBookRecognition dr = new JBookRecognition(rep, new DummyPrefsStorage(), null, null);
+					
+					// for testing it is useful
+					FilePrefsStorage prefs = new FilePrefsStorage(new File("c:\\temp\\prefsTest.properties"));
+					prefs.load();
+					
+					JBookRecognition dr = new JBookRecognition(rep,prefs, null, null);
 
 					f.getContentPane().add(dr);
 

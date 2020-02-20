@@ -31,6 +31,7 @@ import org.barrelorgandiscovery.tools.StringTools;
 import org.barrelorgandiscovery.tools.streamstorage.FolderStreamStorage;
 import org.barrelorgandiscovery.tools.streamstorage.StreamStorage;
 
+@Deprecated
 public class GAESynchronizedRepository2 extends
 		AbstractEditableInstrumentRepository implements Disposable {
 

@@ -1,7 +1,8 @@
 package org.barrelorgandiscovery.editableinstrument;
 
 /**
- * Interface for getting the editableInstrumentManager
+ * Interface for getting the editableInstrumentManager associated to an instrument.
+ * one can get the editable name, and editableInstrumentManager, and edit/load them
  * 
  * @author Freydiere Patrice
  * 

@@ -7,6 +7,8 @@ import java.awt.geom.Point2D;
 import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -18,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.gui.wizard.BasePanelStep;
 import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener;
+import org.barrelorgandiscovery.gui.wizard.Wizard;
 import org.barrelorgandiscovery.gui.wizard.WizardStates;
 import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.recognition.gui.books.BookReadProcessor;
@@ -33,6 +36,7 @@ import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JLinesLayer;
 import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JTiledImageDisplayLayer;
 import org.barrelorgandiscovery.recognition.gui.interactivecanvas.tools.JViewingToolBar;
 import org.barrelorgandiscovery.recognition.gui.interactivecanvas.tools.MoveAndCreatePointForMultipleLinesTool;
+import org.barrelorgandiscovery.recognition.gui.interactivecanvas.tools.MoveTool;
 import org.barrelorgandiscovery.recognition.messages.Messages;
 import org.barrelorgandiscovery.repository.Repository2;
 import org.barrelorgandiscovery.tools.ImageTools;
@@ -65,6 +69,8 @@ public class StepChooseEdges extends BasePanelStep implements Step {
 	private JScaleDisplayLayer scaleDisplayLayer;
 
 	private Repository2 repository;
+	
+	private JCheckBox holeLine;
 
 	private JCheckBox reverseScaleCombo;
 
@@ -93,13 +99,14 @@ public class StepChooseEdges extends BasePanelStep implements Step {
 		bottom = new JLinesLayer();
 		display.addLayer(bottom);
 
-		JButton b = new JButton();
-		b.setToolTipText(Messages.getString("StepChooseEdges.0")); //$NON-NLS-1$
-		b.setIcon(ImageTools.loadIcon(getClass(), "tablet.png")); //$NON-NLS-1$
-		b.addActionListener(new ActionListener() {
+		JButton buttonChooseMoveEdges = new JButton();
+		buttonChooseMoveEdges.setToolTipText(Messages.getString("StepChooseEdges.0")); //$NON-NLS-1$
+		buttonChooseMoveEdges.setIcon(ImageTools.loadIcon(getClass(), "tablet.png")); //$NON-NLS-1$
+		buttonChooseMoveEdges.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
+					top.setSelected(Collections.EMPTY_LIST);
 					display.setCurrentTool(
 							new MoveAndCreatePointForMultipleLinesTool(display, new JLinesLayer[] { top, bottom }));
 				} catch (Exception ex) {
@@ -108,14 +115,29 @@ public class StepChooseEdges extends BasePanelStep implements Step {
 			}
 		});
 		viewingToolBar.addSeparator();
-		viewingToolBar.add(b);
+		viewingToolBar.add(buttonChooseMoveEdges);
+		
+		
+		JButton btnMoveEdges = new JButton();
+		btnMoveEdges.setText("Move edges");
+		btnMoveEdges.addActionListener( (e) -> {
+			try {
+				display.setCurrentTool(new MoveTool(display, new JLinesLayer[] { top, bottom }));
+			} catch(Exception ex) {
+				logger.error(ex.getMessage(), ex);
+			}
+		});
+		viewingToolBar.add(btnMoveEdges);
+		
 		viewingToolBar.addSeparator();
 		reverseScaleCombo = new JCheckBox(Messages.getString("StepChooseEdges.2")); //$NON-NLS-1$
 		viewingToolBar.add(reverseScaleCombo);
 
+		
 		scaleDisplayLayer = new JScaleDisplayLayer(display, null, top, bottom);
 		display.addLayer(scaleDisplayLayer);
 
+		
 		reverseScaleCombo.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -216,8 +238,9 @@ public class StepChooseEdges extends BasePanelStep implements Step {
 
 	@Override
 	public Icon getPageImage() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
+	
+	
 }

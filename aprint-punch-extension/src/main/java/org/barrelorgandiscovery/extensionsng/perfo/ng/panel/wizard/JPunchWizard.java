@@ -84,7 +84,11 @@ public class JPunchWizard extends JPanel implements Disposable {
 	}
 
 	
-	
+	/**
+	 * Test method f
+	 * @param args
+	 * @throws Exception
+	 */
 	public static void main(String[] args) throws Exception {
 
 		BasicConfigurator.configure();
@@ -92,8 +96,11 @@ public class JPunchWizard extends JPanel implements Disposable {
 		JEditableVirtualBookComponent vbv = new JEditableVirtualBookComponent();
 		vbv.activatePanOnMiddleButton();
 
-		final VirtualBookResult vb = VirtualBookXmlIO.read(new File(Messages.getString("JPunchWizard.0"))); //$NON-NLS-1$
+		final VirtualBookResult vb = VirtualBookXmlIO.read(new File("C:\\Users\\use\\Dropbox\\APrint\\Books\\49\\carton_jerome.book")); //$NON-NLS-1$
 
+		// final VirtualBookResult vb = VirtualBookXmlIO.read(new File("C:\\Users\\use\\Dropbox\\APrint\\Books\\52\\Folies Bergere.book")); //$NON-NLS-1$
+
+		
 		vbv.setPreferredSize(new Dimension(300, 300));
 		vbv.setVirtualBook(vb.virtualBook);
 

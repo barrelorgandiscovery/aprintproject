@@ -1,9 +1,9 @@
 package org.barrelorgandiscovery.gui;
 
 /**
- * Interface for long
+ * Interface for informing about progress
  * 
- * @author Freydiere Patrice
+ * @author pfreydiere
  * 
  */
 public interface ProgressIndicator {

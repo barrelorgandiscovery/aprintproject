@@ -66,9 +66,10 @@ public class StepViewAndEditBook extends BasePanelStep implements Disposable {
 
 	private Repository2 repository;
 
+	// visual component
 	private JEditableVirtualBookComponent editableVirtualbookComponent;
 
-	private ImageAndHolesVisualizationLayer iv;
+	private ImageAndHolesVisualizationLayer imageBackgroundShowing;
 
 	private IAPrintWait waitFrame;
 
@@ -108,9 +109,9 @@ public class StepViewAndEditBook extends BasePanelStep implements Disposable {
 
 		editableVirtualbookComponent = new JEditableVirtualBookComponent();
 
-		iv = new ImageAndHolesVisualizationLayer();
+		imageBackgroundShowing = new ImageAndHolesVisualizationLayer();
 
-		editableVirtualbookComponent.addLayer(iv);
+		editableVirtualbookComponent.addLayer(imageBackgroundShowing);
 
 		decisionThreshold = new JSlider(10, 245);
 		decisionThreshold.setValue(150); // default
@@ -241,7 +242,7 @@ public class StepViewAndEditBook extends BasePanelStep implements Disposable {
 					c.mkdirs();
 
 					logger.debug("saving image"); //$NON-NLS-1$
-					ImageIO.write(iv.getBackgroundimage(), "PNG", //$NON-NLS-1$
+					ImageIO.write(imageBackgroundShowing.getBackgroundimage(), "PNG", //$NON-NLS-1$
 							new File(c, "modifiedImage.png")); //$NON-NLS-1$
 
 					VirtualBook vb = editableVirtualbookComponent.getVirtualBook();
@@ -332,6 +333,8 @@ public class StepViewAndEditBook extends BasePanelStep implements Disposable {
 
 		String currentInstrumentName = imageAndInstrument.instrumentName;
 		Instrument instrument = repository.getInstrument(currentInstrumentName);
+
+		imageBackgroundShowing.setFlipHorizontallyTheImage(instrument.getScale().isPreferredViewedInversed());
 
 		///////////////////////////////////////////////////////////////////////
 		// model processing
@@ -429,7 +432,7 @@ public class StepViewAndEditBook extends BasePanelStep implements Disposable {
 		}
 
 		editableVirtualbookComponent.setVirtualBook(currentState.virtualbook);
-		iv.setTiledBackgroundimage(tiView);
+		imageBackgroundShowing.setTiledBackgroundimage(tiView);
 		editableVirtualbookComponent.touchBook();
 		editableVirtualbookComponent.repaint();
 

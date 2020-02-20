@@ -38,6 +38,7 @@ import com.l2fprod.common.propertysheet.PropertySheetPanel;
 public class JDefaultConfigurePanel extends JConfigurePanel {
 
 	protected PropertySheetPanel propertySheetPanel;
+	
 	protected ModelStep ms;
 
 	public JDefaultConfigurePanel(ModelStep ms, JConfigurePanelEnvironment env) {
@@ -65,7 +66,6 @@ public class JDefaultConfigurePanel extends JConfigurePanel {
 
 		pr.registerEditor(Instrument.class,
 				new InstrumentChooserPropertyEditor(env.getRepository()));
-
 		
 		propertySheetPanel.setEditorFactory(pr);
 		propertySheetPanel.setRendererFactory(prr);
@@ -77,6 +77,10 @@ public class JDefaultConfigurePanel extends JConfigurePanel {
 
 	}
 
+	public PropertySheetPanel getPropertySheetPanel() {
+		return propertySheetPanel;
+	}
+	
 	@Override
 	public boolean apply() throws Exception {
 

@@ -31,6 +31,7 @@ import sun.misc.BASE64Encoder;
 
 /**
  */
+@Deprecated
 public class APrintRepositoryClientConnection {
 
 	public static final String APPLICATION_OCTET_STREAM = "application/octet-stream"; //$NON-NLS-1$

@@ -175,7 +175,7 @@ public class StepChooseMachine extends JPanel implements Step {
       try {
         selectedMachineParameters.saveParameters(pnps);
         pnps.save();
-      } catch (Exception ex) {
+      } catch (Throwable ex) {
         logger.error(
             "error while saving preferences :" + ex.getMessage(), //$NON-NLS-1$
             ex);

@@ -11,7 +11,4 @@ public interface NeedInstrument {
 	public abstract void setCurrentInstrument(
 			org.barrelorgandiscovery.instrument.Instrument ins);
 
-	// public abstract org.barrelorgandiscovery.instrument.Instrument
-	// getCurrentInstrument();
-
 }

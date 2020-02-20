@@ -124,10 +124,10 @@ public class MidiDemultiplexer extends BaseMidiModelStep {
 		
 		Collection<ITimedStamped> events = ps.getValue(IN_PARAMETER_MIDI);
 		
-		
 		String midiFilterValue = (String)filterChannel.getValue();
 		Set<Integer> filtered = null;
 		if (midiFilterValue != null && (!midiFilterValue.trim().isEmpty()) ) {
+			log("using midifilter :" + midiFilterValue);
 			// read filter values
 			String[] splittedValues = midiFilterValue.split(","); 
 			if (splittedValues != null) {

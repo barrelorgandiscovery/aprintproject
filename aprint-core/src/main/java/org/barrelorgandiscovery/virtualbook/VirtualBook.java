@@ -611,7 +611,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * Get a copy of all the holes
+	 * Get a copy of all the holes, sorted by timestamp
 	 * 
 	 * @return get a copy array of the contained holes in the book
 	 */

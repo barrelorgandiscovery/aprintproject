@@ -60,6 +60,11 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 	private ArrayList<Hole> holes = null;
 
 	/**
+	 * flip the image display
+	 */
+	private boolean flipHorizontallyTheImage = false;
+	
+	/**
 	 * setter for the image
 	 * 
 	 * @param backgroundimage
@@ -117,10 +122,15 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 
 			Scale s = vb.getScale();
 			double width = s.getWidth();
+			
+			BufferedImage imageToDisplay = backgroundimage;
+			if (flipHorizontallyTheImage) {
+				imageToDisplay = reverseImage(backgroundimage);
+			}
 
-			g.drawImage(backgroundimage, component.convertCartonToScreenX(xoffset), component.convertCartonToScreenY(0),
-					(int) ((1.0 * component.MmToPixel(width) / backgroundimage.getHeight())
-							* backgroundimage.getWidth()),
+			g.drawImage(imageToDisplay, component.convertCartonToScreenX(xoffset), component.convertCartonToScreenY(0),
+					(int) ((1.0 * component.MmToPixel(width) / imageToDisplay.getHeight())
+							* imageToDisplay.getWidth()),
 					component.MmToPixel(width), component);
 		}
 
@@ -161,6 +171,9 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 						if (filePath.exists()) {
 
 							BufferedImage loadImage = ImageTools.loadImage(filePath.toURL());
+							if (flipHorizontallyTheImage) {
+								loadImage = reverseImage(loadImage);
+							}
 
 							AffineTransform scaling2 = AffineTransform.getScaleInstance(f, f);
 							AffineTransform xoff2 = AffineTransform.getTranslateInstance(
@@ -182,6 +195,20 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 			}
 		}
 
+	}
+
+	private BufferedImage reverseImage(BufferedImage inputImage) {
+		BufferedImage imageToDisplay;
+		imageToDisplay = new BufferedImage(inputImage.getWidth(),
+				inputImage.getHeight(), inputImage.getType());
+		Graphics2D g2d = imageToDisplay.createGraphics();
+		try {
+			g2d.drawImage(inputImage, 0, 0, inputImage.getWidth() , inputImage.getHeight(), 0,inputImage.getHeight(), inputImage.getWidth(),0 , null);
+		} finally 
+		{
+			g2d.dispose();
+		}
+		return imageToDisplay;
 	}
 
 	/*
@@ -255,4 +282,13 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 		return xscale;
 	}
 
+	public void setFlipHorizontallyTheImage(boolean flipHorizontallyTheImage) {
+		this.flipHorizontallyTheImage = flipHorizontallyTheImage;
+	}
+	
+	public boolean isFlipHorizontallyTheImage() {
+		return flipHorizontallyTheImage;
+	}
+	
+	
 }

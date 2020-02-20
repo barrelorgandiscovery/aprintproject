@@ -29,7 +29,6 @@ public class PunchPlanIO {
           new CommandVisitor() {
             @Override
             public void visit(int index, DisplacementCommand displacementCommand) throws Exception {
-
               fos.write(
                   String.format(
                       Locale.ENGLISH,

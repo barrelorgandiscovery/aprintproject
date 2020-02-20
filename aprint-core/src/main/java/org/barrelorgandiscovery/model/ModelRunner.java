@@ -56,8 +56,8 @@ public class ModelRunner implements IExecute {
 	/**
 	 * Current executing step
 	 */
-	private ModelStep currentStepToBeExecuted;	
-	
+	private ModelStep currentStepToBeExecuted;
+
 	/**
 	 * Restart the execution
 	 */
@@ -79,8 +79,8 @@ public class ModelRunner implements IExecute {
 	}
 
 	/**
-	 * Execute the current step, and move to the next one if an exception occur
-	 * in the execution
+	 * Execute the current step, and move to the next one if an exception occur in
+	 * the execution
 	 * 
 	 * @throws Exception
 	 */
@@ -100,10 +100,10 @@ public class ModelRunner implements IExecute {
 		for (Iterator iterator = precedingLinksAssociatedTo.iterator(); iterator.hasNext();) {
 			ModelLink modelLink = (ModelLink) iterator.next();
 			AbstractParameter inputParameter = modelLink.getTo();
-			
+
 			// @@@ Merge input , must define a reduce operator
 			// here we adopt a last read parameters overwrite
-			
+
 			inputValuesForStep.put(inputParameter, linkValues.get(modelLink));
 		}
 
@@ -111,6 +111,9 @@ public class ModelRunner implements IExecute {
 
 		Map<AbstractParameter, Object> resultValues = null;
 		try {
+			if (modelExecutionListener != null) {
+				modelExecutionListener.stepExecuting(currentStepToBeExecuted);
+			}
 			resultValues = currentStepToBeExecuted.execute(inputValuesForStep);
 			if (resultValues == null) {
 				logger.warn("implementation error, step " + currentStepToBeExecuted + " must return values");
@@ -156,14 +159,17 @@ public class ModelRunner implements IExecute {
 			modelExecutionListener.startExecuteModel();
 		}
 
-		while (!isFinished()) {
-			executeCurrentStepAndMoveToNext();
-		}
+		try {
 
-		if (modelExecutionListener != null) {
-			modelExecutionListener.endExecuteModel();
-		}
+			while (!isFinished()) {
+				executeCurrentStepAndMoveToNext();
+			}
 
+		} finally {
+			if (modelExecutionListener != null) {
+				modelExecutionListener.endExecuteModel();
+			}
+		}
 	}
 
 	/**
@@ -226,9 +232,8 @@ public class ModelRunner implements IExecute {
 		return rethash;
 	}
 
-	
 	public void setModelExecutionListener(IModelExecutionListener modelExecutionListener) {
 		this.modelExecutionListener = modelExecutionListener;
 	}
-	
+
 }

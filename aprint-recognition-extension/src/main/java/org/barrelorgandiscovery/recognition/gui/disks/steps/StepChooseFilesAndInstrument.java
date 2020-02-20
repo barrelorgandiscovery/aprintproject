@@ -40,9 +40,9 @@ import com.jeta.forms.gui.form.FormAccessor;
 public class StepChooseFilesAndInstrument extends BasePanelStep {
 
 	private static final String CURRENT_DIRECTORY_PREF = "currentDirectory"; //$NON-NLS-1$
+	private static final String LASTBOOKIMAGE_FILE_PREF = "lastBookImageOpened"; //$NON-NLS-1$
 
-	private static Logger logger = Logger
-			.getLogger(StepChooseFilesAndInstrument.class);
+	private static Logger logger = Logger.getLogger(StepChooseFilesAndInstrument.class);
 
 	/**
 	 * button for choosing the picture file
@@ -88,12 +88,11 @@ public class StepChooseFilesAndInstrument extends BasePanelStep {
 	/**
 	 * constructor
 	 * 
-	 * @param repository
-	 *            the instrument repository
+	 * @param repository the instrument repository
 	 * @throws Exception
 	 */
-	public StepChooseFilesAndInstrument(String id, Step parent,
-			Repository2 repository, IPrefsStorage prefStorage) throws Exception {
+	public StepChooseFilesAndInstrument(String id, Step parent, Repository2 repository, IPrefsStorage prefStorage)
+			throws Exception {
 		super(id, parent);
 		assert repository != null;
 		this.repository = repository;
@@ -110,32 +109,35 @@ public class StepChooseFilesAndInstrument extends BasePanelStep {
 	 */
 	private void initComponents() throws Exception {
 
-		FormPanel fp = new FormPanel(getClass().getResourceAsStream(
-				"pictureandinstrument.jfrm")); //$NON-NLS-1$
+		FormPanel fp = new FormPanel(getClass().getResourceAsStream("pictureandinstrument.jfrm")); //$NON-NLS-1$
 		setLayout(new BorderLayout());
 		add(fp, BorderLayout.CENTER);
 
 		browsePicture = (JButton) fp.getComponentByName("picturebrowse"); //$NON-NLS-1$
-		browsePicture.setIcon(new ImageIcon(getClass()
-				.getResource("folder.png"))); //$NON-NLS-1$
+		browsePicture.setIcon(new ImageIcon(getClass().getResource("folder.png"))); //$NON-NLS-1$
 		browsePicture.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					
+
 					File lastLocation = prefStorage.getFileProperty(CURRENT_DIRECTORY_PREF, null);
-					
-					JFileChooser fc = new JFileChooser(lastLocation);
-					int ret = fc
-							.showOpenDialog(StepChooseFilesAndInstrument.this);
+					File lastFile = prefStorage.getFileProperty(LASTBOOKIMAGE_FILE_PREF, null);
+					JFileChooser fc = new JFileChooser(lastFile);
+					if (lastLocation != null && lastFile == null) {
+						fc.setCurrentDirectory(lastLocation);
+					}
+					int ret = fc.showOpenDialog(StepChooseFilesAndInstrument.this);
 					if (ret == JFileChooser.APPROVE_OPTION) {
 						File selectedFile = fc.getSelectedFile();
-						if (selectedFile != null)
-							prefStorage.setFileProperty(CURRENT_DIRECTORY_PREF, selectedFile);
+						if (selectedFile != null) {
+							prefStorage.setFileProperty(CURRENT_DIRECTORY_PREF, selectedFile.getParentFile());
+							prefStorage.setFileProperty(LASTBOOKIMAGE_FILE_PREF, selectedFile);
+
+							prefStorage.save();
+						}
 						internalChangeImageFile(selectedFile);
 					}
 				} catch (Exception ex) {
-					logger.error(
-							"error in reading the file :" + ex.getMessage(), ex); //$NON-NLS-1$
+					logger.error("error in reading the file :" + ex.getMessage(), ex); //$NON-NLS-1$
 					JMessageBox.showError(this, ex);
 				}
 			}
@@ -152,17 +154,16 @@ public class StepChooseFilesAndInstrument extends BasePanelStep {
 		Component tbplacement = fp.getComponentByName("toolbar"); //$NON-NLS-1$
 		formAccessor.replaceBean(tbplacement, new JViewingToolBar(display));
 
-		instrumentChooser = new JCoverFlowInstrumentChoiceWithFilter(repository,
-				new IInstrumentChoiceListener() {
-					public void instrumentChanged(Instrument newInstrument) {
-						if (newInstrument != null) {
-							instrumentName = newInstrument.getName();
-						} else {
-							instrumentName = null;
-						}
-						checkStateAndCallStepChangedListener();
-					}
-				});
+		instrumentChooser = new JCoverFlowInstrumentChoiceWithFilter(repository, new IInstrumentChoiceListener() {
+			public void instrumentChanged(Instrument newInstrument) {
+				if (newInstrument != null) {
+					instrumentName = newInstrument.getName();
+				} else {
+					instrumentName = null;
+				}
+				checkStateAndCallStepChangedListener();
+			}
+		});
 		instrumentChooser.setPreferredSize(new Dimension(200, 200));
 
 		formAccessor.replaceBean("instrumentselect", instrumentChooser); //$NON-NLS-1$
@@ -170,9 +171,9 @@ public class StepChooseFilesAndInstrument extends BasePanelStep {
 		// labels
 		JLabel labelChooseInstrument = formAccessor.getLabel("picturephaseselection"); //$NON-NLS-1$
 		labelChooseInstrument.setText(Messages.getString("StepChooseFilesAndInstrument.1")); //$NON-NLS-1$
-		
+
 		JLabel selectInstrumentLabel = formAccessor.getLabel("selectInstrument"); //$NON-NLS-1$
-		
+
 		selectInstrumentLabel.setText(Messages.getString("StepChooseFilesAndInstrument.3")); //$NON-NLS-1$
 		this.imageFile = null;
 
@@ -181,12 +182,11 @@ public class StepChooseFilesAndInstrument extends BasePanelStep {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.barrelorgandiscovery.recognition.gui.wizard.Step#activate(java.io
+	 * @see org.barrelorgandiscovery.recognition.gui.wizard.Step#activate(java.io
 	 * .Serializable)
 	 */
-	public void activate(Serializable state, WizardStates states,
-			StepStatusChangedListener stepChangedListener) throws Exception {
+	public void activate(Serializable state, WizardStates states, StepStatusChangedListener stepChangedListener)
+			throws Exception {
 
 		if (state == null || (!(state instanceof ImageFileAndInstrument))) {
 			currentState = new ImageFileAndInstrument();
@@ -209,21 +209,19 @@ public class StepChooseFilesAndInstrument extends BasePanelStep {
 		currentState.diskFile = newImageFile;
 		internalChangeImageFile(newImageFile);
 	}
-	
+
 	public File getImageFile() {
 		return currentState.diskFile;
 	}
 
-	
-	public void fitImage(){
+	public void fitImage() {
 		display.fit();
 	}
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.barrelorgandiscovery.recognition.gui.wizard.Step#unActivate(java.
+	 * @see org.barrelorgandiscovery.recognition.gui.wizard.Step#unActivate(java.
 	 * io.Serializable)
 	 */
 	public Serializable unActivateAndGetSavedState() throws Exception {
@@ -247,16 +245,14 @@ public class StepChooseFilesAndInstrument extends BasePanelStep {
 	 * @throws Exception
 	 * @throws MalformedURLException
 	 */
-	private void internalChangeImageFile(File selectedFile) throws Exception,
-			MalformedURLException {
+	private void internalChangeImageFile(File selectedFile) throws Exception, MalformedURLException {
 		// load the file
 		BufferedImage bi = null;
 		if (selectedFile != null && selectedFile.exists()) {
 			try {
 				bi = ImageTools.loadImage(selectedFile.toURL());
 			} catch (Exception ex) {
-				logger.error(
-						"error while loading the image :" + ex.getMessage(), ex); //$NON-NLS-1$
+				logger.error("error while loading the image :" + ex.getMessage(), ex); //$NON-NLS-1$
 			}
 		}
 		layer.setImageToDisplay(bi);
@@ -265,8 +261,7 @@ public class StepChooseFilesAndInstrument extends BasePanelStep {
 		checkStateAndCallStepChangedListener();
 	}
 
-	private void internalChangeInstrumentName(String instrumentName)
-			throws Exception {
+	private void internalChangeInstrumentName(String instrumentName) throws Exception {
 		instrumentChooser.selectInstrument(instrumentName);
 		this.instrumentName = instrumentName;
 		checkStateAndCallStepChangedListener();
