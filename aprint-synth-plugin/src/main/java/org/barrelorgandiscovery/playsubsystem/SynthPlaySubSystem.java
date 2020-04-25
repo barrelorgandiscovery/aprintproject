@@ -69,13 +69,19 @@ public class SynthPlaySubSystem implements PlaySubSystem, NeedInstrument {
 			logger.debug("associated ins :" + associatedIns);
 			IEditableInstrument editableInstrument = em.loadEditableInstrument(associatedIns);
 
-			mapping = new SoundMapping(editableInstrument);
+			
+			changeSoundMapping(editableInstrument);
 
 		} catch (Exception ex) {
 			logger.error(ex.getMessage(), ex);
 		}
 	}
 
+	private void changeSoundMapping(IEditableInstrument editableInstrument) throws Exception {
+		
+		mapping = new SoundMapping(editableInstrument);
+	}
+	
 	@Override
 	public PlayControl play(Object owner, VirtualBook vb, IPlaySubSystemFeedBack feedBack, long pos) throws Exception {
 		this.owner = owner;
@@ -91,7 +97,7 @@ public class SynthPlaySubSystem implements PlaySubSystem, NeedInstrument {
 		Synthetizer synthetizer = new Synthetizer();
 		
 		final AtomicBoolean ended = new AtomicBoolean(false);
-		synthetizer.defaultBufferSize = 10_000;
+		synthetizer.defaultBufferSize = 2_000;
 
 		synthetizer.setPrepareBufferCallBack(new BufferPrepare() {
 
@@ -117,7 +123,7 @@ public class SynthPlaySubSystem implements PlaySubSystem, NeedInstrument {
 					}
 
 					// System.out.println(eventIndex.get());
-					if (startBufferTime > compiled[compiled.length - 1].end) {
+					if (stopBufferTime > compiled[compiled.length - 1].end + 10_000_000) {
 						ended.set(true);
 					}
 					
@@ -134,7 +140,12 @@ public class SynthPlaySubSystem implements PlaySubSystem, NeedInstrument {
 			float[] m = loadSound(soundSample);
 
 			long soundid = synthetizer.loadSample(m, soundSample.getFomat().getSampleRate(),
-					(float) MidiHelper.hertz(soundSample.getMidiRootNote()), isMusicBox);
+					(float) MidiHelper.hertz(soundSample.getMidiRootNote()),
+					soundSample.getLoopStart() != -1,
+					(int)soundSample.getLoopStart(), (int)soundSample.getLoopEnd(),
+					
+					
+					isMusicBox);
 			soundRef.soundId = soundid;
 		}
 
@@ -159,7 +170,7 @@ public class SynthPlaySubSystem implements PlaySubSystem, NeedInstrument {
 						}
 					}
 
-					Thread.sleep(10_000);
+					// Thread.sleep(10_000);
 				} catch (Throwable t) {
 					t.printStackTrace();
 				}
@@ -215,16 +226,18 @@ public class SynthPlaySubSystem implements PlaySubSystem, NeedInstrument {
 		int length = (int) mis.getFrameLength();
 
 		float[] memorySound = new float[length];
-		byte[] buffer = new byte[2];
+		byte[] buffer = new byte[2 * 8192 * 4];
 		int cpt = 0;
-		while (mis.read(buffer) != -1) {
-
-			byte b1 = buffer[0];
-			byte b2 = buffer[1];
-
-			float v = (float) (((1.0 * b1 + 1.0 * 128 * b2)) / (Short.MAX_VALUE * 1.0));
-			// System.out.println(v);
-			memorySound[cpt++] = v;
+		int readFrames;
+		while ( (readFrames =  mis.read(buffer)) != -1) {
+			for (int i = 0 ; i < readFrames / 2 ; i ++) {			
+				byte b1 = buffer[i * 2];
+				byte b2 = buffer[i * 2 + 1];
+	
+				float v = (float) (((1.0 * b1 + 1.0 * 128 * b2)) / (Short.MAX_VALUE * 1.0));
+				// System.out.println(v);
+				memorySound[cpt++] = v;
+			}
 		}
 		System.out.println("sample read :" + cpt);
 		return memorySound;

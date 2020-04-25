@@ -93,7 +93,6 @@ public class SynthExtension implements IExtension, IPlaySubSystemRegistryExtensi
 
 				pss.playSubSystem = new SynthPlaySubSystem(eira);
 
-				pss.playSubSystem = new SynthPlaySubSystem(eira);
 				pl.add(pss);
 			}
 		}

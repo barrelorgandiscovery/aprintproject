@@ -82,6 +82,10 @@ public class SoundSample {
 		this.loopEnd = loopEnd;
 	}
 
+	/**
+	 * return -1 if the sound has no loop
+	 * @return
+	 */
 	public long getLoopStart() {
 		return loopStart;
 	}

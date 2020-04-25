@@ -35,7 +35,7 @@ public class Hole implements Comparable<Hole>, Serializable, ITimedStamped, ITim
 	private int piste;
 
 	/**
-	 * Constructor
+	 * Constructor of hole, given the track no, the timestamp and length (time are in microseconds)
 	 * 
 	 * @param piste
 	 *            hole track
@@ -53,10 +53,10 @@ public class Hole implements Comparable<Hole>, Serializable, ITimedStamped, ITim
 	}
 
 	/**
-	 * Constructeur par copie
+	 * Copy Constructor
 	 * 
 	 * @param n
-	 *            la note à copier
+	 *            hole to copy
 	 */
 	public Hole(Hole n) {
 		super();
