@@ -193,7 +193,6 @@ public class WavPlayer {
 		} catch (Exception ex) {
 			logger.error(ex.getMessage(), ex);
 		}
-
 	}
 
 	public void cancelPlay() {

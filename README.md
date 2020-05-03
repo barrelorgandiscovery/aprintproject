@@ -1,14 +1,18 @@
 # APrint Studio Project
 
-*Patrice Freydiere - 2004-2020*
+*Barrel organ discovery - 2004-2020*
 
 
 
-This repository contains the full source of APrint Studio, more informations can be found on the web site : [http://www.barrel-organ-discovery.org](http://www.barrel-organ-discovery.org)  
+This repository contains the **full source** of APrint Studio, more informations can be found on the web site : [http://www.barrel-organ-discovery.org](http://www.barrel-organ-discovery.org)  
 
 
 
-APrint Studio consist in  tools for creating mechanical books , for street organs, barrel organs, musicbox .. 
+![](doc/main_screenshot.png)
+
+
+
+APrint Studio is composed of a constellation of **tools** for creating **mechanical books** , for **street organs**, **fair organs**, **musicbox** .. 
 
 
 
@@ -34,11 +38,19 @@ java -Xmx2g -server -Dmainfolder="C:\Users\use\Documents\.." -cp aprint.jar org.
 
 
 
+
+
 ### Building the windows installer
 
 Windows installer is available, using the NSIS project, **NSIS** must be installed to create the windows installer.
 
-### 
+for creating the Installer with updated extensions launch the following command :
+
+```
+gradlew createBundles
+```
+
+
 
 
 
