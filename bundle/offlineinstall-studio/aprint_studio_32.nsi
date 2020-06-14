@@ -143,7 +143,7 @@ Section "!APrint Studio"
   WriteUninstaller "ap-uninst.exe"
   
   ; purge the instrument cache directory
-  RMDir /r "$DOCUMENTS\..\aprintstudio\private.cache"
+  RMDir /r "$APRINTDATAS\aprintstudio\private.cache"
   
   
   
@@ -152,8 +152,9 @@ SectionEnd ; end the section
 
 Section /o "Advanced - Source and Developper documentation" 
 	SetOutPath "$INSTDIR\dev"
-	File "..\build\aprint-javadoc.jar"
-	File "..\RD\groovy\docs\groovy-1.7.3\pdf\wiki-snapshot.pdf"
+	File "..\build\aprint-gui-javadoc.jar"
+	File "..\build\aprint-core-javadoc.jar"
+	; File "..\RD\groovy\docs\groovy-1.7.3\pdf\wiki-snapshot.pdf"
 	
 SectionEnd ; end the section
 
@@ -168,21 +169,21 @@ SectionEnd ; end the section
 ;SectionEnd ; end the section
 
 Section /o "Extension - Percage de cartons"
-    CreateDirectory "$DOCUMENTS\..\aprintstudio"
-	SetOutPath "$DOCUMENTS\..\aprintstudio"
+    CreateDirectory "$APRINTDATAS\aprintstudio"
+	SetOutPath "$APRINTDATAS\aprintstudio"
 	File /r "..\offlineinstall-extensions\Punch\*.*"
 SectionEnd ; end the section
 
 Section /o "Scripts"
-    CreateDirectory "$DOCUMENTS\..\aprintstudio\quickscripts"
-	SetOutPath "$DOCUMENTS\..\aprintstudio\quickscripts"
+    CreateDirectory "$APRINTDATAS\aprintstudio\quickscripts"
+	SetOutPath "$APRINTDATAS\aprintstudio\quickscripts"
 	File "officialscripts\*.aprintbookgroovyscript"
 
 SectionEnd
 
 Section /o "Scripts sample development (learning)"
-    CreateDirectory "$DOCUMENTS\..\aprintstudio\quickscripts"
-	SetOutPath "$DOCUMENTS\..\aprintstudio\quickscripts"
+    CreateDirectory "$APRINTDATAS\aprintstudio\quickscripts"
+	SetOutPath "$APRINTDATAS\aprintstudio\quickscripts"
 	File "officialscriptsdev\*.aprintbookgroovyscript"
 
 SectionEnd

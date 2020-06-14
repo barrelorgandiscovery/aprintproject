@@ -154,7 +154,7 @@ Section "!APrint Studio"
   WriteUninstaller "ap-uninst.exe"
   
     ; purge the instrument cache directory
-  RMDir /r "$DOCUMENTS\..\aprintstudio\private.cache"
+  RMDir /r "$APRINTDATAS\aprintstudio\private.cache"
   
   
   
@@ -176,22 +176,22 @@ SectionEnd ; end the section
 
 
 Section /o "Extension - Reconnaissance de disques cartons d'aristons"
-    CreateDirectory "$DOCUMENTS\..\aprintstudio"
-	SetOutPath "$DOCUMENTS\..\aprintstudio"
+    CreateDirectory "$APRINTDATAS\aprintstudio"
+	SetOutPath "$APRINTDATAS\aprintstudio"
 	File /r "..\offlineinstall-extensions\DiskAndBookRecognition\*.*"
 	
 SectionEnd ; end the section
 
 Section /o "Extension - Percage de cartons"
-    CreateDirectory "$DOCUMENTS\..\aprintstudio"
-	SetOutPath "$DOCUMENTS\..\aprintstudio"
+    CreateDirectory "$APRINTDATAS"
+	SetOutPath "$APRINTDATAS\aprintstudio"
 	File /r "..\offlineinstall-extensions\Punch\*.*"
 	
 SectionEnd ; end the section
 
 Section /o "Extension - Scan de cartons"
-    CreateDirectory "$DOCUMENTS\..\aprintstudio"
-	SetOutPath "$DOCUMENTS\..\aprintstudio"
+    CreateDirectory "$APRINTDATAS"
+	SetOutPath "$APRINTDATAS\aprintstudio"
 	File /r "..\offlineinstall-extensions\Scan\*.*"
 	
 SectionEnd ; end the section
@@ -199,15 +199,15 @@ SectionEnd ; end the section
 
 
 Section /o "Scripts"
-    CreateDirectory "$DOCUMENTS\..\aprintstudio\quickscripts"
-	SetOutPath "$DOCUMENTS\..\aprintstudio\quickscripts"
+    CreateDirectory "$APRINTDATAS\aprintstudio\quickscripts"
+	SetOutPath "$APRINTDATAS\aprintstudio\quickscripts"
 	File "officialscripts\*.aprintbookgroovyscript"
 
 SectionEnd
 
 Section /o "Scripts sample development (learning)"
-    CreateDirectory "$DOCUMENTS\..\aprintstudio\quickscripts"
-	SetOutPath "$DOCUMENTS\..\aprintstudio\quickscripts"
+    CreateDirectory "$APRINTDATAS\aprintstudio\quickscripts"
+	SetOutPath "$APRINTDATAS\aprintstudio\quickscripts"
 	File "officialscriptsdev\*.aprintbookgroovyscript"
 
 SectionEnd

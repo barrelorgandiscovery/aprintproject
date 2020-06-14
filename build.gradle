@@ -100,6 +100,7 @@ project(':bundle') {
         from project(':aprint-core').file('build/libs')
         into 'build'
     }
+
     // create installer
     task createBundles(type: Exec, dependsOn: [copyOutputJars,copyExtensionJars] ) {
         commandLine 'C:\\Program Files (x86)\\NSIS\\makensis.exe',
@@ -113,5 +114,23 @@ project(':bundle') {
             assert f.renameTo(new File('APrintStudioInstall_' + rootProject.ext.currentVersion + ".exe"))
         }
     }
+
+    // create installer
+    task createBundles32(type: Exec, dependsOn: [copyOutputJars,copyExtensionJars] ) {
+        commandLine 'C:\\Program Files (x86)\\NSIS\\makensis.exe',
+           "${project.projectDir}/offlineinstall-studio/aprint_studio_32.nsi"
+        workingDir = 'offlineinstall-studio'
+    }
+    task createInstaller32(dependsOn: ['createBundles32']) { 
+        doLast {
+            def f = file('offlineinstall-studio/APrintStudioInstall32.exe')
+            assert f.exists()
+            assert f.renameTo(new File('APrintStudioInstall_x32_' + rootProject.ext.currentVersion + ".exe"))
+        }
+    }
+
+
+
+
 }
 
