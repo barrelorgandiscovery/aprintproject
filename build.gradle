@@ -111,7 +111,7 @@ project(':bundle') {
         doLast {
             def f = file('offlineinstall-studio/APrintStudioInstall.exe')
             assert f.exists()
-            assert f.renameTo(new File('APrintStudioInstall_' + rootProject.ext.currentVersion + ".exe"))
+            assert f.renameTo(new File('build_file_APrintStudioInstall_' + rootProject.ext.currentVersion + ".exe"))
         }
     }
 
@@ -125,7 +125,7 @@ project(':bundle') {
         doLast {
             def f = file('offlineinstall-studio/APrintStudioInstall32.exe')
             assert f.exists()
-            assert f.renameTo(new File('APrintStudioInstall_x32_' + rootProject.ext.currentVersion + ".exe"))
+            assert f.renameTo(new File('build_file_APrintStudioInstall_x32_' + rootProject.ext.currentVersion + ".exe"))
         }
     }
 
