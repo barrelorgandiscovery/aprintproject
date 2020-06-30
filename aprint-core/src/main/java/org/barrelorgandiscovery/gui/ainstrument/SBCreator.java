@@ -185,17 +185,10 @@ public class SBCreator {
 		ModelPatch p = new ModelPatch(isPercussion ? 128 : 0, program, isPercussion); // bank, program ...
 		ins.setPatch(p);
 
-		List<SF2InstrumentRegion> regions = ins.getRegions();
-
-		SF2InstrumentRegion r = new SF2InstrumentRegion();
-		
-
-		List<SF2LayerRegion> regions2 = layer.getRegions();
-		
+		List<SF2InstrumentRegion> listInstrumentRegions = ins.getRegions();
 
 		layer.setName(layername); //$NON-NLS-1$
 
-		//ArrayList<SF2Sample> samples = new ArrayList<SF2Sample>();
 		for (int i = 0; i < mapping.length; i++) {
 			SampleMapping sampleMapping = mapping[i];
 
@@ -230,6 +223,7 @@ public class SBCreator {
 			sample.setData(new ModelByteBuffer(baos.toByteArray()));
 
 			SF2LayerRegion lr = new SF2LayerRegion();
+
 			lr.putBytes(SF2Region.GENERATOR_KEYRANGE, new byte[] {
 					(byte) sampleMapping.getFirstMidiCode(),
 					(byte) sampleMapping.getLastMidiCode() });
@@ -242,6 +236,7 @@ public class SBCreator {
 			 */
 			lr.putShort(SF2Region.GENERATOR_ATTACKVOLENV, (short)-7000); // -12000 par défaut
 			
+		
 			
 			// lr.putInteger(SF2Region.GENERATOR_INITIALATTENUATION, -100);
 
@@ -252,18 +247,21 @@ public class SBCreator {
 //			
 			
 			lr.setSample(sample);
-
-			regions2.add(lr);
-
-			r.setLayer(layer);
-
-			regions.add(r);
 			
-
+			layer.getRegions().add(lr);
+		
+		
+			
 			sb.addResource(sample);
-
+			
 		}
-
+		
+		SF2InstrumentRegion instrumentRegion = new SF2InstrumentRegion();
+		
+		instrumentRegion.setLayer(layer);
+		
+		listInstrumentRegions.add(instrumentRegion);
+		
 		sb.addResource(layer);
 		return ins;
 	}
