@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.barrelorgandiscovery.extensionsng.perfo.dxf.canvas.DXFDeviceDrawing;
 import org.barrelorgandiscovery.extensionsng.perfo.dxf.canvas.DeviceDrawing;
+import org.barrelorgandiscovery.extensionsng.perfo.dxf.canvas.SVGDeviceDrawing;
 import org.barrelorgandiscovery.extensionsng.perfo.dxf.drawer.ArrondiHoleDrawer;
 import org.barrelorgandiscovery.extensionsng.perfo.dxf.drawer.HoleDrawer;
 import org.barrelorgandiscovery.extensionsng.perfo.dxf.drawer.RectangularHoleDrawer;
@@ -37,8 +38,7 @@ import com.vividsolutions.jts.geom.Coordinate;
 
 public class CADVirtualBookExporter {
 
-	private static Logger logger = Logger
-			.getLogger(CADVirtualBookExporter.class);
+	private static Logger logger = Logger.getLogger(CADVirtualBookExporter.class);
 
 	final static String LAYER_BORDS = "BORDS_CARTON";
 
@@ -48,8 +48,7 @@ public class CADVirtualBookExporter {
 
 	final static String LAYER_PLIURES_VERSO = "PLIURES_VERSO";
 
-	public static String[] LAYERS = new String[] { LAYER_BORDS, LAYER_TROUS,
-			LAYER_PLIURES, LAYER_PLIURES_VERSO };
+	public static String[] LAYERS = new String[] { LAYER_BORDS, LAYER_TROUS, LAYER_PLIURES, LAYER_PLIURES_VERSO };
 
 	public CADVirtualBookExporter() {
 	}
@@ -57,19 +56,13 @@ public class CADVirtualBookExporter {
 	/**
 	 * Exporte un carton en fichier DXF
 	 * 
-	 * @param vb
-	 *            le carton à exporter
-	 * @param mecanique
-	 *            booleen indiquant si le type est mecanique
-	 * @param tailleTrous
-	 *            taille des trous dans le cas du pneumatique
-	 * @param ponts
-	 *            taille des ponts pour le pneumatique
-	 * @param baseexportFile
+	 * @param vb          le carton à exporter
+	 * @param mecanique   booleen indiquant si le type est mecanique
+	 * @param tailleTrous taille des trous dans le cas du pneumatique
+	 * @param ponts       taille des ponts pour le pneumatique
 	 * @throws Exception
 	 */
-	public void export(VirtualBook vb, DXFParameters parameters,
-			DeviceDrawing device) throws Exception {
+	public void export(VirtualBook vb, DXFParameters parameters, DeviceDrawing device) throws Exception {
 
 		DXFParameters p = DXFParameters.class.newInstance();
 
@@ -80,69 +73,65 @@ public class CADVirtualBookExporter {
 		parameters.writeExternal(os);
 		os.close();
 
-		p.readExternal(new ObjectInputStream(new ByteArrayInputStream(baos
-				.toByteArray())));
+		p.readExternal(new ObjectInputStream(new ByteArrayInputStream(baos.toByteArray())));
 
 		ArrayList<Hole> holesCopy = vb.getOrderedHolesCopy();
 
-		System.out.println("hole to translate :" + holesCopy.size());
+		logger.debug("hole to translate :" + holesCopy.size());
 
 		Scale scale = vb.getScale();
 
-		double xratio = 1.0 / 1000000.0 * scale.getSpeed();
+		double xratio = 1.0 / 1_000_000.0 * scale.getSpeed();
 
 		// adding the vb edges
 
-		
 		long firstTimeStamp = vb.getFirstHoleStart();
 		if (firstTimeStamp == Long.MAX_VALUE)
 			throw new Exception("no holes in the book, cannot compute");
 
-		logger.debug("ecriture des bords");
-
-		device.setCurrentLayer(LAYER_BORDS);
-
+		
 		// calc the beginning offset of the book
-		double startBook = firstTimeStamp * xratio
-				- p.getStartBookAdjustementFromBeginning()
-				- p.getNombreDePlisAAjouterAuDebut()
-				* p.getTaillePagePourPliure();
+		double startBook = firstTimeStamp * xratio - p.getStartBookAdjustementFromBeginning()
+				- p.getNombreDePlisAAjouterAuDebut() * p.getTaillePagePourPliure();
 
 		// startBook can be negative ...
 
 		double vbend = vb.getLength() * xratio;
 		// round the end to a integer value of the page size
-		vbend = (Math.ceil((vbend - startBook ) / p.getTaillePagePourPliure()) + 1)
-				* p.getTaillePagePourPliure() + startBook;
-
+		vbend = (Math.ceil((vbend - startBook) / p.getTaillePagePourPliure()) + 1) * p.getTaillePagePourPliure()
+				+ startBook;
 		
-		
-		// ligne horizontale
-		device.drawLine(startBook, 0, vbend, 0);
+		if (p.isExportDecoupeDesBords()) {
 
-		// device.drawLine(vbend, 0, vbend, scale.getWidth());
+			logger.debug("ecriture des bords");
 
-		device.drawLine(vbend, scale.getWidth(), startBook, scale.getWidth());
+			device.setCurrentLayer(LAYER_BORDS);
 
-		// device.drawLine(0, scale.getWidth(), 0, 0);
+			// ligne horizontale
+			device.drawLine(startBook, 0, vbend, 0);
 
-		
+			// device.drawLine(vbend, 0, vbend, scale.getWidth());
+
+			device.drawLine(vbend, scale.getWidth(), startBook, scale.getWidth());
+
+			// device.drawLine(0, scale.getWidth(), 0, 0);
+
+		}
+
 		// draw the reference arrow
-		//dest
+		// dest
 		double arrowy = scale.getWidth();
 		if (scale.isPreferredViewedInversed())
 			arrowy = scale.getWidth() - arrowy;
-		
+
 		// origin
 		double arrowy2 = scale.getWidth() - 30; // 3cm
 		if (scale.isPreferredViewedInversed())
 			arrowy2 = scale.getWidth() - arrowy2;
-		
-		Coordinate origin = new Coordinate(10,arrowy2);
+
+		Coordinate origin = new Coordinate(10, arrowy2);
 		device.drawArrow(new Vect(0, arrowy - arrowy2), origin, 10);
-		
-		
-		
+
 		if (p.isExportPliures()) {
 
 			logger.debug("ajout pliures ... ");
@@ -154,27 +143,42 @@ public class CADVirtualBookExporter {
 			while (start <= vbend + 1) {
 
 				if (p.getTypePliure() == TypePliure.POINTILLEE) {
-					device.drawImprovedDottedLines(start, 0, start,
-							scale.getWidth(), 2, 5);
-				} else {
+					device.drawImprovedDottedLines(start, 0, start, scale.getWidth(), 2, 5);
+				} else if (p.getTypePliure() == TypePliure.CONTINUE) {
 					device.drawLine(start, 0, start, scale.getWidth());
+				} else if (p.getTypePliure() == TypePliure.ALTERNE_CONTINU_POINTILLEE) {
+
+					// pointillé avec non déoupe au bord des deux cotés, sur 5mm (sinon, fragilise
+					// le carton)
+					double startNoDots = 5.0;
+					double endDotsWidth = scale.getWidth() - 5.0;
+					assert scale.getWidth() > 10.0;
+
+					device.drawImprovedDottedLines(start, startNoDots, start, endDotsWidth, 2, 5);
+
+				} else {
+					throw new Exception("type pliure " + p.getTypePliure() + " unknown");
 				}
 				start += p.getTaillePagePourPliure() * 2;
 			}
 
-			// fin d'écriture des pliures
+			// fin d'écriture des pliures dans la layer DXF concernée
 
 			device.setCurrentLayer(LAYER_PLIURES);
 			start = startBook + p.getTaillePagePourPliure();
 			while (start <= vbend + 1) {
 				if (p.getTypePliure() == TypePliure.POINTILLEE) {
-					device.drawImprovedDottedLines(start, 0, start,
-							scale.getWidth(), 2, 5);
-				} else {
+					device.drawImprovedDottedLines(start, 0, start, scale.getWidth(), 2, 5);
+				} else if (p.getTypePliure() == TypePliure.CONTINUE) {
 					device.drawLine(start, 0, start, scale.getWidth());
+				} else if (p.getTypePliure() == TypePliure.ALTERNE_CONTINU_POINTILLEE) {
+					// découpe complete
+					device.drawLine(start, 0, start, scale.getWidth());
+				} else {
+					throw new Exception("type pliure " + p.getTypePliure() + " unknown");
 				}
-				start += p.getTaillePagePourPliure() * 2;
 
+				start += p.getTaillePagePourPliure() * 2;
 			}
 		}
 
@@ -184,29 +188,23 @@ public class CADVirtualBookExporter {
 
 		HoleDrawer drawer = null;
 
-		if (p.getTypeTrous().getType() == TrouType.TROUS_RECTANGULAIRES
-				.getType()) {
+		if (p.getTypeTrous().getType() == TrouType.TROUS_RECTANGULAIRES.getType()) {
 
-			drawer = new RectangularHoleDrawer(device, p.getTailleTrous(),
-					p.getPont(), p.getPasDePontSiIlReste());
-		} else if (p.getTypeTrous().getType() == TrouType.TROUS_ARRONDIS
-				.getType()) {
-			drawer = new ArrondiHoleDrawer(device, p.getTailleTrous(),
-					p.getPont(), p.getPasDePontSiIlReste());
+			drawer = new RectangularHoleDrawer(device, p.getTailleTrous(), p.getPont(), p.getPasDePontSiIlReste());
+		} else if (p.getTypeTrous().getType() == TrouType.TROUS_ARRONDIS.getType()) {
+			drawer = new ArrondiHoleDrawer(device, p.getTailleTrous(), p.getPont(), p.getPasDePontSiIlReste());
 		} else if (p.getTypeTrous().getType() == TrouType.TROUS_RONDS.getType()) {
-			drawer = new RondHoleDrawer(device, p.getTailleTrous(),
-					p.getPont(), p.getPasDePontSiIlReste());
+			drawer = new RondHoleDrawer(device, p.getTailleTrous(), p.getPont(), p.getPasDePontSiIlReste());
 		} else {
 			throw new Exception("unsupported trou type");
 		}
 
-		for (Iterator iterator = holesCopy.iterator(); iterator.hasNext();) {
-			Hole hole = (Hole) iterator.next();
+		for (Iterator<Hole> iterator = holesCopy.iterator(); iterator.hasNext();) {
+			Hole hole = iterator.next();
 
 			int piste = hole.getTrack();
 
-			double ypiste = piste * scale.getIntertrackHeight()
-					+ scale.getFirstTrackAxis();
+			double ypiste = piste * scale.getIntertrackHeight() + scale.getFirstTrackAxis();
 
 			if (!scale.isPreferredViewedInversed()) {
 				ypiste = scale.getWidth() - ypiste;
@@ -234,8 +232,7 @@ public class CADVirtualBookExporter {
 
 		BasicConfigurator.configure(new ConsoleAppender(new PatternLayout()));
 		MidiFile midiFile = MidiFileIO
-				.read(new File(
-						"C:/Projets/APrintPerfoExtension/doc/Perçage_Lazer/BEER essai.mid"));
+				.read(new File("C:/Projets/APrintPerfoExtension/doc/Perçage_Lazer/BEER essai.mid"));
 
 		Properties properties = new Properties();
 		properties.setProperty("folder", "C:/Projets/APrint/gammes");
@@ -245,8 +242,7 @@ public class CADVirtualBookExporter {
 		ArrayList<AbstractTransformation> trans = r.getTranspositionManager()
 				.findTransposition(Scale.getGammeMidiInstance(), ermanscale);
 
-		LinearMidiImporter lmi = Utils
-				.linearToMidiImporter((LinearTransposition) trans.get(0));
+		LinearMidiImporter lmi = Utils.linearToMidiImporter((LinearTransposition) trans.get(0));
 
 		MidiConversionResult result = lmi.convert(midiFile);
 
@@ -262,9 +258,12 @@ public class CADVirtualBookExporter {
 
 		DXFDeviceDrawing device = new DXFDeviceDrawing();
 		e.export(vb, p, device);
-		device.write(new File("export_test_file.dxf"), new String[] {
-				LAYER_BORDS, LAYER_TROUS, LAYER_PLIURES });
+		device.write(new File("export_test_file.dxf"), new String[] { LAYER_BORDS, LAYER_TROUS, LAYER_PLIURES });
 
+		SVGDeviceDrawing svgDevice = new SVGDeviceDrawing(2000, 200);
+		e.export(vb, p, svgDevice);
+		svgDevice.write(new File("export_test_svg.svg"), new String[] {});
+		
 	}
 
 }

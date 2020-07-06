@@ -81,6 +81,11 @@ public class DXFParametersBeanInfo extends BaseBeanInfo {
 		typePliure.setDisplayName("Type de pliures");
 		typePliure.setCategory("Pliures");
 		
+		ExtendedPropertyDescriptor exportDecoupeDesBords = addProperty("exportDecoupeDesBords");
+		exportDecoupeDesBords.setShortDescription("Export de la découpe des bords");
+		exportDecoupeDesBords.setDisplayName("Export Bords du carton");
+		exportDecoupeDesBords.setCategory("Export");
+		
 
 	}
 

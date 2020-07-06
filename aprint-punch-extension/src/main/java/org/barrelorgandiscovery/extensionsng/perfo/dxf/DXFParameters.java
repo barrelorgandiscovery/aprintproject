@@ -34,6 +34,8 @@ public class DXFParameters implements Serializable, Externalizable {
 
 	private TypePliure typePliure = TypePliure.CONTINUE;
 
+	private boolean exportDecoupeDesBords = true;
+
 	public void setNombreDePlisAAjouterAuDebut(int nombreDePlisAAjouterAuDebut) {
 		this.nombreDePlisAAjouterAuDebut = nombreDePlisAAjouterAuDebut;
 	}
@@ -42,8 +44,7 @@ public class DXFParameters implements Serializable, Externalizable {
 		return nombreDePlisAAjouterAuDebut;
 	}
 
-	public void setStartBookAdjustementFromBeginning(
-			double startBookAdjustementFromBeginning) {
+	public void setStartBookAdjustementFromBeginning(double startBookAdjustementFromBeginning) {
 		this.startBookAdjustementFromBeginning = startBookAdjustementFromBeginning;
 	}
 
@@ -115,8 +116,15 @@ public class DXFParameters implements Serializable, Externalizable {
 		this.typePliure = typePliure;
 	}
 
-	public void readExternal(ObjectInput in) throws IOException,
-			ClassNotFoundException {
+	public void setExportDecoupeDesBords(boolean exportDecoupeDesBords) {
+		this.exportDecoupeDesBords = exportDecoupeDesBords;
+	}
+
+	public boolean isExportDecoupeDesBords() {
+		return exportDecoupeDesBords;
+	}
+
+	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
 
 		typeTrous = TrouType.valueOf(in.readUTF());
 		typePonts = TrouType.valueOf(in.readUTF());
@@ -128,6 +136,11 @@ public class DXFParameters implements Serializable, Externalizable {
 		typePliure = TypePliure.valueOf(in.readUTF());
 		startBookAdjustementFromBeginning = in.readDouble();
 		nombreDePlisAAjouterAuDebut = in.readInt();
+		try {
+			exportDecoupeDesBords = in.readBoolean();
+		} catch (Exception ex) {
+			// for maintaining compatibility
+		}
 	}
 
 	public void writeExternal(ObjectOutput out) throws IOException {
@@ -142,7 +155,7 @@ public class DXFParameters implements Serializable, Externalizable {
 		out.writeUTF(typePliure.name());
 		out.writeDouble(startBookAdjustementFromBeginning);
 		out.writeInt(nombreDePlisAAjouterAuDebut);
-
+		out.writeBoolean(exportDecoupeDesBords);
 	}
 
 }

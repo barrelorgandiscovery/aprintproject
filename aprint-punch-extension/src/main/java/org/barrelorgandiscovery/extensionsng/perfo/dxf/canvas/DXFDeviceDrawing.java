@@ -37,7 +37,8 @@ public class DXFDeviceDrawing extends DeviceDrawing {
 
 	@Override
 	protected void addObject(Geometry g) {
-		fc.add(toFeature(g, getCurrentLayer()));
+		String currentLayer = getCurrentLayer();
+		fc.add(toFeature(g, currentLayer));
 	}
 
 	public void write(File file, String[] layers) throws Exception {
