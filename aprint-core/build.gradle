@@ -131,5 +131,4 @@ task changeVersion() {
 
 build.dependsOn(changeVersion)
 processResources.dependsOn(changeVersion)
-processResources.dependsOn(buildSpecJar)
 
