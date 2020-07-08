@@ -53,9 +53,9 @@ import com.l2fprod.common.demo.BeanBinder;
 import com.l2fprod.common.propertysheet.PropertySheetPanel;
 
 /**
- * Extension DXF
+ * Extension DXF/SVG
  * 
- * @author use
+ * @author pfreydiere
  * 
  */
 public class DXFExporterExtensionVirtualBook extends BaseVirtualBookExtension
@@ -67,9 +67,9 @@ public class DXFExporterExtensionVirtualBook extends BaseVirtualBookExtension
 	private GraphicsLayer graphicLayer;
 
 	public DXFExporterExtensionVirtualBook() throws Exception {
-		graphicLayer = new GraphicsLayer("Tracé DXF");
+		graphicLayer = new GraphicsLayer("Tracé Vectoriel");
 		defaultAboutAuthor = "Patrice Freydiere";
-		defaultAboutVersion = "2014.2.23";
+		defaultAboutVersion = "2020.7.08";
 		createParametersPanel();
 	}
 
@@ -113,14 +113,21 @@ public class DXFExporterExtensionVirtualBook extends BaseVirtualBookExtension
 
 		JToolBar tb = new JToolBar("Dxf");
 
-		JButton savedxf = new JButton("exporter en DXF");
+		JButton savedxf = new JButton("Export DXF ...");
 		savedxf.setIcon(new ImageIcon(getClass().getResource("misc.png")));
-		savedxf.setToolTipText("Exporter le carton dans un fichier DXF pour perçage laser");
+		savedxf.setToolTipText("Export book into a DXF file for lazer tracing");
 		savedxf.setActionCommand("SAVEDXF");
 		savedxf.addActionListener(this);
-
 		tb.add(savedxf);
 
+		JButton savesvg = new JButton("Export SVG ...");
+		savesvg.setIcon(new ImageIcon(getClass().getResource("misc.png")));
+		savesvg.setToolTipText("Export book into a SVG file for lazer tracing");
+		savesvg.setActionCommand("SAVESVG");
+		savesvg.addActionListener(this);
+		tb.add(savesvg);
+
+		
 		return tb;
 	}
 
@@ -138,14 +145,16 @@ public class DXFExporterExtensionVirtualBook extends BaseVirtualBookExtension
 
 		String actionCommand = e.getActionCommand();
 
-		if ("SAVEDXF".equals(actionCommand)) {
+		if ("SAVEDXF".equals(actionCommand) || "SAVESVG".equals(actionCommand)) {
 
+			boolean isSVG = "SAVESVG".equals(actionCommand);
+			
 			((Frame) this.currentFrame).setCursor(Cursor
 					.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			try {
 				if (this.currentVirtualBook == null) {
 					JMessageBox.showMessage(this.currentFrame,
-							"Pas de carton virtuel");
+							"No Virtual book");
 					return;
 				}
 
@@ -162,9 +171,15 @@ public class DXFExporterExtensionVirtualBook extends BaseVirtualBookExtension
 
 					choose.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
+					if (isSVG) {
+						choose.setFileFilter(new FileNameExtensionFilter(
+								"Fichier SVG", "svg")); //$NON-NLS-1$ //$NON-NLS-2$
+							
+					} else {
 					choose.setFileFilter(new FileNameExtensionFilter(
 							"Fichier DXF", "dxf")); //$NON-NLS-1$ //$NON-NLS-2$
-
+					}
+					
 					if (choose.showSaveDialog((Component) currentFrame) == JFileChooser.APPROVE_OPTION) {
 
 						File savedfile = choose.getSelectedFile();
@@ -175,10 +190,21 @@ public class DXFExporterExtensionVirtualBook extends BaseVirtualBookExtension
 							return;
 						}
 
-						if (!savedfile.getName().endsWith(".dxf")) {
-							savedfile = new File(savedfile.getParentFile(),
-									savedfile.getName() + ".dxf");
+						if (isSVG) {
+							// check extension
+							if (!savedfile.getName().endsWith(".svg")) {
+								savedfile = new File(savedfile.getParentFile(),
+										savedfile.getName() + ".svg");
+							}
+
+						} else {
+							if (!savedfile.getName().endsWith(".dxf")) {
+								savedfile = new File(savedfile.getParentFile(),
+										savedfile.getName() + ".dxf");
+							}
+							
 						}
+						
 
 						try {
 
@@ -191,14 +217,14 @@ public class DXFExporterExtensionVirtualBook extends BaseVirtualBookExtension
 
 							JMessageBox.showMessage(
 									currentFrame.getOwnerForDialog(),
-									"Fichier dxf " + savedfile.getName()
-											+ " sauvegardé");
+									"File " + savedfile.getName()
+											+ " saved");
 
 						} catch (Throwable ex) {
 
 							JMessageBox.showMessage(
 									currentFrame.getOwnerForDialog(),
-									"Erreur dans la sauvegarde du fichier");
+									"Error saving file");
 							logger.error("save", ex);
 
 							BugReporter.sendBugReport();
