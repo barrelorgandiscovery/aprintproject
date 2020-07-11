@@ -18,7 +18,9 @@ APrint Studio is composed of a constellation of **tools** for creating **mechani
 
 ### How to Build main project
 
-For building the project, **Java 8** SDK is needed.
+For building the project, **Java 8** **SDK is needed**. (meaning the Java 8 JDK), this can be downloaded from Oracle Download Center, or you can download the aprint build version [here](http://www.barrel-organ-discovery.org/builds/jdk1.8.0_25_x64.zip)
+
+
 
 from the root folder, launch :
 
