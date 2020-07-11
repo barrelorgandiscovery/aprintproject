@@ -234,23 +234,15 @@ public class SBCreator {
 			/**
 			 * added for smooth the attacks of the instruments
 			 */
-			lr.putShort(SF2Region.GENERATOR_ATTACKVOLENV, (short)-7000); // -12000 par défaut
+			lr.putShort(SF2Region.GENERATOR_ATTACKVOLENV, (short)-12000); // -12000 par défaut
 			
-		
-			
-			// lr.putInteger(SF2Region.GENERATOR_INITIALATTENUATION, -100);
-
-//			
-//			lr.putShort(  SF2Region.GENERATOR_SUSTAINVOLENV,(short) -100);
-//			lr.putShort(  SF2Region.GENERATOR_DECAYVOLENV,(short) -100);
-//			
-//			
-			
+			// parameters proposed by Yann Baraffe
+			lr.putShort(SF2Region.GENERATOR_RELEASEVOLENV, (short)-3500);
+			lr.putShort(SF2Region.GENERATOR_DECAYVOLENV, (short)-1);
+									
 			lr.setSample(sample);
 			
 			layer.getRegions().add(lr);
-		
-		
 			
 			sb.addResource(sample);
 			
