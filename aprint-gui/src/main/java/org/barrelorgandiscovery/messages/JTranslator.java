@@ -29,8 +29,8 @@ import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
 import org.apache.log4j.Logger;
-import org.barrelorgandiscovery.gui.aprint.APrint;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
+import org.barrelorgandiscovery.gui.aprintng.APrintNG;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
 
 import com.jeta.forms.components.panel.FormPanel;
@@ -68,7 +68,7 @@ public class JTranslator extends JFrame {
 		this.aprintproperties = aprintproperties;
 
 		setTitle(Messages.getString("JTranslator.1")); //$NON-NLS-1$
-		setIconImage(APrint.getAPrintApplicationIcon());
+		setIconImage(APrintNG.getAPrintApplicationIcon());
 
 		// build content need aprintproperties
 

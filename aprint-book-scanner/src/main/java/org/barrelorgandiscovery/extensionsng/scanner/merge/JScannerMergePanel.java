@@ -3,7 +3,6 @@ package org.barrelorgandiscovery.extensionsng.scanner.merge;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.Shape;
 import java.awt.geom.Path2D;
@@ -38,9 +37,9 @@ import javax.swing.event.ChangeListener;
 
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensionsng.scanner.FamilyImageFolder;
-import org.barrelorgandiscovery.extensionsng.scanner.PerfoScanFolder;
 import org.barrelorgandiscovery.gui.CancelTracker;
 import org.barrelorgandiscovery.gui.ICancelTracker;
+import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
 import org.barrelorgandiscovery.math.MathVect;
 import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
@@ -55,7 +54,6 @@ import org.barrelorgandiscovery.recognition.gui.interactivecanvas.tools.JViewing
 import org.barrelorgandiscovery.tools.Disposable;
 import org.barrelorgandiscovery.tools.ImageTools;
 import org.barrelorgandiscovery.tools.JMessageBox;
-import org.barrelorgandiscovery.tools.SerializeTools;
 
 import com.jeta.forms.components.panel.FormPanel;
 import com.jeta.forms.gui.form.FormAccessor;
@@ -148,9 +146,9 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 				File preferenceStorage = preferences.getFileProperty("mergescannerpreferences",
 						new File(System.getProperties().getProperty("user.home")));
 
-				JFileChooser fc = new JFileChooser(preferenceStorage);
+				APrintFileChooser fc = new APrintFileChooser(preferenceStorage);
 				int result = fc.showSaveDialog(this);
-				if (result == JFileChooser.APPROVE_OPTION) {
+				if (result == APrintFileChooser.APPROVE_OPTION) {
 
 					File selectedFile = fc.getSelectedFile();
 					if (selectedFile != null) {
@@ -175,7 +173,7 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 				File preferenceStorage = preferences.getFileProperty("mergescannerpreferences",
 						new File(System.getProperties().getProperty("user.home")));
 
-				JFileChooser fc = new JFileChooser(preferenceStorage);
+				APrintFileChooser fc = new APrintFileChooser(preferenceStorage);
 				int result = fc.showOpenDialog(this);
 				if (result == JFileChooser.APPROVE_OPTION) {
 
@@ -525,10 +523,9 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 		resultImageDisplay.repaint();
 	}
 
-	final int FINAL_IMAGE_HEIGHT = 600;
-	final int FINAL_IMAGE_WIDTH = 800;
-	final int IMAGE_SLICE = 200;
-
+	final int FINAL_IMAGE_HEIGHT = 1200;
+	final int FINAL_IMAGE_WIDTH = 1600;
+	
 	private class ComputeResultImage implements Runnable {
 
 		private ICancelTracker cancelTracker;

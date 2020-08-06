@@ -83,6 +83,10 @@ public class ImageBookMergeModel implements Serializable{
     return newImage;
   }
   
+  
+  ////////////////////////////////////////////////////////////////////
+  // load / save properties
+  
   public void loadFrom(IPrefsStorage storage) {
 	origin = new Point2D.Double(storage.getDoubleProperty("originx", 0),
 			storage.getDoubleProperty("originy", 0));

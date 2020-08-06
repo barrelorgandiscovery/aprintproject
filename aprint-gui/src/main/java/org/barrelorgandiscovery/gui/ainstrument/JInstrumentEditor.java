@@ -6,13 +6,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -21,6 +19,8 @@ import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.UIManager;
 
+import org.apache.commons.vfs2.FileName;
+import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.lf5.LF5Appender;
@@ -29,12 +29,13 @@ import org.barrelorgandiscovery.editableinstrument.EditableInstrumentManager;
 import org.barrelorgandiscovery.editableinstrument.EditableInstrumentStorage;
 import org.barrelorgandiscovery.editableinstrument.IEditableInstrument;
 import org.barrelorgandiscovery.editableinstrument.StreamStorageEditableInstrumentManager;
-import org.barrelorgandiscovery.gui.aprint.APrint;
+import org.barrelorgandiscovery.gui.aprintng.APrintNG;
+import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
+import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.scale.importer.MidiBoekGammeImporter;
 import org.barrelorgandiscovery.scale.io.ScaleIO;
-import org.barrelorgandiscovery.tools.FileNameExtensionFilter;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
 import org.barrelorgandiscovery.tools.streamstorage.FolderStreamStorage;
@@ -59,14 +60,13 @@ public class JInstrumentEditor extends JFrame {
 
 	private JInstrumentEditorPanel instrumentEditor;
 
-	public JInstrumentEditor(EditableInstrumentManager manager)
-			throws Exception {
+	public JInstrumentEditor(EditableInstrumentManager manager) throws Exception {
 		super();
 
 		this.manager = manager;
 
 		setTitle(Messages.getString("JInstrumentEditor.13")); //$NON-NLS-1$
-		setIconImage(APrint.getAPrintApplicationIcon());
+		setIconImage(APrintNG.getAPrintApplicationIcon());
 
 		initComponents();
 
@@ -104,35 +104,29 @@ public class JInstrumentEditor extends JFrame {
 		JMenu scaleMenu = new JMenu(Messages.getString("JInstrumentEditor.77")); //$NON-NLS-1$
 		menuBar.add(scaleMenu);
 
-		JMenuItem importScaleFromFile = scaleMenu.add(Messages
-				.getString("JInstrumentEditor.67")); //$NON-NLS-1$
+		JMenuItem importScaleFromFile = scaleMenu.add(Messages.getString("JInstrumentEditor.67")); //$NON-NLS-1$
 		importScaleFromFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					chooseScale();
 				} catch (Exception ex) {
 					logger.error(ex.getMessage(), ex);
-					JMessageBox
-							.showMessage(
-									JInstrumentEditor.this,
-									Messages.getString("JInstrumentEditor.68") + ex.getMessage()); //$NON-NLS-1$
+					JMessageBox.showMessage(JInstrumentEditor.this,
+							Messages.getString("JInstrumentEditor.68") + ex.getMessage()); //$NON-NLS-1$
 					BugReporter.sendBugReport();
 				}
 			}
 		});
 
-		JMenuItem importScaleFromMidiBoek = scaleMenu
-				.add(Messages.getString("JInstrumentEditor.101")); //$NON-NLS-1$
+		JMenuItem importScaleFromMidiBoek = scaleMenu.add(Messages.getString("JInstrumentEditor.101")); //$NON-NLS-1$
 		importScaleFromMidiBoek.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					importScaleFromMidiboek();
 				} catch (Exception ex) {
 					logger.error(ex.getMessage(), ex);
-					JMessageBox
-							.showMessage(
-									JInstrumentEditor.this,
-									"Fail to import midiboek scale :" + ex.getMessage()); //$NON-NLS-1$
+					JMessageBox.showMessage(JInstrumentEditor.this,
+							"Fail to import midiboek scale :" + ex.getMessage()); //$NON-NLS-1$
 					BugReporter.sendBugReport();
 
 				}
@@ -149,8 +143,7 @@ public class JInstrumentEditor extends JFrame {
 		menuBar.add(file);
 		file.setMnemonic('f');
 
-		JMenuItem newInstrument = file.add(Messages
-				.getString("JInstrumentEditor.70")); //$NON-NLS-1$
+		JMenuItem newInstrument = file.add(Messages.getString("JInstrumentEditor.70")); //$NON-NLS-1$
 		newInstrument.setAccelerator(KeyStroke.getKeyStroke("control N")); //$NON-NLS-1$
 		newInstrument.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -163,8 +156,7 @@ public class JInstrumentEditor extends JFrame {
 					instrumentEditor.setModel(newInstrument);
 				} catch (Exception ex) {
 					logger.error(ex.getMessage(), ex);
-					JMessageBox.showMessage(JInstrumentEditor.this, Messages
-							.getString("JInstrumentEditor.71") //$NON-NLS-1$
+					JMessageBox.showMessage(JInstrumentEditor.this, Messages.getString("JInstrumentEditor.71") //$NON-NLS-1$
 							+ ex.getMessage());
 					BugReporter.sendBugReport();
 				}
@@ -173,8 +165,7 @@ public class JInstrumentEditor extends JFrame {
 
 		file.addSeparator();
 
-		JMenuItem openItem = file.add(Messages
-				.getString("JInstrumentEditor.26")); //$NON-NLS-1$
+		JMenuItem openItem = file.add(Messages.getString("JInstrumentEditor.26")); //$NON-NLS-1$
 		openItem.setAccelerator(KeyStroke.getKeyStroke("control O")); //$NON-NLS-1$
 		openItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -187,45 +178,39 @@ public class JInstrumentEditor extends JFrame {
 
 				} catch (Exception ex) {
 					logger.error(ex.getMessage(), ex);
-					JMessageBox.showMessage(JInstrumentEditor.this, Messages
-							.getString("JInstrumentEditor.72") //$NON-NLS-1$
+					JMessageBox.showMessage(JInstrumentEditor.this, Messages.getString("JInstrumentEditor.72") //$NON-NLS-1$
 							+ ex.getMessage());
 					BugReporter.sendBugReport();
 				}
 			}
 		});
 
-		JMenuItem saveItem = file.add(Messages
-				.getString("JInstrumentEditor.29")); //$NON-NLS-1$
+		JMenuItem saveItem = file.add(Messages.getString("JInstrumentEditor.29")); //$NON-NLS-1$
 		saveItem.setAccelerator(KeyStroke.getKeyStroke("control S")); //$NON-NLS-1$
 		saveItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
 
 					saveInstrument();
-					JMessageBox.showMessage(JInstrumentEditor.this, Messages
-							.getString("JInstrumentEditor.91")); //$NON-NLS-1$
+					JMessageBox.showMessage(JInstrumentEditor.this, Messages.getString("JInstrumentEditor.91")); //$NON-NLS-1$
 
 				} catch (Exception ex) {
 					logger.error(ex.getMessage(), ex);
-					JMessageBox.showMessage(JInstrumentEditor.this, Messages
-							.getString("JInstrumentEditor.73") //$NON-NLS-1$
+					JMessageBox.showMessage(JInstrumentEditor.this, Messages.getString("JInstrumentEditor.73") //$NON-NLS-1$
 							+ ex.getMessage());
 					BugReporter.sendBugReport();
 				}
 			}
 		});
 
-		JMenuItem deleteItem = file.add(Messages
-				.getString("JInstrumentEditor.84")); //$NON-NLS-1$
+		JMenuItem deleteItem = file.add(Messages.getString("JInstrumentEditor.84")); //$NON-NLS-1$
 		deleteItem.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					deleteInstrument();
 				} catch (Exception ex) {
 					logger.error(ex.getMessage(), ex);
-					JMessageBox.showMessage(JInstrumentEditor.this, Messages
-							.getString("JInstrumentEditor.73") //$NON-NLS-1$
+					JMessageBox.showMessage(JInstrumentEditor.this, Messages.getString("JInstrumentEditor.73") //$NON-NLS-1$
 							+ ex.getMessage());
 					BugReporter.sendBugReport();
 				}
@@ -234,8 +219,7 @@ public class JInstrumentEditor extends JFrame {
 
 		file.addSeparator();
 
-		JMenuItem importInstrument = file.add(Messages
-				.getString("JInstrumentEditor.80")); //$NON-NLS-1$
+		JMenuItem importInstrument = file.add(Messages.getString("JInstrumentEditor.80")); //$NON-NLS-1$
 		importInstrument.setAccelerator(KeyStroke.getKeyStroke("control I")); //$NON-NLS-1$
 		importInstrument.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -244,8 +228,7 @@ public class JInstrumentEditor extends JFrame {
 
 				} catch (Exception ex) {
 					logger.error(ex.getMessage(), ex);
-					JMessageBox.showMessage(JInstrumentEditor.this, Messages
-							.getString("JInstrumentEditor.81") //$NON-NLS-1$
+					JMessageBox.showMessage(JInstrumentEditor.this, Messages.getString("JInstrumentEditor.81") //$NON-NLS-1$
 							+ ex.getMessage());
 					BugReporter.sendBugReport();
 				}
@@ -253,8 +236,7 @@ public class JInstrumentEditor extends JFrame {
 
 		});
 
-		JMenuItem exportInstrument = file.add(Messages
-				.getString("JInstrumentEditor.82")); //$NON-NLS-1$
+		JMenuItem exportInstrument = file.add(Messages.getString("JInstrumentEditor.82")); //$NON-NLS-1$
 		exportInstrument.setAccelerator(KeyStroke.getKeyStroke("control E")); //$NON-NLS-1$
 		exportInstrument.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -262,8 +244,7 @@ public class JInstrumentEditor extends JFrame {
 					exportInstrument();
 				} catch (Exception ex) {
 					logger.error(ex.getMessage(), ex);
-					JMessageBox.showMessage(JInstrumentEditor.this, Messages
-							.getString("JInstrumentEditor.83") //$NON-NLS-1$
+					JMessageBox.showMessage(JInstrumentEditor.this, Messages.getString("JInstrumentEditor.83") //$NON-NLS-1$
 							+ ex.getMessage());
 					BugReporter.sendBugReport();
 				}
@@ -296,17 +277,16 @@ public class JInstrumentEditor extends JFrame {
 
 			assert ei != null;
 
-			JFileChooser c = new JFileChooser();
+			APrintFileChooser c = new APrintFileChooser();
 			c.setMultiSelectionEnabled(false);
-			c
-					.setFileFilter(new FileNameExtensionFilter(
-							"MidiBoek scale", "gam")); //$NON-NLS-1$ //$NON-NLS-2$
-			if (c.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+			c.setFileFilter(new VFSFileNameExtensionFilter("MidiBoek scale", "gam")); //$NON-NLS-1$ //$NON-NLS-2$
+			if (c.showOpenDialog(this) == APrintFileChooser.APPROVE_OPTION) {
 				// chargement de la gamme ...
-				File choosenFile = c.getSelectedFile();
+				AbstractFileObject choosenFile = c.getSelectedFile();
 				if (choosenFile != null) {
 
-					Scale s = MidiBoekGammeImporter.importScale(choosenFile);
+					FileName filename = choosenFile.getName();
+					Scale s = MidiBoekGammeImporter.importScale(choosenFile.getInputStream(), filename.getBaseName());
 					ei.setScale(s); // model fire events for the GUI ...
 				}
 			}
@@ -319,21 +299,21 @@ public class JInstrumentEditor extends JFrame {
 	}
 
 	private void importInstrument() throws Exception {
-		JFileChooser fc = new JFileChooser();
-		fc
-				.setFileFilter(new FileNameExtensionFilter(
-						Messages.getString("JInstrumentEditor.27"), //$NON-NLS-1$
-						new String[] { StreamStorageEditableInstrumentManager.EDITABLE_INSTRUMENT_TYPE })); //$NON-NLS-1$
+		APrintFileChooser fc = new APrintFileChooser();
+		fc.setFileFilter(new VFSFileNameExtensionFilter(Messages.getString("JInstrumentEditor.27"), //$NON-NLS-1$
+				new String[] { StreamStorageEditableInstrumentManager.EDITABLE_INSTRUMENT_TYPE })); // $NON-NLS-1$
 
-		fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		fc.setFileSelectionMode(APrintFileChooser.FILES_ONLY);
 
-		if (fc.showOpenDialog(JInstrumentEditor.this) == JFileChooser.APPROVE_OPTION) {
+		if (fc.showOpenDialog(JInstrumentEditor.this) == APrintFileChooser.APPROVE_OPTION) {
 
-			final File result = fc.getSelectedFile();
+			final AbstractFileObject result = fc.getSelectedFile();
 
-			InputStream zipis = new FileInputStream(result);
+			InputStream zipis = result.getInputStream();
 			EditableInstrumentStorage is = new EditableInstrumentStorage();
-			IEditableInstrument newModel = is.load(zipis, result.getName());
+			FileName filename = result.getName();
+			assert filename != null;
+			IEditableInstrument newModel = is.load(zipis, filename.getBaseName());
 
 			instrumentEditor.setModel(newModel);
 
@@ -344,16 +324,13 @@ public class JInstrumentEditor extends JFrame {
 	private void loadInstrument() throws Exception {
 
 		String[] instrumentList = manager.listEditableInstruments();
-		String showInputDialog = (String) JOptionPane
-				.showInputDialog(
-						this,
-						Messages.getString("JInstrumentEditor.3"), Messages.getString("JInstrumentEditor.2"), //$NON-NLS-1$ //$NON-NLS-2$
-						JOptionPane.QUESTION_MESSAGE, null, instrumentList,
-						instrumentList.length > 0 ? instrumentList[0] : null);
+		String showInputDialog = (String) JOptionPane.showInputDialog(this, Messages.getString("JInstrumentEditor.3"), //$NON-NLS-1$
+				Messages.getString("JInstrumentEditor.2"), //$NON-NLS-1$
+				JOptionPane.QUESTION_MESSAGE, null, instrumentList,
+				instrumentList.length > 0 ? instrumentList[0] : null);
 
 		if (showInputDialog != null) {
-			IEditableInstrument loadEditableInstrument = manager
-					.loadEditableInstrument(showInputDialog);
+			IEditableInstrument loadEditableInstrument = manager.loadEditableInstrument(showInputDialog);
 			loadEditableInstrument.clearDirty();
 
 			instrumentEditor.setModel(loadEditableInstrument);
@@ -380,50 +357,40 @@ public class JInstrumentEditor extends JFrame {
 
 		logger.debug("deleting instrument"); //$NON-NLS-1$
 		String[] instrumentList = manager.listEditableInstruments();
-		String showInputDialog = (String) JOptionPane
-				.showInputDialog(
-						this,
-						Messages.getString("JInstrumentEditor.86"), Messages.getString("JInstrumentEditor.87"), //$NON-NLS-1$ //$NON-NLS-2$
-						JOptionPane.QUESTION_MESSAGE , null, instrumentList,
-						instrumentList.length > 0 ? instrumentList[0] : null);
+		String showInputDialog = (String) JOptionPane.showInputDialog(this, Messages.getString("JInstrumentEditor.86"), //$NON-NLS-1$
+				Messages.getString("JInstrumentEditor.87"), //$NON-NLS-1$
+				JOptionPane.QUESTION_MESSAGE, null, instrumentList,
+				instrumentList.length > 0 ? instrumentList[0] : null);
 
 		if (showInputDialog != null) {
 			manager.deleteEditableInstrument(showInputDialog);
 		}
 	}
 
-	private void exportInstrument() throws FileNotFoundException, Exception,
-			IOException {
+	private void exportInstrument() throws FileNotFoundException, Exception, IOException {
 
 		logger.debug("export instrument"); //$NON-NLS-1$
 
-		JFileChooser fc = new JFileChooser();
-		fc
-				.setFileFilter(new FileNameExtensionFilter(
-						Messages.getString("JInstrumentEditor.30"), //$NON-NLS-1$
-						StreamStorageEditableInstrumentManager.EDITABLE_INSTRUMENT_TYPE)); //$NON-NLS-1$
+		APrintFileChooser fc = new APrintFileChooser();
+		fc.setFileFilter(new VFSFileNameExtensionFilter(Messages.getString("JInstrumentEditor.30"), //$NON-NLS-1$
+				StreamStorageEditableInstrumentManager.EDITABLE_INSTRUMENT_TYPE)); // $NON-NLS-1$
 
-		int showDialog = fc.showDialog(JInstrumentEditor.this, Messages
-				.getString("JInstrumentEditor.32")); //$NON-NLS-1$
-		if (showDialog == JFileChooser.APPROVE_OPTION) {
+		int showDialog = fc.showDialog(JInstrumentEditor.this, Messages.getString("JInstrumentEditor.32")); //$NON-NLS-1$
+		if (showDialog == APrintFileChooser.APPROVE_OPTION) {
 			logger.debug("saving the instrument in a packed file ..."); //$NON-NLS-1$
 			EditableInstrumentStorage is = new EditableInstrumentStorage();
 
-			File selectedFile = fc.getSelectedFile();
-
-			if (!selectedFile
-					.getName()
-					.endsWith(
-							StreamStorageEditableInstrumentManager.EDITABLE_INSTRUMENT_TYPE)) { //$NON-NLS-1$
+			AbstractFileObject selectedFile = fc.getSelectedFile();
+			FileName selectedFileName = selectedFile.getName();
+			String filename = selectedFileName.getBaseName();
+			if (!filename.endsWith(StreamStorageEditableInstrumentManager.EDITABLE_INSTRUMENT_TYPE)) { // $NON-NLS-1$
 				logger.debug("append the extension"); //$NON-NLS-1$
-				selectedFile = new File(
-						selectedFile.getParentFile(),
-						selectedFile.getName()
-								+ "." + StreamStorageEditableInstrumentManager.EDITABLE_INSTRUMENT_TYPE); //$NON-NLS-1$
+				selectedFile = (AbstractFileObject) selectedFile.getFileSystem()
+						.resolveFile(selectedFile.getName().toString() + "." //$NON-NLS-1$
+								+ StreamStorageEditableInstrumentManager.EDITABLE_INSTRUMENT_TYPE);
 			}
 
-			FileOutputStream fileOutputStream = new FileOutputStream(
-					selectedFile);
+			OutputStream fileOutputStream = selectedFile.getOutputStream();
 			is.save(instrumentEditor.getModel(), fileOutputStream);
 
 			fileOutputStream.close();
@@ -434,8 +401,7 @@ public class JInstrumentEditor extends JFrame {
 	}
 
 	/**
-	 * return true if the user want to continue without keeping its
-	 * modifications
+	 * return true if the user want to continue without keeping its modifications
 	 * 
 	 * @return
 	 */
@@ -447,11 +413,8 @@ public class JInstrumentEditor extends JFrame {
 
 		if (currentModel.isDirty()) {
 
-			if (JOptionPane
-					.showConfirmDialog(
-							JInstrumentEditor.this,
-							Messages.getString("JInstrumentEditor.99"), //$NON-NLS-1$
-							Messages.getString("JInstrumentEditor.100"), JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) { //$NON-NLS-1$
+			if (JOptionPane.showConfirmDialog(JInstrumentEditor.this, Messages.getString("JInstrumentEditor.99"), //$NON-NLS-1$
+					Messages.getString("JInstrumentEditor.100"), JOptionPane.YES_NO_OPTION) != JOptionPane.YES_OPTION) { //$NON-NLS-1$
 				return false;
 			}
 		}
@@ -468,15 +431,14 @@ public class JInstrumentEditor extends JFrame {
 
 			assert ei != null;
 
-			JFileChooser c = new JFileChooser();
+			APrintFileChooser c = new APrintFileChooser();
 			c.setMultiSelectionEnabled(false);
-			c.setFileFilter(new FileNameExtensionFilter(Messages
-					.getString("JInstrumentEditor.54"), "gamme")); //$NON-NLS-1$ //$NON-NLS-2$
-			if (c.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+			c.setFileFilter(new VFSFileNameExtensionFilter(Messages.getString("JInstrumentEditor.54"), "gamme")); //$NON-NLS-1$ //$NON-NLS-2$
+			if (c.showOpenDialog(this) == APrintFileChooser.APPROVE_OPTION) {
 				// chargement de la gamme ...
-				File choosenFile = c.getSelectedFile();
+				AbstractFileObject choosenFile = c.getSelectedFile();
 				if (choosenFile != null) {
-					Scale s = ScaleIO.readGamme(choosenFile);
+					Scale s = ScaleIO.readGamme(choosenFile.getInputStream());
 					ei.setScale(s); // model fire events for the GUI ...
 				}
 			}
@@ -503,10 +465,8 @@ public class JInstrumentEditor extends JFrame {
 
 		// model.setScale(ScaleIO.readGamme(new File("gammes/52li.gamme")));
 
-		StreamStorageEditableInstrumentManager stm = new StreamStorageEditableInstrumentManager(
-				new FolderStreamStorage(
-						new File(
-								"C:\\Documents and Settings\\Freydiere Patrice\\Mes documents\\monrepertoiredegammes"))); //$NON-NLS-1$
+		StreamStorageEditableInstrumentManager stm = new StreamStorageEditableInstrumentManager(new FolderStreamStorage(
+				new File("C:\\Documents and Settings\\Freydiere Patrice\\Mes documents\\monrepertoiredegammes"))); //$NON-NLS-1$
 
 		JInstrumentEditor editor = new JInstrumentEditor(stm);
 		editor.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

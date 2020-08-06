@@ -16,7 +16,6 @@ import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -27,6 +26,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
 import org.barrelorgandiscovery.gui.wizard.BasePanelStep;
 import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener;
@@ -466,9 +466,9 @@ public class StepModelChooseChoice extends BasePanelStep implements Step, Dispos
    */
   private void loadCustomModel() throws Exception {
 
-    JFileChooser fc = new JFileChooser();
+	  APrintFileChooser fc = new APrintFileChooser();
     int showOpenDialog = fc.showOpenDialog(this);
-    if (showOpenDialog == JFileChooser.APPROVE_OPTION) {
+    if (showOpenDialog == APrintFileChooser.APPROVE_OPTION) {
       File file = fc.getSelectedFile();
       if (file != null) {
         customModel =

@@ -90,7 +90,7 @@ public class ImageFlow extends JPanel {
 	private int avatarIndex = -1;
 	private double avatarPosition = 0.0;
 	private double avatarSpacing = 0.4;
-	
+
 	private int avatarAmount = 7;
 
 	private double sigma;
@@ -165,8 +165,7 @@ public class ImageFlow extends JPanel {
 
 	public void setSpacing(double avatarSpacing) {
 		if (avatarSpacing < 0.0 || avatarSpacing > 1.0) {
-			throw new IllegalArgumentException(
-					"Spacing must be < 1.0 and > 0.0");
+			throw new IllegalArgumentException("Spacing must be < 1.0 and > 0.0");
 		}
 		this.avatarSpacing = avatarSpacing;
 		this.damaged = true;
@@ -200,14 +199,13 @@ public class ImageFlow extends JPanel {
 		super.setEnabled(enabled);
 		this.enableInputMethods(enabled);
 	}
-	
+
 	@Override
 	protected void paintChildren(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
 
 		Composite oldComposite = g2.getComposite();
-		g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
-				veilAlphaLevel));
+		g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, veilAlphaLevel));
 		super.paintChildren(g);
 		g2.setComposite(oldComposite);
 	}
@@ -234,13 +232,10 @@ public class ImageFlow extends JPanel {
 		int height = getHeight() - insets.top - insets.bottom;
 
 		Graphics2D g2 = (Graphics2D) g;
-		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION,
-				RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_ON);
+		g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		Composite oldComposite = g2.getComposite();
-		
-			
+
 		if (damaged) {
 			drawableAvatars = sortAvatarsByDepth(x, y, width, height);
 			damaged = false;
@@ -257,22 +252,18 @@ public class ImageFlow extends JPanel {
 
 	private void drawAvatars(Graphics2D g2, DrawableAvatar[] drawableAvatars) {
 		for (DrawableAvatar avatar : drawableAvatars) {
-			AlphaComposite composite = AlphaComposite.getInstance(
-					AlphaComposite.SRC_OVER, (float) avatar.getAlpha());
+			AlphaComposite composite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) avatar.getAlpha());
 			g2.setComposite(composite);
-			g2.drawImage(avatars.get(avatar.getIndex()).getImage(),
-					(int) avatar.getX(), (int) avatar.getY(),
+			g2.drawImage(avatars.get(avatar.getIndex()).getImage(), (int) avatar.getX(), (int) avatar.getY(),
 					avatar.getWidth(), avatar.getHeight(), null);
 		}
 	}
 
-	private DrawableAvatar[] sortAvatarsByDepth(int x, int y, int width,
-			int height) {
+	private DrawableAvatar[] sortAvatarsByDepth(int x, int y, int width, int height) {
 		List<DrawableAvatar> drawables = new LinkedList<DrawableAvatar>();
 
 		for (int i = 0; i < avatars.size(); i++) {
-			promoteAvatarToDrawable(drawables, x, y, width, height, i
-					- avatarIndex);
+			promoteAvatarToDrawable(drawables, x, y, width, height, i - avatarIndex);
 		}
 
 		DrawableAvatar[] drawableAvatars = new DrawableAvatar[drawables.size()];
@@ -283,8 +274,7 @@ public class ImageFlow extends JPanel {
 
 	private void drawAvatarName(Graphics2D g2) {
 		Composite composite = g2.getComposite();
-		g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER,
-				textAlphaLevel));
+		g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, textAlphaLevel));
 
 		FontRenderContext context = g2.getFontRenderContext();
 		TextLayout layout = new TextLayout(avatarText, avatarFont, context);
@@ -296,8 +286,7 @@ public class ImageFlow extends JPanel {
 		double x = (getWidth() - bulletWidth) / 2.0;
 		double y = (getHeight() + CD_SIZE) / 2.0;
 
-		BufferedImage textImage = new BufferedImage((int) bulletWidth,
-				(int) bulletHeight, BufferedImage.TYPE_INT_ARGB);
+		BufferedImage textImage = new BufferedImage((int) bulletWidth, (int) bulletHeight, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D g2text = textImage.createGraphics();
 		g2text.setColor(new Color(0, 0, 0, 170));
 		layout.draw(g2text, 6, layout.getAscent() + 1);
@@ -305,14 +294,13 @@ public class ImageFlow extends JPanel {
 		layout.draw(g2text, 6, layout.getAscent());
 		g2text.dispose();
 
-		g2.drawImage(fx.createReflectedPicture(textImage, fx
-				.createGradientMask((int) bulletWidth, (int) bulletHeight)),
+		g2.drawImage(fx.createReflectedPicture(textImage, fx.createGradientMask((int) bulletWidth, (int) bulletHeight)),
 				(int) x, (int) y, null);
 		g2.setComposite(composite);
 	}
 
-	private void promoteAvatarToDrawable(List<DrawableAvatar> drawables, int x,
-			int y, int width, int height, int offset) {
+	private void promoteAvatarToDrawable(List<DrawableAvatar> drawables, int x, int y, int width, int height,
+			int offset) {
 
 		double spacing = offset * avatarSpacing;
 		double avatarPosition = this.avatarPosition + spacing;
@@ -326,10 +314,8 @@ public class ImageFlow extends JPanel {
 		// int avatarWidth = displayWidth;//avatar.getWidth(null);
 		// int avatarHeight = displayHeight;//avatar.getHeight(null);
 
-		int avatarWidth = (avatar == null ? displayWidth : avatar
-				.getWidth(null));
-		int avatarHeight = (avatar == null ? displayHeight : avatar
-				.getHeight(null));
+		int avatarWidth = (avatar == null ? displayWidth : avatar.getWidth(null));
+		int avatarHeight = (avatar == null ? displayHeight : avatar.getHeight(null));
 
 		double result = computeModifier(avatarPosition);
 		int newWidth = (int) (avatarWidth * result);
@@ -351,8 +337,8 @@ public class ImageFlow extends JPanel {
 			return;
 		}
 
-		drawables.add(new DrawableAvatar(avatarIndex + offset, avatar_x,
-				avatar_y, newWidth, newHeight, avatarPosition, result));
+		drawables.add(new DrawableAvatar(avatarIndex + offset, avatar_x, avatar_y, newWidth, newHeight, avatarPosition,
+				result));
 	}
 
 	private void computeEquationParts() {
@@ -417,11 +403,15 @@ public class ImageFlow extends JPanel {
 
 	/**
 	 * Internal set index
+	 * 
 	 * @param index
 	 */
 	public void setAvatarIndex(int index) {
 		avatarIndex = index;
-		avatarText = avatars.get(index).getLabel();
+		ImageFlowItem imageFlowItem = avatars.get(index);
+		if (imageFlowItem != null) {
+			avatarText = imageFlowItem.getLabel();
+		}
 		notifyListSelectionListener();
 	}
 
@@ -439,8 +429,7 @@ public class ImageFlow extends JPanel {
 	}
 
 	private void scrollAndAnimateBy(int increment) {
-		if (loadingDone
-				&& (scrollerTimer == null || !scrollerTimer.isRunning())) {
+		if (loadingDone && (scrollerTimer == null || !scrollerTimer.isRunning())) {
 			int index = avatarIndex + increment;
 			if (index < 0) {
 				index = 0;
@@ -474,8 +463,8 @@ public class ImageFlow extends JPanel {
 
 	private DrawableAvatar getHitAvatar(int x, int y) {
 		for (DrawableAvatar avatar : drawableAvatars) {
-			Rectangle hit = new Rectangle((int) avatar.getX(), (int) avatar
-					.getY(), avatar.getWidth(), avatar.getHeight() / 2);
+			Rectangle hit = new Rectangle((int) avatar.getX(), (int) avatar.getY(), avatar.getWidth(),
+					avatar.getHeight() / 2);
 			if (hit.contains(x, y)) {
 				return avatar;
 			}
@@ -542,8 +531,7 @@ public class ImageFlow extends JPanel {
 	/**
 	 * Returns true if the specified index is selected.
 	 * 
-	 * @param index
-	 *            int
+	 * @param index int
 	 * @return boolean
 	 */
 	public boolean isSelectedIndex(int index) {
@@ -553,8 +541,7 @@ public class ImageFlow extends JPanel {
 	/**
 	 * Selects a single cell
 	 * 
-	 * @param index
-	 *            int
+	 * @param index int
 	 */
 	public void setSelectedIndex(int index) {
 		this.scrollBy(index - avatarIndex);
@@ -564,19 +551,17 @@ public class ImageFlow extends JPanel {
 	 * Adds a listener to the list that's notified each time a change to the
 	 * selection occur
 	 * 
-	 * @param listener
-	 *            ListSelectionListener
+	 * @param listener ListSelectionListener
 	 */
 	public void addListSelectionListener(ListSelectionListener listener) {
 		listSelectionListeners.add(listener);
 	}
 
 	/**
-	 * Removes a listener from the list that's notified each time a change to
-	 * the selection occurs
+	 * Removes a listener from the list that's notified each time a change to the
+	 * selection occurs
 	 * 
-	 * @param listener
-	 *            ListSelectionListener
+	 * @param listener ListSelectionListener
 	 */
 	public void removeListSelectionListener(ListSelectionListener listener) {
 		listSelectionListeners.remove(listener);
@@ -586,16 +571,13 @@ public class ImageFlow extends JPanel {
 	 * Notify the listeners when a selection event has occured
 	 */
 	private void notifyListSelectionListener() {
-		ListSelectionEvent event = new ListSelectionEvent(this, avatarIndex,
-				avatarIndex, false);
+		ListSelectionEvent event = new ListSelectionEvent(this, avatarIndex, avatarIndex, false);
 		for (ListSelectionListener listener : listSelectionListeners) {
 			listener.valueChanged(event);
 		}
 	}
-	
-	
-	public List<ImageFlowItem> getItems()
-	{
+
+	public List<ImageFlowItem> getItems() {
 		return avatars;
 	}
 
@@ -617,8 +599,7 @@ public class ImageFlow extends JPanel {
 				 * artworks.add(getClass().getResource("artworks/Green
 				 * Day.jpg")); avatarsText.add("Green Day");
 				 * artworks.add(getClass().getResource("artworks/Moby.jpg"));
-				 * avatarsText.add("Moby");
-				 * artworks.add(getClass().getResource("artworks/Norah
+				 * avatarsText.add("Moby"); artworks.add(getClass().getResource("artworks/Norah
 				 * Jones.jpg")); avatarsText.add("Norah Jones");
 				 * artworks.add(getClass().getResource("artworks/Shivaree.jpg"));
 				 * avatarsText.add("Shivaree");
@@ -698,8 +679,7 @@ public class ImageFlow extends JPanel {
 		private double zOrder;
 		private double position;
 
-		private DrawableAvatar(int index, double x, double y, int width,
-				int height, double position, double zOrder) {
+		private DrawableAvatar(int index, double x, double y, int width, int height, double position, double zOrder) {
 			this.index = index;
 			this.x = x;
 			this.y = y;
@@ -794,8 +774,7 @@ public class ImageFlow extends JPanel {
 	private class AvatarScroller extends MouseAdapter {
 		@Override
 		public void mouseReleased(MouseEvent e) {
-			if ((scrollerTimer != null && scrollerTimer.isRunning())
-					|| drawableAvatars == null) {
+			if ((scrollerTimer != null && scrollerTimer.isRunning()) || drawableAvatars == null) {
 				return;
 			}
 
@@ -856,18 +835,15 @@ public class ImageFlow extends JPanel {
 	private class CursorChanger extends MouseMotionAdapter {
 		@Override
 		public void mouseMoved(MouseEvent e) {
-			if ((scrollerTimer != null && scrollerTimer.isRunning())
-					|| drawableAvatars == null) {
+			if ((scrollerTimer != null && scrollerTimer.isRunning()) || drawableAvatars == null) {
 				return;
 			}
 
 			DrawableAvatar avatar = getHitAvatar(e.getX(), e.getY());
 			if (avatar != null) {
-				getParent().setCursor(
-						Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+				getParent().setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 			} else {
-				getParent().setCursor(
-						Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+				getParent().setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
 			}
 		}
 	}
@@ -875,8 +851,7 @@ public class ImageFlow extends JPanel {
 	private class KeyAvatarSelector extends KeyAdapter {
 		@Override
 		public void keyPressed(KeyEvent e) {
-			if ((scrollerTimer == null || !scrollerTimer.isRunning())
-					&& drawableAvatars != null) {
+			if ((scrollerTimer == null || !scrollerTimer.isRunning()) && drawableAvatars != null) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
 				}
 			}
@@ -884,11 +859,10 @@ public class ImageFlow extends JPanel {
 	}
 
 	private class MouseAvatarSelector extends MouseAdapter {
-		
+
 		@Override
 		public void mouseReleased(MouseEvent e) {
-			if ((scrollerTimer == null || !scrollerTimer.isRunning())
-					&& drawableAvatars != null) {
+			if ((scrollerTimer == null || !scrollerTimer.isRunning()) && drawableAvatars != null) {
 				if (e.getButton() == MouseEvent.BUTTON1) {
 					DrawableAvatar avatar = getHitAvatar(e.getX(), e.getY());
 					if (avatar != null && avatar.getIndex() == avatarIndex) {
@@ -896,10 +870,7 @@ public class ImageFlow extends JPanel {
 				}
 			}
 		}
-		
-		
+
 	}
-	
-	
-	
+
 }

@@ -12,7 +12,6 @@ import java.util.Iterator;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
 import javax.swing.JToolBar;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -34,10 +33,11 @@ import org.barrelorgandiscovery.gui.aprint.extensionspoints.ToolbarAddExtensionP
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.VisibilityLayerButtonsExtensionPoint;
 import org.barrelorgandiscovery.gui.atrace.Punch;
 import org.barrelorgandiscovery.gui.atrace.PunchLayer;
+import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
+import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.issues.IssueLayer;
 import org.barrelorgandiscovery.repository.Repository;
 import org.barrelorgandiscovery.scale.Scale;
-import org.barrelorgandiscovery.tools.FileNameExtensionFilter;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
@@ -244,14 +244,14 @@ public class PerfoExtension implements IExtension, InitExtensionPoint,
 
 			// Sélection du fichier ..
 			// demande du fichier à sauvegarder ...
-			JFileChooser choose = new JFileChooser();
+			APrintFileChooser choose = new APrintFileChooser();
 
-			choose.setFileSelectionMode(JFileChooser.FILES_ONLY);
+			choose.setFileSelectionMode(APrintFileChooser.FILES_ONLY);
 
-			choose.setFileFilter(new FileNameExtensionFilter(
+			choose.setFileFilter(new VFSFileNameExtensionFilter(
 					"Fichier XYU", "xyu")); //$NON-NLS-1$ //$NON-NLS-2$
 
-			if (choose.showSaveDialog(aprintref) == JFileChooser.APPROVE_OPTION) {
+			if (choose.showSaveDialog(aprintref) == APrintFileChooser.APPROVE_OPTION) {
 
 				File savedfile = choose.getSelectedFile();
 				if (savedfile == null) {

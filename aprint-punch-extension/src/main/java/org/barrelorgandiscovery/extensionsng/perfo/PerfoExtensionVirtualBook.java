@@ -1,6 +1,5 @@
 package org.barrelorgandiscovery.extensionsng.perfo;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -13,9 +12,6 @@ import java.util.Iterator;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JToolBar;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -28,14 +24,10 @@ import org.barrelorgandiscovery.gui.CancelTracker;
 import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
 import org.barrelorgandiscovery.gui.ainstrument.InstrumentAssociatedParameters;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
-import org.barrelorgandiscovery.gui.aprint.extensionspoints.ImportersExtensionPoint;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.InformCurrentInstrumentExtensionPoint;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.InformCurrentVirtualBookExtensionPoint;
-import org.barrelorgandiscovery.gui.aprint.extensionspoints.InformRepositoryExtensionPoint;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.LayersExtensionPoint;
-import org.barrelorgandiscovery.gui.aprint.extensionspoints.OptionMenuItemsExtensionPoint;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.ToolbarAddExtensionPoint;
-import org.barrelorgandiscovery.gui.aprint.extensionspoints.VirtualBookToolbarButtonsExtensionPoint;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.VisibilityLayerButtonsExtensionPoint;
 import org.barrelorgandiscovery.gui.aprintng.APrintNG;
 import org.barrelorgandiscovery.gui.aprintng.APrintNGVirtualBookFrame;
@@ -45,20 +37,18 @@ import org.barrelorgandiscovery.gui.aprintng.extensionspoints.VirtualBookFrameTo
 import org.barrelorgandiscovery.gui.atrace.Punch;
 import org.barrelorgandiscovery.gui.atrace.PunchLayer;
 import org.barrelorgandiscovery.gui.issues.JIssuePresenter;
+import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
 import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.issues.IssueLayer;
-import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.tools.FileNameExtensionFilter;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
-import org.barrelorgandiscovery.virtualbook.Hole;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 import org.noos.xing.mydoggy.ToolWindowAnchor;
 import org.noos.xing.mydoggy.plaf.MyDoggyToolWindowManager;
 
-import aprintextensions.fr.freydierepatrice.perfo.gerard.BeanAsk;
 import aprintextensions.fr.freydierepatrice.perfo.gerard.JPerfoExtensionParameters;
 import aprintextensions.fr.freydierepatrice.perfo.gerard.PerfoExtensionParameters;
 import aprintextensions.fr.freydierepatrice.perfo.gerard.PerfoPunchConverter;
@@ -331,14 +321,14 @@ public class PerfoExtensionVirtualBook implements IExtension,
 
 			// Sélection du fichier ..
 			// demande du fichier à sauvegarder ...
-			JFileChooser choose = new JFileChooser();
+			APrintFileChooser choose = new APrintFileChooser();
 
-			choose.setFileSelectionMode(JFileChooser.FILES_ONLY);
+			choose.setFileSelectionMode(APrintFileChooser.FILES_ONLY);
 
 			choose.setFileFilter(new FileNameExtensionFilter(
 					"Fichier XYU", "xyu")); //$NON-NLS-1$ //$NON-NLS-2$
 
-			if (choose.showSaveDialog(aprintref) == JFileChooser.APPROVE_OPTION) {
+			if (choose.showSaveDialog(aprintref) == APrintFileChooser.APPROVE_OPTION) {
 
 				File savedfile = choose.getSelectedFile();
 				if (savedfile == null) {

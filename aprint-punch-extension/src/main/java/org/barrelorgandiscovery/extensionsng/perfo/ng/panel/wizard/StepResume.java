@@ -12,7 +12,6 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
@@ -30,6 +29,7 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchPlanIO;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.StatisticVisitor;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.XYCommand;
 import org.barrelorgandiscovery.gui.aprintng.APrintNGInternalFrame;
+import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
 import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener;
 import org.barrelorgandiscovery.gui.wizard.WizardStates;
@@ -169,12 +169,12 @@ public class StepResume extends JPanel implements Step {
 					return;
 				}
 
-				JFileChooser fc = new JFileChooser();
+				APrintFileChooser fc = new APrintFileChooser();
 				fc.setMultiSelectionEnabled(false);
 				fc.setFileFilter(new FileNameExtensionFilter("GCode File", "gcode")); //$NON-NLS-1$ //$NON-NLS-2$
 
 				int f = fc.showSaveDialog(StepResume.this);
-				if (f == JFileChooser.APPROVE_OPTION) {
+				if (f == APrintFileChooser.APPROVE_OPTION) {
 					File fileToSave = fc.getSelectedFile();
 
 					if (!fileToSave.getName().endsWith(".gcode")) {//$NON-NLS-1$

@@ -25,8 +25,8 @@ import javax.swing.border.TitledBorder;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.lf5.LF5Appender;
-import org.barrelorgandiscovery.gui.aprint.APrint;
 import org.barrelorgandiscovery.gui.aprint.PrintPreview;
+import org.barrelorgandiscovery.gui.aprintng.APrintNG;
 import org.barrelorgandiscovery.gui.ascale.ScaleComponent;
 import org.barrelorgandiscovery.gui.ascale.ScalePrintDocument;
 import org.barrelorgandiscovery.instrument.Instrument;
@@ -208,7 +208,7 @@ public class JInstrumentChoice extends JPanel implements IInstrumentChoice {
 		lblinstrument = thepanel.getLabel("labelInstrumentName"); //$NON-NLS-1$
 
 		buttonImprimerGamme = new JButton();
-		buttonImprimerGamme.setIcon(new ImageIcon(APrint.class
+		buttonImprimerGamme.setIcon(new ImageIcon(APrintNG.class
 				.getResource("preview.png"))); //$NON-NLS-1$
 
 		buttonImprimerGamme.setToolTipText(Messages

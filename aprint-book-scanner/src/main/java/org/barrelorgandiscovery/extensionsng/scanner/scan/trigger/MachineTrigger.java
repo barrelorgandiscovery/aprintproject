@@ -54,17 +54,14 @@ public class MachineTrigger extends Trigger implements Disposable {
     this.cancelTracker = new CancelTracker();
     Runnable r =
         new Runnable() {
-
           @Override
           public void run() {
             try {
               double y = 0.0;
               while (!cancelTracker.isCanceled()) {
                 y +=30;
-                mc.sendCommand(new DisplacementCommand(y, -50.0));
-                
-                //Thread.sleep(2000);
-                
+                mc.sendCommand(new DisplacementCommand(y, 0));
+              
                 Thread.sleep(3000); // for hi res ...
                 
                 takePicture();

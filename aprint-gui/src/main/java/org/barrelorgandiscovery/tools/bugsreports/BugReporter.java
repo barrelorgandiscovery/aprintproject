@@ -3,8 +3,6 @@ package org.barrelorgandiscovery.tools.bugsreports;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -18,14 +16,11 @@ import org.apache.commons.httpclient.methods.multipart.FilePart;
 import org.apache.commons.httpclient.methods.multipart.MultipartRequestEntity;
 import org.apache.commons.httpclient.methods.multipart.Part;
 import org.apache.commons.httpclient.methods.multipart.StringPart;
-import org.apache.commons.httpclient.params.HttpClientParams;
-import org.apache.commons.httpclient.params.HttpConnectionManagerParams;
 import org.apache.log4j.Appender;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.FileAppender;
-import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
-import org.barrelorgandiscovery.gui.aprint.APrint;
+import org.barrelorgandiscovery.gui.aprintng.APrintNG;
 import org.barrelorgandiscovery.tools.StreamsTools;
 
 /**
@@ -54,12 +49,10 @@ public class BugReporter {
 	 * @return
 	 */
 	public static Appender getAppender() throws Exception {
-		return new FileAppender(new PatternLayout("%r %-5p %C:%L [%t]: %m%n"),
-				reportfile.getAbsolutePath());
+		return new FileAppender(new PatternLayout("%r %-5p %C:%L [%t]: %m%n"), reportfile.getAbsolutePath());
 	}
 
-	private static ExecutorService bugReportSender = Executors
-			.newSingleThreadExecutor();
+	private static ExecutorService bugReportSender = Executors.newSingleThreadExecutor();
 
 	/**
 	 * Send the log file to the developper using Http access.
@@ -74,9 +67,7 @@ public class BugReporter {
 					// client.getHostConfiguration().setProxy("localhost",
 					// 8888);
 
-					GetMethod pingm = new GetMethod(
-							"http://www.barrel-organ-discovery.org/bugreport/"
-									+ PING_COMMAND);
+					GetMethod pingm = new GetMethod("http://www.barrel-organ-discovery.org/bugreport/" + PING_COMMAND);
 
 					int pingstatus = client.executeMethod(pingm);
 
@@ -84,9 +75,7 @@ public class BugReporter {
 						throw new Exception("bug server not found ...");
 
 					String reportURL = pingm.getURI().toString();
-					reportURL = reportURL.substring(0,
-							reportURL.indexOf(PING_COMMAND))
-							+ REPORT_COMMAND;
+					reportURL = reportURL.substring(0, reportURL.indexOf(PING_COMMAND)) + REPORT_COMMAND;
 
 					File tempfile = File.createTempFile("report", "zip");
 
@@ -100,18 +89,16 @@ public class BugReporter {
 						zipos.putNextEntry(new ZipEntry("logreport.log"));
 
 						if (reportfile == null) {
-							System.out
-									.println("can't send bug report, the bug report library might not have been properly initialized");
+							System.out.println(
+									"can't send bug report, the bug report library might not have been properly initialized");
 							return;
 						}
 
-						StreamsTools.copyStream(
-								new FileInputStream(reportfile), zipos);
+						StreamsTools.copyStream(new FileInputStream(reportfile), zipos);
 						zipos.closeEntry();
 
 						zipos.putNextEntry(new ZipEntry("version"));
-						StreamsTools.copyStream(APrint.class.getClassLoader()
-								.getResourceAsStream("version.properties"),
+						StreamsTools.copyStream(APrintNG.class.getClassLoader().getResourceAsStream("version.properties"),
 								zipos);
 						zipos.closeEntry();
 
@@ -122,26 +109,19 @@ public class BugReporter {
 					// send bug report
 
 					PostMethod filePost = new PostMethod(reportURL);
-					Part[] parts = {
-							new StringPart("uid", System
-									.getProperty("user.name")),
+					Part[] parts = { new StringPart("uid", System.getProperty("user.name")),
 							new FilePart("file", "bugreport", tempfile) };
-					filePost.setRequestEntity(new MultipartRequestEntity(parts,
-							filePost.getParams()));
+					filePost.setRequestEntity(new MultipartRequestEntity(parts, filePost.getParams()));
 
 					// filePost.setFollowRedirects(true);
 
 					int status = client.executeMethod(filePost);
 
 					if (status != 200) {
-						System.err
-								.println("Erreur dans l'envoi du rapport de bug -> code "
-										+ status);
-						System.err.println("return from server :"
-								+ filePost.getResponseBodyAsString());
+						System.err.println("Erreur dans l'envoi du rapport de bug -> code " + status);
+						System.err.println("return from server :" + filePost.getResponseBodyAsString());
 					} else {
-						System.out.println("return from server :"
-								+ filePost.getResponseBodyAsString());
+						System.out.println("return from server :" + filePost.getResponseBodyAsString());
 					}
 
 				} catch (Exception ex) {
@@ -160,8 +140,7 @@ public class BugReporter {
 	 * @param fileInWhichSaveTheBugReport
 	 * @throws Exception
 	 */
-	public static void saveBugReport(File fileInWhichSaveTheBugReport)
-			throws Exception {
+	public static void saveBugReport(File fileInWhichSaveTheBugReport) throws Exception {
 		FileInputStream fileInputStream = new FileInputStream(reportfile);
 		FileOutputStream fos = new FileOutputStream(fileInWhichSaveTheBugReport);
 		try {
@@ -169,6 +148,11 @@ public class BugReporter {
 		} finally {
 			fos.close();
 		}
+	}
+
+	public static void saveBugReport(OutputStream fileInWhichSaveTheBugReport) throws Exception {
+		FileInputStream fileInputStream = new FileInputStream(reportfile);
+		StreamsTools.copyStream(fileInputStream, fileInWhichSaveTheBugReport);
 
 	}
 

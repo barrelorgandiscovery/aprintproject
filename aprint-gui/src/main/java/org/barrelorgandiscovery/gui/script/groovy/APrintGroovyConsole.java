@@ -1,16 +1,15 @@
 package org.barrelorgandiscovery.gui.script.groovy;
 
-import groovy.lang.Binding;
-
 import java.awt.BorderLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
@@ -18,21 +17,24 @@ import java.util.concurrent.Future;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.text.SimpleAttributeSet;
 
+import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.lf5.LF5Appender;
 import org.barrelorgandiscovery.AsyncJobsManager;
 import org.barrelorgandiscovery.JobEvent;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
+import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
+import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.messages.Messages;
-import org.barrelorgandiscovery.tools.FileNameExtensionFilter;
 import org.barrelorgandiscovery.tools.JMessageBox;
+
+import groovy.lang.Binding;
 
 /**
  * APrint adapted console for book stuff manipulating
@@ -64,7 +66,7 @@ public class APrintGroovyConsole extends JFrame {
 	/**
 	 * The current opened file ...
 	 */
-	private File openedFile = null;
+	private AbstractFileObject openedFile = null;
 
 	/**
 	 * Async job manager
@@ -80,12 +82,11 @@ public class APrintGroovyConsole extends JFrame {
 	 * 
 	 * @throws Exception
 	 */
-	public APrintGroovyConsole(Frame ref, APrintProperties props,
-			AsyncJobsManager asyncJobsManager) throws Exception {
+	public APrintGroovyConsole(Frame ref, APrintProperties props, AsyncJobsManager asyncJobsManager) throws Exception {
 		// super(ref);
-		
+
 		setAlwaysOnTop(true);
-		
+
 		// setIconImage(APrint.getAPrintApplicationIcon());
 
 		setOpenedFile(null);
@@ -95,7 +96,7 @@ public class APrintGroovyConsole extends JFrame {
 		initComponents();
 	}
 
-	private void setOpenedFile(File f) {
+	private void setOpenedFile(AbstractFileObject f) {
 		setTitle(Messages.getString("APrintGroovyConsole.1") + (f != null ? "-" + f.getName() : "")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		this.openedFile = f;
 	}
@@ -104,50 +105,48 @@ public class APrintGroovyConsole extends JFrame {
 
 		this.consolePanel = new APrintGroovyConsolePanel();
 
-		JButton loadScript = new JButton(Messages
-				.getString("APrintGroovyConsole.2")); //$NON-NLS-1$
+		JButton loadScript = new JButton(Messages.getString("APrintGroovyConsole.2")); //$NON-NLS-1$
 		loadScript.setIcon(new ImageIcon("folder.png"));//$NON-NLS-1$
 		loadScript.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
 
-					JFileChooser fc = new JFileChooser();
-					fc.setFileFilter(new FileNameExtensionFilter(
-							"APrint Groovy Script", //$NON-NLS-1$
+					APrintFileChooser fc = new APrintFileChooser();
+					fc.setFileFilter(new VFSFileNameExtensionFilter("APrint Groovy Script", //$NON-NLS-1$
 							APRINTGROOVYSCRIPTEXTENSION));
 
-					fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+					fc.setFileSelectionMode(APrintFileChooser.FILES_ONLY);
 
 					if (openedFile != null) {
 						fc.setSelectedFile(openedFile);
-					} else if (props.getLastGroovyScriptFile() != null) {
-						fc.setSelectedFile(props.getLastGroovyScriptFile());
 					}
 
-					if (fc.showOpenDialog(APrintGroovyConsole.this) == JFileChooser.APPROVE_OPTION) {
+					if (fc.showOpenDialog(APrintGroovyConsole.this) == APrintFileChooser.APPROVE_OPTION) {
 
-						File result = fc.getSelectedFile();
-						props.setLastGroovyScriptFile(result);
+						AbstractFileObject result = fc.getSelectedFile();
 
 						setOpenedFile(result);
-
 						StringBuffer sb = new StringBuffer();
-						LineNumberReader r = new LineNumberReader(
-								new InputStreamReader(new FileInputStream(
-										result), Charset.forName("UTF-8"))); //$NON-NLS-1$
+						InputStream istream = result.getInputStream();
 						try {
 
-							String s = r.readLine();
-							while (s != null) {
-								if (sb.length() > 0)
-									sb.append("\n"); //$NON-NLS-1$
-								sb.append(s);
-								s = r.readLine();
+							LineNumberReader r = new LineNumberReader(
+									new InputStreamReader(istream, Charset.forName("UTF-8"))); //$NON-NLS-1$
+							try {
+
+								String s = r.readLine();
+								while (s != null) {
+									if (sb.length() > 0)
+										sb.append("\n"); //$NON-NLS-1$
+									sb.append(s);
+									s = r.readLine();
+								}
+							} finally {
+								r.close();
 							}
 						} finally {
-							r.close();
+							istream.close();
 						}
-
 						consolePanel.setScriptContent(sb.toString());
 
 					}
@@ -155,18 +154,14 @@ public class APrintGroovyConsole extends JFrame {
 				} catch (Exception ex) {
 					logger.error("error in loading the script :" //$NON-NLS-1$
 							+ ex.getMessage(), ex);
-					JMessageBox
-							.showMessage(
-									null,
-									Messages.getString("APrintGroovyConsole.7") + ex.getMessage()); //$NON-NLS-1$
+					JMessageBox.showMessage(null, Messages.getString("APrintGroovyConsole.7") + ex.getMessage()); //$NON-NLS-1$
 				}
 
 			}
 		});
 
-		JButton saveScript = new JButton(Messages
-				.getString("APrintGroovyConsole.8")); //$NON-NLS-1$
-		
+		JButton saveScript = new JButton(Messages.getString("APrintGroovyConsole.8")); //$NON-NLS-1$
+
 		saveScript.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				saveAs();
@@ -209,8 +204,7 @@ public class APrintGroovyConsole extends JFrame {
 					asyncJobsManager.submitAlreadyExecutedJobToTrack(f, new JobEvent() {
 						public void jobAborted() {
 							try {
-								consolePanel.appendOutputNl("Aborted",
-										new SimpleAttributeSet());
+								consolePanel.appendOutputNl("Aborted", new SimpleAttributeSet());
 
 								guiFinishExec();
 
@@ -223,8 +217,7 @@ public class APrintGroovyConsole extends JFrame {
 						public void jobError(Exception ex) {
 							try {
 								consolePanel.appendOutputNl("\n ERROR >> " //$NON-NLS-1$
-										+ ex.getMessage(),
-										new SimpleAttributeSet());
+										+ ex.getMessage(), new SimpleAttributeSet());
 
 								consolePanel.appendOutput(ex);
 
@@ -234,33 +227,28 @@ public class APrintGroovyConsole extends JFrame {
 								currentJob = null;
 
 							} catch (Throwable x) {
-								logger.error("Error in logging exception :"
-										+ x.getMessage(), x);
+								logger.error("Error in logging exception :" + x.getMessage(), x);
 							}
 						}
 
 						public void jobFinished(Object evaluate) {
 							try {
 								if (evaluate == null) {
-									consolePanel
-											.appendOutput(
-													"\n>>  (null) returned from evaluation", //$NON-NLS-1$
-													new SimpleAttributeSet());
+									consolePanel.appendOutput("\n>>  (null) returned from evaluation", //$NON-NLS-1$
+											new SimpleAttributeSet());
 								} else {
-									consolePanel.appendOutputNl(
-											"\n>>  " + evaluate.toString(), //$NON-NLS-1$
+									consolePanel.appendOutputNl("\n>>  " + evaluate.toString(), //$NON-NLS-1$
 											new SimpleAttributeSet());
 								}
-								
+
 								guiFinishExec();
 								currentJob = null;
-								
+
 								logger.debug(evaluate);
 							} catch (Throwable ex) {
 								try {
 									consolePanel.appendOutputNl("\n ERROR >> " //$NON-NLS-1$
-											+ ex.getMessage(),
-											new SimpleAttributeSet());
+											+ ex.getMessage(), new SimpleAttributeSet());
 
 									consolePanel.appendOutput(ex);
 
@@ -288,8 +276,7 @@ public class APrintGroovyConsole extends JFrame {
 			}
 		});
 
-		JButton clear = new JButton(Messages
-				.getString("APrintGroovyConsole.21")); //$NON-NLS-1$
+		JButton clear = new JButton(Messages.getString("APrintGroovyConsole.21")); //$NON-NLS-1$
 		clear.setIcon(new ImageIcon(getClass().getResource("ark_new.png")));//$NON-NLS-1$
 		clear.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -323,43 +310,40 @@ public class APrintGroovyConsole extends JFrame {
 				return;
 			}
 
-			Writer w = new OutputStreamWriter(new FileOutputStream(openedFile),
-					Charset.forName("UTF-8")); //$NON-NLS-1$
+			OutputStream ostream = openedFile.getOutputStream();
 			try {
-				w.write(consolePanel.getScriptContent());
-				logger.debug("file written ..."); //$NON-NLS-1$
+				Writer w = new OutputStreamWriter(ostream, Charset.forName("UTF-8")); //$NON-NLS-1$
+				try {
+					w.write(consolePanel.getScriptContent());
+					logger.debug("file written ..."); //$NON-NLS-1$
+				} finally {
+					w.close();
+				}
 			} finally {
-				w.close();
+				ostream.close();
 			}
-
 		} catch (Exception ex) {
 			logger.error("error in saving the script :" //$NON-NLS-1$
 					+ ex.getMessage(), ex);
-			JMessageBox.showMessage(null, Messages
-					.getString("APrintGroovyConsole.15") + ex.getMessage()); //$NON-NLS-1$
+			JMessageBox.showMessage(null, Messages.getString("APrintGroovyConsole.15") + ex.getMessage()); //$NON-NLS-1$
 		}
 	}
 
 	private void saveAs() {
 		try {
-			JFileChooser fc = new JFileChooser();
-			fc.setFileFilter(new FileNameExtensionFilter(
-					"APrint Groovy Script", //$NON-NLS-1$
+			APrintFileChooser fc = new APrintFileChooser();
+			fc.setFileFilter(new VFSFileNameExtensionFilter("APrint Groovy Script", //$NON-NLS-1$
 					APRINTGROOVYSCRIPTEXTENSION));
 
-			File lastGroovyScriptFile = props.getLastGroovyScriptFile();
-			if (lastGroovyScriptFile != null)
-				fc.setSelectedFile(lastGroovyScriptFile);
+			if (fc.showSaveDialog(APrintGroovyConsole.this) == APrintFileChooser.APPROVE_OPTION) {
 
-			if (fc.showSaveDialog(APrintGroovyConsole.this) == JFileChooser.APPROVE_OPTION) {
-
-				File f = fc.getSelectedFile();
+				AbstractFileObject f = fc.getSelectedFile();
 				if (f == null)
 					return;
 
-				if (!f.getName().toLowerCase().endsWith(
-						"." + APRINTGROOVYSCRIPTEXTENSION)) //$NON-NLS-1$
-					f = new File(f.getParentFile(), f.getName() + "." //$NON-NLS-1$
+				String filename = f.getName().toString();
+				if (!filename.toLowerCase().endsWith("." + APRINTGROOVYSCRIPTEXTENSION)) //$NON-NLS-1$
+					f = (AbstractFileObject) f.getFileSystem().resolveFile(f.getName().toString() + "." //$NON-NLS-1$
 							+ APRINTGROOVYSCRIPTEXTENSION);
 
 				if (f.exists()) {
@@ -368,23 +352,26 @@ public class APrintGroovyConsole extends JFrame {
 						return;
 					}
 				}
-				Writer w = new OutputStreamWriter(new FileOutputStream(f),
-						Charset.forName("UTF-8")); //$NON-NLS-1$
-				try {
-					w.write(consolePanel.getScriptContent());
-					logger.debug("file written ..."); //$NON-NLS-1$
-				} finally {
-					w.close();
-				}
 
+				OutputStream ostream = f.getOutputStream();
+				try {
+					Writer w = new OutputStreamWriter(ostream, Charset.forName("UTF-8")); //$NON-NLS-1$
+					try {
+						w.write(consolePanel.getScriptContent());
+						logger.debug("file written ..."); //$NON-NLS-1$
+					} finally {
+						w.close();
+					}
+				} finally {
+					ostream.close();
+				}
 				setOpenedFile(f);
 			}
 
 		} catch (Exception ex) {
 			logger.error("error in saving the script :" //$NON-NLS-1$
 					+ ex.getMessage(), ex);
-			JMessageBox.showMessage(null, Messages
-					.getString("APrintGroovyConsole.15") + ex.getMessage()); //$NON-NLS-1$
+			JMessageBox.showMessage(null, Messages.getString("APrintGroovyConsole.15") + ex.getMessage()); //$NON-NLS-1$
 		}
 	}
 
@@ -406,8 +393,7 @@ public class APrintGroovyConsole extends JFrame {
 
 		BasicConfigurator.configure(new LF5Appender());
 
-		APrintGroovyConsole gc = new APrintGroovyConsole(null,
-				new APrintProperties(true), new AsyncJobsManager());
+		APrintGroovyConsole gc = new APrintGroovyConsole(null, new APrintProperties(true), new AsyncJobsManager());
 		gc.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		gc.setVisible(true);
 

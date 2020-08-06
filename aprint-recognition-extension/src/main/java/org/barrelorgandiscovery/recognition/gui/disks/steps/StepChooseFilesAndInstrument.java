@@ -12,13 +12,12 @@ import java.net.MalformedURLException;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.gui.aprint.instrumentchoice.IInstrumentChoiceListener;
-import org.barrelorgandiscovery.gui.aprint.instrumentchoice.JCoverFlowInstrumentChoice;
 import org.barrelorgandiscovery.gui.aprint.instrumentchoice.JCoverFlowInstrumentChoiceWithFilter;
+import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
 import org.barrelorgandiscovery.gui.wizard.BasePanelStep;
 import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener;
@@ -121,12 +120,12 @@ public class StepChooseFilesAndInstrument extends BasePanelStep {
 
 					File lastLocation = prefStorage.getFileProperty(CURRENT_DIRECTORY_PREF, null);
 					File lastFile = prefStorage.getFileProperty(LASTBOOKIMAGE_FILE_PREF, null);
-					JFileChooser fc = new JFileChooser(lastFile);
+					APrintFileChooser fc = new APrintFileChooser(lastFile);
 					if (lastLocation != null && lastFile == null) {
 						fc.setCurrentDirectory(lastLocation);
 					}
 					int ret = fc.showOpenDialog(StepChooseFilesAndInstrument.this);
-					if (ret == JFileChooser.APPROVE_OPTION) {
+					if (ret == APrintFileChooser.APPROVE_OPTION) {
 						File selectedFile = fc.getSelectedFile();
 						if (selectedFile != null) {
 							prefStorage.setFileProperty(CURRENT_DIRECTORY_PREF, selectedFile.getParentFile());

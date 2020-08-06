@@ -1,9 +1,7 @@
 package org.barrelorgandiscovery.tools;
 
 import java.awt.BorderLayout;
-import java.awt.Graphics;
 import java.awt.Image;
-import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,8 +15,12 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.lf5.LF5Appender;
+import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
+import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
+import org.barrelorgandiscovery.ui.tools.VFSTools;
 
 import com.l2fprod.common.beans.editor.AbstractPropertyEditor;
 import com.l2fprod.common.beans.editor.FilePropertyEditor;
@@ -60,16 +62,14 @@ public class ImagePropertyEditor extends AbstractPropertyEditor {
 			}
 		};
 		((JPanel) editor).add("*", imageLabel = new JLabel());
-		((JPanel) editor).add(button = ComponentFactory.Helper.getFactory()
-				.createMiniButton());
+		((JPanel) editor).add(button = ComponentFactory.Helper.getFactory().createMiniButton());
 
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				selectFile();
 			}
 		});
-		((JPanel) editor).add(cancelButton = ComponentFactory.Helper
-				.getFactory().createMiniButton());
+		((JPanel) editor).add(cancelButton = ComponentFactory.Helper.getFactory().createMiniButton());
 		cancelButton.setText("X");
 		cancelButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -89,8 +89,7 @@ public class ImagePropertyEditor extends AbstractPropertyEditor {
 			try {
 				bufimage = ImageTools.crop(30, 30, im);
 			} catch (Exception ex) {
-				bufimage = new BufferedImage(30, 30,
-						BufferedImage.TYPE_INT_ARGB);
+				bufimage = new BufferedImage(30, 30, BufferedImage.TYPE_INT_ARGB);
 			}
 			imageLabel.setIcon(new ImageIcon(bufimage));
 		}
@@ -113,24 +112,26 @@ public class ImagePropertyEditor extends AbstractPropertyEditor {
 	protected void selectFile() {
 		ResourceManager rm = ResourceManager.all(FilePropertyEditor.class);
 
-		JFileChooser chooser = UserPreferences.getDefaultFileChooser();
+		APrintFileChooser chooser = new APrintFileChooser();
 		chooser.setDialogTitle(rm.getString("FilePropertyEditor.dialogTitle"));
-		chooser.setApproveButtonText(rm
-				.getString("FilePropertyEditor.approveButtonText"));
-		chooser.setApproveButtonMnemonic(rm
-				.getChar("FilePropertyEditor.approveButtonMnemonic"));
+		chooser.setApproveButtonText(rm.getString("FilePropertyEditor.approveButtonText"));
+		chooser.setApproveButtonMnemonic(rm.getChar("FilePropertyEditor.approveButtonMnemonic"));
 		customizeFileChooser(chooser);
 
-		if (JFileChooser.APPROVE_OPTION == chooser.showOpenDialog(editor)) {
+		if (APrintFileChooser.APPROVE_OPTION == chooser.showOpenDialog(editor)) {
 
-			File newFile = chooser.getSelectedFile();
+			AbstractFileObject afo = chooser.getSelectedFile();
+			try {
+				File newFile = VFSTools.convertToFile(afo);
 
-			Image currentImage = Toolkit.getDefaultToolkit().createImage(
-					newFile.getAbsolutePath());
-			changeLabelImageValue(currentImage);
-			Image oldImage = (Image) getValue();
-			image = currentImage;
-			firePropertyChange(oldImage, newFile);
+				Image currentImage = Toolkit.getDefaultToolkit().createImage(newFile.getAbsolutePath());
+				changeLabelImageValue(currentImage);
+				Image oldImage = (Image) getValue();
+				image = currentImage;
+				firePropertyChange(oldImage, newFile);
+			} catch (Exception ex) {
+				throw new RuntimeException(ex.getMessage(), ex);
+			}
 		}
 	}
 
@@ -145,15 +146,14 @@ public class ImagePropertyEditor extends AbstractPropertyEditor {
 	}
 
 	/**
-	 * Placeholder for subclasses to customize the JFileChooser shown to select
-	 * a file.
+	 * Placeholder for subclasses to customize the JFileChooser shown to select a
+	 * file.
 	 * 
 	 * @param chooser
 	 */
-	protected void customizeFileChooser(JFileChooser chooser) {
+	protected void customizeFileChooser(APrintFileChooser chooser) {
 
-		chooser.setFileFilter(new FileNameExtensionFilter("Image",
-				new String[] { "jpg", "png" }));
+		chooser.setFileFilter(new VFSFileNameExtensionFilter("Image", new String[] { "jpg", "png" }));
 
 	}
 
@@ -184,8 +184,7 @@ public class ImagePropertyEditor extends AbstractPropertyEditor {
 		pr.registerEditor(Image.class, ImagePropertyEditor.class);
 
 		PropertyRendererRegistry propertyRendererRegistry = new PropertyRendererRegistry();
-		propertyRendererRegistry.registerRenderer(Image.class,
-				ImageCellRenderer.class);
+		propertyRendererRegistry.registerRenderer(Image.class, ImageCellRenderer.class);
 
 		p.setProperties(new Property[] { defaultProperty });
 

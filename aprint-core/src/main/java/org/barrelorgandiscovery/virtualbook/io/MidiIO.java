@@ -1,7 +1,9 @@
 package org.barrelorgandiscovery.virtualbook.io;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 
@@ -21,7 +23,6 @@ import org.barrelorgandiscovery.virtualbook.SignatureEvent;
 import org.barrelorgandiscovery.virtualbook.TempoChangeEvent;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 import org.barrelorgandiscovery.virtualbook.transformation.importer.AbstractMidiEventVisitor;
-import org.barrelorgandiscovery.virtualbook.transformation.importer.MidiAdvancedEvent;
 import org.barrelorgandiscovery.virtualbook.transformation.importer.MidiControlChange;
 import org.barrelorgandiscovery.virtualbook.transformation.importer.MidiFile;
 import org.barrelorgandiscovery.virtualbook.transformation.importer.MidiFileIO;
@@ -65,49 +66,50 @@ public class MidiIO {
 		}
 
 		@Override
-		public void visit(MidiSignatureEvent midiSignatureEvent)
-				throws Exception {
+		public void visit(MidiSignatureEvent midiSignatureEvent) throws Exception {
 
-			vb.addEvent(new SignatureEvent(midiSignatureEvent.getTimeStamp(),
-					midiSignatureEvent.getNumerator(), midiSignatureEvent
-							.getDenominator()));
+			vb.addEvent(new SignatureEvent(midiSignatureEvent.getTimeStamp(), midiSignatureEvent.getNumerator(),
+					midiSignatureEvent.getDenominator()));
 
 		}
 
 		@Override
 		public void visit(MidiTempoEvent midiTempoEvent) throws Exception {
 
-			vb.addEvent(new TempoChangeEvent(midiTempoEvent.getTimeStamp(),
-					midiTempoEvent.getBeatLength()));
+			vb.addEvent(new TempoChangeEvent(midiTempoEvent.getTimeStamp(), midiTempoEvent.getBeatLength()));
 
 		}
-		
+
 		@Override
-		public void visit(MidiControlChange midiControlChangeEvent)
-				throws Exception {
+		public void visit(MidiControlChange midiControlChangeEvent) throws Exception {
 			// Nothing
-			
+
 		}
-		
+
 		@Override
 		public void visit(MidiProgramChange midiProgramChange) throws Exception {
 			// Nothing
-			
+
 		}
-		
-		
+
 	}
 
-	public static MidiIOResult readCartonWithError(File midifile)
-			throws Exception {
-
+	/**
+	 * read midi stream and returned the analyzed midi object
+	 * 
+	 * @param midiinputstream
+	 * @param filename
+	 * @return
+	 * @throws Exception
+	 */
+	public static MidiIOResult readCartonWithError(InputStream midiinputstream, String filename) throws Exception {
 		// Lecture des sequences
 		VirtualBook c = new VirtualBook(Scale.getGammeMidiInstance());
 
 		// définition du nom du carton, provenant du nom du fichier midi
-		c.setName(midifile.getName());
+		c.setName(filename);
 
-		MidiFileReadResult readWithError = MidiFileIO.readWithError(midifile);
+		MidiFileReadResult readWithError = MidiFileIO.readWithError(midiinputstream);
 
 		MidiFile midifileread = readWithError.midiFile;
 
@@ -121,8 +123,7 @@ public class MidiIO {
 		result.virtualBook = c;
 		result.issues = new ArrayList<AbstractIssue>();
 
-		for (Iterator iterator = readWithError.errors.iterator(); iterator
-				.hasNext();) {
+		for (Iterator iterator = readWithError.errors.iterator(); iterator.hasNext();) {
 			MidiFileReadError e = (MidiFileReadError) iterator.next();
 			if (e == null)
 				continue;
@@ -132,6 +133,11 @@ public class MidiIO {
 
 		return result;
 
+	}
+
+	public static MidiIOResult readCartonWithError(File midifile) throws Exception {
+		assert midifile != null;
+		return readCartonWithError(new FileInputStream(midifile), midifile.getName());
 	}
 
 	/**
@@ -149,10 +155,21 @@ public class MidiIO {
 	}
 
 	/**
+	 * read midi file from input stream
+	 * 
+	 * @param midiInputStream
+	 * @return
+	 * @throws Exception
+	 */
+	public static VirtualBook readCarton(InputStream midiInputStream, String filename) throws Exception {
+		MidiIOResult readCartonWithError = readCartonWithError(midiInputStream, filename);
+		return readCartonWithError.virtualBook;
+	}
+
+	/**
 	 * old function for reading a midi file ...
 	 * 
-	 * @param midifile
-	 *            la référence au fichier midi lu ...
+	 * @param midifile la référence au fichier midi lu ...
 	 * @return un objet carton virtuel
 	 * @throws MidiIOException
 	 */
@@ -213,8 +230,7 @@ public class MidiIO {
 
 		for (int j = 0; j < track.size(); j++) {
 			MidiEvent me = track.get(j);
-			currenttime = lasttempotime
-					+ (long) ((me.getTick() - lasttempotick) * micropertick);
+			currenttime = lasttempotime + (long) ((me.getTick() - lasttempotick) * micropertick);
 			// Récupération des messages de notes
 			byte[] message = me.getMessage().getMessage();
 			if (message.length > 0) {
@@ -230,8 +246,7 @@ public class MidiIO {
 						note += 128;
 
 					if (alltracks[note] != -1) {
-						c.addHole(new Hole(note, alltracks[note], currenttime
-								- alltracks[note]));
+						c.addHole(new Hole(note, alltracks[note], currenttime - alltracks[note]));
 						alltracks[note] = -1;
 					}
 
@@ -246,8 +261,7 @@ public class MidiIO {
 						// note on but velocity is equals 0
 						// so this is a note off, same as above
 						if (alltracks[note] != -1) {
-							c.addHole(new Hole(note, alltracks[note],
-									currenttime - alltracks[note]));
+							c.addHole(new Hole(note, alltracks[note], currenttime - alltracks[note]));
 							alltracks[note] = -1;
 						}
 					} else {
@@ -259,8 +273,8 @@ public class MidiIO {
 					// tempo
 					if ((message[1] & 0xFF) == 0x51) {
 
-						long l = ((message[3] & 0xFF) << 16
-								| (message[4] & 0xFF) << 8 | (message[5] & 0xFF)) & 0xFFFFFF;
+						long l = ((message[3] & 0xFF) << 16 | (message[4] & 0xFF) << 8 | (message[5] & 0xFF))
+								& 0xFFFFFF;
 						micropertick = (l * 1.0) / resolution;
 
 						lasttempotime = currenttime;
@@ -278,8 +292,7 @@ public class MidiIO {
 						logger.debug("signature change " + numerateur + "/" //$NON-NLS-1$ //$NON-NLS-2$
 								+ denominateur);
 
-						c.addEvent(new SignatureEvent(currenttime, numerateur,
-								denominateur));
+						c.addEvent(new SignatureEvent(currenttime, numerateur, denominateur));
 
 					}
 
@@ -303,8 +316,8 @@ public class MidiIO {
 
 			VirtualBook c =
 
-			MidiIO.readCarton(new File(
-					"C:\\Documents and Settings\\Freydiere Patrice\\workspace\\APrint\\fichier midi test\\Les flots du danube (2007 08 08) .mid")); //$NON-NLS-1$
+					MidiIO.readCarton(new File(
+							"C:\\Documents and Settings\\Freydiere Patrice\\workspace\\APrint\\fichier midi test\\Les flots du danube (2007 08 08) .mid")); //$NON-NLS-1$
 
 			System.out.println(c.toString());
 

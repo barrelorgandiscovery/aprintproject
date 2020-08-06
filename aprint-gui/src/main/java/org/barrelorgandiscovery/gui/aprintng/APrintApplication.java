@@ -4,12 +4,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FilenameFilter;
 import java.io.IOException;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Iterator;
 import java.util.Locale;
 import java.util.Map.Entry;
@@ -19,7 +15,6 @@ import java.util.Set;
 import javax.imageio.ImageIO;
 import javax.swing.JOptionPane;
 import javax.swing.LookAndFeel;
-import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
@@ -28,15 +23,12 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.lf5.LF5Appender;
-import org.barrelorgandiscovery.extensions.ChildFirstClassLoader;
 import org.barrelorgandiscovery.gui.SplashScreenWindow;
-import org.barrelorgandiscovery.gui.aprint.APrint;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.JavaSoundInfos;
 import org.barrelorgandiscovery.tools.ProfilingCondition;
-import org.barrelorgandiscovery.tools.SwingUtils;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
 
 import com.birosoft.liquid.LiquidLookAndFeel;
@@ -277,7 +269,7 @@ public class APrintApplication {
 					Thread.sleep(100);
 				}
 
-				if (p.getTerminateState() != APrint.NEED_RESTART) {
+				if (p.getTerminateState() != APrintNG.NEED_RESTART) {
 					p.dispose();
 					p = null;
 

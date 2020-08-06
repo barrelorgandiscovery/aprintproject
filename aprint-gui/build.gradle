@@ -22,6 +22,10 @@ compileJava {
 dependencies {
     compile project(':aprint-core')
     compile files(fileTree(dir:"${projectDir}/libs" , include:['**/*.jar']).toList())
+    
+    // https://mvnrepository.com/artifact/org.anarres.vfsjfilechooser/filechooser-core
+	compile group: 'org.anarres.vfsjfilechooser', name: 'filechooser-core', version: '1.0.0'
+    
     testCompile 'junit:junit:4.12'
 }
 
@@ -40,6 +44,15 @@ sourceSets {
 			srcDir 'src/main/groovy'
         }
     }
+    test {
+    	java {
+    		srcDir 'src/test/java'
+    	}
+    	resources {
+    		srcDir 'src/test/resources'
+    	}
+    }
+    
     tasks {
         java {
             srcDir 'srcTasksAnt/main/java'

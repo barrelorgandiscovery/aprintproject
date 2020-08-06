@@ -82,7 +82,7 @@ public class PerfoScanFolder extends FamilyImageFolder {
 	 * @return
 	 */
 	public String constructImageName(int sequence) {
-		return SCAN_IMAGE + sequence;
+		return SCAN_IMAGE + String.format("%06d", sequence);
 	}
 
 	/**

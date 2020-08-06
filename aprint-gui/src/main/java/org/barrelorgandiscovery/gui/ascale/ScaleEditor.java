@@ -10,21 +10,23 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.awt.print.PrinterJob;
 import java.io.File;
+import java.io.OutputStream;
 
 import javax.imageio.ImageIO;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 
+import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.gui.aprint.PrintPreview;
+import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
+import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.repository.Repository2;
 import org.barrelorgandiscovery.scale.Scale;
-import org.barrelorgandiscovery.tools.FileNameExtensionFilter;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
 import org.barrelorgandiscovery.virtualbook.transformation.LinearTransposition;
@@ -62,8 +64,7 @@ public class ScaleEditor extends JFrame {
 	/**
 	 * Constructeur
 	 */
-	public ScaleEditor(ScaleEditorPrefs prefs, Repository2 repository)
-			throws Exception {
+	public ScaleEditor(ScaleEditorPrefs prefs, Repository2 repository) throws Exception {
 		super(Messages.getString("GammeEditor.0")); //$NON-NLS-1$
 		assert prefs != null;
 		this.prefs = prefs;
@@ -80,8 +81,7 @@ public class ScaleEditor extends JFrame {
 	 * 
 	 * @param owner
 	 */
-	public ScaleEditor(Frame owner, ScaleEditorPrefs prefs,
-			Repository2 repository) throws Exception {
+	public ScaleEditor(Frame owner, ScaleEditorPrefs prefs, Repository2 repository) throws Exception {
 		this(prefs, repository);
 
 		if (owner != null) {
@@ -117,8 +117,7 @@ public class ScaleEditor extends JFrame {
 				menuFile.setText(Messages.getString("GammeEditor.7")); //$NON-NLS-1$
 
 				//
-				JMenuItem newScale = new JMenuItem(Messages
-						.getString("ScaleEditor.13")); //$NON-NLS-1$
+				JMenuItem newScale = new JMenuItem(Messages.getString("ScaleEditor.13")); //$NON-NLS-1$
 				newScale.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						newScale();
@@ -151,52 +150,48 @@ public class ScaleEditor extends JFrame {
 
 				menuFile.addSeparator();
 
-				JMenuItem exportAsImage = menuFile.add(Messages
-						.getString("ScaleEditor.15")); //$NON-NLS-1$
+				JMenuItem exportAsImage = menuFile.add(Messages.getString("ScaleEditor.15")); //$NON-NLS-1$
 				exportAsImage.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						try {
 
-							BufferedImage scalePicture = ScaleComponent
-									.createScaleImage(scaleEditorPanel
-											.getScale());
+							BufferedImage scalePicture = ScaleComponent.createScaleImage(scaleEditorPanel.getScale());
 
-							JFileChooser fileChooser = new JFileChooser();
-							fileChooser
-									.setFileFilter(new FileNameExtensionFilter(
-											Messages
-													.getString("ScaleEditor.16"), "png")); //$NON-NLS-1$ //$NON-NLS-2$
+							APrintFileChooser fileChooser = new APrintFileChooser();
+							fileChooser.setFileFilter(
+									new VFSFileNameExtensionFilter(Messages.getString("ScaleEditor.16"), "png")); //$NON-NLS-1$ //$NON-NLS-2$
 							fileChooser.setMultiSelectionEnabled(false);
 
-							if (fileChooser.showSaveDialog(ScaleEditor.this) == JFileChooser.APPROVE_OPTION) {
-								File f = fileChooser.getSelectedFile();
-								if (!f.getName().endsWith(".png")) { //$NON-NLS-1$
-									f = new File(f.getParentFile(), f.getName()
-											+ ".png"); //$NON-NLS-1$
+							if (fileChooser.showSaveDialog(ScaleEditor.this) == APrintFileChooser.APPROVE_OPTION) {
+								AbstractFileObject f = fileChooser.getSelectedFile();
+
+								String filename = f.getName().getBaseName();
+
+								if (!filename.endsWith(".png")) { //$NON-NLS-1$
+									f = (AbstractFileObject) f.getFileSystem()
+											.resolveFile(f.getName().toString() + ".png"); //$NON-NLS-1$
 								}
 
 								logger.debug("saving file :" //$NON-NLS-1$
-										+ f.getAbsolutePath());
+										+ f.getName().toString());
 
-								ImageIO.write(scalePicture, "PNG", f); //$NON-NLS-1$
-
-								JMessageBox
-										.showMessage(
-												ScaleEditor.this,
-												Messages
-														.getString("ScaleEditor.22") + f.getAbsolutePath() //$NON-NLS-1$
-														+ Messages
-																.getString("ScaleEditor.23")); //$NON-NLS-1$
+								OutputStream fileOutputStream = f.getOutputStream();
+								try {
+									ImageIO.write(scalePicture, "PNG", fileOutputStream); //$NON-NLS-1$
+								} finally {
+									fileOutputStream.close();
+								}
+								JMessageBox.showMessage(ScaleEditor.this,
+										Messages.getString("ScaleEditor.22") + f.getName().toString() //$NON-NLS-1$
+												+ Messages.getString("ScaleEditor.23")); //$NON-NLS-1$
 							}
 
 						} catch (Exception ex) {
-							logger.error(
-									"error in saving image of the scale ...", //$NON-NLS-1$
+							logger.error("error in saving image of the scale ...", //$NON-NLS-1$
 									ex);
 							BugReporter.sendBugReport();
 
-							JMessageBox.showMessage(ScaleEditor.this, Messages
-									.getString("ScaleEditor.25") //$NON-NLS-1$
+							JMessageBox.showMessage(ScaleEditor.this, Messages.getString("ScaleEditor.25") //$NON-NLS-1$
 									+ ex.getMessage());
 						}
 					}
@@ -247,8 +242,7 @@ public class ScaleEditor extends JFrame {
 				menuAideEnLigne.setText(Messages.getString("GammeEditor.15")); //$NON-NLS-1$
 				menuAideEnLigne.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-						JMessageBox.showMessage(ScaleEditor.this, Messages
-								.getString("GammeEditor.16")); //$NON-NLS-1$
+						JMessageBox.showMessage(ScaleEditor.this, Messages.getString("GammeEditor.16")); //$NON-NLS-1$
 					}
 				});
 				itemaide.add(menuAideEnLigne);
@@ -286,8 +280,7 @@ public class ScaleEditor extends JFrame {
 
 		} catch (Exception ex) {
 			logger.error("newScale", ex); //$NON-NLS-1$
-			JMessageBox.showMessage(this,
-					Messages.getString("ScaleEditor.14") + ex.getMessage()); //$NON-NLS-1$
+			JMessageBox.showMessage(this, Messages.getString("ScaleEditor.14") + ex.getMessage()); //$NON-NLS-1$
 			BugReporter.sendBugReport();
 		}
 	}
@@ -300,8 +293,7 @@ public class ScaleEditor extends JFrame {
 
 			// liste des gammes du repository ...
 
-			ScaleChooserDialog d = new ScaleChooserDialog(repository, this,
-					true);
+			ScaleChooserDialog d = new ScaleChooserDialog(repository, this, true);
 			d.setVisible(true);
 
 			Scale returnscale = d.getSelectedScale();
@@ -328,12 +320,11 @@ public class ScaleEditor extends JFrame {
 			logger.debug("save new scale ... "); //$NON-NLS-1$
 
 			Scale newscaletosave = scaleEditorPanel.getScale();
-			
+
 			repository.saveScale(newscaletosave);
 
 			logger.debug("save default transposition"); //$NON-NLS-1$
-			LinearTransposition t = TranspositionIO
-					.createDefaultMidiTransposition(newscaletosave);
+			LinearTransposition t = TranspositionIO.createDefaultMidiTransposition(newscaletosave);
 
 			repository.saveTransformation(t);
 
@@ -394,10 +385,9 @@ public class ScaleEditor extends JFrame {
 		prefs.setLastGammeFolder(new_default_folder);
 	}
 
-	private void setupDefaultFolderForChooser(JFileChooser choose) {
+	private void setupDefaultFolderForChooser(APrintFileChooser choose) {
 		File default_folder = prefs.getLastGammeFolder();
-		if (default_folder != null && default_folder.exists()
-				&& default_folder.isDirectory())
+		if (default_folder != null && default_folder.exists() && default_folder.isDirectory())
 			choose.setCurrentDirectory(default_folder);
 	}
 
