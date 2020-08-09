@@ -26,17 +26,14 @@ public class OptimizersRepository {
 	 */
 	private static final String PARAMETERS_SUFFIX_CLASS = "Parameters";
 
-	private static Class[] optimizersClasses = { 
-			PunchConverterOptimizer.class,
-			NoReturnPunchConverterOptimizer.class ,
-			GeneticOptimizer.class };
-
+	
 	public OptimizersRepository() {
 
 	}
 
 	public List<Class> listAvailableOptimizersForMachine(AbstractMachine machine) {
-		return Arrays.asList(optimizersClasses);
+		// delegate to machine the available optimizers
+		return machine.getAvailableOptimizerClasses();
 	}
 
 	public Serializable instanciateParametersForOptimizer(Class optimizerClass)
@@ -47,7 +44,6 @@ public class OptimizersRepository {
 		Class<?> parametersClass = Class.forName(className);
 
 		return (Serializable)parametersClass.newInstance();
-
 	}
 
 	public Optimizer newOptimizerWithParameters(Serializable parameters)

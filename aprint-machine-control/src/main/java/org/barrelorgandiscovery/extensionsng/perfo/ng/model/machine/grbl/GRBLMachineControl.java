@@ -6,15 +6,16 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControl;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControlListener;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.gcode.GCodeCompiler;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.Command;
+
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
-
-import org.apache.log4j.Logger;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControl;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControlListener;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.Command;
 
 /**
  * Communicator with the GRBL middleware
@@ -27,7 +28,7 @@ class GRBLMachineControl implements MachineControl {
 	private static final String ALARM_RECEIVED_STATUS = "Alarm:";
 
 	private static final int MAX_PERMIT_SEND = 4;
-	
+
 	// beware the status is done every 500 ms
 	private static final int TRIGGERED_STATUS_TIMER = 500;
 
@@ -46,10 +47,9 @@ class GRBLMachineControl implements MachineControl {
 	private Semaphore commandSendLockSem;
 
 	private static final int MAX_QUEUE = 10;
-	
+
 	/**
-	 * semaphore for command in the pipeline queue, block if the 
-	 * grbl buffer is full
+	 * semaphore for command in the pipeline queue, block if the grbl buffer is full
 	 */
 	private Semaphore commandQueue;
 
@@ -85,18 +85,20 @@ class GRBLMachineControl implements MachineControl {
 	/**
 	 * constructor of the machine control panel
 	 * 
-	 * @param portName
-	 *            the port name
+	 * @param portName the port name
 	 * 
 	 * @throws Exception
 	 */
-	public GRBLMachineControl(String portName) throws Exception {
+	public GRBLMachineControl(String portName, GCodeCompiler commandCompiler) throws Exception {
 
 		init(portName); // raise exception in case of issue
 		currentPortName = portName;
+		assert commandCompiler != null;
+		this.commandCompiler = commandCompiler;
 	}
 
 	private String currentPortName;
+	private GCodeCompiler commandCompiler;
 
 	private void init(String portName) throws SerialPortException {
 
@@ -121,8 +123,7 @@ class GRBLMachineControl implements MachineControl {
 		 */
 
 		serialPort = new SerialPort(portName);
-		
-		
+
 		logger.debug("opening " + portName);
 
 		serialPort.openPort();
@@ -132,8 +133,7 @@ class GRBLMachineControl implements MachineControl {
 		logger.debug("port opened");
 
 		logger.debug("setting communication parameters");
-		serialPort.setParams(SerialPort.BAUDRATE_115200, 
-				SerialPort.DATABITS_8, SerialPort.STOPBITS_1,
+		serialPort.setParams(SerialPort.BAUDRATE_115200, SerialPort.DATABITS_8, SerialPort.STOPBITS_1,
 				SerialPort.PARITY_NONE);
 
 		serialPort.addEventListener(new PortReader(), SerialPort.MASK_RXCHAR);
@@ -187,16 +187,15 @@ class GRBLMachineControl implements MachineControl {
 
 			@Override
 			public void statusReceived(GRBLStatus status) {
-				
+
 				if (listener != null && status != null && status.machinePosition != null) {
 					// logger.debug("status received :" + status);
-					listener.currentMachinePosition(status.status, 
-							status.workingPosition.x, status.workingPosition.y,
+					listener.currentMachinePosition(status.status, status.workingPosition.x, status.workingPosition.y,
 							status.machinePosition.x, status.machinePosition.y);
 				}
 
 				assert status != null;
-				
+
 				if (status.bufferSize != null) {
 
 					int permits = commandQueue.availablePermits();
@@ -207,9 +206,7 @@ class GRBLMachineControl implements MachineControl {
 							//
 							logger.debug("readjust command Queue from delta " + delta);
 							for (int i = 0; i < delta; i++) {
-								
-									commandQueue.release();
-								
+								commandQueue.release();
 							}
 
 						}
@@ -217,10 +214,9 @@ class GRBLMachineControl implements MachineControl {
 
 				} else {
 					// status.bufferSize == null
-					
+
 					// no status come from the device, so release depending on the status
-					if (commandQueue.availablePermits() < 1)
-					{
+					if (commandQueue.availablePermits() < 1) {
 						logger.debug("no commands regulation");
 						commandQueue.release();
 					}
@@ -251,9 +247,9 @@ class GRBLMachineControl implements MachineControl {
 						}
 
 						lastMachineStatus = current;
-					
+
 					}
-					
+
 				} // null status
 				lastMachineStatusTime = System.currentTimeMillis();
 
@@ -318,10 +314,11 @@ class GRBLMachineControl implements MachineControl {
 	public void sendCommand(Command command) throws Exception {
 		checkState();
 
-		GRBLCommandVisitor v = new GRBLCommandVisitor();
-		command.accept(0, v);
+		this.commandCompiler.reset();
+		
+		command.accept(0, commandCompiler);
 
-		List<String> commands = v.getGRBLCommands();
+		List<String> commands = commandCompiler.getGCODECommands();
 		while (commands.size() > 0) {
 			String s = commands.remove(0);
 			logger.debug("sending :" + s);
@@ -350,23 +347,21 @@ class GRBLMachineControl implements MachineControl {
 		grblProtocolState.sendCommand(cmd);
 
 		logger.debug("entered command lock");
-		
+
 		commandSendLockSem.acquire();
 
 		commandQueue.acquire();
 
-		logger.debug("available in command send lock :" 
-						+ commandSendLockSem.availablePermits());
-		logger.debug("available in command queue :" 
-						+ commandQueue.availablePermits());
-		
+		logger.debug("available in command send lock :" + commandSendLockSem.availablePermits());
+		logger.debug("available in command queue :" + commandQueue.availablePermits());
+
 		logger.debug("passed the command lock");
 
 	}
 
 	/**
-	 * wait for all commands sent, this method wait for the non running status
-	 * of the
+	 * wait for all commands sent, this method wait for the non running status of
+	 * the
 	 */
 	public void flushCommands() throws Exception {
 

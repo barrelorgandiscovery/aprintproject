@@ -18,9 +18,9 @@ import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControl;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControlListener;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineStatus;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLCommandVisitor;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLMachine;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLMachineParameters;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.gcode.GRBLPunchCommandVisitor;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLPunchMachine;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLPunchMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.Command;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.HomingCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.MovePlanVisitor;
@@ -239,8 +239,8 @@ public class PunchProcess {
       ICancelTracker cancelTracker)
       throws Exception {
 
-    GRBLMachine machine = new GRBLMachine();
-    GRBLMachineParameters params = new GRBLMachineParameters();
+    GRBLPunchMachine machine = new GRBLPunchMachine();
+    GRBLPunchMachineParameters params = new GRBLPunchMachineParameters();
     logger.debug("existing com :");
     logger.debug(Arrays.asList(SerialPortList.getPortNames()));
     params.setComPort(config.usbPort);
@@ -274,9 +274,9 @@ public class PunchProcess {
   	
     if (logger.isDebugEnabled()) {
   	  logger.debug("debug the punch plan");
-  	  GRBLCommandVisitor cmdVisitor = new GRBLCommandVisitor();
+  	  GRBLPunchCommandVisitor cmdVisitor = new GRBLPunchCommandVisitor();
   	  cmdVisitor.visit(p);
-  	  List<String> allCommands = cmdVisitor.getGRBLCommands();
+  	  List<String> allCommands = cmdVisitor.getGCODECommands();
   	  if (allCommands != null) {
   		  int cpt = 0;
   		   for (String l : allCommands) {

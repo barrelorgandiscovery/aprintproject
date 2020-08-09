@@ -2,9 +2,10 @@ package aprintextensions.fr.freydierepatrice.perfo.gerard;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -16,13 +17,13 @@ import javax.swing.JToolBar;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensions.ExtensionPoint;
 import org.barrelorgandiscovery.extensions.IExtension;
 import org.barrelorgandiscovery.extensions.SimpleExtensionPoint;
 import org.barrelorgandiscovery.gui.CancelTracker;
 import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
-import org.barrelorgandiscovery.gui.aprint.APrint;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.ImportersExtensionPoint;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.InformCurrentVirtualBookExtensionPoint;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.InformRepositoryExtensionPoint;
@@ -31,6 +32,7 @@ import org.barrelorgandiscovery.gui.aprint.extensionspoints.LayersExtensionPoint
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.OptionMenuItemsExtensionPoint;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.ToolbarAddExtensionPoint;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.VisibilityLayerButtonsExtensionPoint;
+import org.barrelorgandiscovery.gui.aprintng.APrintNG;
 import org.barrelorgandiscovery.gui.atrace.Punch;
 import org.barrelorgandiscovery.gui.atrace.PunchLayer;
 import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
@@ -108,9 +110,9 @@ public class PerfoExtension implements IExtension, InitExtensionPoint,
 
 	// cycle de vie
 
-	private APrint aprintref;
+	private APrintNG aprintref;
 
-	public void init(APrint f) {
+	public void init(APrintNG f) {
 
 		assert f != null;
 
@@ -178,7 +180,7 @@ public class PerfoExtension implements IExtension, InitExtensionPoint,
 
 		// sinon
 
-		resultPunchLayer.setPunch(perfoconverter.getPunchesCopy());
+		resultPunchLayer.setOptimizedObject(perfoconverter.getPunchesCopy());
 		resultPunchLayer.setPunchHeight(parameters.poinconheight);
 		resultPunchLayer.setPunchWidth(parameters.poinconsize);
 
@@ -212,7 +214,7 @@ public class PerfoExtension implements IExtension, InitExtensionPoint,
 
 						perfoconverter.optimize(aprintref, ct);
 						if (!ct.isCanceled()) {
-							resultPunchLayer.setPunch(perfoconverter
+							resultPunchLayer.setOptimizedObject(perfoconverter
 									.getPunchesCopy());
 						}
 						aprintref.repaint();
@@ -253,7 +255,7 @@ public class PerfoExtension implements IExtension, InitExtensionPoint,
 
 			if (choose.showSaveDialog(aprintref) == APrintFileChooser.APPROVE_OPTION) {
 
-				File savedfile = choose.getSelectedFile();
+				AbstractFileObject savedfile = choose.getSelectedFile();
 				if (savedfile == null) {
 					JMessageBox.showMessage(aprintref,
 							"pas de fichier sélectionné");
@@ -262,7 +264,8 @@ public class PerfoExtension implements IExtension, InitExtensionPoint,
 
 				try {
 
-					FileWriter fw = new FileWriter(savedfile, false);
+					OutputStream outStream = savedfile.getOutputStream();
+					Writer fw = new OutputStreamWriter(outStream);
 					try {
 						// Ecriture de l'entete ...
 

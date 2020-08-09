@@ -146,7 +146,7 @@ public class StepMatchCenter extends BasePanelStep implements Step {
 		assert previousStateImplementing != null;
 
 		BufferedImage bi = ImageTools.loadImage(previousStateImplementing
-				.getImageFile().toURL());
+				.getImageFile());
 		imageDisplayLayer.setImageToDisplay(bi);
 		if (currentState.points != null) {
 			ellipticLayer.clear();

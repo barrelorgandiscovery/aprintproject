@@ -23,8 +23,8 @@ import org.apache.log4j.lf5.LF5Appender;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControl;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControlListener;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineStatus;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLMachine;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLMachineParameters;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLPunchMachine;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLPunchMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.DisplacementCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.HomingCommand;
 import org.barrelorgandiscovery.perfo.Config;
@@ -174,8 +174,8 @@ public class JMachineMove extends JPanel implements IPunchMachinePanelActivate {
       deactivate();
     }
 
-    GRBLMachine machine = new GRBLMachine();
-    GRBLMachineParameters params = new GRBLMachineParameters();
+    GRBLPunchMachine machine = new GRBLPunchMachine();
+    GRBLPunchMachineParameters params = new GRBLPunchMachineParameters();
     logger.debug("existing com :");
     logger.debug(Arrays.asList(SerialPortList.getPortNames()));
     params.setComPort(currentConfig.usbPort);

@@ -28,9 +28,9 @@ public class GRBLMachineParametersPanel extends JPanel {
 	/**
 	 * associated parameters
 	 */
-	private GRBLMachineParameters parameters;
+	private GRBLPunchMachineParameters parameters;
 
-	public GRBLMachineParametersPanel(GRBLMachineParameters parameters)
+	public GRBLMachineParametersPanel(GRBLPunchMachineParameters parameters)
 			throws Exception {
 		assert parameters != null;
 		this.parameters = parameters;

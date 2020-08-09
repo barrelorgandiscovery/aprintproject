@@ -2491,13 +2491,13 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 				+ APrintGroovyConsole.APRINTGROOVYSCRIPTEXTENSION)) {
 			logger.debug("opening aprint groovy script"); //$NON-NLS-1$
 			APrintGroovyInnerConsole gc = openGroovyScriptConsole();
-			AbstractFileObject fso = (AbstractFileObject) VFS.getManager().resolveFile(file.toURL());
+			AbstractFileObject fso = (AbstractFileObject) VFS.getManager().resolveFile(file.toURL().toString());
 			gc.openScript(fso);
 
 		} else if (lowerCaseFileName.endsWith(".mid") || lowerCaseFileName.endsWith(".kar")) { //$NON-NLS-2$
 
 			APrintNGImporterInternalFrame midiImportFrame = openNewImportMidiFrame();
-			FileObject fso = VFS.getManager().resolveFile(file.toURL());
+			FileObject fso = VFS.getManager().resolveFile(file.toURL().toString());
 			AbstractFileObject resolvedFile = (AbstractFileObject) fso;
 			midiImportFrame.defineCurrentMidiFile(resolvedFile);
 

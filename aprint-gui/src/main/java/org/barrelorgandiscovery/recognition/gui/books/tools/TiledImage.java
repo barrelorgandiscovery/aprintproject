@@ -18,6 +18,13 @@ import javax.imageio.stream.ImageInputStream;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
+/**
+ * this class implements access to part of an image, using a decomposed image in
+ * tiles, tiles are saved into a subfolder, with named conventions
+ * 
+ * @author pfreydiere
+ *
+ */
 public class TiledImage implements ITiledImage {
 
 	private File imagePath;
@@ -25,8 +32,7 @@ public class TiledImage implements ITiledImage {
 	private int maxHeight;
 
 	public TiledImage(File imagePath, File outputRecognitionProject) throws Exception {
-		this(imagePath, outputRecognitionProject, 
-				(int) readImageSize(new FileInputStream(imagePath)).getHeight());
+		this(imagePath, outputRecognitionProject, (int) readImageSize(new FileInputStream(imagePath)).getHeight());
 	}
 
 	public TiledImage(File imagePath, File outputRecognitionProject, int maxHeight) throws Exception {
@@ -61,19 +67,25 @@ public class TiledImage implements ITiledImage {
 		return imagePath;
 	}
 
-	/* (non-Javadoc)
-   * @see org.barrelorgandiscovery.recognition.gui.books.tools.ITiledImage#getWidth()
-   */
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.barrelorgandiscovery.recognition.gui.books.tools.ITiledImage#getWidth()
+	 */
 	@Override
-  public int getWidth() {
+	public int getWidth() {
 		return imagecount * maxHeight;
 	}
 
-	/* (non-Javadoc)
-   * @see org.barrelorgandiscovery.recognition.gui.books.tools.ITiledImage#getHeight()
-   */
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.barrelorgandiscovery.recognition.gui.books.tools.ITiledImage#getHeight()
+	 */
 	@Override
-  public int getHeight() {
+	public int getHeight() {
 		return maxHeight;
 	}
 
@@ -132,11 +144,14 @@ public class TiledImage implements ITiledImage {
 		}
 	}
 
-	/* (non-Javadoc)
-   * @see org.barrelorgandiscovery.recognition.gui.books.tools.ITiledImage#getImageCount()
-   */
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.barrelorgandiscovery.recognition.gui.books.tools.ITiledImage#
+	 * getImageCount()
+	 */
 	@Override
-  public int getImageCount() {
+	public int getImageCount() {
 		return imagecount;
 	}
 
@@ -144,11 +159,15 @@ public class TiledImage implements ITiledImage {
 		return new File(outputRecognitionProject, "" + i + (suffix == null ? "" : "_" + suffix) + ".jpg");
 	}
 
-	/* (non-Javadoc)
-   * @see org.barrelorgandiscovery.recognition.gui.books.tools.ITiledImage#getImagePath(int)
-   */
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.barrelorgandiscovery.recognition.gui.books.tools.ITiledImage#getImagePath
+	 * (int)
+	 */
 	@Override
-  public File getImagePath(int i) {
+	public File getImagePath(int i) {
 		return constructImagePath(i, null);
 	}
 
@@ -170,19 +189,26 @@ public class TiledImage implements ITiledImage {
 		return null;
 	}
 
-	/* (non-Javadoc)
-   * @see org.barrelorgandiscovery.recognition.gui.books.tools.ITiledImage#subTileDimension(int)
-   */
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.barrelorgandiscovery.recognition.gui.books.tools.ITiledImage#
+	 * subTileDimension(int)
+	 */
 	@Override
-  public Rectangle2D.Double subTileDimension(int index) {
+	public Rectangle2D.Double subTileDimension(int index) {
 		return new Rectangle2D.Double(maxHeight * index, 0, maxHeight, maxHeight);
 	}
 
-	/* (non-Javadoc)
-   * @see org.barrelorgandiscovery.recognition.gui.books.tools.ITiledImage#subTiles(java.awt.geom.Rectangle2D.Double)
-   */
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * org.barrelorgandiscovery.recognition.gui.books.tools.ITiledImage#subTiles(
+	 * java.awt.geom.Rectangle2D.Double)
+	 */
 	@Override
-  public int[] subTiles(Rectangle2D.Double viewport) {
+	public int[] subTiles(Rectangle2D.Double viewport) {
 		if (viewport == null)
 			return new int[0];
 

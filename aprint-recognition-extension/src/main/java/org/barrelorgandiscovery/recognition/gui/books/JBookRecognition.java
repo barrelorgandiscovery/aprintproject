@@ -9,7 +9,11 @@ import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Properties;
 
@@ -21,10 +25,10 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import org.apache.commons.vfs2.VFS;
+import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.BasicConfigurator;
-import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Logger;
-import org.apache.log4j.PatternLayout;
 import org.apache.log4j.lf5.LF5Appender;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
 import org.barrelorgandiscovery.gui.aprintng.APrintNGGeneralServices;
@@ -38,7 +42,6 @@ import org.barrelorgandiscovery.gui.wizard.StepChanged;
 import org.barrelorgandiscovery.gui.wizard.Wizard;
 import org.barrelorgandiscovery.gui.wizard.WizardStates;
 import org.barrelorgandiscovery.instrument.Instrument;
-import org.barrelorgandiscovery.prefs.DummyPrefsStorage;
 import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.recognition.gui.books.steps.StepChooseEdges;
@@ -54,6 +57,7 @@ import org.barrelorgandiscovery.repository.Repository2;
 import org.barrelorgandiscovery.repository.Repository2Factory;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.SerializeTools;
+import org.barrelorgandiscovery.tools.URLTools;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 
@@ -119,7 +123,14 @@ public class JBookRecognition extends JPanel {
 			public void currentStepChanged(int stepNo, Serializable state) {
 				try {
 					logger.debug("saving the state ..."); //$NON-NLS-1$
-					SerializeTools.save(wizard.getPagesStates(), JBookRecognition.this.serializeFile);
+
+					
+					OutputStream outStream = new FileOutputStream(JBookRecognition.this.serializeFile);
+					try {
+						SerializeTools.save(wizard.getPagesStates(), outStream);
+					} finally {
+						outStream.close();
+					}
 				} catch (Exception ex) {
 					ex.printStackTrace();
 				}
@@ -136,22 +147,25 @@ public class JBookRecognition extends JPanel {
 					INumericImage numericImage = (INumericImage) wizard.getCurrentWizardState();
 					if (numericImage != null) {
 						File imageFile = numericImage.getImageFile();
-						if (imageFile != null && imageFile.exists()) {
-							serializeFile = new File(imageFile.getParentFile(), imageFile.getName() + ".ser"); //$NON-NLS-1$
+						if (imageFile != null) {
+							serializeFile = new File(imageFile.getAbsolutePath() + ".ser"); //$NON-NLS-1$
 						}
 
-						if (serializeFile.exists()) {
+						try {
+							InputStream is = new FileInputStream(serializeFile);
 							try {
-								Serializable s = (Serializable) SerializeTools.load(serializeFile);
+								Serializable s = (Serializable) SerializeTools.load(is);
 								// loaded
 								wizard.reloadStatesIfPossible(s, new Step[] { chooseModelStep, stepEdges, stepEdit });
-
-							} catch (Exception ex) {
-								logger.error("error reading the saved state :" + ex.getMessage(), ex); //$NON-NLS-1$
+							} finally {
+								is.close();
 							}
+						} catch (Exception ex) {
+							logger.debug(ex.getMessage(), ex);
 						}
+						
 
-						try (FileInputStream fis = new FileInputStream(numericImage.getImageFile())) {
+						try (InputStream fis = new FileInputStream(imageFile)) {
 							Dimension d = TiledImage.readImageSize(fis);
 							if (d.getHeight() > 800) {
 								int result = JOptionPane.showConfirmDialog(wizard,
@@ -164,18 +178,19 @@ public class JBookRecognition extends JPanel {
 									int newwidth = d.width * 800 / d.height;
 
 									// move to jpeg ...
-									String rootName = numericImage.getImageFile().getName();
+									String rootName = imageFile.getName();
+									
 									int extensionpoint = rootName.lastIndexOf('.');
 									if (extensionpoint != -1) {
 										rootName = rootName.substring(0, extensionpoint);
 										rootName += ".jpg"; //$NON-NLS-1$
 									}
 
-									File newFileName = new File(numericImage.getImageFile().getParentFile(),
-											"rescaled_" + rootName);//$NON-NLS-1$
+									File newFileName = new File(imageFile.getParentFile(),
+													"rescaled_" + rootName);//$NON-NLS-1$
 
 									Image loadImage = Toolkit.getDefaultToolkit()
-											.createImage(numericImage.getImageFile().toURL())
+											.createImage(imageFile.toURL())
 											.getScaledInstance(newwidth, PREFERRED_COMPUTED_HEIGHT, 0);
 									// load image
 									JLabel l = new JLabel(new ImageIcon(loadImage));
@@ -191,8 +206,12 @@ public class JBookRecognition extends JPanel {
 										g.dispose();
 									}
 
-									ImageIO.write(newImage, "JPEG", newFileName); //$NON-NLS-1$
-
+									OutputStream outStream = new FileOutputStream(newFileName);
+									try {
+										ImageIO.write(newImage, "JPEG", outStream); //$NON-NLS-1$
+									} finally {
+										outStream.close();
+									}
 									stepChooseFilesAndInstrument.setImageFile(newFileName);
 									logger.debug("image resized"); //$NON-NLS-1$
 								}
@@ -274,19 +293,19 @@ public class JBookRecognition extends JPanel {
 
 					BasicConfigurator.configure(new LF5Appender());
 
-					APrintProperties aPrintProperties = new APrintProperties("aprintstudio",false);
-					System.out.println(aPrintProperties.getAprintFolder() ); 
+					APrintProperties aPrintProperties = new APrintProperties("aprintstudio", false);
+					System.out.println(aPrintProperties.getAprintFolder());
 					Repository2 rep = Repository2Factory.create(new Properties(), aPrintProperties);
 
 					JFrame f = new JFrame();
 					f.setSize(800, 500);
 					f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-					
+
 					// for testing it is useful
 					FilePrefsStorage prefs = new FilePrefsStorage(new File("c:\\temp\\prefsTest.properties"));
 					prefs.load();
-					
-					JBookRecognition dr = new JBookRecognition(rep,prefs, null, null);
+
+					JBookRecognition dr = new JBookRecognition(rep, prefs, null, null);
 
 					f.getContentPane().add(dr);
 

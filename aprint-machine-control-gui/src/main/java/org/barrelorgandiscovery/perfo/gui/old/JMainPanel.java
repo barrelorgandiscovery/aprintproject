@@ -10,8 +10,8 @@ import javax.swing.SwingUtilities;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControl;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControlListener;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineStatus;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLMachine;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLMachineParameters;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLPunchMachine;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLPunchMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.DisplacementCommand;
 
 public class JMainPanel extends JPanel {
@@ -27,8 +27,8 @@ public class JMainPanel extends JPanel {
 
     add(connectedStatus, BorderLayout.SOUTH);
 
-    GRBLMachine g = new GRBLMachine();
-    GRBLMachineParameters p = new GRBLMachineParameters();
+    GRBLPunchMachine g = new GRBLPunchMachine();
+    GRBLPunchMachineParameters p = new GRBLPunchMachineParameters();
     p.setComPort("/dev/ttyUSB0");
     MachineControl m = g.open(p);
 

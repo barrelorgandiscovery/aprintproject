@@ -2,7 +2,8 @@ package org.barrelorgandiscovery.extensionsng.perfo.ng.panel.wizard;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.io.File;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +16,7 @@ import javax.swing.JEditorPane;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.controlling.PunchCommandPanel;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.messages.Messages;
@@ -30,13 +32,14 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.StatisticVisito
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.XYCommand;
 import org.barrelorgandiscovery.gui.aprintng.APrintNGInternalFrame;
 import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
+import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener;
 import org.barrelorgandiscovery.gui.wizard.WizardStates;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.scale.Scale;
-import org.barrelorgandiscovery.tools.FileNameExtensionFilter;
 import org.barrelorgandiscovery.tools.JMessageBox;
+import org.barrelorgandiscovery.ui.tools.VFSTools;
 import org.barrelorgandiscovery.virtualbook.Hole;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 
@@ -156,6 +159,8 @@ public class StepResume extends JPanel implements Step {
 
 	class ExportAction extends AbstractAction {
 
+		private static final String GCODE_EXTENSION = "gcode";
+
 		public ExportAction() {
 			super(Messages.getString("StepResume.13")); //$NON-NLS-1$
 		}
@@ -171,21 +176,28 @@ public class StepResume extends JPanel implements Step {
 
 				APrintFileChooser fc = new APrintFileChooser();
 				fc.setMultiSelectionEnabled(false);
-				fc.setFileFilter(new FileNameExtensionFilter("GCode File", "gcode")); //$NON-NLS-1$ //$NON-NLS-2$
+				fc.setFileFilter(new VFSFileNameExtensionFilter("GCode File", GCODE_EXTENSION)); //$NON-NLS-1$ //$NON-NLS-2$
 
 				int f = fc.showSaveDialog(StepResume.this);
 				if (f == APrintFileChooser.APPROVE_OPTION) {
-					File fileToSave = fc.getSelectedFile();
+					AbstractFileObject fileToSave = fc.getSelectedFile();
 
-					if (!fileToSave.getName().endsWith(".gcode")) {//$NON-NLS-1$
-						fileToSave = new File(fileToSave.getParentFile(), fileToSave.getName() + ".gcode");//$NON-NLS-1$
-					}
+					fileToSave = VFSTools.ensureExtensionIs(fileToSave, GCODE_EXTENSION);
 
 					// export plan
-					
+
 					PunchBookAndPlan reversed = reverseToHaveTheReferenceUp(vb, currentPlan);
-					
-					PunchPlanIO.exportToGRBL(fileToSave, reversed.punchplan);
+					OutputStream os = fileToSave.getOutputStream();
+					try {
+						OutputStreamWriter w = new OutputStreamWriter(os);
+						try {
+							PunchPlanIO.exportToGRBL(w, reversed.punchplan);
+						} finally {
+							w.close();
+						}
+					} finally {
+						os.close();
+					}
 					JMessageBox.showMessage(StepResume.this, Messages.getString("StepResume.15") //$NON-NLS-1$
 							+ fileToSave + Messages.getString("StepResume.16")); //$NON-NLS-1$
 				}
@@ -218,19 +230,19 @@ public class StepResume extends JPanel implements Step {
 
 			getContentPane().setLayout(new BorderLayout());
 
-			
 			PunchBookAndPlan reverseToHaveTheReferenceUp = reverseToHaveTheReferenceUp(vb, currentPlan);
 			assert reverseToHaveTheReferenceUp != null;
 			assert reverseToHaveTheReferenceUp.punchplan != null;
 			assert reverseToHaveTheReferenceUp.virtualBook != null;
-			
+
 			// prepend the origin displacement
 			DisplacementCommand origin = new DisplacementCommand(0, 0);
 
 			PunchPlan planCopy = new PunchPlan(reverseToHaveTheReferenceUp.punchplan);
 			planCopy.getCommandsByRef().add(0, origin);
 
-			PunchCommandPanel punchCommandPanel = new PunchCommandPanel(planCopy, reverseToHaveTheReferenceUp.virtualBook, ps);
+			PunchCommandPanel punchCommandPanel = new PunchCommandPanel(planCopy,
+					reverseToHaveTheReferenceUp.virtualBook, ps);
 
 			punchCommandPanel.setMachineControl(machineControl);
 			getContentPane().add(punchCommandPanel);
@@ -308,9 +320,10 @@ public class StepResume extends JPanel implements Step {
 
 		VirtualBook newReversed = new VirtualBook(modifiedScale);
 
-		Long maxTimeStamp = vb.getHolesCopy().stream().map((Hole h) -> h.getTimestamp() + h.getTimeLength() ).reduce( (a,b) -> Math.max(a,b)).get();
-		
-		// long maxTimestamp = 
+		Long maxTimeStamp = vb.getHolesCopy().stream().map((Hole h) -> h.getTimestamp() + h.getTimeLength())
+				.reduce((a, b) -> Math.max(a, b)).get();
+
+		// long maxTimestamp =
 		for (Hole h : vb.getHolesCopy()) {
 			Hole nh = new Hole(h.getTrack(), maxTimeStamp - h.getTimestamp() - h.getTimeLength(), h.getTimeLength());
 			newReversed.addHole(nh);
@@ -325,8 +338,7 @@ public class StepResume extends JPanel implements Step {
 			}
 			return 0.0;
 		}).reduce((a, b) -> Math.max(a, b)).get();
-		
-		
+
 		List<Command> originalCommands = punchplan.getCommandsByRef();
 
 		List<Command> reversedCommands = new ArrayList<Command>();

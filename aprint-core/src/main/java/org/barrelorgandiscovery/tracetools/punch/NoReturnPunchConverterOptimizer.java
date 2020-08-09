@@ -15,7 +15,7 @@ import org.barrelorgandiscovery.gui.atrace.Punch;
 import org.barrelorgandiscovery.gui.atrace.PunchConverter;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 
-public class NoReturnPunchConverterOptimizer implements Optimizer {
+public class NoReturnPunchConverterOptimizer implements Optimizer<Punch> {
 
   private static class PunchComparator implements Comparator<Punch> {
 
@@ -71,12 +71,12 @@ public class NoReturnPunchConverterOptimizer implements Optimizer {
   }
 
   @Override
-  public OptimizerResult optimize(VirtualBook carton) throws Exception {
+  public OptimizerResult<Punch> optimize(VirtualBook carton) throws Exception {
     return optimize(carton, null, null);
   }
 
   @Override
-  public OptimizerResult optimize(VirtualBook carton, OptimizerProgress progress, ICancelTracker ct)
+  public OptimizerResult<Punch> optimize(VirtualBook carton, OptimizerProgress progress, ICancelTracker ct)
       throws Exception {
 
     assert carton != null;
@@ -88,7 +88,7 @@ public class NoReturnPunchConverterOptimizer implements Optimizer {
             parameters.getOverlap(),
             parameters.getNotPunchedIfLessThan());
 
-    OptimizerResult convert = pc.convert(carton.getOrderedHolesCopy());
+    OptimizerResult<Punch> convert = pc.convert(carton.getOrderedHolesCopy());
 
     ArrayList<Punch> result = orderPunches(convert.result);
 

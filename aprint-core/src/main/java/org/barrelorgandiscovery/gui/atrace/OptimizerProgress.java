@@ -8,7 +8,7 @@ package org.barrelorgandiscovery.gui.atrace;
  */
 public interface OptimizerProgress {
 
-	public void report(double progressIndicator, Punch[] orderedPunches,
+	public void report(double progressIndicator, OptimizedObject[] orderedPunches,
 			String message);
 	
 	

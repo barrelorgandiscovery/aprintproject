@@ -6,12 +6,10 @@ import java.util.Iterator;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
-
 import org.barrelorgandiscovery.gui.ICancelTracker;
-import org.barrelorgandiscovery.gui.aprint.APrint;
 import org.barrelorgandiscovery.gui.atrace.Punch;
 import org.barrelorgandiscovery.gui.atrace.PunchConverter;
-import org.barrelorgandiscovery.gui.atrace.PunchConverter.PunchConverterResult;
+import org.barrelorgandiscovery.gui.atrace.ConverterResult;
 import org.barrelorgandiscovery.issues.IssueCollection;
 import org.barrelorgandiscovery.tools.TimeUtils;
 import org.barrelorgandiscovery.tracetools.ga.GeneticSolver;
@@ -71,7 +69,7 @@ public class PerfoPunchConverter {
 				longueurpoinconsenscarton, longueurpoinconsenscarton
 						- avancement, lastpoincondistance);
 
-		PunchConverterResult result = pc.convert(vb.getOrderedHolesCopy());
+		ConverterResult<Punch> result = pc.convert(vb.getOrderedHolesCopy());
 
 		this.ic = result.holeerrors;
 

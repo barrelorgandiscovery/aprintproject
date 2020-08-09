@@ -27,11 +27,15 @@ import org.barrelorgandiscovery.tools.ImageTools;
  */
 public class JImagePreviewStack extends JPanel {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 5661371358507862578L;
+	
 	private static final int MAX_IMAGES = 5;
 	private List<JLabel> images = new ArrayList<JLabel>();
 
 	public JImagePreviewStack() {
-
 	}
 
 	private void refreshImages() {
@@ -47,7 +51,7 @@ public class JImagePreviewStack extends JPanel {
 	}
 
 	public void addImage(Image image) {
-		BufferedImage thumbnail = org.barrelorgandiscovery.tools.ImageTools.crop(100, 100, image);
+		BufferedImage thumbnail = ImageTools.crop(100, 100, image);
 		JLabel l = new JLabel();
 
 		l.setIcon(new ImageIcon(thumbnail));

@@ -24,12 +24,15 @@ import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.controlling.XYPanel.XYListener;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.controlling.wizard.PanelStep;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.messages.Messages;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachine;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineCommandStream;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControl;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControlListener;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineStatus;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLMachine;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLMachineParameters;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLPunchMachine;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLPunchMachineParameters;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.mock.MockMachine;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.mock.MockMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.Command;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.DisplacementCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.HomingCommand;
@@ -43,6 +46,7 @@ import org.barrelorgandiscovery.gui.aedit.Tool;
 import org.barrelorgandiscovery.gui.aedit.UndoStack;
 import org.barrelorgandiscovery.gui.aedit.toolbar.JVBToolingToolbar;
 import org.barrelorgandiscovery.gui.atrace.OptimizerResult;
+import org.barrelorgandiscovery.gui.atrace.Punch;
 import org.barrelorgandiscovery.gui.atrace.PunchConverter;
 import org.barrelorgandiscovery.gui.tools.CursorTools;
 import org.barrelorgandiscovery.gui.wizard.Step;
@@ -70,6 +74,11 @@ import com.jeta.forms.gui.form.GridView;
  * 
  */
 public class PunchCommandPanel extends JPanel implements Disposable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3591301386606927045L;
 
 	private static Logger logger = Logger.getLogger(PunchCommandPanel.class);
 
@@ -828,16 +837,20 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 		// convert to punchplan
 
 		PunchConverter pc = new PunchConverter(r.virtualBook.getScale(), 3.0);
-		OptimizerResult punches = pc.convert(r.virtualBook.getHolesCopy());
+		OptimizerResult<Punch> punches = pc.convert(r.virtualBook.getHolesCopy());
 
 		PunchPlan pp = PunchPlan.createDefaultPunchPlan(punches.result);
 		pp.getCommandsByRef().add(0, new DisplacementCommand(0, 0));
 
-		GRBLMachineParameters grblMachineParameters = new GRBLMachineParameters();
-		grblMachineParameters.setComPort("COM4");
-
-		GRBLMachine grblMachine = new GRBLMachine();
-		MachineControl machineControl = grblMachine.open(grblMachineParameters);
+		MockMachineParameters mockMachineParameters = new MockMachineParameters();
+		AbstractMachine machine = mockMachineParameters.createAssociatedMachineInstance();
+		MachineControl machineControl = machine.open(mockMachineParameters);
+		
+//		GRBLPunchMachineParameters grblMachineParameters = new GRBLPunchMachineParameters();
+//		grblMachineParameters.setComPort("COM4");
+//
+//		GRBLPunchMachine grblMachine = new GRBLPunchMachine();
+//		MachineControl machineControl = grblMachine.open(grblMachineParameters);
 
 		IPrefsStorage dps = new FilePrefsStorage(new File("c:\\temp\\prefsperfo"));
 		dps.load();

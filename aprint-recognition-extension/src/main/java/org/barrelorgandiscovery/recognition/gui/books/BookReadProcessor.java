@@ -410,9 +410,6 @@ public class BookReadProcessor {
 			a.add(new Rectangle2D.Double(r.getX() - 5, r.getY() - 5, 10, 10));
 		}
 		return a;
-
 	}
 	
-	
-
 }

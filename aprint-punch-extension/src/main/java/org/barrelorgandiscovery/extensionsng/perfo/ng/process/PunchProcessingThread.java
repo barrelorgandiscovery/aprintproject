@@ -11,11 +11,11 @@ import org.barrelorgandiscovery.JobEvent;
 import org.barrelorgandiscovery.gui.CancelTracker;
 import org.barrelorgandiscovery.gui.ICancelTracker;
 import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
+import org.barrelorgandiscovery.gui.atrace.OptimizedObject;
 import org.barrelorgandiscovery.gui.atrace.Optimizer;
 import org.barrelorgandiscovery.gui.atrace.OptimizerProgress;
 import org.barrelorgandiscovery.gui.atrace.OptimizerResult;
-import org.barrelorgandiscovery.gui.atrace.Punch;
-import org.barrelorgandiscovery.gui.atrace.PunchConverter.PunchConverterResult;
+import org.barrelorgandiscovery.gui.atrace.ConverterResult;
 import org.barrelorgandiscovery.gui.atrace.PunchLayer;
 import org.barrelorgandiscovery.gui.issues.JIssuePresenter;
 import org.barrelorgandiscovery.gui.script.groovy.ASyncConsoleOutput;
@@ -82,7 +82,7 @@ public class PunchProcessingThread {
 	 *            the track cancel
 	 * @throws Exception
 	 */
-	public void execute(final Optimizer optimizer, final VirtualBook vb,
+	public void execute(final Optimizer<OptimizedObject> optimizer, final VirtualBook vb,
 			final ICancelTracker cancelTracker,
 			final OptimizerProgress optimProgress) throws Exception {
 
@@ -110,11 +110,11 @@ public class PunchProcessingThread {
 
 					@Override
 					public void report(double progressIndicator,
-							Punch[] orderedPunches, String message) {
+							OptimizedObject[] orderedPunches, String message) {
 						try {
 							addConsoleLine(progressIndicator + " " + message);
 
-							OptimizerResult r = new OptimizerResult();
+							OptimizerResult<OptimizedObject> r = new OptimizerResult<OptimizedObject>();
 							r.result = orderedPunches;
 
 							signalNewResult(r);
@@ -129,7 +129,7 @@ public class PunchProcessingThread {
 					}
 				};
 
-				OptimizerResult oresult = optimizer.optimize(vb, op, ct);
+				OptimizerResult<OptimizedObject> oresult = optimizer.optimize(vb, op, ct);
 
 				if (ct.isCanceled()) // don't send result if cancelled
 					return null;
@@ -208,7 +208,7 @@ public class PunchProcessingThread {
 	 * @param result
 	 * @throws Exception
 	 */
-	private void signalNewResult(final PunchConverterResult result)
+	private void signalNewResult(final ConverterResult<OptimizedObject> result)
 			throws Exception {
 
 		SwingUtilities.invokeAndWait(new Runnable() {
@@ -216,7 +216,7 @@ public class PunchProcessingThread {
 			public void run() {
 				logger.debug("set punches"); //$NON-NLS-1$
 				if (punchLayer != null) {
-					punchLayer.setPunch(result.result);
+					punchLayer.setOptimizedObject(result.result);
 				}
 				if (issuePresenter != null)
 					issuePresenter.loadIssues(result.holeerrors);

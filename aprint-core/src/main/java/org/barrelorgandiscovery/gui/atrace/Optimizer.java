@@ -1,18 +1,16 @@
 package org.barrelorgandiscovery.gui.atrace;
 
-import java.util.Map;
-
 import javax.swing.ImageIcon;
 
 import org.barrelorgandiscovery.gui.ICancelTracker;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 
 /**
- * Generic interface for punch optimization
+ * Generic interface for punch or lazer optimization
  * 
  * @author Freydiere Patrice
  */
-public interface Optimizer {
+public interface Optimizer<T extends OptimizedObject> {
 
 	
 	/**
@@ -42,7 +40,7 @@ public interface Optimizer {
 	 *            le carton à optimiser ..
 	 * @return
 	 */
-	public OptimizerResult optimize(VirtualBook carton) throws Exception;
+	public OptimizerResult<T> optimize(VirtualBook carton) throws Exception;
 
 	/**
 	 * run optimization on the virtual book and get feedbacks
@@ -53,7 +51,7 @@ public interface Optimizer {
 	 * @return the result
 	 * @throws Exception
 	 */
-	public OptimizerResult optimize(VirtualBook carton,
+	public OptimizerResult<T> optimize(VirtualBook carton,
 			OptimizerProgress progress, ICancelTracker ct) throws Exception;
 
 }

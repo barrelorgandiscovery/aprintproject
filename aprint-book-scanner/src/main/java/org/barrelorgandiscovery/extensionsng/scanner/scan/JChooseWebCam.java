@@ -203,6 +203,7 @@ public class JChooseWebCam extends JPanel implements Disposable {
 		return (WebCamConfig) combo.getSelectedItem();
 	}
 
+	// test method
 	public static void main(String[] args) throws Exception {
 		BasicConfigurator.configure(new LF5Appender());
 

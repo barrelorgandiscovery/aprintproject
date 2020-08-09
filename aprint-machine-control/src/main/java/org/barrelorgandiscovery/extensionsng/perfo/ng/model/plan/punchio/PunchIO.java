@@ -10,6 +10,7 @@ import java.io.InputStream;
 import org.apache.log4j.Logger;
 import org.apache.xmlbeans.XmlOptions;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.CommandVisitor;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.CutToCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.DisplacementCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.HomingCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchCommand;
@@ -17,6 +18,7 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchPlan;
 import org.barrelorgandiscovery.punch.x2016.Punch;
 import org.barrelorgandiscovery.punch.x2016.PunchDisplacement;
 import org.barrelorgandiscovery.punch.x2016.PunchplanDocument;
+import org.barrelorgandiscovery.punch.x2020.CutTo;
 import org.barrelorgandiscovery.tools.StreamsTools;
 import org.barrelorgandiscovery.tools.streamstorage.FolderStreamStorage;
 import org.barrelorgandiscovery.tools.streamstorage.ZipStreamMarshaller;
@@ -59,6 +61,14 @@ public class PunchIO {
             punch.setY(punchCommand.getY());
             punchplan.addNewPunchcommand().set(punch);
           }
+          
+          @Override
+        	public void visit(int index, CutToCommand cutToCommand) throws Exception {
+        		CutTo cutTo = CutTo.Factory.newInstance();
+        		cutTo.setX(cutToCommand.getX());
+        		cutTo.setY(cutToCommand.getY());
+        		cutTo.setPowerfactor(cutToCommand.getPowerFactor());
+        	}
         };
 
     v.visit(p);

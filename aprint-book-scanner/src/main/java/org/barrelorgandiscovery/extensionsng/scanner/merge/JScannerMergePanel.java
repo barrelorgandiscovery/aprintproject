@@ -35,12 +35,14 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensionsng.scanner.FamilyImageFolder;
 import org.barrelorgandiscovery.gui.CancelTracker;
 import org.barrelorgandiscovery.gui.ICancelTracker;
 import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
 import org.barrelorgandiscovery.math.MathVect;
+import org.barrelorgandiscovery.prefs.AbstractFileObjectPrefsStorage;
 import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JDisplay;
@@ -143,18 +145,14 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 		saveparameters.addActionListener((e) -> {
 			try {
 
-				File preferenceStorage = preferences.getFileProperty("mergescannerpreferences",
-						new File(System.getProperties().getProperty("user.home")));
-
-				APrintFileChooser fc = new APrintFileChooser(preferenceStorage);
+			
+				APrintFileChooser fc = new APrintFileChooser();
 				int result = fc.showSaveDialog(this);
 				if (result == APrintFileChooser.APPROVE_OPTION) {
 
-					File selectedFile = fc.getSelectedFile();
+					AbstractFileObject selectedFile = fc.getSelectedFile();
 					if (selectedFile != null) {
-						FilePrefsStorage filePrefsStorage = new FilePrefsStorage(selectedFile);
-						preferences.setFileProperty("mergescannerpreferences", selectedFile.getParentFile());
-						preferences.save();
+						IPrefsStorage filePrefsStorage = new AbstractFileObjectPrefsStorage(selectedFile);
 						saveModel(filePrefsStorage);
 					}
 				}
@@ -170,16 +168,14 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 		loadparameters.addActionListener((e) -> {
 			try {
 
-				File preferenceStorage = preferences.getFileProperty("mergescannerpreferences",
-						new File(System.getProperties().getProperty("user.home")));
-
-				APrintFileChooser fc = new APrintFileChooser(preferenceStorage);
+		
+				APrintFileChooser fc = new APrintFileChooser();
 				int result = fc.showOpenDialog(this);
 				if (result == JFileChooser.APPROVE_OPTION) {
 
-					File selectedFile = fc.getSelectedFile();
+					AbstractFileObject selectedFile = fc.getSelectedFile();
 					if (selectedFile != null) {
-						FilePrefsStorage filePrefsStorage = new FilePrefsStorage(selectedFile);
+						IPrefsStorage filePrefsStorage = new AbstractFileObjectPrefsStorage(selectedFile);
 						filePrefsStorage.load();
 						loadModel(filePrefsStorage);
 					}

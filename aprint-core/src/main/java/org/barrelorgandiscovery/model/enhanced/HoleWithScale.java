@@ -5,7 +5,7 @@ import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.virtualbook.Hole;
 
 /**
- * transport type for hole and associated scale
+ * transport type for hole and associated scale, this is usefull in the model editor
  * 
  * @author pfreydiere
  *

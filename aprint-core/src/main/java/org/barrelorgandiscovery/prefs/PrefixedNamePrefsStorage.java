@@ -9,10 +9,16 @@ import java.io.Serializable;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.tools.StringTools;
 
+/**
+ * this compose a perfs storage, with a specific prefix, given in the
+ * constructor this permit to merge multiple preferences into one storage
+ * 
+ * @author pfreydiere
+ *
+ */
 public class PrefixedNamePrefsStorage implements IPrefsStorage {
 
-	private static Logger logger = Logger
-			.getLogger(PrefixedNamePrefsStorage.class);
+	private static Logger logger = Logger.getLogger(PrefixedNamePrefsStorage.class);
 
 	private IPrefsStorage ps;
 	private String prefix;
@@ -34,15 +40,13 @@ public class PrefixedNamePrefsStorage implements IPrefsStorage {
 	 * @return
 	 */
 	private String constructKey(String propertyname) {
-		return StringTools.convertToPhysicalName(this.prefix, true) + "."
-				+ propertyname;
+		return StringTools.convertToPhysicalName(this.prefix, true) + "." + propertyname;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.barrelorgandiscovery.prefs.IPrefsStorage#getBooleanProperty(java.
+	 * @see org.barrelorgandiscovery.prefs.IPrefsStorage#getBooleanProperty(java.
 	 * lang.String, boolean)
 	 */
 	public boolean getBooleanProperty(String propertyname, boolean defaultvalue) {
@@ -53,8 +57,7 @@ public class PrefixedNamePrefsStorage implements IPrefsStorage {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.barrelorgandiscovery.prefs.IPrefsStorage#getDoubleProperty(java.lang
+	 * @see org.barrelorgandiscovery.prefs.IPrefsStorage#getDoubleProperty(java.lang
 	 * .String, double)
 	 */
 	public double getDoubleProperty(String propertyname, double defaultvalue) {
@@ -64,8 +67,7 @@ public class PrefixedNamePrefsStorage implements IPrefsStorage {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.barrelorgandiscovery.prefs.IPrefsStorage#getFileProperty(java.lang
+	 * @see org.barrelorgandiscovery.prefs.IPrefsStorage#getFileProperty(java.lang
 	 * .String, java.io.File)
 	 */
 	public File getFileProperty(String propertyname, File defaultvalue) {
@@ -75,8 +77,7 @@ public class PrefixedNamePrefsStorage implements IPrefsStorage {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.barrelorgandiscovery.prefs.IPrefsStorage#getIntegerProperty(java.
+	 * @see org.barrelorgandiscovery.prefs.IPrefsStorage#getIntegerProperty(java.
 	 * lang.String, int)
 	 */
 	public int getIntegerProperty(String propertyname, int defaultvalue) {
@@ -86,8 +87,7 @@ public class PrefixedNamePrefsStorage implements IPrefsStorage {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.barrelorgandiscovery.prefs.IPrefsStorage#getStringProperty(java.lang
+	 * @see org.barrelorgandiscovery.prefs.IPrefsStorage#getStringProperty(java.lang
 	 * .String, java.lang.String)
 	 */
 	public String getStringProperty(String propertyname, String defaultvalue) {
@@ -116,8 +116,7 @@ public class PrefixedNamePrefsStorage implements IPrefsStorage {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.barrelorgandiscovery.prefs.IPrefsStorage#setBooleanProperty(java.
+	 * @see org.barrelorgandiscovery.prefs.IPrefsStorage#setBooleanProperty(java.
 	 * lang.String, boolean)
 	 */
 	public void setBooleanProperty(String propertyname, boolean value) {
@@ -128,8 +127,7 @@ public class PrefixedNamePrefsStorage implements IPrefsStorage {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.barrelorgandiscovery.prefs.IPrefsStorage#setDoubleProperty(java.lang
+	 * @see org.barrelorgandiscovery.prefs.IPrefsStorage#setDoubleProperty(java.lang
 	 * .String, double)
 	 */
 	public void setDoubleProperty(String propertyname, double value) {
@@ -140,8 +138,7 @@ public class PrefixedNamePrefsStorage implements IPrefsStorage {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.barrelorgandiscovery.prefs.IPrefsStorage#setFileProperty(java.lang
+	 * @see org.barrelorgandiscovery.prefs.IPrefsStorage#setFileProperty(java.lang
 	 * .String, java.io.File)
 	 */
 	public void setFileProperty(String propertyname, File value) {
@@ -152,8 +149,7 @@ public class PrefixedNamePrefsStorage implements IPrefsStorage {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.barrelorgandiscovery.prefs.IPrefsStorage#setIntegerProperty(java.
+	 * @see org.barrelorgandiscovery.prefs.IPrefsStorage#setIntegerProperty(java.
 	 * lang.String, int)
 	 */
 	public void setIntegerProperty(String propertyname, int value) {
@@ -164,8 +160,7 @@ public class PrefixedNamePrefsStorage implements IPrefsStorage {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.barrelorgandiscovery.prefs.IPrefsStorage#setStringProperty(java.lang
+	 * @see org.barrelorgandiscovery.prefs.IPrefsStorage#setStringProperty(java.lang
 	 * .String, java.lang.String)
 	 */
 	public void setStringProperty(String propertyname, String value) {
@@ -176,8 +171,8 @@ public class PrefixedNamePrefsStorage implements IPrefsStorage {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * org.barrelorgandiscovery.prefs.IPrefsStorage#setDimension(java.lang.String
-	 * , java.awt.Dimension)
+	 * org.barrelorgandiscovery.prefs.IPrefsStorage#setDimension(java.lang.String ,
+	 * java.awt.Dimension)
 	 */
 	public void setDimension(String propertyname, Dimension dimension) {
 		ps.setDimension(constructKey(propertyname), dimension);
@@ -187,8 +182,7 @@ public class PrefixedNamePrefsStorage implements IPrefsStorage {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * org.barrelorgandiscovery.prefs.IPrefsStorage#getDimension(java.lang.String
-	 * )
+	 * org.barrelorgandiscovery.prefs.IPrefsStorage#getDimension(java.lang.String )
 	 */
 	public Dimension getDimension(String propertyName) {
 		return ps.getDimension(constructKey(propertyName));
@@ -197,8 +191,7 @@ public class PrefixedNamePrefsStorage implements IPrefsStorage {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.barrelorgandiscovery.prefs.IPrefsStorage#getPoint(java.lang.String)
+	 * @see org.barrelorgandiscovery.prefs.IPrefsStorage#getPoint(java.lang.String)
 	 */
 	public Point getPoint(String propertyName) {
 		return ps.getPoint(constructKey(propertyName));
@@ -207,13 +200,11 @@ public class PrefixedNamePrefsStorage implements IPrefsStorage {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.barrelorgandiscovery.prefs.IPrefsStorage#setPoint(java.lang.String,
+	 * @see org.barrelorgandiscovery.prefs.IPrefsStorage#setPoint(java.lang.String,
 	 * java.awt.Point)
 	 */
 	public void setPoint(String propertyName, Point point) {
 		ps.setPoint(constructKey(propertyName), point);
 	}
-	
-	
+
 }

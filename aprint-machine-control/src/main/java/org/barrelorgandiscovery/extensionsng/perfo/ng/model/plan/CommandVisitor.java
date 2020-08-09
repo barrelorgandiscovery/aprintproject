@@ -30,6 +30,8 @@ public abstract class CommandVisitor {
 
 	public abstract void visit(int index, DisplacementCommand displacementCommand)
 			throws Exception;
+	
+	public abstract void visit(int index, CutToCommand cutToCommand) throws Exception;
 
 	public abstract void visit(int index, HomingCommand command) throws Exception;
 

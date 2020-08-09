@@ -63,8 +63,7 @@ public class SerializeTools {
 	 * 
 	 * si l'objet passé en paramètre est null, null est retourné
 	 * 
-	 * @param object
-	 *            l'objet à cloner
+	 * @param object l'objet à cloner
 	 * @return la copie de l'objet
 	 */
 	public static <T extends Serializable> T deepClone(T object) {
@@ -73,7 +72,7 @@ public class SerializeTools {
 			return null;
 
 		assert object instanceof Serializable;
-		
+
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			ObjectOutputStream oos = new ObjectOutputStream(baos);
@@ -83,11 +82,10 @@ public class SerializeTools {
 				oos.close();
 			}
 
-			ByteArrayInputStream bais = new ByteArrayInputStream(
-					baos.toByteArray());
+			ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 			ObjectInputStream ois = new ObjectInputStream(bais);
 			try {
-				return (T)ois.readObject();
+				return (T) ois.readObject();
 			} finally {
 				ois.close();
 			}
@@ -106,11 +104,15 @@ public class SerializeTools {
 	public static void save(Object object, File file) throws IOException {
 		FileOutputStream fos = new FileOutputStream(file);
 		try {
-			ObjectOutputStream oos = new ObjectOutputStream(fos);
-			oos.writeObject(object);
+			save(object, fos);
 		} finally {
 			fos.close();
 		}
+	}
+
+	public static void save(Object object, OutputStream outStream) throws IOException {
+		ObjectOutputStream oos = new ObjectOutputStream(outStream);
+		oos.writeObject(object);
 	}
 
 	/**
@@ -120,15 +122,24 @@ public class SerializeTools {
 	 * @return
 	 * @throws Exception
 	 */
-	public static Object load(File file) throws IOException,
-			ClassNotFoundException {
+	public static Object load(File file) throws Exception {
 		FileInputStream fis = new FileInputStream(file);
 		try {
-			ObjectInputStream ois = new ObjectInputStream(fis);
-			return ois.readObject();
+			return load(fis);
 		} finally {
 			fis.close();
 		}
+	}
+
+	/**
+	 * load object from input stream
+	 * @param inputstream
+	 * @return
+	 * @throws Exception
+	 */
+	public static Object load(InputStream inputstream) throws Exception {
+		ObjectInputStream ois = new ObjectInputStream(inputstream);
+		return ois.readObject();
 	}
 
 	/**
@@ -139,8 +150,7 @@ public class SerializeTools {
 			return null;
 
 		Decoder dec = Base64.getDecoder();
-		ByteArrayInputStream bais = new ByteArrayInputStream(
-				dec.decode(base64Stream));
+		ByteArrayInputStream bais = new ByteArrayInputStream(dec.decode(base64Stream));
 		try {
 			return readObject(bais);
 		} finally {

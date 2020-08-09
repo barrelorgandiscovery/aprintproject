@@ -36,6 +36,13 @@ import org.barrelorgandiscovery.virtualbook.transformation.importer.Utils;
 
 import com.vividsolutions.jts.geom.Coordinate;
 
+/**
+ * this class export the book drawing to a device, this can be display device,
+ * or DXF, SVG, or GCODE
+ * 
+ * @author pfreydiere
+ *
+ */
 public class CADVirtualBookExporter {
 
 	private static Logger logger = Logger.getLogger(CADVirtualBookExporter.class);
@@ -89,7 +96,6 @@ public class CADVirtualBookExporter {
 		if (firstTimeStamp == Long.MAX_VALUE)
 			throw new Exception("no holes in the book, cannot compute");
 
-		
 		// calc the beginning offset of the book
 		double startBook = firstTimeStamp * xratio - p.getStartBookAdjustementFromBeginning()
 				- p.getNombreDePlisAAjouterAuDebut() * p.getTaillePagePourPliure();
@@ -100,7 +106,7 @@ public class CADVirtualBookExporter {
 		// round the end to a integer value of the page size
 		vbend = (Math.ceil((vbend - startBook) / p.getTaillePagePourPliure()) + 1) * p.getTaillePagePourPliure()
 				+ startBook;
-		
+
 		if (p.isExportDecoupeDesBords()) {
 
 			logger.debug("ecriture des bords");
@@ -226,6 +232,7 @@ public class CADVirtualBookExporter {
 	}
 
 	/**
+	 * test function
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {
@@ -263,7 +270,7 @@ public class CADVirtualBookExporter {
 		SVGDeviceDrawing svgDevice = new SVGDeviceDrawing(2000, 200);
 		e.export(vb, p, svgDevice);
 		svgDevice.write(new File("export_test_svg.svg"), new String[] {});
-		
+
 	}
 
 }

@@ -1,13 +1,14 @@
 package org.barrelorgandiscovery.extensionsng.perfo.cad.canvas;
 
-import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.barrelorgandiscovery.tools.StreamsTools;
 import org.jfree.graphics2d.svg.SVGGraphics2D;
 import org.jfree.graphics2d.svg.SVGUtils;
 
@@ -43,6 +44,7 @@ public class SVGDeviceDrawing extends DeviceDrawing {
 
 	/**
 	 * draw geometry
+	 * 
 	 * @param g the geometry
 	 */
 	private void draw(Geometry g) {
@@ -69,7 +71,9 @@ public class SVGDeviceDrawing extends DeviceDrawing {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.barrelorgandiscovery.extensionsng.perfo.cad.canvas.DeviceDrawing#addObject(com.vividsolutions.jts.geom.Geometry)
+	 * 
+	 * @see org.barrelorgandiscovery.extensionsng.perfo.cad.canvas.DeviceDrawing#
+	 * addObject(com.vividsolutions.jts.geom.Geometry)
 	 */
 	@Override
 	protected void addObject(Geometry g) {
@@ -78,10 +82,30 @@ public class SVGDeviceDrawing extends DeviceDrawing {
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.barrelorgandiscovery.extensionsng.perfo.cad.canvas.DeviceDrawing#write(java.io.File, java.lang.String[])
+	 * 
+	 * @see
+	 * org.barrelorgandiscovery.extensionsng.perfo.cad.canvas.DeviceDrawing#write(
+	 * java.io.File, java.lang.String[])
 	 */
 	public void write(File file, String[] layers) throws Exception {
 		SVGUtils.writeToSVG(file, device.getSVGElement());
+	}
+
+	@Override
+	public void write(OutputStream outStream, String[] layers) throws Exception {
+
+		File tmpFile = File.createTempFile("svgout", ".tmp");
+		try {
+			SVGUtils.writeToSVG(tmpFile, device.getSVGElement());
+			FileInputStream inputStreamTmpFile = new FileInputStream(tmpFile);
+			try {
+				StreamsTools.copyStream(inputStreamTmpFile, outStream);
+			} finally {
+				inputStreamTmpFile.close();
+			}
+		} finally {
+			tmpFile.delete();
+		}
 	}
 
 }

@@ -20,24 +20,28 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
 
+import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensions.ExtensionPoint;
 import org.barrelorgandiscovery.extensionsng.perfo.cad.canvas.DXFDeviceDrawing;
 import org.barrelorgandiscovery.extensionsng.perfo.cad.canvas.DeviceDrawing;
 import org.barrelorgandiscovery.extensionsng.perfo.cad.canvas.DeviceGraphicLayerDrawing;
+import org.barrelorgandiscovery.extensionsng.perfo.cad.canvas.SVGDeviceDrawing;
 import org.barrelorgandiscovery.gui.aedit.GraphicsLayer;
 import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
 import org.barrelorgandiscovery.gui.aprintng.extensionspoints.VirtualBookFrameToolRegister;
 import org.barrelorgandiscovery.gui.aprintng.helper.BaseVirtualBookExtension;
 import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
+import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
-import org.barrelorgandiscovery.tools.FileNameExtensionFilter;
+import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.StringTools;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
+import org.barrelorgandiscovery.ui.tools.VFSTools;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 import org.noos.xing.mydoggy.ToolWindow;
 import org.noos.xing.mydoggy.ToolWindowAnchor;
@@ -59,6 +63,7 @@ public class CADExporterExtensionVirtualBook extends BaseVirtualBookExtension
 	private static final String SAVECAD_COMMAND = "SAVECAD";
 	private static final String SAVESVG_COMMAND = "SAVESVG";
 	private static final String SAVEDXF_COMMAND = "SAVEDXF";
+
 	private static final String DXF_EXTENSION = "dxf";
 	private static final String SVG_EXTENSION = "svg";
 
@@ -106,27 +111,6 @@ public class CADExporterExtensionVirtualBook extends BaseVirtualBookExtension
 		initExtensionPoints.add(createExtensionPoint(VirtualBookFrameToolRegister.class));
 	}
 
-	private JToolBar createExportDXFToolBar() {
-
-		JToolBar tb = new JToolBar("Cad");
-
-		JButton savedxf = new JButton("Export DXF ...");
-		savedxf.setIcon(new ImageIcon(getClass().getResource("misc.png")));
-		savedxf.setToolTipText("Export book into a DXF file for lazer tracing");
-		savedxf.setActionCommand(SAVEDXF_COMMAND);
-		savedxf.addActionListener(this);
-		tb.add(savedxf);
-
-		JButton savesvg = new JButton("Export SVG ...");
-		savesvg.setIcon(new ImageIcon(getClass().getResource("misc.png")));
-		savesvg.setToolTipText("Export book into a SVG file for lazer tracing");
-		savesvg.setActionCommand(SAVESVG_COMMAND);
-		savesvg.addActionListener(this);
-		tb.add(savesvg);
-
-		return tb;
-	}
-
 	public void informCurrentVirtualBook(VirtualBook vb) {
 		this.currentVirtualBook = vb;
 		touchPreference();
@@ -134,7 +118,7 @@ public class CADExporterExtensionVirtualBook extends BaseVirtualBookExtension
 
 	@Override
 	public JToolBar[] addToolBars() {
-		return new JToolBar[] { createExportDXFToolBar() };
+		return new JToolBar[] { };
 	}
 
 	public void actionPerformed(ActionEvent e) {
@@ -142,12 +126,6 @@ public class CADExporterExtensionVirtualBook extends BaseVirtualBookExtension
 		String actionCommand = e.getActionCommand();
 
 		if (SAVECAD_COMMAND.equals(actionCommand)) {
-
-			saveCad();
-
-		} else if (SAVEDXF_COMMAND.equals(actionCommand) || SAVESVG_COMMAND.equals(actionCommand)) {
-
-			boolean isSVG = SAVESVG_COMMAND.equals(actionCommand);
 
 			((Frame) this.currentFrame).setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 			try {
@@ -158,59 +136,52 @@ public class CADExporterExtensionVirtualBook extends BaseVirtualBookExtension
 
 				try {
 
-					if (currentDXFDeviceDrawing == null) {
-						updateCurrentCADDrawing();
-					}
-
-					assert currentDXFDeviceDrawing != null;
-
 					APrintFileChooser choose = new APrintFileChooser();
 
 					choose.setFileSelectionMode(APrintFileChooser.FILES_ONLY);
-
-					if (isSVG) {
-						choose.setFileFilter(new FileNameExtensionFilter("Fichier SVG", "svg")); //$NON-NLS-1$ //$NON-NLS-2$
-					} else {
-						choose.setFileFilter(new FileNameExtensionFilter("Fichier DXF", "dxf")); //$NON-NLS-1$ //$NON-NLS-2$
-					}
+					VFSFileNameExtensionFilter svgFileFilter = new VFSFileNameExtensionFilter("Fichier SVG", "svg");
+					choose.setFileFilter(svgFileFilter); //$NON-NLS-1$ //$NON-NLS-2$
+					choose.setFileFilter(new VFSFileNameExtensionFilter("Fichier DXF", "dxf")); //$NON-NLS-1$ //$NON-NLS-2$
 
 					if (choose.showSaveDialog((Component) currentFrame) == APrintFileChooser.APPROVE_OPTION) {
 
-						File savedfile = choose.getSelectedFile();
+						AbstractFileObject savedfile = choose.getSelectedFile();
 						if (savedfile == null) {
 							JMessageBox.showMessage(currentFrame.getOwnerForDialog(), "pas de fichier sélectionné");
 							return;
 						}
 
-						if (isSVG) {
-							// check extension
-							if (!savedfile.getName().endsWith(SVG_EXTENSION_DOT)) {
-								savedfile = new File(savedfile.getParentFile(),
-										savedfile.getName() + SVG_EXTENSION_DOT);
-							}
+						DeviceDrawing current = null;
 
+						if (choose.getSelectedFileFilter() == svgFileFilter) {
+
+							savedfile = VFSTools.ensureExtensionIs(savedfile, SVG_EXTENSION);
+							Scale scale = currentVirtualBook.getScale();
+							double lengthinmm = scale.timeToMM(currentVirtualBook.getLength());
+
+							current = new SVGDeviceDrawing(lengthinmm, scale.getWidth());
 						} else {
-							if (!savedfile.getName().endsWith(DXF_EXTENSION_DOT)) {
-								savedfile = new File(savedfile.getParentFile(),
-										savedfile.getName() + DXF_EXTENSION_DOT);
-							}
-
+							
+							savedfile = VFSTools.ensureExtensionIs(savedfile, DXF_EXTENSION);
+							current = new DXFDeviceDrawing();
 						}
 
 						try {
-
-							currentDXFDeviceDrawing.write(savedfile, CADVirtualBookExporter.LAYERS);
-
+							java.io.OutputStream os = savedfile.getOutputStream();
+							try {
+								drawToDrawing(current);
+								current.write(os, CADVirtualBookExporter.LAYERS);
+							} finally {
+								os.close();
+							}
 							JMessageBox.showMessage(currentFrame.getOwnerForDialog(),
 									"File " + savedfile.getName() + " saved");
 
 						} catch (Throwable ex) {
 
-							JMessageBox.showMessage(currentFrame.getOwnerForDialog(), "Error saving file");
+							JMessageBox.showMessage(currentFrame.getOwnerForDialog(), "Error saving file " + savedfile);
 							logger.error("save", ex);
-
 							BugReporter.sendBugReport();
-
 						}
 					}
 
@@ -225,74 +196,6 @@ public class CADExporterExtensionVirtualBook extends BaseVirtualBookExtension
 			} finally {
 				((Frame) currentFrame).setCursor(Cursor.getDefaultCursor());
 			}
-		}
-	}
-
-	private void saveCad() {
-
-		((Frame) this.currentFrame).setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-		try { // for cursor
-			if (this.currentVirtualBook == null) {
-				JMessageBox.showMessage(this.currentFrame, "No Virtual book");
-				return;
-			}
-
-			try {
-
-				if (currentDXFDeviceDrawing == null) {
-					updateCurrentCADDrawing();
-				}
-
-				assert currentDXFDeviceDrawing != null;
-
-				APrintFileChooser choose = new APrintFileChooser();
-
-				choose.setFileSelectionMode(APrintFileChooser.FILES_ONLY);
-				
-				
-				choose.setFileFilter(new FileNameExtensionFilter("Fichier SVG", "svg")); //$NON-NLS-1$ //$NON-NLS-2$
-				choose.setFileFilter(new FileNameExtensionFilter("Fichier DXF", "dxf")); //$NON-NLS-1$ //$NON-NLS-2$
-
-				if (choose.showSaveDialog((Component) currentFrame) == APrintFileChooser.APPROVE_OPTION) {
-
-					File savedfile = choose.getSelectedFile();
-					if (savedfile == null) {
-						JMessageBox.showMessage(currentFrame.getOwnerForDialog(), "pas de fichier sélectionné");
-						return;
-					}
-					
-@@@
-					try {
-
-						// Fusion des trous chevauchés ....
-
-						currentDXFDeviceDrawing.write(savedfile, CADVirtualBookExporter.LAYERS);
-
-						// ExportDXF.export(mergedHoles, result, savedfile);
-
-						JMessageBox.showMessage(currentFrame.getOwnerForDialog(),
-								"File " + savedfile.getName() + " saved");
-
-					} catch (Throwable ex) {
-
-						JMessageBox.showMessage(currentFrame.getOwnerForDialog(), "Error saving file");
-						logger.error("save", ex);
-
-						BugReporter.sendBugReport();
-
-					}
-				}
-
-			} catch (Throwable ex) {
-
-				JMessageBox.showMessage(currentFrame.getOwnerForDialog(), "Error in saving file");
-				logger.error("save error:" + ex.getMessage(), ex);
-
-				BugReporter.sendBugReport();
-
-			}
-		} finally {
-			((Frame) currentFrame).setCursor(Cursor.getDefaultCursor());
 		}
 	}
 
@@ -376,8 +279,6 @@ public class CADExporterExtensionVirtualBook extends BaseVirtualBookExtension
 	// ////////////////////////////////////////////////////////////////////
 	// Methods on the Dxf Extension
 
-	private DeviceDrawing currentDXFDeviceDrawing;
-
 	private PropertySheetPanel propertySheetPanel;
 
 	private JButton visualiser;
@@ -452,28 +353,27 @@ public class CADExporterExtensionVirtualBook extends BaseVirtualBookExtension
 
 	}
 
+	private void drawToDrawing(DeviceDrawing deviceDrawing) throws Exception {
+		assert currentVirtualBook != null;
+
+		VirtualBook mergedHolesVirtualBook = currentVirtualBook.flattenVirtualBook();
+		CADVirtualBookExporter c = new CADVirtualBookExporter();
+		c.export(mergedHolesVirtualBook, dxfParameters, deviceDrawing);
+
+	}
+
 	public void updateCurrentCADDrawing() throws Exception {
 
 		logger.debug("update Current CAD Drawing");
 
-		assert currentVirtualBook != null;
-
-		VirtualBook mergedHolesVirtualBook = currentVirtualBook.flattenVirtualBook();
-
-		CADVirtualBookExporter c = new CADVirtualBookExporter();
 		graphicLayer.clear();
 		graphicLayer.setStroke(new BasicStroke(0.2f));
 		graphicLayer.setColor(Color.black);
 
 		// on exporte dans les deux (CAD + dessin)
 		DeviceGraphicLayerDrawing device = new DeviceGraphicLayerDrawing(graphicLayer,
-				mergedHolesVirtualBook.getScale().getWidth());
-		c.export(mergedHolesVirtualBook, dxfParameters, device);
-
-		DXFDeviceDrawing dxfDeviceDrawing = new DXFDeviceDrawing();
-		c.export(mergedHolesVirtualBook, dxfParameters, dxfDeviceDrawing);
-
-		currentDXFDeviceDrawing = dxfDeviceDrawing;
+				currentVirtualBook.getScale().getWidth());
+		drawToDrawing(device);
 
 		// ensure the layer is visible,
 		graphicLayer.setVisible(true);

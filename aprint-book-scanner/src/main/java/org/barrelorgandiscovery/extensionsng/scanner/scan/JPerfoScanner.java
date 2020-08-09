@@ -25,8 +25,8 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.lf5.LF5Appender;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControl;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLMachine;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLMachineParameters;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLPunchMachine;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLPunchMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.DisplacementCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.HomingCommand;
 import org.barrelorgandiscovery.extensionsng.scanner.PerfoScanFolder;
@@ -231,8 +231,8 @@ public class JPerfoScanner extends JPanel implements Disposable {
           BasicConfigurator.configure(new LF5Appender());
         });
 
-    GRBLMachine machine = new GRBLMachine();
-    GRBLMachineParameters params = new GRBLMachineParameters();
+    GRBLPunchMachine machine = new GRBLPunchMachine();
+    GRBLPunchMachineParameters params = new GRBLPunchMachineParameters();
     System.out.println("Available Port List :" + Arrays.asList(SerialPortList.getPortNames()));//$NON-NLS-1$
     params.setComPort("COM5");//$NON-NLS-1$
     MachineControl open = machine.open(params);

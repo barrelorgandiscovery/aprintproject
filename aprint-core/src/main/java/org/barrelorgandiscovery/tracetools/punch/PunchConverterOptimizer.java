@@ -20,7 +20,7 @@ import org.barrelorgandiscovery.virtualbook.VirtualBook;
  * @author pfreydiere
  * 
  */
-public class PunchConverterOptimizer implements Optimizer {
+public class PunchConverterOptimizer implements Optimizer<Punch> {
 
 	private PunchConverterOptimizerParameters parameters = new PunchConverterOptimizerParameters();
 
@@ -53,7 +53,7 @@ public class PunchConverterOptimizer implements Optimizer {
 	}
 
 	@Override
-	public OptimizerResult optimize(VirtualBook carton,
+	public OptimizerResult<Punch> optimize(VirtualBook carton,
 			OptimizerProgress progress, ICancelTracker ct) throws Exception {
 		
 		assert carton != null;
@@ -62,7 +62,7 @@ public class PunchConverterOptimizer implements Optimizer {
 				parameters.getPunchWidth(), parameters.getOverlap(),
 				parameters.getNotPunchedIfLessThan());
 
-		OptimizerResult convert = pc.convert(carton.getOrderedHolesCopy());
+		OptimizerResult<Punch> convert = pc.convert(carton.getOrderedHolesCopy());
 
 		// order the punches by x
 		Arrays.sort(convert.result, new Comparator<Punch>() {
@@ -76,7 +76,7 @@ public class PunchConverterOptimizer implements Optimizer {
 	}
 
 	@Override
-	public OptimizerResult optimize(VirtualBook carton) throws Exception {
+	public OptimizerResult<Punch> optimize(VirtualBook carton) throws Exception {
 		return optimize(carton, null, null);
 	}
 

@@ -19,6 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.CommandVisitor;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.CutToCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.DisplacementCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.HomingCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchCommand;
@@ -279,6 +280,13 @@ public class PunchCommandLayer implements VirtualBookComponentLayer,
 					index.add(punchCommand);
 					indexToInteger.put( punchCommand, i.getAndAdd(1));
 				}
+				
+				@Override
+				public void visit(int idx, CutToCommand cutToCommand) throws Exception {
+					index.add(cutToCommand);
+					indexToInteger.put( cutToCommand, i.getAndAdd(1));
+				}
+				
 				
 				@Override
 				public void visit(int idx,HomingCommand command) throws Exception {

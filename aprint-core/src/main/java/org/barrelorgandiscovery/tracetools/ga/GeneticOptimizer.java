@@ -3,7 +3,6 @@ package org.barrelorgandiscovery.tracetools.ga;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -19,14 +18,12 @@ import org.barrelorgandiscovery.gui.atrace.OptimizerProgress;
 import org.barrelorgandiscovery.gui.atrace.OptimizerResult;
 import org.barrelorgandiscovery.gui.atrace.Punch;
 import org.barrelorgandiscovery.gui.atrace.PunchConverter;
-import org.barrelorgandiscovery.gui.atrace.PunchConverter.PunchConverterResult;
 import org.barrelorgandiscovery.gui.atrace.Tools;
 import org.barrelorgandiscovery.issues.IssueCollection;
 import org.barrelorgandiscovery.messages.Messages;
-import org.barrelorgandiscovery.virtualbook.Hole;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 
-public class GeneticOptimizer implements Optimizer {
+public class GeneticOptimizer implements Optimizer<Punch> {
 
 	private static final Logger logger = Logger
 			.getLogger(GeneticOptimizer.class);
@@ -70,7 +67,7 @@ public class GeneticOptimizer implements Optimizer {
 	 * @return
 	 * @throws Exception
 	 */
-	public OptimizerResult optimize(VirtualBook carton,
+	public OptimizerResult<Punch> optimize(VirtualBook carton,
 			final OptimizerProgress progress, final ICancelTracker ct)
 			throws Exception {
 
@@ -93,26 +90,19 @@ public class GeneticOptimizer implements Optimizer {
 		final PunchConverter pc = new PunchConverter(carton.getScale(),
 				poinconsize, recouvrement, notPunchedIfLessThan);
 		
-		OptimizerResult converterResult = pc.convert(carton.getOrderedHolesCopy());
+		OptimizerResult<Punch> converterResult = pc.convert(carton.getOrderedHolesCopy());
 		
 		Punch[] allPunches = converterResult.result;
 		assert allPunches !=null;
 
-		
-		
 		// sort by x
-		
 		Arrays.sort(allPunches, new Comparator<Punch>() {
-			
 			@Override
 			public int compare(Punch o1, Punch o2) {
-				
 				int c = Double.compare(o1.x, o2.x);
 				if (c != 0)
 					return c;
-				
 				return Double.compare(o1.y,o2.y);
-				
 			}
 		});
 		
@@ -211,8 +201,7 @@ public class GeneticOptimizer implements Optimizer {
 
 			};
 
-			Future<Void> f = e.submit(c);
-
+			e.submit(c);
 		}
 
 		e.shutdown();
@@ -224,7 +213,7 @@ public class GeneticOptimizer implements Optimizer {
 		
 		// collect results
 
-		OptimizerResult result = new OptimizerResult();
+		OptimizerResult<Punch> result = new OptimizerResult<Punch>();
 
 		IssueCollection errorResult = new IssueCollection();
 

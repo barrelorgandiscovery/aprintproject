@@ -31,6 +31,12 @@ public abstract class AbstractMachine {
 	 * @return
 	 */
 	public abstract String getDescription();
+	
+	/**
+	 * get the available optimizer classes
+	 * @return
+	 */
+	public abstract List<Class> getAvailableOptimizerClasses();
 
 
 	/**

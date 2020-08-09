@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchPlan;
 import org.barrelorgandiscovery.gui.atrace.OptimizerResult;
+import org.barrelorgandiscovery.gui.atrace.Punch;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.tracetools.punch.PunchConverterOptimizer;
 import org.barrelorgandiscovery.virtualbook.Hole;
@@ -23,7 +24,7 @@ public class TestPunchIO {
 	  s.addHole(new Hole(1, 1_000, 1_000_000));
 	  
 	  PunchConverterOptimizer p = new PunchConverterOptimizer();
-	  OptimizerResult r = p.optimize(s);
+	  OptimizerResult<Punch> r = p.optimize(s);
 	  
 	  PunchPlan pp = PunchPlan.createDefaultPunchPlan(r.result);
 	  

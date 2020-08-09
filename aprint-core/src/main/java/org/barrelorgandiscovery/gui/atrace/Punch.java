@@ -7,7 +7,7 @@ import org.barrelorgandiscovery.tools.HashCodeUtils;
  * 
  * @author Freydiere Patrice
  */
-public class Punch {
+public class Punch extends OptimizedObject {
 
 	public double x;
 	public double y;
@@ -38,7 +38,32 @@ public class Punch {
 
 	@Override
 	public String toString() {
-		return "[" + x + ";" + y +"]";
+		return "[" + x + ";" + y + "]";
 	}
-	
+
+	@Override
+	public Extent getExtent() {
+		return new Extent(x, y, x, y);
+	}
+
+	@Override
+	public double firstX() {
+		return x;
+	}
+
+	@Override
+	public double firstY() {
+		return y;
+	}
+
+	@Override
+	public double lastX() {
+		return x;
+	}
+
+	@Override
+	public double lastY() {
+		return y;
+	}
+
 }

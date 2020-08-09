@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.gui.ICancelTracker;
-import org.barrelorgandiscovery.issues.IssueCollection;
 import org.barrelorgandiscovery.issues.IssueHole;
 import org.barrelorgandiscovery.issues.IssuesConstants;
 import org.barrelorgandiscovery.scale.Scale;
@@ -40,15 +39,6 @@ public class PunchConverter {
 	private double recouvrement;
 	
 	
-	
-	public static class PunchConverterResult {
-
-		public Punch[] result;
-
-		public IssueCollection holeerrors = new IssueCollection();
-
-	}
-
 	
 	public PunchConverter(Scale gamme, double largeurpoincon) {
 		this.gamme = gamme;
@@ -92,9 +82,9 @@ public class PunchConverter {
 	 *            la largeur du poinçon
 	 * @return
 	 */
-	public OptimizerResult convert(List<Hole> notes) {
+	public OptimizerResult<Punch> convert(List<Hole> notes) {
 
-		OptimizerResult result = new OptimizerResult();
+		OptimizerResult<Punch> result = new OptimizerResult<>();
 
 		ArrayList<Punch> p = new ArrayList<Punch>();
 

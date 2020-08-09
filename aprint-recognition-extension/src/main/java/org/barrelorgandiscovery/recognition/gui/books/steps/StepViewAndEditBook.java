@@ -9,6 +9,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.Serializable;
+import java.net.URL;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;

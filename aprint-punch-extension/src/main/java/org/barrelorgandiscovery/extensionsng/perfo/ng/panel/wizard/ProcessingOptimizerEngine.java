@@ -10,6 +10,7 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.process.PunchProcessingThr
 import org.barrelorgandiscovery.gui.CancelTracker;
 import org.barrelorgandiscovery.gui.ICancelTracker;
 import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
+import org.barrelorgandiscovery.gui.atrace.OptimizedObject;
 import org.barrelorgandiscovery.gui.atrace.Optimizer;
 import org.barrelorgandiscovery.gui.atrace.OptimizerProgress;
 import org.barrelorgandiscovery.gui.atrace.OptimizerResult;
@@ -56,7 +57,8 @@ public class ProcessingOptimizerEngine implements Disposable {
 					@Override
 					public void result(OptimizerResult result) {
 
-						punchLayer.setPunch(result.result);
+						// transactional on the list itself
+						punchLayer.setOptimizedObject(result.result);
 						if (processingOptimizerEngineProgress != null)
 							processingOptimizerEngineProgress
 									.processEnded(result);
@@ -125,7 +127,7 @@ public class ProcessingOptimizerEngine implements Disposable {
 
 						@Override
 						public void report(double progressIndicator,
-								Punch[] orderedPunches, String message) {
+								OptimizedObject[] orderedPunches, String message) {
 							try {
 
 								if (processingOptimizerEngineProgress != null) {

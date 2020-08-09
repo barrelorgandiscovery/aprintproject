@@ -179,7 +179,7 @@ public class StepChooseOrientationAndBeginning extends BasePanelStep implements
 		assert previousStateImplementing != null;
 
 		BufferedImage bi = ImageTools.loadImage(previousStateImplementing
-				.getImageFile().toURL());
+				.getImageFile());
 		imageDisplayLayer.setImageToDisplay(bi);
 
 		PointsAndEllipseParameters centerEllipse = states

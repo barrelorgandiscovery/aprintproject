@@ -12,7 +12,7 @@ import org.barrelorgandiscovery.prefs.IPrefsStorage;
  * @author pfreydiere
  * 
  */
-public class GRBLMachineParameters extends AbstractMachineParameters {
+public class GRBLPunchMachineParameters extends AbstractMachineParameters {
 
 	private static final String COM_PORT_STORAGEPROPERTY_SAVE = "comPort";
 	/**
@@ -28,15 +28,13 @@ public class GRBLMachineParameters extends AbstractMachineParameters {
 		this.comPort = comPort;
 	}
 
-	
-
 	/*
 	 * (non-Javadoc)
 	 * @see org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachineParameters#getLabelName()
 	 */
 	@Override
 	public String getLabelName() {
-		return "Machine GRBL";
+		return "Punch Machine GRBL";
 	}
 
 	@Override

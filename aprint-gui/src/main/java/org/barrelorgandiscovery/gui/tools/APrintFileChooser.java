@@ -141,6 +141,14 @@ public class APrintFileChooser {
 		fileChooser.setFileFilter(fileFilter);
 	}
 
+	public void addFileFilter(VFSFileNameExtensionFilter fileFilter) {
+		fileChooser.addChoosableFileFilter(fileFilter);
+	}
+
+	public VFSFileNameExtensionFilter getSelectedFileFilter() {
+		return (VFSFileNameExtensionFilter) fileChooser.getFileFilter();
+	}
+
 	public void setDialogTitle(String title) {
 		fileChooser.setDialogTitle(title);
 	}

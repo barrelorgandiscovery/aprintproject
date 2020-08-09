@@ -3,6 +3,7 @@ package org.barrelorgandiscovery.extensionsng.perfo.cad.canvas;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.io.File;
+import java.io.OutputStream;
 
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.gui.aedit.GraphicsLayer;
@@ -58,5 +59,10 @@ public class DeviceGraphicLayerDrawing extends DeviceDrawing {
 	@Override
 	public void write(File file, String[] layers) throws Exception {
 		throw new Exception("not supported for this type of drawing device");
+	}
+	
+	@Override
+	public void write(OutputStream outStream, String[] layers) throws Exception {
+		throw new Exception("not supported for this type of drawing device");	
 	}
 }

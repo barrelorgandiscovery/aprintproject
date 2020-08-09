@@ -26,11 +26,14 @@ public class VFSTools {
 
 		FileName filename = f.getName();
 		if (filename.getBaseName().toLowerCase().endsWith("." + extension.toLowerCase())) {
+			// ok for the extension
 			return f;
 		}
-
-		return (AbstractFileObject) f.getFileSystem().resolveFile(filename.toString() + "." + extension);
-
+		try {
+			return (AbstractFileObject) f.getFileSystem().resolveFile(filename.toString() + "." + extension);
+		} finally {
+			f.close();
+		}
 	}
 
 }

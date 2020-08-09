@@ -5,7 +5,7 @@ import org.barrelorgandiscovery.playsubsystem.PlaySubSystem;
 /**
  * Class for the registry of playsubsystems
  * permit to extend play subsystems
- * @author use
+ * @author pfreydiere
  *
  */
 public class PlaySubSystemDef {

@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.barrelorgandiscovery.gui.atrace.Punch;
 import org.barrelorgandiscovery.gui.atrace.PunchConverter;
-import org.barrelorgandiscovery.gui.atrace.PunchConverter.PunchConverterResult;
+import org.barrelorgandiscovery.gui.atrace.ConverterResult;
 import org.barrelorgandiscovery.virtualbook.Hole;
 
 
@@ -103,7 +103,7 @@ public class TracePage {
 
 	public Punch[] optimize() {
 
-		PunchConverterResult res = converter.convert(refnotes);
+		ConverterResult<Punch> res = converter.convert(refnotes);
 
 		return reorder(res.result);
 

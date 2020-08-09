@@ -19,7 +19,7 @@ import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachine;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.GUIMachineParametersRepository;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLMachineParameters;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLPunchMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.mock.MockMachineParameters;
 import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
@@ -41,7 +41,7 @@ public class JMachineWithParametersChooser extends JPanel {
 	private IPrefsStorage preferences;
 
 	// by default
-	private AbstractMachineParameters selectedMachineParameters = new GRBLMachineParameters();
+	private AbstractMachineParameters selectedMachineParameters = new GRBLPunchMachineParameters();
 
 	public JMachineWithParametersChooser(IPrefsStorage ps) throws Exception {
 		this.preferences = ps;
@@ -78,7 +78,7 @@ public class JMachineWithParametersChooser extends JPanel {
 		FormPanel fp = new FormPanel(is);
 		add(fp, BorderLayout.CENTER);
 
-		GRBLMachineParameters gp = new GRBLMachineParameters();
+		GRBLPunchMachineParameters gp = new GRBLPunchMachineParameters();
 		try {
 			PrefixedNamePrefsStorage pps = constructMachinePreferenceStorage(gp);
 			gp.loadParameters(pps);

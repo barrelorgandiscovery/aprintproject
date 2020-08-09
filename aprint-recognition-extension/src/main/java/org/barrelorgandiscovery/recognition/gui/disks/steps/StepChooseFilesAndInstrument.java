@@ -9,11 +9,13 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.net.URL;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 
+import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.gui.aprint.instrumentchoice.IInstrumentChoiceListener;
 import org.barrelorgandiscovery.gui.aprint.instrumentchoice.JCoverFlowInstrumentChoiceWithFilter;
@@ -32,12 +34,19 @@ import org.barrelorgandiscovery.recognition.messages.Messages;
 import org.barrelorgandiscovery.repository.Repository2;
 import org.barrelorgandiscovery.tools.ImageTools;
 import org.barrelorgandiscovery.tools.JMessageBox;
+import org.barrelorgandiscovery.ui.tools.VFSTools;
 
 import com.jeta.forms.components.panel.FormPanel;
 import com.jeta.forms.gui.form.FormAccessor;
 
 public class StepChooseFilesAndInstrument extends BasePanelStep {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5849877785127366190L;
+	
+	
 	private static final String CURRENT_DIRECTORY_PREF = "currentDirectory"; //$NON-NLS-1$
 	private static final String LASTBOOKIMAGE_FILE_PREF = "lastBookImageOpened"; //$NON-NLS-1$
 
@@ -126,14 +135,9 @@ public class StepChooseFilesAndInstrument extends BasePanelStep {
 					}
 					int ret = fc.showOpenDialog(StepChooseFilesAndInstrument.this);
 					if (ret == APrintFileChooser.APPROVE_OPTION) {
-						File selectedFile = fc.getSelectedFile();
-						if (selectedFile != null) {
-							prefStorage.setFileProperty(CURRENT_DIRECTORY_PREF, selectedFile.getParentFile());
-							prefStorage.setFileProperty(LASTBOOKIMAGE_FILE_PREF, selectedFile);
-
-							prefStorage.save();
-						}
-						internalChangeImageFile(selectedFile);
+						AbstractFileObject selectedFile = fc.getSelectedFile();
+						File f = VFSTools.convertToFile(selectedFile);
+						internalChangeImageFile(f);
 					}
 				} catch (Exception ex) {
 					logger.error("error in reading the file :" + ex.getMessage(), ex); //$NON-NLS-1$
@@ -247,9 +251,9 @@ public class StepChooseFilesAndInstrument extends BasePanelStep {
 	private void internalChangeImageFile(File selectedFile) throws Exception, MalformedURLException {
 		// load the file
 		BufferedImage bi = null;
-		if (selectedFile != null && selectedFile.exists()) {
+		if (selectedFile != null) {
 			try {
-				bi = ImageTools.loadImage(selectedFile.toURL());
+				bi = ImageTools.loadImage(selectedFile);
 			} catch (Exception ex) {
 				logger.error("error while loading the image :" + ex.getMessage(), ex); //$NON-NLS-1$
 			}

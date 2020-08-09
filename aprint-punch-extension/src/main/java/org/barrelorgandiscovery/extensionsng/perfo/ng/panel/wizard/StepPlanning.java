@@ -33,6 +33,7 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.StatisticVisito
 import org.barrelorgandiscovery.extensionsng.perfo.ng.optimizers.OptimizersRepository;
 import org.barrelorgandiscovery.gui.aedit.JEditableVirtualBookComponent;
 import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
+import org.barrelorgandiscovery.gui.atrace.OptimizedObject;
 import org.barrelorgandiscovery.gui.atrace.Optimizer;
 import org.barrelorgandiscovery.gui.atrace.OptimizerResult;
 import org.barrelorgandiscovery.gui.atrace.Punch;
@@ -144,12 +145,14 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 								logTextInformation(Messages
 										.getString("StepPlanning.1")); //$NON-NLS-1$
 
-								Punch[] punches = result.result;
+								OptimizedObject[] punches = result.result;
 
+								// this is used to test for punch enlargment, if necessary
 								PunchPlan pp = PunchPlan
 										.createDefaultPunchPlan(punches);
 
 								definePunchPlanning(pp);
+								
 								logTextInformation(Messages
 										.getString("StepPlanning.2")); //$NON-NLS-1$
 
@@ -159,8 +162,9 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 								issuePresenter.loadIssues(result.holeerrors);
 								PunchLayer punchLayer = processingEngine.getPunchLayer(); 
-								punchLayer.setPunch(
+								punchLayer.setOptimizedObject(
 										result.result);
+								
 								final VirtualBook currentvb = processingEngine
 											.getVirtualBook();
 								processingEngine.getIssueLayer()
@@ -225,7 +229,6 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 		});
 
 		initComponents();
-
 	}
 
 	protected void initComponents() throws Exception {
@@ -356,45 +359,22 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 	 */
 	private class JOptimizerRadioButton extends JRadioButton {
 
-		private Class optimizerClass = null;;
-
-		public JOptimizerRadioButton() {
-			super();
-		}
-
-		public JOptimizerRadioButton(Action a) {
-			super(a);
-		}
-
-		public JOptimizerRadioButton(Icon icon, boolean selected) {
-			super(icon, selected);
-		}
-
-		public JOptimizerRadioButton(Icon icon) {
-			super(icon);
-		}
-
-		public JOptimizerRadioButton(String text, boolean selected) {
-			super(text, selected);
-		}
-
-		public JOptimizerRadioButton(String text, Icon icon, boolean selected) {
-			super(text, icon, selected);
-		}
-
-		public JOptimizerRadioButton(String text, Icon icon) {
-			super(text, icon);
-		}
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1775818254230613406L;
+		
+		private Class<?> optimizerClass = null;;
 
 		public JOptimizerRadioButton(String text) {
 			super(text);
 		}
 
-		public void setOptimizerClass(Class optimizerClass) {
+		public void setOptimizerClass(Class<?> optimizerClass) {
 			this.optimizerClass = optimizerClass;
 		}
 
-		public Class getOptimizerClass() {
+		public Class<?> getOptimizerClass() {
 			return optimizerClass;
 		}
 

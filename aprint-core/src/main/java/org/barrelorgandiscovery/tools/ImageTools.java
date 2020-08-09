@@ -205,6 +205,10 @@ public class ImageTools {
 		Image image = kit.createImage(url);
 		return loadImage(image);
 	}
+	
+	public static BufferedImage loadImage(File file) throws Exception {
+		return loadImage(file.toURL());
+	}
 
 	public static BufferedImage loadImage(Image image) throws Exception {
 
