@@ -8,17 +8,17 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.AsyncJobsManager;
 import org.barrelorgandiscovery.JobEvent;
+import org.barrelorgandiscovery.extensionsng.perfo.gui.PunchLayer;
 import org.barrelorgandiscovery.gui.CancelTracker;
 import org.barrelorgandiscovery.gui.ICancelTracker;
 import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
-import org.barrelorgandiscovery.gui.atrace.OptimizedObject;
-import org.barrelorgandiscovery.gui.atrace.Optimizer;
-import org.barrelorgandiscovery.gui.atrace.OptimizerProgress;
-import org.barrelorgandiscovery.gui.atrace.OptimizerResult;
-import org.barrelorgandiscovery.gui.atrace.ConverterResult;
-import org.barrelorgandiscovery.gui.atrace.PunchLayer;
 import org.barrelorgandiscovery.gui.issues.JIssuePresenter;
 import org.barrelorgandiscovery.gui.script.groovy.ASyncConsoleOutput;
+import org.barrelorgandiscovery.optimizers.ConverterResult;
+import org.barrelorgandiscovery.optimizers.Optimizer;
+import org.barrelorgandiscovery.optimizers.OptimizerProgress;
+import org.barrelorgandiscovery.optimizers.OptimizerResult;
+import org.barrelorgandiscovery.optimizers.model.OptimizedObject;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 
 /**
@@ -117,7 +117,7 @@ public class PunchProcessingThread {
 							OptimizerResult<OptimizedObject> r = new OptimizerResult<OptimizedObject>();
 							r.result = orderedPunches;
 
-							signalNewResult(r);
+							signalNewResult(r, vb);
 
 							if (optimProgress != null)
 								optimProgress.report(progressIndicator,
@@ -134,7 +134,7 @@ public class PunchProcessingThread {
 				if (ct.isCanceled()) // don't send result if cancelled
 					return null;
 				
-				signalNewResult(oresult); // for display
+				signalNewResult(oresult, vb); // for display
 
 				if (punchProcessingResultCallBack != null) {
 					punchProcessingResultCallBack.result(oresult);
@@ -208,7 +208,7 @@ public class PunchProcessingThread {
 	 * @param result
 	 * @throws Exception
 	 */
-	private void signalNewResult(final ConverterResult<OptimizedObject> result)
+	private void signalNewResult(final ConverterResult<OptimizedObject> result, VirtualBook virtualbook)
 			throws Exception {
 
 		SwingUtilities.invokeAndWait(new Runnable() {

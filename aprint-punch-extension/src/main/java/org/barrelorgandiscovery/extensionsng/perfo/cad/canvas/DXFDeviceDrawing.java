@@ -4,8 +4,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
 
+import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.tools.StreamsTools;
 
 import com.vividsolutions.jts.geom.Geometry;
@@ -20,14 +20,20 @@ import fr.michaelm.jump.drivers.dxf.DxfFile;
 
 public class DXFDeviceDrawing extends DeviceDrawing {
 
+	private static Logger logger = Logger.getLogger(DXFDeviceDrawing.class);
+
+	private static final String LAYER_ATTRIBUTE_NAME = "LAYER";
+
+	private static final String SHAPE_ATTRIBUTE_NAME = "SHAPE";
+
 	private FeatureSchema fs;
 
 	private FeatureCollection fc;
 
 	public DXFDeviceDrawing() {
 		fs = new FeatureSchema();
-		fs.addAttribute("SHAPE", AttributeType.GEOMETRY);
-		fs.addAttribute("LAYER", AttributeType.STRING);
+		fs.addAttribute(SHAPE_ATTRIBUTE_NAME, AttributeType.GEOMETRY);
+		fs.addAttribute(LAYER_ATTRIBUTE_NAME, AttributeType.STRING);
 
 		fc = new FeatureDataset(fs);
 	}
@@ -35,7 +41,7 @@ public class DXFDeviceDrawing extends DeviceDrawing {
 	private Feature toFeature(Geometry g, String layerName) {
 		Feature feature = FeatureUtil.toFeature(g, fs);
 		if (layerName != null) {
-			feature.setAttribute("LAYER", layerName);
+			feature.setAttribute(LAYER_ATTRIBUTE_NAME, layerName);
 		}
 		return feature;
 	}
@@ -61,7 +67,9 @@ public class DXFDeviceDrawing extends DeviceDrawing {
 	@Override
 	public void write(OutputStream outStream, String[] layers) throws Exception {
 		assert outStream != null;
+
 		File tmpFile = File.createTempFile("dxftmp", ".tmp");
+		logger.debug("start writing temp file " + tmpFile);
 		try {
 			FileWriter fw = new FileWriter(tmpFile);
 			try {
@@ -82,4 +90,9 @@ public class DXFDeviceDrawing extends DeviceDrawing {
 
 	}
 
+	@Override
+	public boolean ignoreReference() {
+		return false;
+	}
+	
 }

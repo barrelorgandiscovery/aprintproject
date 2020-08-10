@@ -1,18 +1,8 @@
 package org.barrelorgandiscovery.model.xml;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-
 import org.apache.log4j.Logger;
-import org.barrelorgandiscovery.model.ModelValuedParameter;
 import org.barrelorgandiscovery.model.ObjectMethodStep;
-import org.barrelorgandiscovery.model.steps.book.VirtualBookMultiplexer;
-import org.barrelorgandiscovery.scale.Scale;
-import org.barrelorgandiscovery.scale.io.ScaleIO;
 import org.w3c.dom.Element;
-
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
 
 /**
  * Step ObjectMethodStep serializer / deserializer

@@ -5,12 +5,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Base64;
+import java.util.Base64.Decoder;
+import java.util.Base64.Encoder;
 
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
-
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
 
 public abstract class BaseSerDeserHelper<T> implements SerDeserHelper<T> {
 
@@ -84,8 +84,8 @@ public abstract class BaseSerDeserHelper<T> implements SerDeserHelper<T> {
       oos.writeObject(value);
       oos.close();
 
-      BASE64Encoder encoder = new BASE64Encoder();
-      r = encoder.encode(baos.toByteArray());
+      Encoder encoder = Base64.getEncoder();
+      r = new String(encoder.encode(baos.toByteArray()));
     }
     addElementValue(e, name, r);
   }
@@ -97,8 +97,8 @@ public abstract class BaseSerDeserHelper<T> implements SerDeserHelper<T> {
       return null;
     }
     // otherwise, decode the content
-    BASE64Decoder dec = new BASE64Decoder();
-    byte[] b = dec.decodeBuffer(sv);
+    Decoder decoder = Base64.getDecoder();
+    byte[] b = decoder.decode(sv);
 
     return (Serializable) new ObjectInputStream(new ByteArrayInputStream(b)).readObject();
   }

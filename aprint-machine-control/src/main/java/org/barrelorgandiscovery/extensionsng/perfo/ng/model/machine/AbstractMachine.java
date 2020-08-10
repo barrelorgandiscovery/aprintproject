@@ -1,19 +1,13 @@
 package org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchPlan;
-
 /**
- * abstract machine command, interpreting the punchplan
+ * abstract machine command, interpreting the punch plan
  * 
  * @author pfreydiere
  * 
  */
 public abstract class AbstractMachine {
 
-	
 	public AbstractMachine() {
 
 	}
@@ -31,20 +25,14 @@ public abstract class AbstractMachine {
 	 * @return
 	 */
 	public abstract String getDescription();
-	
-	/**
-	 * get the available optimizer classes
-	 * @return
-	 */
-	public abstract List<Class> getAvailableOptimizerClasses();
-
 
 	/**
-	 * open the machine control, 
-	 * this raise exception if the machine is not ready or connected
+	 * open the machine control, this raise exception if the machine is not ready or
+	 * connected
 	 * 
 	 * @param punchPlan
 	 */
 	public abstract MachineControl open(AbstractMachineParameters parameters) throws Exception;
 
+	
 }

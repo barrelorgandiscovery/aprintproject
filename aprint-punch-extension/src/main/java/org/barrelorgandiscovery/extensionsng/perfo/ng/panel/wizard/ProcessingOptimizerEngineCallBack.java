@@ -1,6 +1,6 @@
 package org.barrelorgandiscovery.extensionsng.perfo.ng.panel.wizard;
 
-import org.barrelorgandiscovery.gui.atrace.OptimizerResult;
+import org.barrelorgandiscovery.optimizers.OptimizerResult;
 
 /**
  * call back for optimizer engine

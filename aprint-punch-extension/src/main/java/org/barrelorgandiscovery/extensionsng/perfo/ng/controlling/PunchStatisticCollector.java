@@ -1,6 +1,5 @@
 package org.barrelorgandiscovery.extensionsng.perfo.ng.controlling;
 
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
 

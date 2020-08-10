@@ -1,6 +1,5 @@
 package org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan;
 
-import org.barrelorgandiscovery.gui.atrace.Punch;
 import org.barrelorgandiscovery.tools.HashCodeUtils;
 
 public class PunchCommand extends Command implements XYCommand {

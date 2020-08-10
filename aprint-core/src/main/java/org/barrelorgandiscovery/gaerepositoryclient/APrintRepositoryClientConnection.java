@@ -25,9 +25,6 @@ import org.apache.xmlbeans.impl.util.Base64;
 import org.barrelorgandiscovery.tools.StreamsTools;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.json.JSONTokener;
-
-import sun.misc.BASE64Encoder;
 
 /**
  */
@@ -156,14 +153,15 @@ public class APrintRepositoryClientConnection {
 					int cpt = raf.read(b);
 
 					JSONObject chunk = new JSONObject();
-					BASE64Encoder be = new BASE64Encoder();
+					java.util.Base64.Encoder be = java.util.Base64.getEncoder();
+					// BASE64Encoder be = new BASE64Encoder();
 					String encoded = null;
 					if (cpt == b.length) {
-						encoded = be.encode(b);
+						encoded = new String(be.encode(b));
 					} else {
 						byte[] nba = new byte[cpt];
 						System.arraycopy(b, 0, nba, 0, cpt);
-						encoded = be.encode(nba);
+						encoded = new String(be.encode(nba));
 					}
 					chunk.put("content", encoded); //$NON-NLS-1$
 

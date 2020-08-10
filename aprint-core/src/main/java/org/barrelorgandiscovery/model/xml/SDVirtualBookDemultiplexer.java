@@ -2,16 +2,15 @@ package org.barrelorgandiscovery.model.xml;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.util.Base64;
+import java.util.Base64.Decoder;
+import java.util.Base64.Encoder;
 
 import org.barrelorgandiscovery.model.ModelValuedParameter;
-import org.barrelorgandiscovery.model.steps.book.VirtualBookMultiplexer;
 import org.barrelorgandiscovery.model.steps.book.VirtualBookDemultiplexer;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.scale.io.ScaleIO;
 import org.w3c.dom.Element;
-
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
 
 /**
  * Step VirtualBookConstructor serializer / deserializer
@@ -35,7 +34,8 @@ public class SDVirtualBookDemultiplexer extends
 		if (v != null) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			ScaleIO.writeGamme(v, baos);
-			String stringV = new BASE64Encoder().encode(baos.toByteArray());
+			Encoder encoder = Base64.getEncoder();
+			String stringV = new String(encoder.encode(baos.toByteArray()));
 			addElementValue(element, "scale", stringV);
 		}
 		
@@ -53,8 +53,10 @@ public class SDVirtualBookDemultiplexer extends
 		Element escale = getSubElement(object, "scale");
 		if (escale != null) {
 			String v = escale.getTextContent();
+			Decoder decoder = Base64.getDecoder();
+			
 			ByteArrayInputStream bais = new ByteArrayInputStream(
-					new BASE64Decoder().decodeBuffer(v));
+					decoder.decode(v));
 
 			modelValuedParameter.setValue(ScaleIO.readGamme(bais));
 			vbc.applyConfig(); // adjust parameters

@@ -19,19 +19,14 @@ import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
 
-import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.controlling.XYPanel.XYListener;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.controlling.wizard.PanelStep;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.messages.Messages;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachine;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineCommandStream;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControl;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControlListener;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineStatus;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLPunchMachine;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLPunchMachineParameters;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.mock.MockMachine;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.mock.MockMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.Command;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.DisplacementCommand;
@@ -45,14 +40,14 @@ import org.barrelorgandiscovery.gui.aedit.JEditableVirtualBookComponent;
 import org.barrelorgandiscovery.gui.aedit.Tool;
 import org.barrelorgandiscovery.gui.aedit.UndoStack;
 import org.barrelorgandiscovery.gui.aedit.toolbar.JVBToolingToolbar;
-import org.barrelorgandiscovery.gui.atrace.OptimizerResult;
-import org.barrelorgandiscovery.gui.atrace.Punch;
-import org.barrelorgandiscovery.gui.atrace.PunchConverter;
 import org.barrelorgandiscovery.gui.tools.CursorTools;
 import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.StepChanged;
 import org.barrelorgandiscovery.gui.wizard.Wizard;
-import org.barrelorgandiscovery.prefs.DummyPrefsStorage;
+import org.barrelorgandiscovery.optimizers.OptimizerResult;
+import org.barrelorgandiscovery.optimizers.PunchDefaultConverter;
+import org.barrelorgandiscovery.optimizers.model.Punch;
+import org.barrelorgandiscovery.optimizers.punchconverters.PunchConverter;
 import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.tools.Disposable;
@@ -839,7 +834,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 		PunchConverter pc = new PunchConverter(r.virtualBook.getScale(), 3.0);
 		OptimizerResult<Punch> punches = pc.convert(r.virtualBook.getHolesCopy());
 
-		PunchPlan pp = PunchPlan.createDefaultPunchPlan(punches.result);
+		PunchPlan pp = PunchDefaultConverter.createDefaultPunchPlan(punches.result);
 		pp.getCommandsByRef().add(0, new DisplacementCommand(0, 0));
 
 		MockMachineParameters mockMachineParameters = new MockMachineParameters();

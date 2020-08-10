@@ -1,9 +1,9 @@
 package org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl;
 
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractLazerMachine;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachineParameters;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.BaseAbstractLazerMachine;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControl;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.gcode.GRBLLazerCommandVisitor;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.gcode.GRBLLazerCompilerVisitor;
 
 /**
  * GRBLMachine using punch
@@ -11,7 +11,7 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.gcode.GRBLLa
  * @author pfreydiere
  *
  */
-public class GRBLLazerMachine extends AbstractLazerMachine {
+public class GRBLLazerMachine extends BaseAbstractLazerMachine {
 
 	public GRBLLazerMachine() {
 
@@ -35,8 +35,11 @@ public class GRBLLazerMachine extends AbstractLazerMachine {
 
 		GRBLLazerMachineParameters p = (GRBLLazerMachineParameters) parameters;
 
-		GRBLMachineControl gmc = new GRBLMachineControl(p.getPort(), new GRBLLazerCommandVisitor(p.getMaxspeed()));
+		GRBLMachineControl gmc = new GRBLMachineControl(p.getPort(), new GRBLLazerCompilerVisitor(p.getMaxspeed()));
 		return gmc;
 	}
+
+
+
 
 }

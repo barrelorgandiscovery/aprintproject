@@ -67,6 +67,15 @@ public abstract class DeviceDrawing {
 	public String getCurrentLayer() {
 		return this.currentLayer;
 	}
+	
+	
+	public void startGroup() {
+		
+	}
+	
+	public void endGroup() {
+		
+	}
 
 	Coordinate computeCircularPos(double xcenter, double ycenter, double radius, double angle) {
 		double x = xcenter + radius * Math.cos(angle);
@@ -334,4 +343,10 @@ public abstract class DeviceDrawing {
 	 */
 	public abstract void write(OutputStream outStream, String[] layers) throws Exception;
 
+	/**
+	 * does the export needs to ignore the reference ?
+	 * @return
+	 */
+	public abstract boolean ignoreReference();
+	
 }

@@ -2,7 +2,6 @@ package aprintextensions.fr.freydierepatrice.perfo.gerard;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
@@ -22,6 +21,7 @@ import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensions.ExtensionPoint;
 import org.barrelorgandiscovery.extensions.IExtension;
 import org.barrelorgandiscovery.extensions.SimpleExtensionPoint;
+import org.barrelorgandiscovery.extensionsng.perfo.gui.PunchLayer;
 import org.barrelorgandiscovery.gui.CancelTracker;
 import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.ImportersExtensionPoint;
@@ -33,11 +33,10 @@ import org.barrelorgandiscovery.gui.aprint.extensionspoints.OptionMenuItemsExten
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.ToolbarAddExtensionPoint;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.VisibilityLayerButtonsExtensionPoint;
 import org.barrelorgandiscovery.gui.aprintng.APrintNG;
-import org.barrelorgandiscovery.gui.atrace.Punch;
-import org.barrelorgandiscovery.gui.atrace.PunchLayer;
 import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
 import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.issues.IssueLayer;
+import org.barrelorgandiscovery.optimizers.model.Punch;
 import org.barrelorgandiscovery.repository.Repository;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.tools.JMessageBox;

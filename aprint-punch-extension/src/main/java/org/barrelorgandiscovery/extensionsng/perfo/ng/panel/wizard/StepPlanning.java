@@ -12,7 +12,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import javax.swing.Action;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.Icon;
@@ -26,6 +25,7 @@ import javax.swing.SwingUtilities;
 
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.extensionsng.perfo.gui.PunchLayer;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.messages.Messages;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachine;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchPlan;
@@ -33,11 +33,6 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.StatisticVisito
 import org.barrelorgandiscovery.extensionsng.perfo.ng.optimizers.OptimizersRepository;
 import org.barrelorgandiscovery.gui.aedit.JEditableVirtualBookComponent;
 import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
-import org.barrelorgandiscovery.gui.atrace.OptimizedObject;
-import org.barrelorgandiscovery.gui.atrace.Optimizer;
-import org.barrelorgandiscovery.gui.atrace.OptimizerResult;
-import org.barrelorgandiscovery.gui.atrace.Punch;
-import org.barrelorgandiscovery.gui.atrace.PunchLayer;
 import org.barrelorgandiscovery.gui.issues.IssueSelector;
 import org.barrelorgandiscovery.gui.issues.JIssuePresenter;
 import org.barrelorgandiscovery.gui.wizard.Step;
@@ -47,11 +42,14 @@ import org.barrelorgandiscovery.issues.AbstractIssue;
 import org.barrelorgandiscovery.issues.IssueCollection;
 import org.barrelorgandiscovery.issues.IssueHole;
 import org.barrelorgandiscovery.issues.IssuesConstants;
+import org.barrelorgandiscovery.optimizers.Optimizer;
+import org.barrelorgandiscovery.optimizers.OptimizerResult;
+import org.barrelorgandiscovery.optimizers.model.OptimizedObject;
+import org.barrelorgandiscovery.optimizers.punch.NoReturnPunchConverterOptimizer;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.prefs.ObjectsPrefsStorage;
 import org.barrelorgandiscovery.prefs.PrefixedNamePrefsStorage;
 import org.barrelorgandiscovery.tools.Disposable;
-import org.barrelorgandiscovery.tracetools.punch.NoReturnPunchConverterOptimizer;
 import org.barrelorgandiscovery.ui.animation.InfiniteProgressPanel;
 import org.barrelorgandiscovery.virtualbook.Hole;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
@@ -61,6 +59,11 @@ import com.l2fprod.common.demo.BeanBinder;
 import com.l2fprod.common.propertysheet.PropertySheetPanel;
 
 public class StepPlanning extends JPanel implements Step, Disposable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 768126798467269246L;
 
 	private static Logger logger = LogManager.getLogger(StepPlanning.class);
 
@@ -76,8 +79,7 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 	// private JConsole informationConsole;
 	private ProgressPanelWithText progress;
-	
-	
+
 	private PunchPlan currentPunchPlan;
 
 	private JIssuePresenter issuePresenter;
@@ -86,16 +88,14 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 	private JVirtualBookScrollableComponent pianoroll;
 
-	private InfiniteProgressPanel infiniteprogresspanel = new InfiniteProgressPanel(
-			null, 20, 0.5f, 0.5f);
+	private InfiniteProgressPanel infiniteprogresspanel = new InfiniteProgressPanel(null, 20, 0.5f, 0.5f);
 
 	private IPrefsStorage prefsStorage;
-	
+
 	private AtomicBoolean userHasBeenAskedForSmallHoles = new AtomicBoolean(false);
 
 	public StepPlanning(final OptimizersRepository optimizers, final StepChooseMachine sm,
-			final ProcessingOptimizerEngine ppt,
-			final JVirtualBookScrollableComponent pianoroll,
+			final ProcessingOptimizerEngine ppt, final JVirtualBookScrollableComponent pianoroll,
 			final IPrefsStorage prefsStorage) throws Exception {
 		assert optimizers != null;
 		assert prefsStorage != null;
@@ -105,25 +105,22 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 		this.processingEngine = ppt;
 		assert pianoroll != null;
 		this.pianoroll = pianoroll;
-		this.prefsStorage = new PrefixedNamePrefsStorage(
-				"perfoextensionoptimizers", prefsStorage); //$NON-NLS-1$
+		this.prefsStorage = new PrefixedNamePrefsStorage("perfoextensionoptimizers", prefsStorage); //$NON-NLS-1$
 
 		ppt.setProcessingOptimizerEngineProgress(new ProcessingOptimizerEngineCallBack() {
 
 			@Override
-			public void progressUpdate(final double percentage,
-					final String message) {
+			public void progressUpdate(final double percentage, final String message) {
 				try {
 					SwingUtilities.invokeAndWait(new Runnable() {
 
 						@Override
 						public void run() {
 
-							logTextInformation(String.format(
-									"%1$tT - %2$d  %3$s ", new Date(), //$NON-NLS-1$
+							logTextInformation(String.format("%1$tT - %2$d  %3$s ", new Date(), //$NON-NLS-1$
 									(int) (percentage * 100), message));
 							StepPlanning.this.pianoroll.repaint();
-							
+
 							progress.setProgress(percentage);
 						}
 					});
@@ -142,81 +139,76 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 							try {
 
-								logTextInformation(Messages
-										.getString("StepPlanning.1")); //$NON-NLS-1$
+								logTextInformation(Messages.getString("StepPlanning.1")); //$NON-NLS-1$
 
 								OptimizedObject[] punches = result.result;
 
-								// this is used to test for punch enlargment, if necessary
-								PunchPlan pp = PunchPlan
-										.createDefaultPunchPlan(punches);
+								AbstractMachine machine = sm.getSelectedMachine();
+								assert machine != null;
+
+								OptimizersRepository o = new OptimizersRepository();
+								PunchPlan pp = o.createDefaultPunchPlanFromOptimizeResult(sm.getSelectedMachine(),
+										sm.getMachineParameters(), punches);
 
 								definePunchPlanning(pp);
-								
-								logTextInformation(Messages
-										.getString("StepPlanning.2")); //$NON-NLS-1$
+
+								logTextInformation(Messages.getString("StepPlanning.2")); //$NON-NLS-1$
 
 								StatisticVisitor v = new StatisticVisitor(false);
 								v.visit(pp);
 								logTextInformation(v.getReport().toString());
 
 								issuePresenter.loadIssues(result.holeerrors);
-								PunchLayer punchLayer = processingEngine.getPunchLayer(); 
-								punchLayer.setOptimizedObject(
-										result.result);
-								
-								final VirtualBook currentvb = processingEngine
-											.getVirtualBook();
-								processingEngine.getIssueLayer()
-										.setIssueCollection(
-												result.holeerrors,
-												currentvb);
+								PunchLayer punchLayer = processingEngine.getPunchLayer();
+								punchLayer.setOptimizedObject(result.result);
+
+								final VirtualBook currentvb = processingEngine.getVirtualBook();
+								processingEngine.getIssueLayer().setIssueCollection(result.holeerrors, currentvb);
 
 								infiniteprogresspanel.stop();
 								StepPlanning.this.pianoroll.repaint();
 								if (stepStatusChangedListener != null)
-									stepStatusChangedListener
-											.stepStatusChanged();
-								
+									stepStatusChangedListener.stepStatusChanged();
+
 								IssueCollection issueCollection = result.holeerrors;
-								
-								// if there are errors linked to 
-								
+
+								// if there are errors linked to
+
 								if (hasTooSmallHoleErrors(issueCollection) && !userHasBeenAskedForSmallHoles.get()) {
 									userHasBeenAskedForSmallHoles.set(true);
 									int ret = JOptionPane.showConfirmDialog(StepPlanning.this,
-										  Messages.getString("StepPlanning.0")  //$NON-NLS-1$
-										  + Messages.getString("StepPlanning.5"), Messages.getString("StepPlanning.6"), JOptionPane.YES_NO_OPTION); //$NON-NLS-1$ //$NON-NLS-2$
+											Messages.getString("StepPlanning.0") //$NON-NLS-1$
+													+ Messages.getString("StepPlanning.5"), //$NON-NLS-1$
+											Messages.getString("StepPlanning.6"), JOptionPane.YES_NO_OPTION); //$NON-NLS-1$
 									if (ret == JOptionPane.YES_OPTION) {
 										// modify the book
 										logger.debug("change the hole sizes"); //$NON-NLS-1$
 										assert pianoroll instanceof JEditableVirtualBookComponent;
-										JEditableVirtualBookComponent c = (JEditableVirtualBookComponent)pianoroll;
+										JEditableVirtualBookComponent c = (JEditableVirtualBookComponent) pianoroll;
 										c.startEventTransaction();
 										try {
 
 											List<Hole> holes = currentvb.getHolesCopy();
 											for (Hole h : holes) {
-												if (pianoroll.timestampToMM(h.getTimeLength()) 
-														< punchLayer.getPunchWidth()) {
-													currentvb.addHole(new Hole(h.getTrack(), h.getTimestamp(), pianoroll.MMToTime(punchLayer.getPunchWidth())));
+												if (pianoroll.timestampToMM(h.getTimeLength()) < punchLayer
+														.getPunchWidth()) {
+													currentvb.addHole(new Hole(h.getTrack(), h.getTimestamp(),
+															pianoroll.MMToTime(punchLayer.getPunchWidth())));
 													currentvb.removeHole(h);
 												}
 											}
-											
+
 										} finally {
 											c.endEventTransaction();
 										}
 										startNewComputation();
 									}
-									
+
 								}
-								
 
 							} catch (Exception ex) {
-								logger.error(
-										Messages.getString("StepPlanning.3") //$NON-NLS-1$
-												+ ex.getMessage(), ex);
+								logger.error(Messages.getString("StepPlanning.3") //$NON-NLS-1$
+										+ ex.getMessage(), ex);
 							}
 						}
 
@@ -235,16 +227,14 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 		setLayout(new BorderLayout());
 
-		FormPanel panel = new FormPanel(getClass().getResourceAsStream(
-				"planning.jfrm")); //$NON-NLS-1$
+		FormPanel panel = new FormPanel(getClass().getResourceAsStream("planning.jfrm")); //$NON-NLS-1$
 
 		// panel for the optimizer selection
-		this.strategypanel = (JPanel) panel.getFormAccessor()
-				.getComponentByName("strategypanel"); //$NON-NLS-1$
-		
-		JLabel lblchoixstrategy = (JLabel)panel.getFormAccessor().getComponentByName("lblstrategychoice");//$NON-NLS-1$
+		this.strategypanel = (JPanel) panel.getFormAccessor().getComponentByName("strategypanel"); //$NON-NLS-1$
+
+		JLabel lblchoixstrategy = (JLabel) panel.getFormAccessor().getComponentByName("lblstrategychoice");//$NON-NLS-1$
 		lblchoixstrategy.setText(Messages.getString("StepPlanning.4")); //$NON-NLS-1$
-		
+
 		// vertical strategy
 		strategypanel.setLayout(new BoxLayout(strategypanel, BoxLayout.Y_AXIS));
 
@@ -257,13 +247,11 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 		panel.getFormAccessor().replaceBean("parameters", ppPanel); //$NON-NLS-1$
 
 		progress = new ProgressPanelWithText();
-		
+
 		panel.getFormAccessor().replaceBean("informations", progress); //$NON-NLS-1$
 
-		
 		this.issuePresenter = new JIssuePresenter(this, false, false);
-		issuePresenter.setIssueSelectionListener(new IssueSelector(
-				processingEngine.getIssueLayer(), pianoroll));
+		issuePresenter.setIssueSelectionListener(new IssueSelector(processingEngine.getIssueLayer(), pianoroll));
 
 		JRootPane jrp = new JRootPane();
 		jrp.setContentPane(issuePresenter);
@@ -326,18 +314,16 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 		try {
 
 			// save parameters
-			saveUserParameters(currentOptimizerClass,
-					currentOptimizerParameters);
+			saveUserParameters(currentOptimizerClass, currentOptimizerParameters);
 
-			processingEngine
-					.changeOptimizerParameters(currentOptimizerParameters);
+			processingEngine.changeOptimizerParameters(currentOptimizerParameters);
 
 			definePunchPlanning(null);
 
 			if (stepStatusChangedListener != null)
 				stepStatusChangedListener.stepStatusChanged();
 
-			//informationConsole.clearScreen();
+			// informationConsole.clearScreen();
 			progress.reset();
 
 		} catch (Exception ex) {
@@ -346,8 +332,7 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 					+ ex.getMessage(), ex);
 		} finally {
 			if (!infiniteprogresspanel.isStarted())
-				infiniteprogresspanel.start(Messages
-						.getString("StepPlanning.13")); //$NON-NLS-1$
+				infiniteprogresspanel.start(Messages.getString("StepPlanning.13")); //$NON-NLS-1$
 		}
 	}
 
@@ -363,7 +348,7 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 		 * 
 		 */
 		private static final long serialVersionUID = 1775818254230613406L;
-		
+
 		private Class<?> optimizerClass = null;;
 
 		public JOptimizerRadioButton(String text) {
@@ -390,12 +375,12 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 	}
 
-	public void activate(Serializable state, WizardStates allStepsStates,
-			StepStatusChangedListener stepListener) throws Exception {
+	public void activate(Serializable state, WizardStates allStepsStates, StepStatusChangedListener stepListener)
+			throws Exception {
 
 		// reset
 		userHasBeenAskedForSmallHoles.set(false);
-		
+
 		AbstractMachine machine = sm.getSelectedMachine();
 		assert machine != null;
 
@@ -417,8 +402,7 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 			}
 		}
 
-		List<Class> listAvailableOptimizersForMachine = this.optimizers
-				.listAvailableOptimizersForMachine(machine);
+		List<Class> listAvailableOptimizersForMachine = this.optimizers.listAvailableOptimizersForMachine(machine);
 
 		// add all Optimizers
 
@@ -429,46 +413,38 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 		ObjectsPrefsStorage ops = new ObjectsPrefsStorage(prefsStorage);
 
 		JOptimizerRadioButton firstStrategyButton = null;
-		
+
 		logger.debug("instanciate optimizers"); //$NON-NLS-1$
 		for (Class c : listAvailableOptimizersForMachine) {
-			
+
 			logger.debug("install strategy " + c + " in panel");
-			
+
 			assert Optimizer.class.isAssignableFrom(c);
 			Optimizer o = (Optimizer) c.newInstance();
-			JOptimizerRadioButton jRadioButton = new JOptimizerRadioButton(
-					o.getTitle());
-			
-			if (firstStrategyButton == null && c == NoReturnPunchConverterOptimizer.class)
-			{
+			JOptimizerRadioButton jRadioButton = new JOptimizerRadioButton(o.getTitle());
+
+			if (firstStrategyButton == null && c == NoReturnPunchConverterOptimizer.class) {
 				firstStrategyButton = jRadioButton;
 			}
-			
+
 			jRadioButton.setOptimizerClass(c);
 
-			Serializable instanciatedParametersForOptimizer = optimizers
-					.instanciateParametersForOptimizer(c);
+			Serializable instanciatedParametersForOptimizer = optimizers.instanciateParametersForOptimizer(c);
 
 			logger.debug("load stored parameters"); //$NON-NLS-1$
 			try {
 
-				Serializable storedObject = ops.loadObjectProperties(c
-						.getSimpleName());
+				Serializable storedObject = ops.loadObjectProperties(c.getSimpleName());
 
-				if (storedObject != null
-						&& storedObject.getClass() == instanciatedParametersForOptimizer
-								.getClass()) {
+				if (storedObject != null && storedObject.getClass() == instanciatedParametersForOptimizer.getClass()) {
 					instanciatedParametersForOptimizer = storedObject;
 				}
 			} catch (Exception ex) {
-				logger.debug(
-						"fail to load optimizer parameters :" + ex.getMessage(), //$NON-NLS-1$
+				logger.debug("fail to load optimizer parameters :" + ex.getMessage(), //$NON-NLS-1$
 						ex);
 			}
 
-			jRadioButton
-					.setOptimizerParameters(instanciatedParametersForOptimizer);
+			jRadioButton.setOptimizerParameters(instanciatedParametersForOptimizer);
 
 			buttonGroup.add(jRadioButton);
 
@@ -483,17 +459,14 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					try {
-						JOptimizerRadioButton o = ((JOptimizerRadioButton) e
-								.getSource());
+						JOptimizerRadioButton o = ((JOptimizerRadioButton) e.getSource());
 						if (o != null) {
 							currentOptimizerClass = o.getOptimizerClass();
-							currentOptimizerParameters = o
-									.getOptimizerParameters();
+							currentOptimizerParameters = o.getOptimizerParameters();
 
 							// save parameters
 
-							saveUserParameters(currentOptimizerClass,
-									currentOptimizerParameters);
+							saveUserParameters(currentOptimizerClass, currentOptimizerParameters);
 
 							adjustGUIFromSelectedStrategy();
 						}
@@ -506,31 +479,29 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 		}
 
 		// clear console
-		//informationConsole.clearScreen(); //$NON-NLS-1$
+		// informationConsole.clearScreen(); //$NON-NLS-1$
 		progress.reset();
-		
+
 		stepStatusChangedListener = stepListener;
 		stepListener.stepStatusChanged();
-		
-		// if no strategy selected, 
+
+		// if no strategy selected,
 		// select the fastest one
-		
+
 		if (firstStrategyButton != null) {
 			try {
 				firstStrategyButton.getModel().setSelected(true);
-				
+
 				currentOptimizerClass = firstStrategyButton.getOptimizerClass();
-				currentOptimizerParameters = firstStrategyButton
-						.getOptimizerParameters();
-	
+				currentOptimizerParameters = firstStrategyButton.getOptimizerParameters();
+
 				adjustGUIFromSelectedStrategy();
-				
+
 			} catch (Exception ex) {
 				ex.printStackTrace();
 				logger.error(ex.getMessage(), ex);
 			}
 		}
-		
 
 	}
 
@@ -547,13 +518,11 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 		// instanciate the BeanInfo
 
 		assert currentOptimizerParameters != null;
-		String biClassName = currentOptimizerParameters.getClass().getName()
-				+ "BeanInfo"; //$NON-NLS-1$
+		String biClassName = currentOptimizerParameters.getClass().getName() + "BeanInfo"; //$NON-NLS-1$
 
 		Class biClass = Class.forName(biClassName);
 
-		BeanBinder beanBinder = new BeanBinder(currentOptimizerParameters,
-				ppPanel, (BeanInfo) biClass.newInstance());
+		BeanBinder beanBinder = new BeanBinder(currentOptimizerParameters, ppPanel, (BeanInfo) biClass.newInstance());
 
 		// replace at the end
 		ppPanel.removePropertySheetChangeListener(relaunchEventListener);
@@ -583,13 +552,13 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 	private void logTextInformation(String message) {
 
 		if (message.length() > 60) {
-			message = message.substring(0,57) + "..";  //$NON-NLS-1$
+			message = message.substring(0, 57) + ".."; //$NON-NLS-1$
 		}
-		
+
 		progress.setText(message);
 		progress.repaint();
 		// informationConsole.writeln(message);
-		//informationConsole.repaint();
+		// informationConsole.repaint();
 	}
 
 	private void definePunchPlanning(PunchPlan punchPlanning) {
@@ -605,59 +574,54 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 		return null;
 	}
 
-	private void saveUserParameters(Class optimizerClass,
-			Serializable savedParameters) {
+	private void saveUserParameters(Class optimizerClass, Serializable savedParameters) {
 		ObjectsPrefsStorage ops = new ObjectsPrefsStorage(prefsStorage);
 
 		logger.debug("save stored parameters"); //$NON-NLS-1$
 		try {
-			ops.saveObjectProperties(optimizerClass.getSimpleName(),
-					savedParameters
+			ops.saveObjectProperties(optimizerClass.getSimpleName(), savedParameters
 
 			);
 
 			prefsStorage.save();
 
 		} catch (Exception ex) {
-			logger.debug(
-					"fail to save optimizer parameters :" + ex.getMessage(), ex); //$NON-NLS-1$
+			logger.debug("fail to save optimizer parameters :" + ex.getMessage(), ex); //$NON-NLS-1$
 		}
 	}
 
 	@Override
 	public void dispose() {
-		
-		if (processingEngine != null)
-		{
+
+		if (processingEngine != null) {
 			processingEngine.dispose();
 		}
-		
-		
+
 	}
 
-  /**
-   * check if issue collection has Hole too small
-   * @param issueCollection
-   * @return
-   */
-  private boolean hasTooSmallHoleErrors(IssueCollection issueCollection) {
-   	  boolean toosmall = false;
-	  if (issueCollection != null) {
-    	for (AbstractIssue i : issueCollection)
-    	{
-    		if (i != null) {
-    			if (i instanceof IssueHole) {
-    				IssueHole ih = (IssueHole)i;
-    				if (ih.getType() == IssuesConstants.HOLE_TOO_SMALL) {
-    					toosmall = true;
-    					break;
-    				}
-    			}
-    		}
-    	}
-    	
-      }
-	  return toosmall;
-  }
-	
+	/**
+	 * check if issue collection has Hole too small
+	 * 
+	 * @param issueCollection
+	 * @return
+	 */
+	private boolean hasTooSmallHoleErrors(IssueCollection issueCollection) {
+		boolean toosmall = false;
+		if (issueCollection != null) {
+			for (AbstractIssue i : issueCollection) {
+				if (i != null) {
+					if (i instanceof IssueHole) {
+						IssueHole ih = (IssueHole) i;
+						if (ih.getType() == IssuesConstants.HOLE_TOO_SMALL) {
+							toosmall = true;
+							break;
+						}
+					}
+				}
+			}
+
+		}
+		return toosmall;
+	}
+
 }

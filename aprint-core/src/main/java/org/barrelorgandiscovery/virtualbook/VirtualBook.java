@@ -12,14 +12,12 @@ import java.util.TreeSet;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-import org.barrelorgandiscovery.gui.atrace.Tools;
 import org.barrelorgandiscovery.scale.AbstractRegisterCommandDef;
 import org.barrelorgandiscovery.scale.PipeStopGroup;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.tools.HashCodeUtils;
 import org.barrelorgandiscovery.tools.ReadOnlySet;
 import org.barrelorgandiscovery.tools.SerializeTools;
-import org.barrelorgandiscovery.tools.StreamsTools;
 
 /**
  * Virtual book

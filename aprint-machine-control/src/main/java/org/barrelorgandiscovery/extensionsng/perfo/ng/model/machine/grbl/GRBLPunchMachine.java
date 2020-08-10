@@ -4,7 +4,7 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.messages.Messages;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.BaseAbstractPunchMachine;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControl;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.gcode.GRBLPunchCommandVisitor;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.gcode.GRBLPunchCompilerVisitor;
 
 /**
  * GRBLMachine using punch
@@ -36,8 +36,10 @@ public class GRBLPunchMachine extends BaseAbstractPunchMachine {
 
 		GRBLPunchMachineParameters p = (GRBLPunchMachineParameters) parameters;
 
-		GRBLMachineControl gmc = new GRBLMachineControl(p.getPort(), new GRBLPunchCommandVisitor());
+		GRBLMachineControl gmc = new GRBLMachineControl(p.getPort(), new GRBLPunchCompilerVisitor());
 		return gmc;
 	}
+
+
 
 }

@@ -20,6 +20,7 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMach
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.GUIMachineParametersRepository;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLPunchMachineParameters;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.lazer.mock.MockLazerMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.mock.MockMachineParameters;
 import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
@@ -90,9 +91,13 @@ public class JMachineWithParametersChooser extends JPanel {
 		selectedMachineParameters = gp;
 
 		MockMachineParameters mockMachine = new MockMachineParameters();
+		
+		MockLazerMachineParameters mockMachineLazer = new MockLazerMachineParameters();
 
-		MachineParameterDisplayer[] displayers = new MachineParameterDisplayer[] { new MachineParameterDisplayer(gp),
-				new MachineParameterDisplayer(mockMachine) };
+		MachineParameterDisplayer[] displayers = new MachineParameterDisplayer[] { 
+				new MachineParameterDisplayer(gp),
+				new MachineParameterDisplayer(mockMachine),
+				new MachineParameterDisplayer(mockMachineLazer)};
 
 		machineCombo = fp.getComboBox("cbmachine"); //$NON-NLS-1$
 		machineCombo.setModel(new DefaultComboBoxModel<MachineParameterDisplayer>(displayers));

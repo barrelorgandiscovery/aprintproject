@@ -55,7 +55,10 @@ public class CADVirtualBookExporter {
 
 	final static String LAYER_PLIURES_VERSO = "PLIURES_VERSO";
 
-	public static String[] LAYERS = new String[] { LAYER_BORDS, LAYER_TROUS, LAYER_PLIURES, LAYER_PLIURES_VERSO };
+	final static String LAYER_REFERENCE = "REFERENCE";
+
+	public static String[] LAYERS = new String[] { LAYER_BORDS, LAYER_TROUS, LAYER_PLIURES, LAYER_PLIURES_VERSO,
+			LAYER_REFERENCE };
 
 	public CADVirtualBookExporter() {
 	}
@@ -73,7 +76,7 @@ public class CADVirtualBookExporter {
 
 		CADParameters p = CADParameters.class.newInstance();
 
-		// clone the parameters
+		// clone the parameters, in serializing them
 
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ObjectOutputStream os = new ObjectOutputStream(baos);
@@ -113,13 +116,22 @@ public class CADVirtualBookExporter {
 
 			device.setCurrentLayer(LAYER_BORDS);
 
-			// ligne horizontale
-			device.drawLine(startBook, 0, vbend, 0);
-
+			device.startGroup();
+			try {
+				// ligne horizontale
+				device.drawLine(startBook, 0, vbend, 0);
+			} finally {
+				device.endGroup();
+			}
+			// verticales ?
 			// device.drawLine(vbend, 0, vbend, scale.getWidth());
-
-			device.drawLine(vbend, scale.getWidth(), startBook, scale.getWidth());
-
+			device.startGroup();
+			try {
+				device.drawLine(vbend, scale.getWidth(), startBook, scale.getWidth());
+			} finally {
+				device.endGroup();
+			}
+			// verticale ?
 			// device.drawLine(0, scale.getWidth(), 0, 0);
 
 		}
@@ -127,17 +139,24 @@ public class CADVirtualBookExporter {
 		// draw the reference arrow
 		// dest
 		double arrowy = scale.getWidth();
-		if (scale.isPreferredViewedInversed())
+		if (!device.ignoreReference() && !scale.isPreferredViewedInversed())
 			arrowy = scale.getWidth() - arrowy;
 
 		// origin
 		double arrowy2 = scale.getWidth() - 30; // 3cm
-		if (scale.isPreferredViewedInversed())
+		
+		
+		if (!device.ignoreReference() && !scale.isPreferredViewedInversed())
 			arrowy2 = scale.getWidth() - arrowy2;
 
+		device.setCurrentLayer(LAYER_REFERENCE);
 		Coordinate origin = new Coordinate(10, arrowy2);
-		device.drawArrow(new Vect(0, arrowy - arrowy2), origin, 10);
-
+		device.startGroup();
+		try {
+			device.drawArrow(new Vect(0, arrowy - arrowy2), origin, 10);
+		} finally {
+			device.endGroup();
+		}
 		if (p.isExportPliures()) {
 
 			logger.debug("ajout pliures ... ");
@@ -146,12 +165,24 @@ public class CADVirtualBookExporter {
 
 			device.setCurrentLayer(LAYER_PLIURES_VERSO);
 			double start = startBook;
+			
+			
 			while (start <= vbend + 1) {
 
 				if (p.getTypePliure() == TypePliure.POINTILLEE) {
-					device.drawImprovedDottedLines(start, 0, start, scale.getWidth(), 2, 5);
+					device.startGroup();
+					try {
+						device.drawImprovedDottedLines(start, 0, start, scale.getWidth(), 2, 5);
+					} finally {
+						device.endGroup();
+					}
 				} else if (p.getTypePliure() == TypePliure.CONTINUE) {
-					device.drawLine(start, 0, start, scale.getWidth());
+					device.startGroup();
+					try {
+						device.drawLine(start, 0, start, scale.getWidth());
+					} finally {
+						device.endGroup();
+					}
 				} else if (p.getTypePliure() == TypePliure.ALTERNE_CONTINU_POINTILLEE) {
 
 					// pointillé avec non déoupe au bord des deux cotés, sur 5mm (sinon, fragilise
@@ -159,27 +190,45 @@ public class CADVirtualBookExporter {
 					double startNoDots = 5.0;
 					double endDotsWidth = scale.getWidth() - 5.0;
 					assert scale.getWidth() > 10.0;
-
-					device.drawImprovedDottedLines(start, startNoDots, start, endDotsWidth, 2, 5);
-
+					device.startGroup();
+					try {
+						device.drawImprovedDottedLines(start, startNoDots, start, endDotsWidth, 2, 5);
+					} finally {
+						device.endGroup();
+					}
 				} else {
 					throw new Exception("type pliure " + p.getTypePliure() + " unknown");
 				}
 				start += p.getTaillePagePourPliure() * 2;
 			}
 
-			// fin d'écriture des pliures dans la layer DXF concernée
+			// fin d'écriture des pliures dans la layer concernée
 
 			device.setCurrentLayer(LAYER_PLIURES);
 			start = startBook + p.getTaillePagePourPliure();
 			while (start <= vbend + 1) {
 				if (p.getTypePliure() == TypePliure.POINTILLEE) {
-					device.drawImprovedDottedLines(start, 0, start, scale.getWidth(), 2, 5);
+					device.startGroup();
+					try {
+						device.drawImprovedDottedLines(start, 0, start, scale.getWidth(), 2, 5);
+					} finally {
+						device.endGroup();
+					}
 				} else if (p.getTypePliure() == TypePliure.CONTINUE) {
-					device.drawLine(start, 0, start, scale.getWidth());
+					device.startGroup();
+					try {
+						device.drawLine(start, 0, start, scale.getWidth());
+					} finally {
+						device.endGroup();
+					}
 				} else if (p.getTypePliure() == TypePliure.ALTERNE_CONTINU_POINTILLEE) {
 					// découpe complete
-					device.drawLine(start, 0, start, scale.getWidth());
+					device.startGroup();
+					try {
+						device.drawLine(start, 0, start, scale.getWidth());
+					} finally {
+						device.endGroup();
+					}
 				} else {
 					throw new Exception("type pliure " + p.getTypePliure() + " unknown");
 				}
@@ -195,14 +244,13 @@ public class CADVirtualBookExporter {
 		HoleDrawer drawer = null;
 
 		if (p.getTypeTrous().getType() == TrouType.TROUS_RECTANGULAIRES.getType()) {
-
 			drawer = new RectangularHoleDrawer(device, p.getTailleTrous(), p.getPont(), p.getPasDePontSiIlReste());
 		} else if (p.getTypeTrous().getType() == TrouType.TROUS_ARRONDIS.getType()) {
 			drawer = new ArrondiHoleDrawer(device, p.getTailleTrous(), p.getPont(), p.getPasDePontSiIlReste());
 		} else if (p.getTypeTrous().getType() == TrouType.TROUS_RONDS.getType()) {
 			drawer = new RondHoleDrawer(device, p.getTailleTrous(), p.getPont(), p.getPasDePontSiIlReste());
 		} else {
-			throw new Exception("unsupported trou type");
+			throw new Exception("unsupported type " + p.getTypeTrous().getType());
 		}
 
 		for (Iterator<Hole> iterator = holesCopy.iterator(); iterator.hasNext();) {
@@ -212,7 +260,7 @@ public class CADVirtualBookExporter {
 
 			double ypiste = piste * scale.getIntertrackHeight() + scale.getFirstTrackAxis();
 
-			if (!scale.isPreferredViewedInversed()) {
+			if (!device.ignoreReference() && !scale.isPreferredViewedInversed()) {
 				ypiste = scale.getWidth() - ypiste;
 			}
 
@@ -222,8 +270,12 @@ public class CADVirtualBookExporter {
 			double endx = (hole.getTimestamp() + hole.getTimeLength()) * xratio;
 
 			// ecriture des trous ...
-			drawer.drawHole(ypiste, halfheight, x, endx);
-
+			device.startGroup();
+			try {
+				drawer.drawHole(ypiste, halfheight, x, endx);
+			} finally {
+				device.endGroup();
+			}
 			logger.debug("export :" + hole);
 		}
 
@@ -233,6 +285,7 @@ public class CADVirtualBookExporter {
 
 	/**
 	 * test function
+	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) throws Exception {

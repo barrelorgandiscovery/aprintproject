@@ -3,10 +3,11 @@ package org.barrelorgandiscovery.extensionsng.perfo.ng;
 import java.io.File;
 
 import org.apache.log4j.Logger;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.messages.Messages;
 import org.barrelorgandiscovery.extensions.ExtensionPoint;
 import org.barrelorgandiscovery.extensions.IExtension;
 import org.barrelorgandiscovery.extensions.SimpleExtensionPoint;
+import org.barrelorgandiscovery.extensionsng.perfo.gui.PunchLayer;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.messages.Messages;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.panel.wizard.JPunchWizard;
 import org.barrelorgandiscovery.gui.aedit.IVirtualBookChangedListener;
 import org.barrelorgandiscovery.gui.aedit.JEditableVirtualBookComponent;
@@ -19,22 +20,17 @@ import org.barrelorgandiscovery.gui.aprintng.APrintNGVirtualBookFrame;
 import org.barrelorgandiscovery.gui.aprintng.extensionspoints.InformVirtualBookFrameExtensionPoint;
 import org.barrelorgandiscovery.gui.aprintng.extensionspoints.InitNGExtensionPoint;
 import org.barrelorgandiscovery.gui.aprintng.extensionspoints.VirtualBookFrameToolRegister;
-import org.barrelorgandiscovery.gui.atrace.PunchLayer;
 import org.barrelorgandiscovery.issues.IssueLayer;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
+import org.barrelorgandiscovery.tools.Disposable;
 import org.barrelorgandiscovery.ui.tools.ToolWindowTools;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 import org.noos.xing.mydoggy.DockedTypeDescriptor;
-import org.noos.xing.mydoggy.FloatingTypeDescriptor;
-import org.noos.xing.mydoggy.PushAwayMode;
 import org.noos.xing.mydoggy.ToolWindow;
 import org.noos.xing.mydoggy.ToolWindowAnchor;
 import org.noos.xing.mydoggy.ToolWindowType;
-import org.noos.xing.mydoggy.ToolWindowTypeDescriptor;
 import org.noos.xing.mydoggy.plaf.MyDoggyToolWindowManager;
-import org.noos.xing.mydoggy.plaf.ui.DockableDescriptor;
 
-import com.sun.media.jfxmediaimpl.MediaDisposer.Disposable;
 
 /**
  * Extension de perçage pour la machine à percer de gérard

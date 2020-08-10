@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import org.apache.log4j.Logger;
-
 import org.barrelorgandiscovery.gui.aprint.extensions.ImporterParameters;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;

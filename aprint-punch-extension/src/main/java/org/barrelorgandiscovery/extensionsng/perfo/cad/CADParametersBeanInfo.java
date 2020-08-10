@@ -2,11 +2,8 @@ package org.barrelorgandiscovery.extensionsng.perfo.cad;
 
 import com.l2fprod.common.beans.BaseBeanInfo;
 import com.l2fprod.common.beans.ExtendedPropertyDescriptor;
-import com.l2fprod.common.beans.editor.BooleanAsCheckBoxPropertyEditor;
-import com.l2fprod.common.beans.editor.ComboBoxPropertyEditor;
 import com.l2fprod.common.beans.editor.DoublePropertyEditor;
 import com.l2fprod.common.beans.editor.IntegerPropertyEditor;
-import com.sun.media.ui.ComboBox;
 
 /**
  * cad parameters shown in the parameter panel

@@ -65,4 +65,9 @@ public class DeviceGraphicLayerDrawing extends DeviceDrawing {
 	public void write(OutputStream outStream, String[] layers) throws Exception {
 		throw new Exception("not supported for this type of drawing device");	
 	}
+	
+	@Override
+	public boolean ignoreReference() {
+		return false;
+	}
 }

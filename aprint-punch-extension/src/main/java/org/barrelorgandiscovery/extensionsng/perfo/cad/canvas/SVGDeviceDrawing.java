@@ -107,5 +107,10 @@ public class SVGDeviceDrawing extends DeviceDrawing {
 			tmpFile.delete();
 		}
 	}
+	
+	@Override
+	public boolean ignoreReference() {
+		return false;
+	}
 
 }

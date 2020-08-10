@@ -4,25 +4,24 @@ import java.io.Serializable;
 
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.AsyncJobsManager;
+import org.barrelorgandiscovery.extensionsng.perfo.gui.PunchLayer;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.optimizers.OptimizersRepository;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.process.PunchProcessingResult;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.process.PunchProcessingThread;
 import org.barrelorgandiscovery.gui.CancelTracker;
 import org.barrelorgandiscovery.gui.ICancelTracker;
 import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
-import org.barrelorgandiscovery.gui.atrace.OptimizedObject;
-import org.barrelorgandiscovery.gui.atrace.Optimizer;
-import org.barrelorgandiscovery.gui.atrace.OptimizerProgress;
-import org.barrelorgandiscovery.gui.atrace.OptimizerResult;
-import org.barrelorgandiscovery.gui.atrace.Punch;
-import org.barrelorgandiscovery.gui.atrace.PunchLayer;
 import org.barrelorgandiscovery.gui.issues.JIssuePresenter;
 import org.barrelorgandiscovery.gui.script.groovy.ASyncConsoleOutput;
 import org.barrelorgandiscovery.issues.IssueCollection;
 import org.barrelorgandiscovery.issues.IssueLayer;
+import org.barrelorgandiscovery.optimizers.Optimizer;
+import org.barrelorgandiscovery.optimizers.OptimizerProgress;
+import org.barrelorgandiscovery.optimizers.OptimizerResult;
+import org.barrelorgandiscovery.optimizers.model.OptimizedObject;
+import org.barrelorgandiscovery.optimizers.punch.PunchConverterOptimizerParameters;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.tools.Disposable;
-import org.barrelorgandiscovery.tracetools.punch.PunchConverterOptimizerParameters;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 
 public class ProcessingOptimizerEngine implements Disposable {
@@ -56,7 +55,6 @@ public class ProcessingOptimizerEngine implements Disposable {
 				.setPunchProcessingResultCallBack(new PunchProcessingResult() {
 					@Override
 					public void result(OptimizerResult result) {
-
 						// transactional on the list itself
 						punchLayer.setOptimizedObject(result.result);
 						if (processingOptimizerEngineProgress != null)

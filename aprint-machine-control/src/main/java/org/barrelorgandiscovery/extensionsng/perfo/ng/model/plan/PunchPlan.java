@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.barrelorgandiscovery.gui.atrace.Punch;
-
 /**
  * punch plan, containing the commands, and associated parameters for the optimizer
  * 
@@ -92,16 +90,6 @@ public class PunchPlan {
 		}
 		return null;
 	}
-	
-	public static PunchPlan createDefaultPunchPlan(Punch[] punches) {
-		PunchPlan pp = new PunchPlan();
-		for (Punch p : punches) {
-			if (p == null)
-				continue;
-			pp.commands.add(new PunchCommand(p.x, p.y));
-		}
-		return pp;
-	}
-	
+
 
 }
