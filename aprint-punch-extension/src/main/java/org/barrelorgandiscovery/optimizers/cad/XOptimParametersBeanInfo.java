@@ -9,10 +9,10 @@ import com.l2fprod.common.beans.ExtendedPropertyDescriptor;
 import com.l2fprod.common.beans.editor.DoublePropertyEditor;
 import com.l2fprod.common.beans.editor.IntegerPropertyEditor;
 
-public class NoOptimParametersBeanInfo extends BaseBeanInfo {
+public class XOptimParametersBeanInfo extends BaseBeanInfo {
 
-	public NoOptimParametersBeanInfo() {
-		super(NoOptimParameters.class);
+	public XOptimParametersBeanInfo() {
+		super(XOptimParameters.class);
 		
 
 		ExtendedPropertyDescriptor startBookAdjustementFromBeginning = addProperty("startBookAdjustementFromBeginning");

@@ -14,15 +14,15 @@ import org.barrelorgandiscovery.optimizers.OptimizerResult;
 import org.barrelorgandiscovery.optimizers.model.OptimizedObject;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 
-public class NoOptim implements Optimizer<OptimizedObject> {
+public class XOptim implements Optimizer<OptimizedObject> {
 
-	private NoOptimParameters parameters = new NoOptimParameters();
+	private XOptimParameters parameters = new XOptimParameters();
 
-	public NoOptim() {
+	public XOptim() {
 		
 	}
 	
-	public NoOptim(NoOptimParameters parameters) {
+	public XOptim(XOptimParameters parameters) {
 		this.parameters = parameters;
 	}
 	

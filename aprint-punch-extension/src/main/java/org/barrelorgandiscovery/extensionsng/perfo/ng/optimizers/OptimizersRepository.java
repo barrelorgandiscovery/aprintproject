@@ -15,7 +15,7 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.DisplacementCom
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchPlan;
 import org.barrelorgandiscovery.optimizers.Optimizer;
 import org.barrelorgandiscovery.optimizers.PunchDefaultConverter;
-import org.barrelorgandiscovery.optimizers.cad.NoOptim;
+import org.barrelorgandiscovery.optimizers.cad.XOptim;
 import org.barrelorgandiscovery.optimizers.ga.GeneticOptimizer;
 import org.barrelorgandiscovery.optimizers.model.CutLine;
 import org.barrelorgandiscovery.optimizers.model.GroupedCutLine;
@@ -54,7 +54,7 @@ public class OptimizersRepository {
 		if (machine instanceof BaseAbstractPunchMachine) {
 			return Arrays.asList(punchOptimizersClasses);
 		} else if (machine instanceof BaseAbstractLazerMachine) {
-			return Arrays.asList(new Class[] { NoOptim.class });
+			return Arrays.asList(new Class[] { XOptim.class });
 		}
 		return Arrays.asList(new Class[0]);
 	}

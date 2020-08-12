@@ -8,7 +8,7 @@ import java.io.Serializable;
 import org.barrelorgandiscovery.extensionsng.perfo.cad.TrouType;
 import org.barrelorgandiscovery.extensionsng.perfo.cad.TypePliure;
 
-public class NoOptimParameters implements Serializable {
+public class XOptimParameters implements Serializable {
 
 
 	/**

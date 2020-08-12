@@ -13,8 +13,8 @@ import java.util.zip.ZipInputStream;
 
 import org.apache.log4j.Logger;
 import org.apache.xmlbeans.impl.util.Base64;
+import org.barrelorgandiscovery.tools.NotImplementedException;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * Stream storage that uncompress on demand a specific stream

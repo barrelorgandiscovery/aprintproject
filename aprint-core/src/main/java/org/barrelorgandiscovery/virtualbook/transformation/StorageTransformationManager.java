@@ -11,10 +11,10 @@ import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.scale.ScaleManager;
 import org.barrelorgandiscovery.tools.IniFileParser;
+import org.barrelorgandiscovery.tools.NotImplementedException;
 import org.barrelorgandiscovery.tools.StringTools;
 import org.barrelorgandiscovery.tools.streamstorage.StreamStorage;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 public class StorageTransformationManager implements TransformationManager {
 
