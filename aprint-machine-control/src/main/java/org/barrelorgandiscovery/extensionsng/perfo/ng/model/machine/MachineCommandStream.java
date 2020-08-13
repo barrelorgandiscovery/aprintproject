@@ -92,7 +92,7 @@ public class MachineCommandStream {
 								}
 							}
 							
-							// // and hack
+							// and hack
 							if (logger.isDebugEnabled()) {
 								logger.debug("command stream send command :"
 										+ cmd);

@@ -180,7 +180,6 @@ public class CADVirtualBookExporter {
 					device.startGroup();
 					try {
 						device.drawImprovedDottedLines(start, 0, start, scale.getWidth(), 2, 5);
-					
 					} finally {
 						device.endGroup();
 					}

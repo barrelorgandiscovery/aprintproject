@@ -29,6 +29,7 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineContr
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineStatus;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.mock.MockMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.Command;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.CutToCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.DisplacementCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.HomingCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.NearestCommandXYVisitor;
@@ -119,8 +120,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 	 */
 	private IPrefsStorage ps;
 
-	public PunchCommandPanel(PunchPlan pp, VirtualBook vb, IPrefsStorage ps)
-			throws Exception {
+	public PunchCommandPanel(PunchPlan pp, VirtualBook vb, IPrefsStorage ps) throws Exception {
 
 		assert ps != null;
 		assert pp != null;
@@ -149,8 +149,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 			final MachineControl innerMc = mc;
 
 			@Override
-			public void setMachineControlListener(
-					final MachineControlListener listener) {
+			public void setMachineControlListener(final MachineControlListener listener) {
 
 				innerMc.setMachineControlListener(new MachineControlListener() {
 
@@ -165,10 +164,9 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 					}
 
 					@Override
-					public void currentMachinePosition(String status,
-							double wx, double wy, double mx, double my) {
-						listener.currentMachinePosition(status, wx, wy, mx
-								+ xMachineOffset, my + yMachineOffset + yShift);
+					public void currentMachinePosition(String status, double wx, double wy, double mx, double my) {
+						listener.currentMachinePosition(status, wx, wy, mx + xMachineOffset,
+								my + yMachineOffset + yShift);
 					}
 				});
 
@@ -181,16 +179,18 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 
 					if (command instanceof DisplacementCommand) {
 						DisplacementCommand pc = (DisplacementCommand) command;
-						innerMc.sendCommand(new DisplacementCommand(pc.getX()
-								+ yMachineOffset + yShift, pc.getY()
-								+ xMachineOffset));
+						innerMc.sendCommand(new DisplacementCommand(pc.getX() + yMachineOffset + yShift,
+								pc.getY() + xMachineOffset));
 
 					} else if (command instanceof PunchCommand) {
 						PunchCommand pc = (PunchCommand) command;
-						innerMc.sendCommand(new PunchCommand(pc.getX()
-								+ yMachineOffset + yShift, pc.getY()
-								+ xMachineOffset));
+						innerMc.sendCommand(
+								new PunchCommand(pc.getX() + yMachineOffset + yShift, pc.getY() + xMachineOffset));
 
+					} else if (command instanceof CutToCommand) {
+						CutToCommand cutToCommand = (CutToCommand)command;
+						innerMc.sendCommand(
+								new CutToCommand(cutToCommand.getX() + yMachineOffset + yShift, cutToCommand.getY() + xMachineOffset , cutToCommand.getPowerFactor(), cutToCommand.getSpeedFactor()));
 					} else {
 						throw new Exception("unsupported XYCommand :" + command); //$NON-NLS-1$
 					}
@@ -210,12 +210,12 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 			public void close() throws Exception {
 				innerMc.close();
 			}
-			
+
 			@Override
 			public void reset() throws Exception {
 				innerMc.reset();
 			}
-			
+
 		};
 
 		this.machineControl = withOffsetMachineControl;
@@ -236,8 +236,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 			long lastDisplayedFeedBack = System.currentTimeMillis();
 
 			@Override
-			public void currentMachinePosition(final String status,
-					final double wx, final double wy, final double mx,
+			public void currentMachinePosition(final String status, final double wx, final double wy, final double mx,
 					final double my) {
 				try {
 
@@ -246,15 +245,14 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 						SwingUtilities.invokeLater(new Runnable() {
 							@Override
 							public void run() {
-								// "Machine Position X:" + mx + "  Y:"
+								// "Machine Position X:" + mx + " Y:"
 								// + my + " ,
 								updateStatus(Messages.getString("PunchCommandPanel.3") + wx //$NON-NLS-1$
 										+ "  Y:" + wy); //$NON-NLS-1$
 								lastpositionMachineY = wy;
 
-								machinePositionLayer.setMachinePosition(wx
-										- xMachineOffset, wy - yMachineOffset
-										- yShift);
+								machinePositionLayer.setMachinePosition(wx - xMachineOffset,
+										wy - yMachineOffset - yShift);
 
 								// if machine position is outside the current
 								// view
@@ -262,32 +260,25 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 								if (moveBookDuringPunch.isSelected()) {
 
 									boolean isIn = true;
-									double machinex = machinePositionLayer
-											.getY();
-								
+									double machinex = machinePositionLayer.getY();
+
 									double xmax = virtualBookComponent
-											.convertScreenXToCarton(virtualBookComponent
-													.getWidth());
-									
+											.convertScreenXToCarton(virtualBookComponent.getWidth());
+
 									if (machinex > xmax)
 										isIn = false;
 
-									if (machinex < virtualBookComponent
-											.convertScreenXToCarton(0))
+									if (machinex < virtualBookComponent.convertScreenXToCarton(0))
 										isIn = false;
 
-									double widthInMM = virtualBookComponent
-											.pixelToMM(virtualBookComponent
-													.getWidth());
+									double widthInMM = virtualBookComponent.pixelToMM(virtualBookComponent.getWidth());
 
 									if (!isIn) {
 										if (controller.isRunning()) {
 											// align the punch on left, 1/5
-											virtualBookComponent
-													.setXoffset(machinex - 1.0
-															/ 5 * widthInMM);
+											virtualBookComponent.setXoffset(machinex - 1.0 / 5 * widthInMM);
 
-										} 
+										}
 									}
 
 								}
@@ -341,8 +332,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 		pvb.add(virtualBookComponent, BorderLayout.CENTER);
 
 		// add toolbar
-		JVBToolingToolbar tb = new JVBToolingToolbar(virtualBookComponent,
-				new UndoStack(), null);
+		JVBToolingToolbar tb = new JVBToolingToolbar(virtualBookComponent, new UndoStack(), null);
 
 		pvb.add(tb, BorderLayout.NORTH);
 
@@ -353,14 +343,11 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				try {
-					double x = virtualBookComponent.convertScreenXToCarton(e
-							.getX());
-					double y = virtualBookComponent.convertScreenYToCarton(e
-							.getY());
+					double x = virtualBookComponent.convertScreenXToCarton(e.getX());
+					double y = virtualBookComponent.convertScreenYToCarton(e.getY());
 
 					// search for command in the plan
-					NearestCommandXYVisitor nv = new NearestCommandXYVisitor(x,
-							y);
+					NearestCommandXYVisitor nv = new NearestCommandXYVisitor(x, y);
 					nv.visit(punchPlan);
 					XYCommand nearest = nv.getNearest();
 
@@ -370,28 +357,23 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 					}
 
 				} catch (Exception ex) {
-					logger.error(
-							"error in handling click event :" + ex.getMessage(), //$NON-NLS-1$
+					logger.error("error in handling click event :" + ex.getMessage(), //$NON-NLS-1$
 							ex);
 				}
 			}
 
 			@Override
 			public void mouseMoved(MouseEvent e) {
-				virtualBookComponent.setHightlight(virtualBookComponent
-						.convertScreenXToCarton(e.getX()));
+				virtualBookComponent.setHightlight(virtualBookComponent.convertScreenXToCarton(e.getX()));
 			}
 
 			@Override
 			public void activated() {
 				try {
 					virtualBookComponent.setCursor(CursorTools
-							.createCursorWithImage(ImageTools
-									.loadImage(getClass().getResource(
-											"smallpunch.png")))); //$NON-NLS-1$
+							.createCursorWithImage(ImageTools.loadImage(getClass().getResource("smallpunch.png")))); //$NON-NLS-1$
 				} catch (Exception ex) {
-					logger.error(
-							"fail to load cursor image :" + ex.getMessage(), ex); //$NON-NLS-1$
+					logger.error("fail to load cursor image :" + ex.getMessage(), ex); //$NON-NLS-1$
 				}
 			}
 
@@ -408,8 +390,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 
 		moveBookDuringPunch = new JToggleButton();
 		moveBookDuringPunch.setIcon(ImageTools.loadIcon(this.getClass(), "view_punch.png")); //$NON-NLS-1$
-		moveBookDuringPunch
-				.setToolTipText(Messages.getString("PunchCommandPanel.12")); //$NON-NLS-1$
+		moveBookDuringPunch.setToolTipText(Messages.getString("PunchCommandPanel.12")); //$NON-NLS-1$
 		tb.addSeparator();
 		tb.add(moveBookDuringPunch);
 		moveBookDuringPunch.setSelected(true);
@@ -427,18 +408,17 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 		XYPanel xypanel = new XYPanel();
 		xypanel.setOffsets(xMachineOffset, yMachineOffset);
 
-		settingsPanel = new FormPanel(getClass().getResourceAsStream(
-				"settings.jfrm")); //$NON-NLS-1$
+		settingsPanel = new FormPanel(getClass().getResourceAsStream("settings.jfrm")); //$NON-NLS-1$
 
-		TitledBorderLabel labelsettingposition = (TitledBorderLabel)settingsPanel.getComponentByName("lblposition"); //$NON-NLS-1$
+		TitledBorderLabel labelsettingposition = (TitledBorderLabel) settingsPanel.getComponentByName("lblposition"); //$NON-NLS-1$
 		labelsettingposition.setText(Messages.getString("PunchCommandPanel.15")); //$NON-NLS-1$
-		
+
 		// add(tabs, BorderLayout.WEST);
 
 		settingsPanel.getFormAccessor().replaceBean("xpanel", xypanel); //$NON-NLS-1$
 		PanelStep settingsStep = new PanelStep(settingsPanel, "settings", //$NON-NLS-1$
-				Messages.getString("PunchCommandPanel.18"), Messages.getString("PunchCommandPanel.19"), new ImageIcon(getClass() //$NON-NLS-1$ //$NON-NLS-2$
-						.getResource("misc.png"))); //$NON-NLS-1$
+				Messages.getString("PunchCommandPanel.18"), Messages.getString("PunchCommandPanel.19"), //$NON-NLS-1$ //$NON-NLS-2$
+				new ImageIcon(getClass().getResource("misc.png"))); //$NON-NLS-1$
 
 		PanelStep punchStep = new PanelStep(positionPanel, "punch", Messages.getString("PunchCommandPanel.22"), //$NON-NLS-1$ //$NON-NLS-2$
 				Messages.getString("PunchCommandPanel.23"), new ImageIcon(getClass() //$NON-NLS-1$
@@ -446,10 +426,9 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 
 		JLabel usepunchposition = settingsPanel.getLabel("lblusepunchposition"); //$NON-NLS-1$
 		usepunchposition.setText(Messages.getString("PunchCommandPanel.123")); //$NON-NLS-1$
-		
+
 		punchStep.setParentStep(settingsStep);
-		wizardPunch = new Wizard(Arrays.asList(new Step[] { settingsStep,
-				punchStep }), null);
+		wizardPunch = new Wizard(Arrays.asList(new Step[] { settingsStep, punchStep }), null);
 
 		wizardPunch.setBorder(new TitledBorder(Messages.getString("PunchCommandPanel.25"))); //$NON-NLS-1$
 
@@ -482,7 +461,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 		dontmovey.setSelected(true);
 
 		// homing
-		
+
 		homingButton = (JButton) settingsPanel.getButton("homing"); //$NON-NLS-1$
 
 		homingButton.addActionListener(new ActionListener() {
@@ -491,13 +470,12 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 				homingButtonCalled();
 			}
 		});
-		homingButton
-				.setIcon(new ImageIcon(getClass().getResource("gohome.png"))); //$NON-NLS-1$
+		homingButton.setIcon(new ImageIcon(getClass().getResource("gohome.png"))); //$NON-NLS-1$
 		homingButton.setText(Messages.getString("PunchCommandPanel.30")); //$NON-NLS-1$
 		homingButton.setToolTipText(Messages.getString("PunchCommandPanel.31")); //$NON-NLS-1$
 
 		// reset
-		resetButton = (JButton)settingsPanel.getButton("reset"); //$NON-NLS-1$
+		resetButton = (JButton) settingsPanel.getButton("reset"); //$NON-NLS-1$
 		resetButton.setText(Messages.getString("PunchCommandPanel.33")); //$NON-NLS-1$
 		resetButton.setToolTipText(Messages.getString("PunchCommandPanel.34")); //$NON-NLS-1$
 		resetButton.setIcon(new ImageIcon(getClass().getResource("connect_established.png"))); //$NON-NLS-1$
@@ -505,14 +483,14 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				try {
-				machineControl.reset();
-				} catch(Exception ex) {
+					machineControl.reset();
+				} catch (Exception ex) {
 					logger.error("error resetting the machine :" + ex.getMessage(), ex); //$NON-NLS-1$
 					JMessageBox.showError(this, ex);
 				}
 			}
 		});
-		
+
 		// define defaults
 
 		principalModeChanged();
@@ -541,13 +519,11 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 
 		dontmovey.setSelected(true);
 		dontmovey.setText(Messages.getString("PunchCommandPanel.38")); //$NON-NLS-1$
-		dontmovey
-				.setToolTipText(Messages.getString("PunchCommandPanel.39")); //$NON-NLS-1$
+		dontmovey.setToolTipText(Messages.getString("PunchCommandPanel.39")); //$NON-NLS-1$
 		// dontmovey
 		dontmovey.setIcon(new ImageIcon(getClass().getResource("bothmove.png"))); //$NON-NLS-1$
 
-		GridView actions = (GridView) settingsPanel
-				.getFormAccessor("actionbuttons"); //$NON-NLS-1$
+		GridView actions = (GridView) settingsPanel.getFormAccessor("actionbuttons"); //$NON-NLS-1$
 		JButton punch = (JButton) actions.getComponentByName("punch"); //$NON-NLS-1$
 		punch.setText(Messages.getString("PunchCommandPanel.43")); //$NON-NLS-1$
 		punch.setIcon(new ImageIcon(getClass().getResource("smallpunch.png"))); //$NON-NLS-1$
@@ -561,8 +537,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 
 					XYCommand xyc = getCurrentSelectedXYCommand();
 
-					PunchCommand punchCommand = new PunchCommand(xyc.getX(),
-							xyc.getY());
+					PunchCommand punchCommand = new PunchCommand(xyc.getX(), xyc.getY());
 					machineControl.sendCommand(punchCommand);
 
 					logger.debug("Done !"); //$NON-NLS-1$
@@ -574,17 +549,15 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 			}
 		});
 
-		
-		JTextField mmnumber = (JTextField)actions.getComponentByName("mmsize"); //$NON-NLS-1$
-		
+		JTextField mmnumber = (JTextField) actions.getComponentByName("mmsize"); //$NON-NLS-1$
+
 		double defaultshift = ps.getDoubleProperty("shiftproperty", 160.0); //$NON-NLS-1$
 		mmnumber.setText(Double.toString(defaultshift));
-		
+
 		JButton moveForward = (JButton) actions.getComponentByName("forward"); //$NON-NLS-1$
 
 		moveForward.setText(Messages.getString("PunchCommandPanel.50")); //$NON-NLS-1$
-		moveForward.setIcon(new ImageIcon(getClass().getResource(
-				"fastforward.png"))); //$NON-NLS-1$
+		moveForward.setIcon(new ImageIcon(getClass().getResource("fastforward.png"))); //$NON-NLS-1$
 		moveForward.setToolTipText(Messages.getString("PunchCommandPanel.52")); //$NON-NLS-1$
 		moveForward.addActionListener(new ActionListener() {
 			@Override
@@ -596,13 +569,12 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 					double shift = Double.parseDouble(textmm);
 					ps.setDoubleProperty("shiftproperty", shift); //$NON-NLS-1$
 					ps.save();
-					
+
 					yShift += shift; // 16 cm move
 					moveToCurrentPosition();
 
 				} catch (Exception ex) {
-					logger.error(
-							"error while moving forward :" + ex.getMessage(), //$NON-NLS-1$
+					logger.error("error while moving forward :" + ex.getMessage(), //$NON-NLS-1$
 							ex);
 				}
 
@@ -631,8 +603,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 	 */
 	private void principalModeChanged() {
 		logger.debug("is settings activated :" + isSettingMode()); //$NON-NLS-1$
-		SwingUtils.recurseSetEnable(settingsPanel, isSettingMode()
-				&& !controller.isRunning());
+		SwingUtils.recurseSetEnable(settingsPanel, isSettingMode() && !controller.isRunning());
 		SwingUtils.recurseSetEnable(positionPanel, !isSettingMode());
 	}
 
@@ -658,16 +629,14 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 						// yshift = 0;
 					}
 
-					DisplacementCommand pos = new DisplacementCommand(
-							xycommand.getX(), xycommand.getY());
+					DisplacementCommand pos = new DisplacementCommand(xycommand.getX(), xycommand.getY());
 
 					checkMachineControl();
 
 					machineControl.sendCommand(pos);
 
 				} catch (Exception ex) {
-					logger.error(
-							"error in machine displacement :" + ex.getMessage(), //$NON-NLS-1$
+					logger.error("error in machine displacement :" + ex.getMessage(), //$NON-NLS-1$
 							ex);
 				}
 
@@ -688,17 +657,15 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 
 						virtualBookComponent.repaint();
 
-						DisplacementCommand pos = new DisplacementCommand(
-								xycommand.getX(), xycommand.getY());
+						DisplacementCommand pos = new DisplacementCommand(xycommand.getX(), xycommand.getY());
 
 						checkMachineControl();
 
 						machineControl.sendCommand(pos);
 						// machineControl.flushCommands();
 					} catch (Exception ex) {
-						logger.error(
-								"error in machine displacement :" //$NON-NLS-1$
-										+ ex.getMessage(), ex);
+						logger.error("error in machine displacement :" //$NON-NLS-1$
+								+ ex.getMessage(), ex);
 					}
 				}
 			}
@@ -709,10 +676,10 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 
 	private void defineCurrentCommandIndexAndUpdatePanel(int index) {
 		punchLayer.setCurrentPos(index);
-		int nbCommandsToSend = punchPlan
-				.getCommandsByRef().size();
+		int nbCommandsToSend = punchPlan.getCommandsByRef().size();
 
-		positionPanel.updateState(index,nbCommandsToSend , index > 0, index < nbCommandsToSend - 1, "--", "--", "--", "--"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+		positionPanel.updateState(index, nbCommandsToSend, index > 0, index < nbCommandsToSend - 1, "--", "--", "--", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				"--");
 	}
 
 	// ///////////////////////////////////////////////////////////////
@@ -729,7 +696,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 	private MachinePositionLayer machinePositionLayer;
 
 	private JButton homingButton;
-	
+
 	private JButton resetButton;
 
 	// ////////////////////////////////////////////////////////
@@ -766,8 +733,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 	private XYCommand getCurrentSelectedXYCommand() throws Exception {
 		// get selected position
 		Integer currentSelectedIndex = punchLayer.getCurrentPos();
-		Command command = punchPlan.getCommandsByRef()
-				.get(currentSelectedIndex);
+		Command command = punchPlan.getCommandsByRef().get(currentSelectedIndex);
 
 		if (command instanceof XYCommand) {
 			XYCommand xy = (XYCommand) command;
@@ -800,7 +766,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 			if (machineControl != null) {
 				machineControl.close();
 			}
-			
+
 			if (controller != null) {
 				controller.dispose();
 			}
@@ -826,8 +792,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 		f.setLayout(new BorderLayout());
 
 		VirtualBookResult r = VirtualBookXmlIO
-				.read(new File(
-						"C:\\Users\\use\\Dropbox\\APrint\\Books\\27-29\\Complainte de la butte.book")); //$NON-NLS-1$
+				.read(new File("C:\\Users\\use\\Dropbox\\APrint\\Books\\27-29\\Complainte de la butte.book")); //$NON-NLS-1$
 
 		// convert to punchplan
 
@@ -840,7 +805,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 		MockMachineParameters mockMachineParameters = new MockMachineParameters();
 		AbstractMachine machine = mockMachineParameters.createAssociatedMachineInstance();
 		MachineControl machineControl = machine.open(mockMachineParameters);
-		
+
 //		GRBLPunchMachineParameters grblMachineParameters = new GRBLPunchMachineParameters();
 //		grblMachineParameters.setComPort("COM4");
 //

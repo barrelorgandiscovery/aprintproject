@@ -84,7 +84,7 @@ public class XOptim implements Optimizer<OptimizedObject> {
 
 				Extent e = arg0.getExtent();
 				Extent e2 = arg1.getExtent();
-				int c = Double.compare(e.xmin, e2.xmin);
+				int c = Double.compare((e.xmin + e.xmax )/2, (e2.xmin + e2.xmax)/2);
 				if (c != 0)
 					return c;
 				return Double.compare(e.ymin, e2.ymin);
