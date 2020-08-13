@@ -230,8 +230,9 @@ public class StepModelChooseChoice extends BasePanelStep implements Step, Dispos
 							ImagePlus r = ws.applyClassifier(input);
 
 							ImageProcessor processor = r.getProcessor();
+							processor.multiply(250);
 
-							ByteProcessor bp = processor.convertToByteProcessor();
+							ByteProcessor bp = processor.convertToByteProcessor(true);
 
 							ImagePlus binary = new ImagePlus("", bp); //$NON-NLS-1$
 							ij.IJ.save(binary, outputTile.getAbsolutePath());
