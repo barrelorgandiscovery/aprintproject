@@ -1,5 +1,7 @@
 package org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine;
 
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.gcode.GCodeCompiler;
+
 /**
  * abstract machine command, interpreting the punch plan
  * 
@@ -34,5 +36,12 @@ public abstract class AbstractMachine {
 	 */
 	public abstract MachineControl open(AbstractMachineParameters parameters) throws Exception;
 
-	
+	/**
+	 * create a new gcode compiler
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public abstract GCodeCompiler createNewGCodeCompiler(AbstractMachineParameters parameters) throws Exception;
+
 }

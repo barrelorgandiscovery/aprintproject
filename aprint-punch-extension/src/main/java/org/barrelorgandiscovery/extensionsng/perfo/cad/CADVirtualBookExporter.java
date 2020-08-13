@@ -47,15 +47,15 @@ public class CADVirtualBookExporter {
 
 	private static Logger logger = Logger.getLogger(CADVirtualBookExporter.class);
 
-	final static String LAYER_BORDS = "BORDS_CARTON";
+	public final static String LAYER_BORDS = "BORDS_CARTON";
 
-	final static String LAYER_TROUS = "TROUS";
+	public final static String LAYER_TROUS = "TROUS";
 
-	final static String LAYER_PLIURES = "PLIURES";
+	public final static String LAYER_PLIURES = "PLIURES";
 
-	final static String LAYER_PLIURES_VERSO = "PLIURES_VERSO";
+	public final static String LAYER_PLIURES_VERSO = "PLIURES_VERSO";
 
-	final static String LAYER_REFERENCE = "REFERENCE";
+	public final static String LAYER_REFERENCE = "REFERENCE";
 
 	public static String[] LAYERS = new String[] { LAYER_BORDS, LAYER_TROUS, LAYER_PLIURES, LAYER_PLIURES_VERSO,
 			LAYER_REFERENCE };
@@ -136,27 +136,34 @@ public class CADVirtualBookExporter {
 
 		}
 
+		device.setCurrentLayer(LAYER_REFERENCE);
 		// draw the reference arrow
 		// dest
-		double arrowy = scale.getWidth();
-		if (!device.ignoreReference() && !scale.isPreferredViewedInversed())
-			arrowy = scale.getWidth() - arrowy;
-
+		double arrowy = 0;
+	
 		// origin
-		double arrowy2 = scale.getWidth() - 30; // 3cm
+		double arrowlength = 30; // length of the reference arrow
 		
-		
-		if (!device.ignoreReference() && !scale.isPreferredViewedInversed())
-			arrowy2 = scale.getWidth() - arrowy2;
-
-		device.setCurrentLayer(LAYER_REFERENCE);
-		Coordinate origin = new Coordinate(10, arrowy2);
+		Coordinate origin = new Coordinate(10 /* X */, arrowy + arrowlength);
 		device.startGroup();
 		try {
-			device.drawArrow(new Vect(0, arrowy - arrowy2), origin, 10);
+
+			Vect arrowVector = new Vect(0, - arrowlength);
+			
+			if (!device.ignoreReference() && !scale.isPreferredViewedInversed()) {
+				// reference is at the bottom
+				// move origin, and revert the arrow vector
+				origin = new Coordinate(10, scale.getWidth() - arrowlength);
+				// revert the arrow
+				arrowVector = arrowVector.moins();
+			}
+			
+			device.drawArrow(arrowVector, origin, 10);
+			
 		} finally {
 			device.endGroup();
 		}
+		
 		if (p.isExportPliures()) {
 
 			logger.debug("ajout pliures ... ");
@@ -173,6 +180,7 @@ public class CADVirtualBookExporter {
 					device.startGroup();
 					try {
 						device.drawImprovedDottedLines(start, 0, start, scale.getWidth(), 2, 5);
+					
 					} finally {
 						device.endGroup();
 					}
@@ -278,8 +286,6 @@ public class CADVirtualBookExporter {
 			}
 			logger.debug("export :" + hole);
 		}
-
-		device.flushLine();
 
 	}
 

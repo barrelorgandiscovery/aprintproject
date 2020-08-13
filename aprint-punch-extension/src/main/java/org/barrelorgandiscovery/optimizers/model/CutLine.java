@@ -51,7 +51,6 @@ public class CutLine extends OptimizedObject {
 
 	@Override
 	public double firstX() {
-		
 		return x1;
 	}
 

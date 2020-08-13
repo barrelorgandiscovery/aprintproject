@@ -154,7 +154,7 @@ public class PunchProcessingThread {
 			}
 
 			@Override
-			public void jobError(Exception ex) {
+			public void jobError(Throwable ex) {
 				try {
 					addConsoleLine("error in job :" + ex.getMessage());
 					logger.error(ex);

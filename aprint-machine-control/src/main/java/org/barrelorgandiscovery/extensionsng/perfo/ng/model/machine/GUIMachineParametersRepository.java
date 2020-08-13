@@ -5,6 +5,11 @@ import javax.swing.JPanel;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLPunchMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLMachineParametersPanel;
 
+/**
+ * repository to create associated panel to the machine parameters
+ * @author pfreydiere
+ *
+ */
 public class GUIMachineParametersRepository {
 
   public GUIMachineParametersRepository() {}

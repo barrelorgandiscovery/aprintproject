@@ -8,7 +8,6 @@ public class RectangularHoleDrawer extends HoleDrawer {
 	public RectangularHoleDrawer(DeviceDrawing device, double tailleTrous,
 			double taillePonts, double pasDePontSilReste) {
 		super(device, tailleTrous, taillePonts, pasDePontSilReste);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override

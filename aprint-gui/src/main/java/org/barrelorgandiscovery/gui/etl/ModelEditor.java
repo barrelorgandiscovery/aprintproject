@@ -1008,7 +1008,7 @@ public class ModelEditor extends JPanel {
 				}
 
 				@Override
-				public void jobError(Exception ex) {
+				public void jobError(Throwable ex) {
 					logger.error("error in executing the jobs :" + ex.getMessage(), ex); //$NON-NLS-1$
 					execInUIThread(() -> {
 						console.appendOutput(ex);

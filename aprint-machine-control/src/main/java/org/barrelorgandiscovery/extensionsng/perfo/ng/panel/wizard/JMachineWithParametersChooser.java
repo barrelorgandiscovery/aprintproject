@@ -19,6 +19,7 @@ import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachine;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.GUIMachineParametersRepository;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLLazerMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLPunchMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.lazer.mock.MockLazerMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.mock.MockMachineParameters;
@@ -79,23 +80,26 @@ public class JMachineWithParametersChooser extends JPanel {
 		FormPanel fp = new FormPanel(is);
 		add(fp, BorderLayout.CENTER);
 
-		GRBLPunchMachineParameters gp = new GRBLPunchMachineParameters();
+		GRBLPunchMachineParameters grblpunchpachineparameters = new GRBLPunchMachineParameters();
 		try {
-			PrefixedNamePrefsStorage pps = constructMachinePreferenceStorage(gp);
-			gp.loadParameters(pps);
+			PrefixedNamePrefsStorage pps = constructMachinePreferenceStorage(grblpunchpachineparameters);
+			grblpunchpachineparameters.loadParameters(pps);
 		} catch (Exception ex) {
 			logger.error("error while loading the preference storage for machine :" //$NON-NLS-1$
 					+ ex.getMessage(), ex);
 		}
 
-		selectedMachineParameters = gp;
+		// default selected
+		selectedMachineParameters = grblpunchpachineparameters;
 
-		MockMachineParameters mockMachine = new MockMachineParameters();
+		GRBLLazerMachineParameters grblLazerMachineParameters = new GRBLLazerMachineParameters();
 		
+		MockMachineParameters mockMachine = new MockMachineParameters();
 		MockLazerMachineParameters mockMachineLazer = new MockLazerMachineParameters();
 
 		MachineParameterDisplayer[] displayers = new MachineParameterDisplayer[] { 
-				new MachineParameterDisplayer(gp),
+				new MachineParameterDisplayer(grblpunchpachineparameters),
+				new MachineParameterDisplayer(grblLazerMachineParameters),
 				new MachineParameterDisplayer(mockMachine),
 				new MachineParameterDisplayer(mockMachineLazer)};
 

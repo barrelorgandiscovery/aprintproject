@@ -2077,7 +2077,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 							}
 						}
 
-						public void jobError(Exception t) {
+						public void jobError(Throwable t) {
 							try {
 
 								jobEvent.jobError(p, t);
@@ -2173,7 +2173,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 								p.appendOutput("Aborted", null); //$NON-NLS-1$
 							}
 
-							public void jobError(APrintGroovyConsolePanel p, Exception t) throws Exception {
+							public void jobError(APrintGroovyConsolePanel p, Throwable t) throws Exception {
 								p.appendOutput(t);
 							}
 
@@ -2321,7 +2321,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 							+ Messages.getString("APrint.126")); //$NON-NLS-1$
 				}
 
-				public void jobError(Exception ex) {
+				public void jobError(Throwable ex) {
 					waitininterface.infiniteEndWait();
 					logger.error("export as wav", ex); //$NON-NLS-1$
 					JMessageBox.showError(getOwnerForDialog(), ex);
@@ -2410,7 +2410,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 							+ "successfully exported"); //$NON-NLS-1$
 				}
 
-				public void jobError(Exception ex) {
+				public void jobError(Throwable ex) {
 					waitininterface.infiniteEndWait();
 
 					logger.error("Error while exporting to movie :" //$NON-NLS-1$
@@ -2540,7 +2540,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 							+ Messages.getString("APrint.126")); //$NON-NLS-1$
 				}
 
-				public void jobError(Exception ex) {
+				public void jobError(Throwable ex) {
 					waitininterface.infiniteEndWait();
 					logger.error("export as ogg", ex); //$NON-NLS-1$
 					JMessageBox.showError(this, ex);
@@ -3021,7 +3021,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 										public void jobAborted() {
 										}
 
-										public void jobError(Exception t) {
+										public void jobError(Throwable t) {
 											try {
 
 												logger.error("error while executing script :" //$NON-NLS-1$

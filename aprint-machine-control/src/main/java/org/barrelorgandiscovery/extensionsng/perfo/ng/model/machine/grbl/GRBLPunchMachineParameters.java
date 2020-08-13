@@ -14,6 +14,11 @@ import org.barrelorgandiscovery.prefs.IPrefsStorage;
  */
 public class GRBLPunchMachineParameters extends AbstractMachineParameters {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1616242921334870489L;
+	
 	private static final String COM_PORT_STORAGEPROPERTY_SAVE = "comPort";
 	/**
 	 * communication com port

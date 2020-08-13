@@ -1778,7 +1778,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 						try {
 							internalOpenVirtualBookWindow(r.vb, result, r.ins, null);
 
-						} catch (Exception e) {
+						} catch (Throwable e) {
 							logger.error(e.getMessage(), e);
 							JMessageBox.showMessage(APrintNG.this.getOwnerForDialog(), e.getMessage());
 						} finally {
@@ -1788,7 +1788,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 				});
 			}
 
-			public void jobError(final Exception ex) {
+			public void jobError(final Throwable ex) {
 				SwingUtilities.invokeLater(new Runnable() {
 					public void run() {
 
@@ -1865,7 +1865,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 								dialog.setSize(700, 500);
 								dialog.setVisible(true);
 
-							} catch (Exception ex) {
+							} catch (Throwable ex) {
 								logger.error(ex.getMessage(), ex);
 								JMessageBox.showMessage(APrintNG.this.getOwnerForDialog(), ex.getMessage());
 							}
@@ -2437,7 +2437,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 				public void jobFinished(Object result) {
 				}
 
-				public void jobError(Exception ex) {
+				public void jobError(Throwable ex) {
 					JMessageBox.showMessage(APrintNG.this, Messages.getString("APrintNG.206") + file.getName()); //$NON-NLS-1$
 				}
 

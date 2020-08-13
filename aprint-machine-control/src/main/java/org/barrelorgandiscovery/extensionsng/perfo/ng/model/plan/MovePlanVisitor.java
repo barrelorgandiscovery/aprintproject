@@ -32,7 +32,7 @@ public class MovePlanVisitor extends CommandVisitor {
 	@Override
 	public void visit(int index, CutToCommand cutToCommand) throws Exception {
 		constructedPunchPlan.getCommandsByRef().add(new CutToCommand(cutToCommand.getX() + deltaX,
-				cutToCommand.getY() + deltaY, cutToCommand.getPowerFactor(), cutToCommand.getSpeed()));
+				cutToCommand.getY() + deltaY, cutToCommand.getPowerFactor(), cutToCommand.getSpeedFactor()));
 	}
 
 	@Override

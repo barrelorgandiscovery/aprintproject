@@ -337,7 +337,7 @@ public class Scale implements Serializable {
 			this.properties = new HashMap<String, String>(properties);
 		}
 	}
-
+	
 	/**
 	 * 
 	 * get the distance between each track (in mm)

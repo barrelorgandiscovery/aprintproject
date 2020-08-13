@@ -31,6 +31,11 @@ import org.barrelorgandiscovery.gui.aedit.VirtualBookComponentLayer;
 import org.barrelorgandiscovery.gui.aedit.VirtualBookComponentLayerName;
 import org.barrelorgandiscovery.scale.Scale;
 
+/**
+ * this layer display the commands on the book
+ * @author pfreydieere
+ *
+ */
 public class PunchCommandLayer implements VirtualBookComponentLayer,
 		VirtualBookComponentLayerName {
 
@@ -115,9 +120,9 @@ public class PunchCommandLayer implements VirtualBookComponentLayer,
 						jcarton.pixelToMm(rect.width),
 						jcarton.pixelToMm(rect.height));
 			}
-			SortedSet<XYCommand> subSet = searchForXYCommands(rectcarton);
+			SortedSet<XYCommand> subSet = index; // searchForXYCommands(rectcarton);
 
-			drawPunches(g, jcarton, localpunches, g2d, transparent, rect,
+			drawXYCommands(g, jcarton, localpunches, g2d, transparent, rect,
 					subSet);
 		} finally {
 			g2d.setComposite(oldcomposite);
@@ -125,7 +130,7 @@ public class PunchCommandLayer implements VirtualBookComponentLayer,
 		}
 	}
 
-	private void drawPunches(Graphics g, JVirtualBookComponent jcarton,
+	private void drawXYCommands(Graphics g, JVirtualBookComponent jcarton,
 			PunchPlan localpunches, Graphics2D g2d, Composite transparent,
 			Rectangle rect, SortedSet<XYCommand> subSet) {
 
@@ -258,7 +263,10 @@ public class PunchCommandLayer implements VirtualBookComponentLayer,
 					int c = Double.compare(o1.getX(), o2.getX());
 					if (c != 0)
 						return c;
-					return Double.compare(o1.getY(), o2.getY());
+					c = Double.compare(o1.getY(), o2.getY());
+					if (c != 0)
+						return c;
+					return Integer.compare(o1.hashCode(), o2.hashCode());
 				}
 			});
 

@@ -74,6 +74,7 @@ public abstract class DeviceDrawing {
 	}
 	
 	public void endGroup() {
+		flushLine();
 		
 	}
 
@@ -248,7 +249,6 @@ public abstract class DeviceDrawing {
 		drawTo(endx, ypiste + halfheight);
 		drawTo(x, ypiste + halfheight);
 		drawTo(x, ypiste - halfheight);
-
 	}
 
 	public void drawTo(Coordinate c) {
@@ -264,7 +264,7 @@ public abstract class DeviceDrawing {
 
 	public void flushLine() {
 		if (currentLine == null)
-			throw new RuntimeException("invalid draw, nothing to flush");
+			return;
 
 		if (currentLine.size() <= 1)
 			throw new RuntimeException("invalid draw, not enough points");
@@ -302,19 +302,21 @@ public abstract class DeviceDrawing {
 	 * draw an arrow
 	 * 
 	 * @param vector vector for the arrow
-	 * @param origin origin of the arrow
+	 * @param arroworigin origin of the arrow
 	 * @param width  lengths of the arrow borders
 	 */
-	public void drawArrow(Vect vector, Coordinate origin, double width) {
+	public void drawArrow(Vect vector, Coordinate arroworigin, double width) {
 
-		Coordinate end = vector.plus(origin);
+		Coordinate end = vector.plus(arroworigin);
 
-		Vect v = new Vect(0, 1).scale(width);
+		Vect v = vector.orthoNorme().scale(width);
 		Vect inverted = v.rotateOrigin(Math.PI);
+		
 		Vect o1 = inverted.rotateOrigin(Math.PI / 180.0 * 15);
 		Vect o2 = inverted.rotateOrigin(-Math.PI / 180.0 * 15);
 
-		moveTo(origin);
+		// draw the main line
+		moveTo(arroworigin);
 		drawTo(end);
 
 		moveTo(end);
@@ -322,6 +324,8 @@ public abstract class DeviceDrawing {
 
 		moveTo(end);
 		drawTo(o2.plus(end));
+		
+		
 
 	}
 

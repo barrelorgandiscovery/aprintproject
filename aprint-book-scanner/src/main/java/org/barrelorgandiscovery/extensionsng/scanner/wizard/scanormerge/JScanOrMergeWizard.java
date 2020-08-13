@@ -19,57 +19,63 @@ import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 
 public class JScanOrMergeWizard extends JPanel {
-	
-  private IPrefsStorage ps;
 
-  private Wizard wizard;
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8973318931575705458L;
 
-  public JScanOrMergeWizard(IPrefsStorage ps) throws Exception {
-    this.ps = ps;
-    initComponents();
-  }
+	private IPrefsStorage ps;
 
-  protected void initComponents() throws Exception {
+	private Wizard wizard;
 
-    // scan steps
-    JOutputFolderChooserStep s = new JOutputFolderChooserStep(null, ps);
-    s.setLabelOutputFolder("Choose Written Output Folder for images ...");
-    JScanParameterStep p = new JScanParameterStep(s, ps);
-    JScanStep scanStep = new JScanStep(p, s);
+	public JScanOrMergeWizard(IPrefsStorage ps) throws Exception {
+		this.ps = ps;
+		initComponents();
+	}
 
-    // merge steps
+	protected void initComponents() throws Exception {
 
-    // folder step for choosing folder
-    JChooseFolderStep sf = new JChooseFolderStep(ps);
+		// scan steps
+		JOutputFolderChooserStep s = new JOutputFolderChooserStep(null, ps);
+		s.setLabelOutputFolder("Choose Written Output Folder for images ...");
+		JScanParameterStep p = new JScanParameterStep(s, ps);
+		JScanStep scanStep = new JScanStep(p, s);
 
-    JMergeImagesStep m = new JMergeImagesStep(sf, ps);
+		// merge steps
 
-    JScanOrMergeStep scanOrmergeStep =
-        new JScanOrMergeStep(null, Arrays.asList(sf, m), Arrays.asList(s, p, scanStep), ps);
+		// folder step for choosing folder
+		JChooseFolderStep sf = new JChooseFolderStep(ps);
 
-    wizard = new Wizard(Arrays.asList(scanOrmergeStep), null);
-    // give the context to step
-    scanOrmergeStep.initWizard(wizard);
-    
-    setLayout(new BorderLayout());
-    add(wizard, BorderLayout.CENTER);
+		JMergeImagesStep m = new JMergeImagesStep(sf, ps);
 
-    wizard.toFirst();
-  }
+		// this is the alternative step, to choose between methods
+		JScanOrMergeStep scanOrmergeStep = new JScanOrMergeStep(null, Arrays.asList(sf, m),
+				Arrays.asList(s, p, scanStep), ps);
 
-  public static void main(String[] args) throws Exception {
+		wizard = new Wizard(Arrays.asList(scanOrmergeStep), null);
+		// give the context to step
+		scanOrmergeStep.initWizard(wizard);
 
-    BasicConfigurator.configure(new LF5Appender());
+		setLayout(new BorderLayout());
+		add(wizard, BorderLayout.CENTER);
 
-    FilePrefsStorage p = new FilePrefsStorage(new File("c:\\temp\\wizardscan.properties"));
-    p.load();
+		wizard.toFirst();
+	}
 
-    JFrame f = new JFrame();
-    f.getContentPane().setLayout(new BorderLayout());
-    f.getContentPane().add(new JScanOrMergeWizard(p), BorderLayout.CENTER);
+	public static void main(String[] args) throws Exception {
 
-    f.setSize(800, 600);
-    f.setVisible(true);
-    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-  }
+		BasicConfigurator.configure(new LF5Appender());
+
+		FilePrefsStorage p = new FilePrefsStorage(new File("c:\\temp\\wizardscan.properties"));
+		p.load();
+
+		JFrame f = new JFrame();
+		f.getContentPane().setLayout(new BorderLayout());
+		f.getContentPane().add(new JScanOrMergeWizard(p), BorderLayout.CENTER);
+
+		f.setSize(800, 600);
+		f.setVisible(true);
+		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	}
 }

@@ -30,182 +30,166 @@ import com.jeta.forms.components.panel.FormPanel;
 
 public class StepChooseMachine extends JPanel implements Step {
 
-  private static Logger logger = Logger.getLogger(StepChooseMachine.class);
- 
-  private IPrefsStorage ps;
-  
-  private JMachineWithParametersChooser machineChoose;
+	private static Logger logger = Logger.getLogger(StepChooseMachine.class);
 
-  public StepChooseMachine(IPrefsStorage ps) throws Exception {
-    this.ps = ps;
-    initComponents();
-  }
+	private IPrefsStorage ps;
 
-  protected void initComponents() throws Exception {
+	private JMachineWithParametersChooser machineChoose;
 
-    setLayout(new BorderLayout());
-    FormPanel panel =
-        new FormPanel(getClass().getResourceAsStream("choosemachine.jfrm")); //$NON-NLS-1$
-    add(
-        new JScrollPane(
-            panel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER),
-        BorderLayout.CENTER);
+	public StepChooseMachine(IPrefsStorage ps) throws Exception {
+		this.ps = ps;
+		initComponents();
+	}
 
-    StringContent content = new StringContent();
-    StringBuilder sb = new StringBuilder();
-    sb.append("<html><body>"); //$NON-NLS-1$
+	protected void initComponents() throws Exception {
 
-    sb.append("<h2>")
-        .append(Messages.getString("StepChooseMachine.6")) //$NON-NLS-1$ //$NON-NLS-2$
-        .append("</h2>"); //$NON-NLS-1$
-    sb.append("<p><center><img src=\"data:image/jpeg;base64,"); //$NON-NLS-1$
-    InputStream imageStream = getClass().getResourceAsStream("perfo.jpg"); //$NON-NLS-1$
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    StreamsTools.copyStream(imageStream, baos);
+		setLayout(new BorderLayout());
+		FormPanel panel = new FormPanel(getClass().getResourceAsStream("choosemachine.jfrm")); //$NON-NLS-1$
+		add(new JScrollPane(panel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER),
+				BorderLayout.CENTER);
 
-    sb.append(new String(org.apache.commons.codec.binary.Base64.encodeBase64(baos.toByteArray())));
-    sb.append("\" ></center></p>") //$NON-NLS-1$
-        .append(
-            "<p>"
-                + //$NON-NLS-1$
-                Messages.getString("StepChooseMachine.14") //$NON-NLS-1$
-                + Messages.getString("StepChooseMachine.15")
-                + "<br/>" //$NON-NLS-1$
-                + Messages.getString("StepChooseMachine.16") //$NON-NLS-1$
-                + "</p><p>" //$NON-NLS-1$
-                + Messages.getString("StepChooseMachine.18")
-                + //$NON-NLS-1$
-                "<a href=\"http://www.barrel-organ-discovery.org\">http://www.barrel-organ-discovery.org</a>") //$NON-NLS-1$
-        .append("</body></html>"); //$NON-NLS-1$
+		StringContent content = new StringContent();
+		StringBuilder sb = new StringBuilder();
+		sb.append("<html><body>"); //$NON-NLS-1$
 
-    content.insertString(0, sb.toString());
+		sb.append("<h2>").append(Messages.getString("StepChooseMachine.6")) //$NON-NLS-2$ //$NON-NLS-2$
+				.append("</h2>"); //$NON-NLS-1$
+		sb.append("<p><center><img src=\"data:image/jpeg;base64,"); //$NON-NLS-1$
+		InputStream imageStream = getClass().getResourceAsStream("perfo.jpg"); //$NON-NLS-1$
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		StreamsTools.copyStream(imageStream, baos);
 
-    final JEditorPane presentation =
-        new JEditorPane() {
-          @Override
-          public Dimension getPreferredSize() {
-            Dimension size = super.getPreferredSize();
-            if (size.getWidth() > 300) {
-              size.setSize(300, size.getHeight());
-            }
-            return size;
-          }
-        };
-    // presentation.setAutoscrolls(true);
+		sb.append(new String(org.apache.commons.codec.binary.Base64.encodeBase64(baos.toByteArray())));
+		sb.append("\" ></center></p>") //$NON-NLS-1$
+				.append("<p>" + // $NON-NLS-1$
+						Messages.getString("StepChooseMachine.14") //$NON-NLS-1$
+						+ Messages.getString("StepChooseMachine.15") + "<br/>" //$NON-NLS-2$
+						+ Messages.getString("StepChooseMachine.16") //$NON-NLS-1$
+						+ "</p><p>" //$NON-NLS-1$
+						+ Messages.getString("StepChooseMachine.18") + // $NON-NLS-1$
+						"<a href=\"http://www.barrel-organ-discovery.org\">http://www.barrel-organ-discovery.org</a>") //$NON-NLS-1$
+				.append("</body></html>"); //$NON-NLS-1$
 
-    // presentation.setAutoscrolls(true);
-    presentation.setContentType("text/html"); //$NON-NLS-1$
-    presentation.setEditorKit(new CustomEditorKit());
-    presentation.setText(sb.toString());
+		content.insertString(0, sb.toString());
 
-    presentation.setEditable(false);
-  
-    panel.getFormAccessor().replaceBean("presentation", presentation); //$NON-NLS-1$
+		final JEditorPane presentation = new JEditorPane() {
+			@Override
+			public Dimension getPreferredSize() {
+				Dimension size = super.getPreferredSize();
+				if (size.getWidth() > 300) {
+					size.setSize(300, size.getHeight());
+				}
+				return size;
+			}
+		};
+		// presentation.setAutoscrolls(true);
 
-    JButton pp = (JButton) panel.getButton("openplan"); //$NON-NLS-1$
-    pp.setText(Messages.getString("StepChooseMachine.4")); //$NON-NLS-1$
-    pp.setToolTipText(Messages.getString("StepChooseMachine.5")); //$NON-NLS-1$
-    pp.setEnabled(false);
-    pp.addActionListener(
-        new ActionListener() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            openPlan();
-          }
-        });
+		// presentation.setAutoscrolls(true);
+		presentation.setContentType("text/html"); //$NON-NLS-1$
+		presentation.setEditorKit(new CustomEditorKit());
+		presentation.setText(sb.toString());
 
-    // choose the machine configuration
+		presentation.setEditable(false);
 
-    machineChoose = new JMachineWithParametersChooser(ps);
-    panel.getFormAccessor().replaceBean("lblmachinechoose", machineChoose);
-    
-    
-    assert ps != null;
+		panel.getFormAccessor().replaceBean("presentation", presentation); //$NON-NLS-1$
 
-  
-  }
+		JButton pp = (JButton) panel.getButton("openplan"); //$NON-NLS-1$
+		pp.setText(Messages.getString("StepChooseMachine.4")); //$NON-NLS-1$
+		pp.setToolTipText(Messages.getString("StepChooseMachine.5")); //$NON-NLS-1$
+		pp.setEnabled(false);
+		pp.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				openPlan();
+			}
+		});
 
+		// choose the machine configuration
 
-  private void openPlan() {
-    // not implemented yet
-  }
+		machineChoose = new JMachineWithParametersChooser(ps);
+		panel.getFormAccessor().replaceBean("lblmachinechoose", machineChoose);
 
+		assert ps != null;
 
-  @Override
-  public String getId() {
-    return "choosemachine"; //$NON-NLS-1$
-  }
+	}
 
-  private Step parentStep;
- 
-  public Step getParentStep() {
-    return parentStep;
-  }
+	private void openPlan() {
+		// not implemented yet
+	}
 
-  public void setParentStep(Step parent) {
-    this.parentStep = parent;
-  }
+	@Override
+	public String getId() {
+		return "choosemachine"; //$NON-NLS-1$
+	}
 
-  public String getLabel() {
-    return Messages.getString("StepChooseMachine.9"); //$NON-NLS-1$
-  }
+	private Step parentStep;
 
-  public void activate(
-      Serializable state, WizardStates allStepsStates, StepStatusChangedListener stepListener)
-      throws Exception {
+	public Step getParentStep() {
+		return parentStep;
+	}
 
-    if (state != null) {
-      assert state instanceof AbstractMachineParameters;
-      machineChoose.setSelectedMachineParameters((AbstractMachineParameters) state);
-    }
+	public void setParentStep(Step parent) {
+		this.parentStep = parent;
+	}
 
-    // get the selected machine parameters
+	public String getLabel() {
+		return Messages.getString("StepChooseMachine.9"); //$NON-NLS-1$
+	}
 
-  }
+	public void activate(Serializable state, WizardStates allStepsStates, StepStatusChangedListener stepListener)
+			throws Exception {
 
-  public Serializable unActivateAndGetSavedState() throws Exception {
+		if (state != null) {
+			assert state instanceof AbstractMachineParameters;
+			machineChoose.setSelectedMachineParameters((AbstractMachineParameters) state);
+		}
 
-    // store the machine parameters in preferences
-    AbstractMachineParameters selectedMachineParameters = machineChoose.getSelectedMachineParameters();
-  if (selectedMachineParameters != null) {
-      // serializable
+		// get the selected machine parameters
 
-      PrefixedNamePrefsStorage pnps = machineChoose.constructMachinePreferenceStorage(selectedMachineParameters);
+	}
 
-      try {
-        selectedMachineParameters.saveParameters(pnps);
-        pnps.save();
-      } catch (Throwable ex) {
-        logger.error(
-            "error while saving preferences :" + ex.getMessage(), //$NON-NLS-1$
-            ex);
-        // continue
-      }
-    }
+	public Serializable unActivateAndGetSavedState() throws Exception {
 
-    return selectedMachineParameters;
-  }
-  
-  public AbstractMachine getSelectedMachine() throws Exception {
-	  // delegate
-	  return machineChoose.getSelectedMachine();
-  }
-  
-  public AbstractMachineParameters getMachineParameters() throws Exception {
-	  // delegate
-	  return machineChoose.getSelectedMachineParameters();
-  }
+		// store the machine parameters in preferences
+		AbstractMachineParameters selectedMachineParameters = machineChoose.getSelectedMachineParameters();
+		if (selectedMachineParameters != null) {
+			// serializable
 
-  public boolean isStepCompleted() {
-    return true;
-  }
+			PrefixedNamePrefsStorage pnps = machineChoose.constructMachinePreferenceStorage(selectedMachineParameters);
 
-  public String getDetails() {
-    return Messages.getString("StepChooseMachine.10"); //$NON-NLS-1$
-  }
+			try {
+				selectedMachineParameters.saveParameters(pnps);
+				pnps.save();
+			} catch (Throwable ex) {
+				logger.error("error while saving preferences :" + ex.getMessage(), //$NON-NLS-1$
+						ex);
+				// continue
+			}
+		}
 
-  @Override
-  public Icon getPageImage() {
-    return null;
-  }
+		return selectedMachineParameters;
+	}
+
+	public AbstractMachine getSelectedMachine() throws Exception {
+		// delegate
+		return machineChoose.getSelectedMachine();
+	}
+
+	public AbstractMachineParameters getMachineParameters() throws Exception {
+		// delegate
+		return machineChoose.getSelectedMachineParameters();
+	}
+
+	public boolean isStepCompleted() {
+		return true;
+	}
+
+	public String getDetails() {
+		return Messages.getString("StepChooseMachine.10"); //$NON-NLS-1$
+	}
+
+	@Override
+	public Icon getPageImage() {
+		return null;
+	}
 }

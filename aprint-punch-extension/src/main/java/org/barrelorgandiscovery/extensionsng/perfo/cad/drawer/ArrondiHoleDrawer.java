@@ -60,6 +60,7 @@ public class ArrondiHoleDrawer extends HoleDrawer {
 			d.drawTo(xstart, ypiste + halfheight);
 		}
 
+		d.flushLine();
 	}
 
 }

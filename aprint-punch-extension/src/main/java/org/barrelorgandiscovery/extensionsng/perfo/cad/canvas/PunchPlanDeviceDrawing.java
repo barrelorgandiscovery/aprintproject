@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.OutputStream;
 import java.util.ArrayList;
 
+import org.barrelorgandiscovery.extensionsng.perfo.cad.CADExporterExtensionVirtualBook;
+import org.barrelorgandiscovery.extensionsng.perfo.cad.CADVirtualBookExporter;
 import org.barrelorgandiscovery.optimizers.model.CutLine;
 import org.barrelorgandiscovery.optimizers.model.GroupedCutLine;
 import org.barrelorgandiscovery.optimizers.model.OptimizedObject;
@@ -54,8 +56,8 @@ public class PunchPlanDeviceDrawing extends DeviceDrawing {
 
 	@Override
 	public void endGroup() {
-		flushCurrent();
 		super.endGroup();
+		flushCurrent();
 	}
 
 	@Override
@@ -63,6 +65,16 @@ public class PunchPlanDeviceDrawing extends DeviceDrawing {
 
 		if (!(g instanceof LineString)) {
 			throw new RuntimeException("unsupported geometry " + g);
+		}
+
+		// don't export the reference arrow
+		if (CADVirtualBookExporter.LAYER_REFERENCE.equals(getCurrentLayer())) {
+			return;
+		}
+
+		// don't export the bords for punch machines
+		if (CADVirtualBookExporter.LAYER_BORDS.equals(getCurrentLayer())) {
+			return;
 		}
 
 		LineString ls = (LineString) g;
@@ -107,5 +119,5 @@ public class PunchPlanDeviceDrawing extends DeviceDrawing {
 	public boolean ignoreReference() {
 		return true;
 	}
-	
+
 }

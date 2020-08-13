@@ -24,6 +24,7 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMach
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControl;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.Command;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.CutToCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.DisplacementCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchPlan;
@@ -187,11 +188,15 @@ public class StepResume extends JPanel implements Step {
 					// export plan
 
 					PunchBookAndPlan reversed = reverseToHaveTheReferenceUp(vb, currentPlan);
+
 					OutputStream os = fileToSave.getOutputStream();
 					try {
 						OutputStreamWriter w = new OutputStreamWriter(os);
 						try {
-							PunchPlanIO.exportToGRBL(w, reversed.punchplan);
+
+							PunchPlanIO.exportToGRBL(w, reversed.punchplan,
+									sm.getSelectedMachine().createNewGCodeCompiler(sm.getMachineParameters()));
+
 						} finally {
 							w.close();
 						}
@@ -299,6 +304,14 @@ public class StepResume extends JPanel implements Step {
 		return null;
 	}
 
+	/**
+	 * in case the reference is reverted, this switch the plan
+	 * 
+	 * @param vb
+	 * @param punchplan
+	 * @return
+	 * @throws Exception
+	 */
 	public static PunchBookAndPlan reverseToHaveTheReferenceUp(VirtualBook vb, PunchPlan punchplan) throws Exception {
 		Scale scale = vb.getScale();
 		assert scale != null;
@@ -312,6 +325,7 @@ public class StepResume extends JPanel implements Step {
 		logger.debug("reverse the elements");
 		assert scale.isPreferredViewedInversed();
 
+		// new scale with preferred view inversed modified
 		Scale modifiedScale = new Scale(scale.getName(), scale.getWidth(), scale.getIntertrackHeight(),
 				scale.getTrackWidth(), scale.getFirstTrackAxis(), scale.getTrackNb(), scale.getTracksDefinition(),
 				scale.getPipeStopGroupList(), scale.getSpeed(), scale.getConstraints(), scale.getInformations(),
@@ -355,6 +369,14 @@ public class StepResume extends JPanel implements Step {
 					reversedCommands
 							.add(new PunchCommand(maxX - displacementCommand.getX(), displacementCommand.getY()));
 
+				} else if (c instanceof CutToCommand) {
+					CutToCommand cutcommand = (CutToCommand)c;
+					reversedCommands.add(new CutToCommand(
+							maxX - cutcommand.getX(),
+							cutcommand.getY(), 
+							cutcommand.getPowerFactor(),
+							cutcommand.getSpeedFactor()
+							));
 				} else {
 					throw new Exception("unsupported command type, implementation error :" + c);
 				}

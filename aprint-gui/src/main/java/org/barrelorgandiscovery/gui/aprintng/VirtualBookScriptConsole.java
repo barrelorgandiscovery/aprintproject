@@ -142,7 +142,7 @@ public class VirtualBookScriptConsole extends JDialog {
 										pianoroll.endEventTransaction();
 									}
 
-									public void jobError(Exception t) {
+									public void jobError(Throwable t) {
 										try {
 
 											logger.error(

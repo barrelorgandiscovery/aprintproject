@@ -7,16 +7,18 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.io.Writer;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.gcode.GCodeCompiler;
 
 /**
- * this class is responsible to import / export XML punch plans, 
- * and convert them into model objects
+ * this class is responsible to import / export XML punch plans, and convert
+ * them into model objects
  * 
  * @author pfreydiere
  *
@@ -25,50 +27,26 @@ public class PunchPlanIO {
 
 	private static Logger logger = Logger.getLogger(PunchPlanIO.class);
 
-	public static void exportToGRBL(File file, PunchPlan p) throws Exception {
+	public static void exportToGRBL(File file, PunchPlan p, GCodeCompiler gcodeCompiler) throws Exception {
 
 		final FileWriter fos = new FileWriter(file);
 		try {
-			exportToGRBL(fos, p);
+			exportToGRBL(fos, p, gcodeCompiler);
 		} finally {
 			fos.close();
 		}
 	}
 
-	public static void exportToGRBL(Writer writer, PunchPlan p) throws Exception {
+	public static void exportToGRBL(Writer writer, PunchPlan p, GCodeCompiler gcodeCompiler) throws Exception {
 
 		// write header
 		final AtomicInteger ai = new AtomicInteger(0);
 
-		CommandVisitor v = new CommandVisitor() {
-			@Override
-			public void visit(int index, DisplacementCommand displacementCommand) throws Exception {
-				writer.write(String.format(Locale.ENGLISH, "N%1$d G90 X%2$f Y%3$f\n", //$NON-NLS-1$
-						ai.addAndGet(1), displacementCommand.getY(), // The X Axis (Y in punch plan)
-						displacementCommand.getX()));
-			}
-
-			@Override
-			public void visit(int index, PunchCommand punchCommand) throws Exception {
-				writer.write(String.format(Locale.ENGLISH, "N%1$d G90 X%2$f Y%3$f\n", ai.addAndGet(1), // $NON-NLS-1$
-						punchCommand.getY(), punchCommand.getX()));
-				writer.write("M100\n"); //$NON-NLS-1$
-			}
-			
-			@Override
-			public void visit(int index, CutToCommand cutToCommand) throws Exception {
-				@@@
-				writer.write(String.format(Locale.ENGLISH, "N%1$d G1 X%2$f Y%3$f\n", ai.addAndGet(1), // $NON-NLS-1$
-						cutToCommand.getY(), cutToCommand.getX()));
-				
-			}
-
-			@Override
-			public void visit(int index, HomingCommand command) throws Exception {
-			}
-		};
-
-		v.visit(p);
+		gcodeCompiler.visit(p);
+		List<String> list = gcodeCompiler.getGCODECommands();
+		for (String s : list) {
+			writer.write(s + "\n");
+		}
 
 	}
 

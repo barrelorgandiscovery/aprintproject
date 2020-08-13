@@ -11,8 +11,15 @@ import org.barrelorgandiscovery.prefs.IPrefsStorage;
  */
 public class GRBLLazerMachineParameters extends AbstractMachineParameters {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -443494675635558228L;
+	
 	private static final String COM_PORT_STORAGEPROPERTY_SAVE = "comPort";
 	private static final String MAX_SPEED = "maxSpeed";
+	private static final String MAX_POWER = "maxPower";
+	
 	
 	/**
 	 * communication com port
@@ -20,6 +27,7 @@ public class GRBLLazerMachineParameters extends AbstractMachineParameters {
 	String comPort = "COM3";
 
 	Integer maxspeed = 1000;
+	Integer maxPower = 1000;
 
 	public String getPort() {
 		return comPort;
@@ -39,6 +47,14 @@ public class GRBLLazerMachineParameters extends AbstractMachineParameters {
 		this.maxspeed = maxspeed;
 	}
 
+	public void setMaxPower(Integer maxPower) {
+		this.maxPower = maxPower;
+	}
+	
+	public Integer getMaxPower() {
+		return maxPower;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -47,7 +63,7 @@ public class GRBLLazerMachineParameters extends AbstractMachineParameters {
 	 */
 	@Override
 	public String getLabelName() {
-		return "Punch Machine GRBL";
+		return "Lazer Machine GRBL 1.1";
 	}
 
 	@Override
@@ -59,7 +75,7 @@ public class GRBLLazerMachineParameters extends AbstractMachineParameters {
 		}
 		
 		maxspeed = ps.getIntegerProperty(MAX_SPEED, 1000);
-		
+		maxPower = ps.getIntegerProperty(MAX_POWER, 1000);
 	}
 
 	@Override
@@ -67,6 +83,8 @@ public class GRBLLazerMachineParameters extends AbstractMachineParameters {
 		assert ps != null;
 		ps.setStringProperty(COM_PORT_STORAGEPROPERTY_SAVE, comPort);
 		ps.setIntegerProperty(MAX_SPEED, maxspeed);
+		ps.setIntegerProperty(MAX_POWER, maxPower);
+		
 	}
 
 }

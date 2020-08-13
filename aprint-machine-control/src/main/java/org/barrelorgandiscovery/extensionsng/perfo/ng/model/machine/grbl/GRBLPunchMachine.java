@@ -4,6 +4,7 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.messages.Messages;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.BaseAbstractPunchMachine;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControl;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.gcode.GCodeCompiler;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.gcode.GRBLPunchCompilerVisitor;
 
 /**
@@ -40,6 +41,9 @@ public class GRBLPunchMachine extends BaseAbstractPunchMachine {
 		return gmc;
 	}
 
-
+	@Override
+	public GCodeCompiler createNewGCodeCompiler(AbstractMachineParameters parameters) throws Exception {
+		return new GRBLPunchCompilerVisitor();
+	}
 
 }

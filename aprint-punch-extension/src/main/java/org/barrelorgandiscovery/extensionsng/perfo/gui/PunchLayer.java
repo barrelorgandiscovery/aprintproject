@@ -9,6 +9,7 @@ import java.awt.Paint;
 import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.awt.geom.Rectangle2D;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -132,6 +133,49 @@ public class PunchLayer implements VirtualBookComponentLayer, VirtualBookCompone
 			OptimizedObject current = iterator.next();
 
 			int i = indexToInteger.get(current);
+			
+			// draw displacement lines first (to be on the bottom)
+
+			if (i < localpunches.length - 1) {
+				OptimizedObject nextOne = localpunches[i + 1];
+
+				int lastX = jcarton.convertCartonToScreenX(current.lastX());
+				int lastY = jcarton.convertCartonToScreenY(
+						(isPreferredViewInverted ? scale.getWidth() - current.lastY() : current.lastY()));
+
+				int x2 = jcarton.convertCartonToScreenX(nextOne.firstX());
+				int y2 = jcarton.convertCartonToScreenY(
+						(isPreferredViewInverted ? scale.getWidth() - nextOne.firstY() : nextOne.firstY()));
+
+				// if (rect.intersectsLine(lastX, lastY, x2, y2)) {
+					// g2d.setComposite(transparent);
+					g.drawLine(lastX, lastY, x2, y2);
+					// g2d.setComposite(oldcomposite);
+				//}
+
+			}
+
+			if (i > 1) {
+				OptimizedObject previousOne = localpunches[i - 1];
+
+				int firstX = jcarton.convertCartonToScreenX(current.firstX());
+				int firstY = jcarton.convertCartonToScreenY(
+						(isPreferredViewInverted ? scale.getWidth() - current.firstY() : current.firstY()));
+
+				int x2 = jcarton.convertCartonToScreenX(previousOne.lastX());
+				int y2 = jcarton.convertCartonToScreenY(
+						(isPreferredViewInverted ? scale.getWidth() - previousOne.lastY() : previousOne.lastY()));
+
+				// if (rect.intersectsLine(firstX, firstY, x2, y2)) {
+					// g2d.setComposite(transparent);
+					g.drawLine(firstX, firstY, x2, y2);
+					// g2d.setComposite(oldcomposite);
+				//}
+					
+			}
+
+			
+			
 
 			if (current instanceof Punch) {
 
@@ -198,49 +242,13 @@ public class PunchLayer implements VirtualBookComponentLayer, VirtualBookCompone
 				CutLine cl = (CutLine) current;
 
 				drawCutLine(g, jcarton, g2d, scale, isPreferredViewInverted, cl);
+				
 			} else if (current instanceof GroupedCutLine) {
 
 				for (CutLine l : ((GroupedCutLine) current).getLinesByRefs()) {
 					drawCutLine(g, jcarton, g2d, scale, isPreferredViewInverted, l);
 				}
 
-			}
-
-			if (i < localpunches.length - 1) {
-				OptimizedObject nextOne = localpunches[i + 1];
-
-				int lastX = jcarton.convertCartonToScreenX(current.lastX());
-				int lastY = jcarton.convertCartonToScreenY(
-						(isPreferredViewInverted ? scale.getWidth() - current.lastY() : current.lastY()));
-
-				int x2 = jcarton.convertCartonToScreenX(nextOne.firstX());
-				int y2 = jcarton.convertCartonToScreenY(
-						(isPreferredViewInverted ? scale.getWidth() - nextOne.firstY() : nextOne.firstY()));
-
-				if (rect.intersectsLine(lastX, lastY, x2, y2)) {
-					// g2d.setComposite(transparent);
-					g.drawLine(lastX, lastY, x2, y2);
-					// g2d.setComposite(oldcomposite);
-				}
-
-			}
-
-			if (i > 1) {
-				OptimizedObject previousOne = localpunches[i - 1];
-
-				int firstX = jcarton.convertCartonToScreenX(current.firstX());
-				int firstY = jcarton.convertCartonToScreenY(
-						(isPreferredViewInverted ? scale.getWidth() - current.firstY() : current.firstY()));
-
-				int x2 = jcarton.convertCartonToScreenX(previousOne.lastX());
-				int y2 = jcarton.convertCartonToScreenY(
-						(isPreferredViewInverted ? scale.getWidth() - previousOne.lastY() : previousOne.lastY()));
-
-				if (rect.intersectsLine(firstX, firstY, x2, y2)) {
-					// g2d.setComposite(transparent);
-					g.drawLine(firstX, firstY, x2, y2);
-					// g2d.setComposite(oldcomposite);
-				}
 			}
 
 		}
@@ -273,7 +281,7 @@ public class PunchLayer implements VirtualBookComponentLayer, VirtualBookCompone
 
 		Envelope searchEnvelope = new Envelope(rectcarton.x, rectcarton.x + rectcarton.width, rectcarton.y,
 				rectcarton.y + rectcarton.height);
-		return (List<OptimizedObject>) quadTree.queryAll();
+		return (List<OptimizedObject>) Arrays.asList(punches);
 		// return (List<OptimizedObject>) quadTree.query(searchEnvelope);
 	}
 

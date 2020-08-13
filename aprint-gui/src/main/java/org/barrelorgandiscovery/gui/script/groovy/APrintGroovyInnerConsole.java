@@ -198,7 +198,7 @@ public class APrintGroovyInnerConsole extends APrintNGInternalFrame {
 							}
 						}
 
-						public void jobError(Exception ex) {
+						public void jobError(Throwable ex) {
 							try {
 								consolePanel.appendOutputNl("\n ERROR >> " //$NON-NLS-1$
 										+ ex.getMessage(), new SimpleAttributeSet());

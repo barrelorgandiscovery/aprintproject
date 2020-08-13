@@ -228,7 +228,7 @@ public class StepViewAndEditDisk extends BasePanelStep {
 					}
 
 					@Override
-					public void jobError(Exception ex) {
+					public void jobError(Throwable ex) {
 
 						BugReporter.sendBugReport();
 

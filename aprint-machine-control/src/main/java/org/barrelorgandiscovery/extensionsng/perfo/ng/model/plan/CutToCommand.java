@@ -4,6 +4,7 @@ import org.barrelorgandiscovery.tools.HashCodeUtils;
 
 /**
  * this command used for lazer, design a cut to line command
+ * 
  * @author pfreydiere
  *
  */
@@ -30,12 +31,12 @@ public class CutToCommand extends Command implements XYCommand {
 	public double getY() {
 		return moveToY;
 	}
-	
+
 	public double getPowerFactor() {
 		return powerFactor;
 	}
-	
-	public double getSpeed() {
+
+	public double getSpeedFactor() {
 		return speed;
 	}
 
@@ -61,6 +62,14 @@ public class CutToCommand extends Command implements XYCommand {
 
 		CutToCommand n = (CutToCommand) obj;
 		return moveToX == n.moveToX && moveToY == n.moveToY;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("CutTo Command ").append(moveToX).append(',').append(moveToY).append("  Power :").append(powerFactor)
+				.append("  Speed :").append(speed);
+		return sb.toString();
 	}
 
 }

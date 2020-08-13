@@ -1,6 +1,9 @@
 package org.barrelorgandiscovery.optimizers.cad;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.TreeSet;
 
 import javax.swing.ImageIcon;
 
@@ -11,6 +14,7 @@ import org.barrelorgandiscovery.gui.ICancelTracker;
 import org.barrelorgandiscovery.optimizers.Optimizer;
 import org.barrelorgandiscovery.optimizers.OptimizerProgress;
 import org.barrelorgandiscovery.optimizers.OptimizerResult;
+import org.barrelorgandiscovery.optimizers.model.Extent;
 import org.barrelorgandiscovery.optimizers.model.OptimizedObject;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 
@@ -19,16 +23,16 @@ public class XOptim implements Optimizer<OptimizedObject> {
 	private XOptimParameters parameters = new XOptimParameters();
 
 	public XOptim() {
-		
+
 	}
-	
+
 	public XOptim(XOptimParameters parameters) {
 		this.parameters = parameters;
 	}
-	
+
 	@Override
 	public String getTitle() {
-		return "Standard Optimizer";
+		return "Simple Lazer Optimizer";
 	}
 
 	@Override
@@ -41,7 +45,6 @@ public class XOptim implements Optimizer<OptimizedObject> {
 		return parameters;
 	}
 
-	
 	CADParameters constructCADParameters() {
 		CADParameters parameters = new CADParameters();
 		parameters.setExportDecoupeDesBords(false);
@@ -56,12 +59,12 @@ public class XOptim implements Optimizer<OptimizedObject> {
 		parameters.setTypePonts(this.parameters.getTypePonts());
 		return parameters;
 	}
-	
+
 	@Override
 	public OptimizerResult<OptimizedObject> optimize(VirtualBook carton) throws Exception {
 
 		CADParameters parameters = constructCADParameters();
-		
+
 		CADVirtualBookExporter exporter = new CADVirtualBookExporter();
 
 		PunchPlanDeviceDrawing pp = new PunchPlanDeviceDrawing();
@@ -71,6 +74,22 @@ public class XOptim implements Optimizer<OptimizedObject> {
 
 		OptimizerResult<OptimizedObject> result = new OptimizerResult<>();
 		result.result = optimized.toArray(new OptimizedObject[optimized.size()]);
+
+		// sort the elements by x
+		Arrays.sort(result.result, new Comparator<OptimizedObject>() {
+			@Override
+			public int compare(OptimizedObject arg0, OptimizedObject arg1) {
+				assert arg0 != null;
+				assert arg1 != null;
+
+				Extent e = arg0.getExtent();
+				Extent e2 = arg1.getExtent();
+				int c = Double.compare(e.xmin, e2.xmin);
+				if (c != 0)
+					return c;
+				return Double.compare(e.ymin, e2.ymin);
+			}
+		});
 
 		return result;
 	}

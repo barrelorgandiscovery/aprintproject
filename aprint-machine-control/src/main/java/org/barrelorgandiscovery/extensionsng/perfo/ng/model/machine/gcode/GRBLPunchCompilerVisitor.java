@@ -30,6 +30,9 @@ public class GRBLPunchCompilerVisitor extends GCodeCompiler {
 
 	@Override
 	public void visit(int index, PunchCommand punchCommand) throws Exception {
+		///
+		/// SEE that the coordinates X / Y are inverted
+		///
 		grblCommands.add(String.format(Locale.ENGLISH, "G90 X%1$f Y%2$f\n", //$NON-NLS-1$
 				punchCommand.getY(), punchCommand.getX()));
 		grblCommands.add("M100\n"); //$NON-NLS-1$
@@ -37,6 +40,10 @@ public class GRBLPunchCompilerVisitor extends GCodeCompiler {
 
 	@Override
 	public void visit(int index, DisplacementCommand displacementCommand) throws Exception {
+		///
+		/// SEE that the coordinates X / Y are inverted
+		///
+
 		grblCommands.add(String.format(Locale.ENGLISH, "G90 X%1$f Y%2$f\n", //$NON-NLS-1$
 				displacementCommand.getY(), displacementCommand.getX()));
 	}

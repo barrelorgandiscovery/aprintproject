@@ -10,6 +10,9 @@ public class GroupedCutLine extends OptimizedObject {
 
 	public GroupedCutLine(List<CutLine> lines) {
 		this.lines = new ArrayList<>(lines);
+		for (CutLine l : lines) {
+			assert l instanceof CutLine;
+		}
 		assert lines.size() > 0;
 	}
 
@@ -37,25 +40,25 @@ public class GroupedCutLine extends OptimizedObject {
 	@Override
 	public double firstX() {
 		assert lines.size() > 0;
-		return lines.get(0).x1;
+		return lines.get(0).firstX();
 	}
 
 	@Override
 	public double firstY() {
 		assert lines.size() > 0;
-		return lines.get(0).y1;
+		return lines.get(0).firstY();
 	}
 
 	@Override
 	public double lastX() {
 		assert lines.size() > 0;
-		return lines.get(lines.size() - 1).x2;
+		return lines.get(lines.size() - 1).lastX();
 	}
 
 	@Override
 	public double lastY() {
 		assert lines.size() > 0;
-		return lines.get(lines.size() - 1).y2;
+		return lines.get(lines.size() - 1).lastY();
 	}
 
 }

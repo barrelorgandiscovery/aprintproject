@@ -214,7 +214,7 @@ public class APrintGroovyConsole extends JFrame {
 							}
 						}
 
-						public void jobError(Exception ex) {
+						public void jobError(Throwable ex) {
 							try {
 								consolePanel.appendOutputNl("\n ERROR >> " //$NON-NLS-1$
 										+ ex.getMessage(), new SimpleAttributeSet());

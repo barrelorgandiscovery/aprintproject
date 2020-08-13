@@ -79,7 +79,7 @@ public class JPerfoScanner extends JPanel implements Disposable {
     @Override
     public void run() {
 
-      double y = 0.0;
+      double bookdisplacement = 0.0;
 
       while (!cancelTracker.isCanceled()) {
         try {
@@ -101,13 +101,13 @@ public class JPerfoScanner extends JPanel implements Disposable {
             logger.debug("save and move");//$NON-NLS-1$
             try {
               perfoScan.addNewImage(picture);
-              machineControl.sendCommand(new DisplacementCommand(y, -50.0));
+              machineControl.sendCommand(new DisplacementCommand(bookdisplacement, 0.0));
               Thread.sleep(2000);
               // machineControl.flushCommands();
             } catch (Exception ex) {
               logger.error(ex.getMessage(), ex);
             }
-            y += 20.0;
+            bookdisplacement += 20.0;
             try {
               Thread.sleep(1000);
             } catch (Exception ex) {

@@ -36,6 +36,7 @@ public class RondHoleDrawer extends HoleDrawer {
 		d.drawArrondi(new Coordinate(xstart, ypiste - halfheight),
 				new Coordinate(xstart, ypiste + halfheight), -halfheight);
 
+		d.flushLine();
 	}
 
 }

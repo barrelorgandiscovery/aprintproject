@@ -119,6 +119,14 @@ public class OptimizersRepository {
 		}
 	}
 
+	/**
+	 * this convert the optimised objects into commands
+	 * 
+	 * @param parameters
+	 * @param optimizedObjects
+	 * @return
+	 * @throws Exception
+	 */
 	public PunchPlan createDefaultPunchPlanForLazerMachine(AbstractMachineParameters parameters,
 			OptimizedObject[] optimizedObjects) throws Exception {
 
