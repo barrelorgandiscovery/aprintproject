@@ -9,8 +9,7 @@ import com.github.sarxos.webcam.Webcam;
 public class TestWebCamDeviceInfos {
 
 	
-	@Test
-	public void testDisplayWebCam() throws Exception {
+	public static void main() throws Exception {
 		
 		List<Webcam> webcams = Webcam.getWebcams();
 		webcams.stream().forEach( (w) -> {
@@ -20,7 +19,6 @@ public class TestWebCamDeviceInfos {
 		});
 		
 		System.out.println();
-		
 		
 	}
 	
