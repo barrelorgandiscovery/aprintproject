@@ -17,36 +17,33 @@ import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensions.ExtensionPoint;
 import org.barrelorgandiscovery.gui.aprint.instrumentchoice.IInstrumentChoiceListener;
 import org.barrelorgandiscovery.gui.aprint.instrumentchoice.JCoverFlowInstrumentChoice;
-import org.barrelorgandiscovery.gui.aprint.instrumentchoice.JInstrumentChoice;
-import org.barrelorgandiscovery.gui.aprint.instrumentchoice.shelf.JInstrumentChoiceShelf;
 import org.barrelorgandiscovery.gui.aprintng.extensionspoints.WelcomeExtensionExtensionPoint;
 import org.barrelorgandiscovery.gui.aprintng.helper.BaseExtension;
 import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.prefs.DummyPrefsStorage;
 import org.barrelorgandiscovery.recognition.RecognitionProject;
 import org.barrelorgandiscovery.recognition.gui.JRecognitionProjectWindow;
+import org.barrelorgandiscovery.recognition.messages.Messages;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
 
-import com.jeta.forms.project.ProjectManager;
 import com.l2fprod.common.swing.JDirectoryChooser;
-import com.l2fprod.common.swing.plaf.DirectoryChooserUI;
 
 public class APrintRecognitionExtension extends BaseExtension {
 
-	private static final String PREF_FOLDER = "folder";
+	private static final String PREF_FOLDER = "folder"; //$NON-NLS-1$
 	private static Logger logger = Logger
 			.getLogger(APrintRecognitionExtension.class);
 
 	public APrintRecognitionExtension() throws Exception {
 		super();
-		this.defaultAboutAuthor = "Patrice Freydiere";
-		this.defaultAboutVersion = "0.5_beta";
+		this.defaultAboutAuthor = "Patrice Freydiere"; //$NON-NLS-1$
+		this.defaultAboutVersion = "0.5_beta"; //$NON-NLS-1$
 	}
 
 	@Override
 	public String getName() {
-		return "APrint Recognition Extension";
+		return Messages.getString("APrintRecognitionExtension.3"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -68,7 +65,7 @@ public class APrintRecognitionExtension extends BaseExtension {
 	}
 
 	private JButton createNewProjectButton() {
-		JButton btn = new JButton("New Recognition Project ...");
+		JButton btn = new JButton(Messages.getString("APrintRecognitionExtension.4")); //$NON-NLS-1$
 		btn.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
@@ -76,7 +73,7 @@ public class APrintRecognitionExtension extends BaseExtension {
 					newProject();
 				} catch (Throwable t) {
 					logger.error(
-							"error creating new project :" + t.getMessage(), t);
+							"error creating new project :" + t.getMessage(), t); //$NON-NLS-1$
 					BugReporter.sendBugReport();
 					JMessageBox.showError(
 							APrintRecognitionExtension.this.application
@@ -88,7 +85,7 @@ public class APrintRecognitionExtension extends BaseExtension {
 	}
 
 	private JButton createOpenProjectButton() {
-		JButton btn = new JButton("Open Recognition Project ...");
+		JButton btn = new JButton(Messages.getString("APrintRecognitionExtension.6")); //$NON-NLS-1$
 		btn.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
@@ -96,7 +93,7 @@ public class APrintRecognitionExtension extends BaseExtension {
 					openProject();
 				} catch (Throwable t) {
 					logger.error(
-							"error creating new project :" + t.getMessage(), t);
+							"error creating new project :" + t.getMessage(), t); //$NON-NLS-1$
 					BugReporter.sendBugReport();
 					JMessageBox.showError(
 							APrintRecognitionExtension.this.application
@@ -117,12 +114,12 @@ public class APrintRecognitionExtension extends BaseExtension {
 				null);
 
 		dc.setSelectedFile(fPrefs);
-		dc.setDialogTitle("Choisissez le répertoire contenant les photos ...");
+		dc.setDialogTitle(Messages.getString("APrintRecognitionExtension.8")); //$NON-NLS-1$
 		if (dc.showOpenDialog((Component) application.getOwnerForDialog()) == JDirectoryChooser.APPROVE_OPTION) {
 			this.extensionPreferences.setFileProperty(PREF_FOLDER,
 					dc.getSelectedFile());
 
-			logger.debug("directory :" + dc.getSelectedFile().getAbsolutePath());
+			logger.debug(Messages.getString("APrintRecognitionExtension.9") + dc.getSelectedFile().getAbsolutePath()); //$NON-NLS-1$
 			RecognitionProject p = new RecognitionProject(dc.getSelectedFile(),
 					application.getRepository(), application.getProperties()
 							.getAprintFolder());
@@ -147,7 +144,7 @@ public class APrintRecognitionExtension extends BaseExtension {
 				null);
 
 		dc.setSelectedFile(fPrefs);
-		dc.setDialogTitle("Choisissez le répertoire contenant les photos ...");
+		dc.setDialogTitle(Messages.getString("APrintRecognitionExtension.10")); //$NON-NLS-1$
 		if (dc.showOpenDialog((Component) application.getOwnerForDialog()) == JDirectoryChooser.APPROVE_OPTION) {
 			this.extensionPreferences.setFileProperty(PREF_FOLDER,
 					dc.getSelectedFile());
@@ -161,19 +158,18 @@ public class APrintRecognitionExtension extends BaseExtension {
 					new IInstrumentChoiceListener() {
 
 						public void instrumentChanged(Instrument newInstrument) {
-							// TODO Auto-generated method stub
-
+					
 						}
 					}
 
 			);
 			cp.add(ic, BorderLayout.CENTER);
-			JButton ok = new JButton("OK");
+			JButton ok = new JButton(Messages.getString("APrintRecognitionExtension.11")); //$NON-NLS-1$
 			ok.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					try {
 						d.dispose();
-						logger.debug("directory :"
+						logger.debug("directory :" //$NON-NLS-1$
 								+ dc.getSelectedFile().getAbsolutePath());
 						RecognitionProject p = new RecognitionProject(dc
 								.getSelectedFile(), ic.getCurrentInstrument(),
@@ -188,7 +184,7 @@ public class APrintRecognitionExtension extends BaseExtension {
 
 					} catch (Exception ex) {
 						logger.error(
-								"error in creating the project :"
+								"error in creating the project :" //$NON-NLS-1$
 										+ ex.getMessage(), ex);
 						BugReporter.sendBugReport();
 						JMessageBox.showError(application.getOwnerForDialog(),
