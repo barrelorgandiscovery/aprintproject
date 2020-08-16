@@ -25,11 +25,11 @@ For building the project, **Java 8** **SDK is needed**. (meaning the Java 8 JDK)
 from the root folder, launch :
 
 ```
-gradlew fatJar
+gradlew createAllJars
 ```
 
-the main application result is then located in **aprint-gui\build\libs\aprint.jar**
-
+compilation results will be located in bundle\build
+extensions (that are installed in the personal home folder) are generated in bundle\offlineinstall-extensions 
 
 
 ### Running the project from command line
@@ -39,10 +39,7 @@ java -Xmx2g -server -Dmainfolder="C:\Users\use\Documents\.." -cp aprint.jar org.
 ```
 
 
-
-
-
-### Building the windows installer
+### Building the windows installer (only on windows platefoms)
 
 Windows installer is available, using the NSIS project, **NSIS** must be installed to create the windows installer.
 
@@ -52,8 +49,7 @@ for creating the Installer with updated extensions launch the following command 
 gradlew createBundles
 ```
 
-### Launch automatic tests and global test report
-
+### for DEVS : Launch automatic tests and global test report
 
 ```
 gradlew check testReport jacocoTestReport

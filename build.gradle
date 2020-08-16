@@ -71,7 +71,6 @@ rootProject.ext.execAndGetOutput = { String command ->
 rootProject.ext.asUTC = { Date date, String format ->
   def snapshotDateFormat = new SimpleDateFormat(format)
   snapshotDateFormat.setTimeZone(TimeZone.getTimeZone('UTC'))
-  
   return snapshotDateFormat.format(date)
 }
  
@@ -120,6 +119,10 @@ project(':bundle') {
         into 'build'
     }
 
+    task createAllJars(dependsOn: [copyOutputJars, copyExtensionJars]) {
+
+    }
+
     // create installer
     task createBundles(type: Exec, dependsOn: [copyOutputJars,copyExtensionJars] ) {
         commandLine 'C:\\Program Files (x86)\\NSIS\\makensis.exe',
@@ -140,6 +143,7 @@ project(':bundle') {
            "${project.projectDir}/offlineinstall-studio/aprint_studio_32.nsi"
         workingDir = 'offlineinstall-studio'
     }
+
     task createInstaller32(dependsOn: ['createBundles32']) { 
         doLast {
             def f = file('offlineinstall-studio/APrintStudioInstall32.exe')
@@ -147,9 +151,6 @@ project(':bundle') {
             assert f.renameTo(new File('build_file_APrintStudioInstall_x32_' + rootProject.ext.currentVersion + ".exe"))
         }
     }
-
-
-
 
 }
 
