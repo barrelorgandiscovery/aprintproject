@@ -11,5 +11,6 @@ Functionnalities :
 
 Development :
 
+* Compatibility Java 13
 * Add CI CD to perform automatic checks on compilation
 

@@ -8,6 +8,7 @@ import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
 import org.apache.commons.vfs2.provider.AbstractFileObject;
+import org.apache.log4j.Logger;
 
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser.RETURN_TYPE;
@@ -20,6 +21,8 @@ import com.googlecode.vfsjfilechooser2.VFSJFileChooser.SELECTION_MODE;
  *
  */
 public class APrintFileChooser {
+	
+	private static Logger logger = Logger.getLogger(APrintFileChooser.class);
 
 	/** Instruction to display only files. */
 	public static final int FILES_ONLY = 0;
@@ -109,6 +112,10 @@ public class APrintFileChooser {
 	}
 
 	public void setCurrentDirectory(File currentDirectory) {
+		if (currentDirectory == null) {
+			logger.warn("no current directory passed, set current directory will not be setted");
+			return;
+		}
 		try {
 			FileSystemManager fsManager = VFS.getManager();
 			FileObject fileObject = fsManager.resolveFile(currentDirectory.getParentFile(), currentDirectory.getName());
