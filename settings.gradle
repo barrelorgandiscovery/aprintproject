@@ -3,7 +3,7 @@ include 'aprint-gervill'
 include 'aprint-core'
 include 'aprint-gui'
 
-include 'aprint-synth-plugin'
+//include 'aprint-synth-plugin'
 
 include 'aprint-machine-control'
 include 'aprint-machine-control-gui'
