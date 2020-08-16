@@ -12,6 +12,4 @@ os:
 before_install:
   - chmod a+x gradlew
 
-script:
-  - travis_retry . ./gradlew clean compile 
 
