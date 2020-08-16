@@ -23,7 +23,7 @@ import com.googlecode.vfsjfilechooser2.accessories.bookmarks.BookmarksDialog;
 
 public class TestImprovedFileChooser {
 
-	@Test
+	// @Test
 	public void testFileObject() throws Exception {
 
 		FileObject f = VFS.getManager().resolveFile("c:\\temp");
