@@ -28,7 +28,8 @@ import org.barrelorgandiscovery.virtualbook.VirtualBook;
 import org.barrelorgandiscovery.virtualbook.rendering.MusicBoxRendering;
 import org.barrelorgandiscovery.virtualbook.rendering.VirtualBookRendering;
 
-import com.sun.media.sound.SoftShortMessage;
+import gervill.SoftShortMessage;
+
 
 /**
  * This class convert the Virtual Book to a Midi compliant Listening
