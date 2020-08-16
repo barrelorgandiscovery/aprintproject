@@ -31,7 +31,7 @@ public class APrintHelpAction extends AbstractAction {
 		try {
 			
 			String mainVersion = VersionTools.getMainVersion();
-			BareBonesBrowserLaunch.openURL("http://www.barrel-organ-discovery.org/site/doc/\" + mainVersion"); //$NON-NLS-1$
+			BareBonesBrowserLaunch.openURL("http://www.barrel-organ-discovery.org/site/doc/" + mainVersion); //$NON-NLS-1$
 		
 		} catch(Exception ex)
 		{
