@@ -69,7 +69,7 @@ public class TestSoundBank {
 		System.out.println(MidiHelper.hertz(69));
 	}
 
-	@Test
+	// @Test
 	public void testSoundBankCreation() throws Exception {
 		SBCreator sb = new SBCreator();
 		
