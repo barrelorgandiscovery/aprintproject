@@ -11,7 +11,7 @@ import javax.sound.sampled.AudioSystem;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.playsubsystem.GervillPlaySubSystemWithRegisterInstruments;
 
-import com.sun.media.sound.SoftSynthesizer;
+import gervill.SoftSynthesizer;
 
 /**
  * MultiThreaded Utility class for playing notes where a soundbank can be

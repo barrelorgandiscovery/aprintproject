@@ -25,8 +25,8 @@ import javax.sound.sampled.AudioSystem;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.playsubsystem.GervillPlaySubSystemWithRegisterInstruments;
 
-import com.sun.media.sound.AudioSynthesizer;
-import com.sun.media.sound.SoftSynthesizer;
+import gervill.AudioSynthesizer;
+import gervill.SoftSynthesizer;
 
 public class SequencerTools {
 

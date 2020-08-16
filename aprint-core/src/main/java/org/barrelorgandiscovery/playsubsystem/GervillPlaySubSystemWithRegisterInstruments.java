@@ -22,9 +22,9 @@ import org.barrelorgandiscovery.playsubsystem.prepared.IPreparedPlaying;
 import org.barrelorgandiscovery.playsubsystem.prepared.ISubSystemPlayParameters;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 
-import com.sun.media.sound.SF2Instrument;
-import com.sun.media.sound.SF2Soundbank;
-import com.sun.media.sound.SoftSynthesizer;
+import gervill.SF2Instrument;
+import gervill.SF2Soundbank;
+import gervill.SoftSynthesizer;
 
 public class GervillPlaySubSystemWithRegisterInstruments implements
 		PlaySubSystem, NeedInstrument, IPreparedCapableSubSystem {

@@ -14,7 +14,7 @@ import org.barrelorgandiscovery.instrument.sample.SoundSample;
 import org.barrelorgandiscovery.tools.MidiHelper;
 import org.junit.Test;
 
-import com.sun.media.sound.SF2Soundbank;
+import gervill.SF2Soundbank;
 
 public class TestSoundBank {
 

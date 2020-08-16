@@ -17,15 +17,15 @@ import org.barrelorgandiscovery.scale.PercussionDef;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.tools.StreamsTools;
 
-import com.sun.media.sound.ModelByteBuffer;
-import com.sun.media.sound.ModelPatch;
-import com.sun.media.sound.SF2Instrument;
-import com.sun.media.sound.SF2InstrumentRegion;
-import com.sun.media.sound.SF2Layer;
-import com.sun.media.sound.SF2LayerRegion;
-import com.sun.media.sound.SF2Region;
-import com.sun.media.sound.SF2Sample;
-import com.sun.media.sound.SF2Soundbank;
+import gervill.ModelByteBuffer;
+import gervill.ModelPatch;
+import gervill.SF2Instrument;
+import gervill.SF2InstrumentRegion;
+import gervill.SF2Layer;
+import gervill.SF2LayerRegion;
+import gervill.SF2Region;
+import gervill.SF2Sample;
+import gervill.SF2Soundbank;
 
 public class SBCreator {
 

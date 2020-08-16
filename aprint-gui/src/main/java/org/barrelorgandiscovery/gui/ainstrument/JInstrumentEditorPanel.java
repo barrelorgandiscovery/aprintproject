@@ -90,7 +90,8 @@ import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
 
 import com.jeta.forms.components.image.ImageComponent;
 import com.jeta.forms.components.panel.FormPanel;
-import com.sun.media.sound.SF2Soundbank;
+
+import gervill.SF2Soundbank;
 
 /**
  * Panel used for edit an instrument
