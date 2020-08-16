@@ -16,7 +16,7 @@ import org.barrelorgandiscovery.tools.ImageTools;
 import org.barrelorgandiscovery.tools.streamstorage.IStreamRef;
 
 /**
- * Classe décrivant un instrument
+ * Classe dÃ©crivant un instrument
  * 
  * @author Freydiere Patrice
  */

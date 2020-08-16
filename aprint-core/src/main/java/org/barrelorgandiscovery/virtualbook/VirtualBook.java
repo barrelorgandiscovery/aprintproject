@@ -168,7 +168,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 		if (hole == null)
 			return;
 
-		// Vérification de la note associée au carton ..
+		// VÃ©rification de la note associÃ©e au carton ..
 		notes.add(hole);
 		// notesorderedbyend.add(n);
 		si.add(hole);
@@ -354,7 +354,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * Recherche toutes les notes dans la fenetre donnée de temps donnée
+	 * Recherche toutes les notes dans la fenetre donnÃ©e de temps donnÃ©e
 	 * 
 	 * @param start
 	 * @param length
@@ -409,7 +409,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * Recherche toutes les notes dans la fenetre donnée de temps donnée
+	 * Recherche toutes les notes dans la fenetre donnÃ©e de temps donnÃ©e
 	 * 
 	 * @param start
 	 * @param length
@@ -440,7 +440,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * Recherche toutes les notes dans la fenetre donnée de temps donnée
+	 * Recherche toutes les notes dans la fenetre donnÃ©e de temps donnÃ©e
 	 * 
 	 * @param start
 	 * @param length
@@ -478,7 +478,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * Recherche des notes dans la fenetre donnée
+	 * Recherche des notes dans la fenetre donnÃ©e
 	 * 
 	 * @param start
 	 *            the start timestamp
@@ -865,7 +865,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	// notes.add((Note)in.readObject());
 	// }
 	//
-	// // tout s'est bien déroulé
+	// // tout s'est bien dÃ©roulÃ©
 	// gamme = g;
 	// this.notes = notes;
 	//
@@ -874,10 +874,10 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	// }
 
 	// ///////////////////////////////////////////////////////////////////////////
-	// methodes associées à la registration
+	// methodes associÃ©es Ã  la registration
 
 	/**
-	 * Propriété mémorisant la liste des sections associées
+	 * PropriÃ©tÃ© mÃ©morisant la liste des sections associÃ©es
 	 */
 	private RegistrationSection[] rsections = null;
 

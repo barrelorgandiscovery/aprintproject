@@ -108,7 +108,7 @@ public class LinearTranspositionParser implements LineParser {
 	}
 
 	/**
-	 * Récupère la transposition
+	 * RÃ©cupÃ¨re la transposition
 	 * 
 	 * @return
 	 */

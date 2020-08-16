@@ -328,7 +328,7 @@ public class ExtensionManager implements ExtensionFactory {
 	}
 
 	/**
-	 * Liste les extensions chargées
+	 * Liste les extensions chargÃ©es
 	 * 
 	 * @return the found extension name array, must not be null
 	 */

@@ -9,7 +9,7 @@ public abstract class ControlTrackDef extends AbstractTrackDef {
 	}
 
 	/**
-	 * longueur pour la percussion (en mm) (taille normalisée) par défaut 6mm
+	 * longueur pour la percussion (en mm) (taille normalisÃ©e) par dÃ©faut 6mm
 	 * pour la grosse caisse, ou 5 mm sinon (caisse clair)
 	 */
 	protected double longueur;
@@ -28,9 +28,9 @@ public abstract class ControlTrackDef extends AbstractTrackDef {
 	}
 
 	/**
-	 * Retoune le retard à la percussion (en mm)
+	 * Retoune le retard Ã  la percussion (en mm)
 	 * 
-	 * @return NaN si non défini
+	 * @return NaN si non dÃ©fini
 	 */
 	public double getRetard() {
 		return this.retard;

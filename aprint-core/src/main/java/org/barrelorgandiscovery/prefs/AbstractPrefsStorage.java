@@ -20,7 +20,7 @@ public abstract class AbstractPrefsStorage implements IPrefsStorage {
 	private static Logger logger = Logger.getLogger(AbstractPrefsStorage.class);
 
 	/**
-	 * Mémorisation des préférences utilisateur
+	 * MÃ©morisation des prÃ©fÃ©rences utilisateur
 	 */
 	protected Properties userproperties = new Properties();
 
@@ -146,7 +146,7 @@ public abstract class AbstractPrefsStorage implements IPrefsStorage {
 		if (value == null) {
 			userproperties.remove(propertyname);
 		} else {
-			// définition de la valeur
+			// dÃ©finition de la valeur
 			userproperties.setProperty(propertyname, value);
 			logger.debug("saving properties");
 			save();

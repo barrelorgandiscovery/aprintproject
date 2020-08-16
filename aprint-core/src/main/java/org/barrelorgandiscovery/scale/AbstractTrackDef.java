@@ -3,7 +3,7 @@ package org.barrelorgandiscovery.scale;
 import java.io.Serializable;
 
 /**
- * Cette classe représente la définition d'une piste du carton 
+ * Cette classe reprÃ©sente la dÃ©finition d'une piste du carton 
  * 
  * @author Freydiere Patrice
  */

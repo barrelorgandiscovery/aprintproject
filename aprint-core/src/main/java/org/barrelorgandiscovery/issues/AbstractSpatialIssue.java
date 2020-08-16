@@ -10,7 +10,7 @@ public abstract class AbstractSpatialIssue extends AbstractIssue implements
 	}
 
 	/**
-	 * Récupère l'étendue du problème
+	 * RÃ©cupÃ¨re l'Ã©tendue du problÃ¨me
 	 * 
 	 * @return
 	 */

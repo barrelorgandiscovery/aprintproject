@@ -351,7 +351,7 @@ public class APrintRepositoryClientConnection {
 						"/streams", //$NON-NLS-1$
 						new FileInputStream(
 								new File(
-										"C:/Documents and Settings/Freydiere Patrice/Bureau/Projets/Musique Mécanique/gamme_50_limonaire.jpg")), //$NON-NLS-1$
+										"C:/Documents and Settings/Freydiere Patrice/Bureau/Projets/Musique MÃ©canique/gamme_50_limonaire.jpg")), //$NON-NLS-1$
 						"image/jpeg"); //$NON-NLS-1$
 
 		long contentStream = c

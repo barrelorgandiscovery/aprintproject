@@ -120,7 +120,7 @@ public class StringTools {
 	}
 
 	/**
-	 * Concatene les éléments en utilisant un delimiteur
+	 * Concatene les Ã©lÃ©ments en utilisant un delimiteur
 	 * 
 	 * @param elements
 	 * @param delimiter

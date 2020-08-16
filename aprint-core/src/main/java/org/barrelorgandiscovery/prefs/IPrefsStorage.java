@@ -8,14 +8,14 @@ import java.io.IOException;
 public interface IPrefsStorage {
 
 	/**
-	 * Cette fonction lit les propriétés stockées dans le fichier de propriétés
+	 * Cette fonction lit les propriÃ©tÃ©s stockÃ©es dans le fichier de propriÃ©tÃ©s
 	 * 
 	 * @throws IOException
 	 */
 	public abstract void load() throws IOException;
 
 	/**
-	 * Sauvegarde les propriétés
+	 * Sauvegarde les propriÃ©tÃ©s
 	 * 
 	 * @throws IOException
 	 */

@@ -14,7 +14,7 @@ import org.barrelorgandiscovery.virtualbook.Hole;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 
 /**
- * Cette classe gère une transposition point à point
+ * Cette classe gÃ¨re une transposition point Ã  point
  * 
  * 
  * @author Freydiere Patrice
@@ -36,7 +36,7 @@ public class LinearTransposition extends AbstractTransposeVirtualBook {
 		private static final long serialVersionUID = -7195557889715754168L;
 
 		/**
-		 * permutation circulaire des éléments du tableau
+		 * permutation circulaire des Ã©lÃ©ments du tableau
 		 */
 		public void shift() {
 			if (size() > 0) {
@@ -80,7 +80,7 @@ public class LinearTransposition extends AbstractTransposeVirtualBook {
 	}
 
 	/**
-	 * Définit une correspondance entre une note source et sa correspondance
+	 * DÃ©finit une correspondance entre une note source et sa correspondance
 	 * dans la destination (piste)
 	 * 
 	 * @param source
@@ -129,7 +129,7 @@ public class LinearTransposition extends AbstractTransposeVirtualBook {
 	}
 
 	/**
-	 * Récupère la prochaine correspondance à la touche
+	 * RÃ©cupÃ¨re la prochaine correspondance Ã  la touche
 	 * 
 	 * @param source
 	 * @return
@@ -153,7 +153,7 @@ public class LinearTransposition extends AbstractTransposeVirtualBook {
 	}
 
 	/**
-	 * Récupère la liste des correspondances associées à un "track"
+	 * RÃ©cupÃ¨re la liste des correspondances associÃ©es Ã  un "track"
 	 * 
 	 * @param source
 	 * @return
@@ -202,12 +202,12 @@ public class LinearTransposition extends AbstractTransposeVirtualBook {
 	}
 
 	/**
-	 * Effectue une transposition, par défaut, on effectue une translation de
+	 * Effectue une transposition, par dÃ©faut, on effectue une translation de
 	 * notes ...
 	 * 
 	 * @param carton
-	 *            le carton à transposer ..
-	 * @return le résultat de la transposition ...
+	 *            le carton Ã  transposer ..
+	 * @return le rÃ©sultat de la transposition ...
 	 */
 	public TranspositionResult transpose(VirtualBook carton) {
 
@@ -267,7 +267,7 @@ public class LinearTransposition extends AbstractTransposeVirtualBook {
 						}
 
 						if (!Double.isNaN(d.getLength())) {
-							// la longueur de la note est imposé
+							// la longueur de la note est imposÃ©
 							long longueur = (long) (d.getLength()
 									/ gammedestination.getSpeed() * 1000000);
 							holelength = longueur;
@@ -280,7 +280,7 @@ public class LinearTransposition extends AbstractTransposeVirtualBook {
 
 			} else {
 				// la note n'a pas de correspondance
-				// on a enlevé une note ...
+				// on a enlevÃ© une note ...
 				notesnontransposees.add(n);
 			}
 		}
@@ -302,7 +302,7 @@ public class LinearTransposition extends AbstractTransposeVirtualBook {
 	}
 
 	/**
-	 * Cette fonction cree une transposition fictive de midi à midi
+	 * Cette fonction cree une transposition fictive de midi Ã  midi
 	 * 
 	 * @return
 	 */
@@ -318,7 +318,7 @@ public class LinearTransposition extends AbstractTransposeVirtualBook {
 	}
 
 	/**
-	 * Récupère l'ordre d'affichage de la transposition
+	 * RÃ©cupÃ¨re l'ordre d'affichage de la transposition
 	 */
 	public int getOrder() {
 		return 0;

@@ -12,7 +12,7 @@ public abstract class AbstractIssue {
 	}
 
 	/**
-	 * Récupération du libelle de l'erreur
+	 * RÃ©cupÃ©ration du libelle de l'erreur
 	 * 
 	 * @return
 	 */
@@ -21,7 +21,7 @@ public abstract class AbstractIssue {
 	}
 
 	/**
-	 * Redéfinition du libelle du problème
+	 * RedÃ©finition du libelle du problÃ¨me
 	 * 
 	 * @param newlibelle
 	 */

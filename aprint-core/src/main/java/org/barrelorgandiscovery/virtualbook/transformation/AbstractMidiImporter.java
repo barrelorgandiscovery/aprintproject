@@ -4,7 +4,7 @@ import org.barrelorgandiscovery.virtualbook.transformation.importer.MidiConversi
 import org.barrelorgandiscovery.virtualbook.transformation.importer.MidiFile;
 
 /**
- * Transposition directe à partir d'un fichier midi ...
+ * Transposition directe Ã  partir d'un fichier midi ...
  * 
  * @author Freydiere Patrice
  */

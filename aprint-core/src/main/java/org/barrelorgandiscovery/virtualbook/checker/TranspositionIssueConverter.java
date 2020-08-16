@@ -80,7 +80,7 @@ public class TranspositionIssueConverter {
 						(NoteDef) td);
 			}
 
-			// recherche de la position interpolée pour les notes qui manquent
+			// recherche de la position interpolÃ©e pour les notes qui manquent
 
 			issuecollection.add(new IssueMissing(hole.getTimestamp(), hole
 					.getTimeLength(), td, interpolate));

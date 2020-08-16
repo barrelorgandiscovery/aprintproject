@@ -99,7 +99,7 @@ public class MidiHelper {
 	}
 
 	/**
-	 * retourne le no de la note, du code midi passé en paramètre
+	 * retourne le no de la note, du code midi passÃ© en paramÃ¨tre
 	 * @param code le code midi
 	 * @return la note (0-11)
 	 */
@@ -230,7 +230,7 @@ public class MidiHelper {
 	 */
 	public static void main(String[] args) throws Exception {
 
-		System.out.println(midiLibelle(72) + " doit être egal à C5");
+		System.out.println(midiLibelle(72) + " doit Ãªtre egal Ã  C5");
 
 		for (int i = 0; i < 128; i++) {
 			System.out.println(midiLibelle(i));

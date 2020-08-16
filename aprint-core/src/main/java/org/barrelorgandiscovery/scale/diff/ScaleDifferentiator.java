@@ -116,7 +116,7 @@ public class ScaleDifferentiator {
 
 			assert aTrackDefDest != null;
 
-			// vérification du type
+			// vÃ©rification du type
 
 			if (aTrackDefSource instanceof NoteDef) {
 				// c'est une note
@@ -136,7 +136,7 @@ public class ScaleDifferentiator {
 				// compare note
 				if (!s.hasSameMidiCode(d)) {
 					if (s.isSameSimpleNoteAs(d)) {
-						// pas la même octave
+						// pas la mÃªme octave
 						result.add(new NoteOctaveDiff(i, s, d));
 						continue;
 					} else {
@@ -144,7 +144,7 @@ public class ScaleDifferentiator {
 						continue;
 					}
 				}
-				// même code
+				// mÃªme code
 
 				continue;
 

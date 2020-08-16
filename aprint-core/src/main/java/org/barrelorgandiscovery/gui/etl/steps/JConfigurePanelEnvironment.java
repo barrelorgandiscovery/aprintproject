@@ -3,8 +3,8 @@ package org.barrelorgandiscovery.gui.etl.steps;
 import org.barrelorgandiscovery.repository.Repository2;
 
 /**
- * Environnement UI permettant à une classe Step de créer son composant visuel
- * de configuration, cet objet est passé en paramètre du panel pour la saisie de
+ * Environnement UI permettant Ã  une classe Step de crÃ©er son composant visuel
+ * de configuration, cet objet est passÃ© en paramÃ¨tre du panel pour la saisie de
  * la configuration d'un step
  * 
  * @author pfreydiere

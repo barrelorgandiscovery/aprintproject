@@ -24,7 +24,7 @@ public class Scale implements Serializable {
 	private static Logger logger = Logger.getLogger(Scale.class);
 
 	/**
-	 * Sérialize id
+	 * SÃ©rialize id
 	 */
 	private static final long serialVersionUID = -8783842623884249931L;
 
@@ -220,11 +220,11 @@ public class Scale implements Serializable {
 			this.registersets = null;
 		}
 
-		// Vérification de la cohérence de la gamme ...
+		// VÃ©rification de la cohÃ©rence de la gamme ...
 		if (this.registersets != null) {
-			// vérification ...
+			// vÃ©rification ...
 
-			// on vérifie que toutes les notes font partie d'un ensemble de
+			// on vÃ©rifie que toutes les notes font partie d'un ensemble de
 			// registre
 			for (int i = 0; i < notedefs.length; i++) {
 
@@ -246,8 +246,8 @@ public class Scale implements Serializable {
 							.get(rcsd.getRegisterSetName());
 
 					if (associatedRegisterSet != null) {
-						// on a trouvé
-						// on vérifie que le register est existant à l'intérieur
+						// on a trouvÃ©
+						// on vÃ©rifie que le register est existant Ã  l'intÃ©rieur
 						// ...
 
 						if (!associatedRegisterSet.exist(rcsd
@@ -270,14 +270,14 @@ public class Scale implements Serializable {
 				}
 			}
 
-			// normalement si on passe tout ça ... c'est bon
+			// normalement si on passe tout Ã§a ... c'est bon
 
 		} // (registersets != null)
 		else {
 			// registersets == null
 
 			// les notes ne doivent pas avoir de registres ...
-			// on vérifie que toutes les notes font partie d'un ensemble de
+			// on vÃ©rifie que toutes les notes font partie d'un ensemble de
 			// registre
 			for (int i = 0; i < notedefs.length; i++) {
 
@@ -520,7 +520,7 @@ public class Scale implements Serializable {
 	 * @see java.lang.Object#toString()
 	 */
 	@Override
-	// utilisé pour swing ...
+	// utilisÃ© pour swing ...
 	public String toString() {
 		return name;
 	}
@@ -542,7 +542,7 @@ public class Scale implements Serializable {
 					return i;
 			}
 		}
-		return -1; // non trouvé
+		return -1; // non trouvÃ©
 	}
 
 	/**
@@ -585,7 +585,7 @@ public class Scale implements Serializable {
 					return i;
 			}
 		}
-		return -1; // non trouvé
+		return -1; // non trouvÃ©
 	}
 
 	/**
@@ -637,7 +637,7 @@ public class Scale implements Serializable {
 					return i;
 			}
 		}
-		return -1; // non trouvé
+		return -1; // non trouvÃ©
 	}
 
 	/**
@@ -672,8 +672,8 @@ public class Scale implements Serializable {
 		if (registersets == null)
 			return null;
 
-		// Récupère une copie de la définition des listes (pour éviter les
-		// problèmes de modifications par référence)
+		// RÃ©cupÃ¨re une copie de la dÃ©finition des listes (pour Ã©viter les
+		// problÃ¨mes de modifications par rÃ©fÃ©rence)
 
 		return new PipeStopGroupList(registersets);
 

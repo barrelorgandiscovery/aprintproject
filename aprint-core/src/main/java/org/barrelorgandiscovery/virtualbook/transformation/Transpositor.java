@@ -15,10 +15,10 @@ public class Transpositor {
 	 * Transform a virtual book from one scale to another
 	 * 
 	 * @param carton
-	 *            le carton à transposer
+	 *            le carton Ã  transposer
 	 * @param transposition
-	 *            la transposition à opérer
-	 * @return le résultat de la transposition
+	 *            la transposition Ã  opÃ©rer
+	 * @return le rÃ©sultat de la transposition
 	 */
 	public static TranspositionResult transpose(VirtualBook carton,
 			AbstractTransposeVirtualBook transposition) {

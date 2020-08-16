@@ -40,7 +40,7 @@ import org.barrelorgandiscovery.tools.MidiHelper;
 import org.barrelorgandiscovery.virtualbook.rendering.VirtualBookRendering;
 
 /**
- * Objet permettant de lire et écrire un fichier de gamme
+ * Objet permettant de lire et Ã©crire un fichier de gamme
  * 
  * @author Freydiere Patrice
  * 
@@ -69,7 +69,7 @@ public class ScaleIO {
 	}
 
 	/**
-	 * Lecture d'un fichier de gamme à partir d'un flux
+	 * Lecture d'un fichier de gamme Ã  partir d'un flux
 	 * 
 	 * @param is
 	 * @return
@@ -462,7 +462,7 @@ public class ScaleIO {
 
 					// Ecriture de la piste ...
 					writeKeyValue(w, Integer.toString(i),
-							MidiHelper.midiLibelle(nd.getMidiNote() - 12)); // décalage
+							MidiHelper.midiLibelle(nd.getMidiNote() - 12)); // dÃ©calage
 					// dans le
 					// fichier
 					// de gamme
@@ -519,9 +519,9 @@ public class ScaleIO {
 	 * Ecriture de la gamme sous forme de fichier de gamme
 	 * 
 	 * @param gamme
-	 *            gamme à écrire
+	 *            gamme Ã  Ã©crire
 	 * @param fichiergamme
-	 *            le fichier de gamme à écrire
+	 *            le fichier de gamme Ã  Ã©crire
 	 * @throws IOException
 	 * @throws ScaleException
 	 */

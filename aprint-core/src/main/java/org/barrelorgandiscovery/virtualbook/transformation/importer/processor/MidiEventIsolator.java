@@ -5,7 +5,7 @@ import org.barrelorgandiscovery.virtualbook.transformation.importer.MidiAdvanced
 public interface MidiEventIsolator {
 
 	/**
-	 * Méthode retournant un boolean indiquant si l'évènement doit être séparé
+	 * MÃ©thode retournant un boolean indiquant si l'Ã©vÃ¨nement doit Ãªtre sÃ©parÃ©
 	 * 
 	 * @param note
 	 * @return

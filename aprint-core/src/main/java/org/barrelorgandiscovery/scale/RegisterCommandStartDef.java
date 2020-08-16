@@ -10,12 +10,12 @@ public class RegisterCommandStartDef extends AbstractRegisterCommandDef {
 	private static final long serialVersionUID = -4689010420165268507L;
 
 	/**
-	 * Définition du jeu de registre associé
+	 * DÃ©finition du jeu de registre associÃ©
 	 */
 	private String jeuregistre;
 
 	/**
-	 * Définition du registre sélectionné dans le jeu
+	 * DÃ©finition du registre sÃ©lectionnÃ© dans le jeu
 	 */
 	private String registre;
 

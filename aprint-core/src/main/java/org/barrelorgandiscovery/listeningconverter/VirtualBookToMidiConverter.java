@@ -207,7 +207,7 @@ public class VirtualBookToMidiConverter implements MIDIListeningConverter {
 	 */
 	public Sequence convert(VirtualBook vb) throws Exception {
 		/**
-		 * Fusion des notes dédoublées
+		 * Fusion des notes dÃ©doublÃ©es
 		 */
 
 		long micropertick = (long) (10000.0 / 384.0 * ticksperbeat);

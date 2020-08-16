@@ -6,7 +6,7 @@ import org.barrelorgandiscovery.tools.HashCodeUtils;
 public class NoteDef extends AbstractTrackDef {
 
 	/**
-	 * pour la sérialisation
+	 * pour la sÃ©rialisation
 	 */
 	private static final long serialVersionUID = 881283155174363392L;
 
@@ -16,7 +16,7 @@ public class NoteDef extends AbstractTrackDef {
 	private int midinote;
 
 	/**
-	 * classification de la note (pour l'instant en chaine de caractère)
+	 * classification de la note (pour l'instant en chaine de caractÃ¨re)
 	 */
 	private String registersetname; // chant, acompagnement, basse, tremolo ...
 
@@ -24,7 +24,7 @@ public class NoteDef extends AbstractTrackDef {
 	 * Constructeur
 	 * 
 	 * @param midinote
-	 *            définition midi de la note jouée
+	 *            dÃ©finition midi de la note jouÃ©e
 	 */
 	public NoteDef(int midinote) {
 		this.midinote = midinote;
@@ -34,9 +34,9 @@ public class NoteDef extends AbstractTrackDef {
 	 * Constructeur
 	 * 
 	 * @param midinote
-	 *            définition midi de la note jouée
+	 *            dÃ©finition midi de la note jouÃ©e
 	 * @param registersetname
-	 *            (catégorie de classification de la note)
+	 *            (catÃ©gorie de classification de la note)
 	 */
 	public NoteDef(int midinote, String registersetname) {
 		this(midinote);
@@ -44,7 +44,7 @@ public class NoteDef extends AbstractTrackDef {
 	}
 
 	/**
-	 * Récupère la définition midi de la note
+	 * RÃ©cupÃ¨re la dÃ©finition midi de la note
 	 * 
 	 * @return
 	 */

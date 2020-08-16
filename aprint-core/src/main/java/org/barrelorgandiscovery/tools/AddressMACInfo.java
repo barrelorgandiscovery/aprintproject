@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
 
 /**
  * 
- * Classe permettant de rÈcupÈrer l'adresse MAC d'un ordinateur.
+ * Classe permettant de r√©cup√©rer l'adresse MAC d'un ordinateur.
  * 
  */
 
@@ -21,7 +21,7 @@ public final class AddressMACInfo
 
 	/**
 	 * 
-	 * MÈthode Main de l'application
+	 * M√©thode Main de l'application
 	 * 
 	 * 
 	 * 
@@ -37,9 +37,9 @@ public final class AddressMACInfo
 
 		{
 
-			System.out.println("Information RÈseau Local");
+			System.out.println("Information R√©seau Local");
 
-			System.out.println("  SystËme d'exploitation : "
+			System.out.println("  Syst√®me d'exploitation : "
 					+ System.getProperty("os.name"));
 
 			System.out.println("  IP/Localhost: "
@@ -61,9 +61,9 @@ public final class AddressMACInfo
 
 	/**
 	 * 
-	 * MÈthode invoquant le traitement ‡ effectuer pour rÈcupÈrer l'adresse MAC
+	 * M√©thode invoquant le traitement √† effectuer pour r√©cup√©rer l'adresse MAC
 	 * 
-	 * de l'ordinateur sur lequel on se trouve suivant le systËme
+	 * de l'ordinateur sur lequel on se trouve suivant le syst√®me
 	 * 
 	 * d'exploitation.
 	 * 
@@ -88,7 +88,7 @@ public final class AddressMACInfo
 			} else if (os.startsWith("Mac OS X")) {
 				return osxParseMacAddress(osxRunIfConfigCommand());
 			} else {
-				throw new IOException("SystËme d'exploitation non supportÈ : "
+				throw new IOException("Syst√®me d'exploitation non support√© : "
 						+ os);
 			}
 		}
@@ -99,16 +99,16 @@ public final class AddressMACInfo
 		}
 	}
 
-	// *************** Commande de rÈcupÈration des informations rÈseau
+	// *************** Commande de r√©cup√©ration des informations r√©seau
 	// ***************//
 
 	/**
 	 * 
-	 * MÈthode rÈcupÈrant les informations rÈseau sous Windows
+	 * M√©thode r√©cup√©rant les informations r√©seau sous Windows
 	 * 
 	 * 
 	 * 
-	 * @return toutes les informations rÈseau
+	 * @return toutes les informations r√©seau
 	 * 
 	 * 
 	 * 
@@ -135,11 +135,11 @@ public final class AddressMACInfo
 
 	/**
 	 * 
-	 * MÈthode rÈcupÈrant les informations rÈseau sous Linux
+	 * M√©thode r√©cup√©rant les informations r√©seau sous Linux
 	 * 
 	 * 
 	 * 
-	 * @return toutes les informations rÈseau
+	 * @return toutes les informations r√©seau
 	 * 
 	 * 
 	 * 
@@ -166,11 +166,11 @@ public final class AddressMACInfo
 
 	/**
 	 * 
-	 * MÈthode rÈcupÈrant les informations rÈseau sous OS X (Apple)
+	 * M√©thode r√©cup√©rant les informations r√©seau sous OS X (Apple)
 	 * 
 	 * 
 	 * 
-	 * @return toutes les informations rÈseau
+	 * @return toutes les informations r√©seau
 	 * 
 	 * 
 	 * 
@@ -195,13 +195,13 @@ public final class AddressMACInfo
 		return outputText;
 	}
 
-	// *************** RÈcupÈration de l'adresse MAC ***************//
+	// *************** R√©cup√©ration de l'adresse MAC ***************//
 
 	/**
 	 * 
-	 * MÈthode triant les informations rÈseau rÈcupÈrer sous Windows gr‚ce ‡ la
+	 * M√©thode triant les informations r√©seau r√©cup√©rer sous Windows gr√¢ce √† la
 	 * 
-	 * mÈthode windowsRunIpConfigCommand pour extraire seulement l'adresse MAC.
+	 * m√©thode windowsRunIpConfigCommand pour extraire seulement l'adresse MAC.
 	 * 
 	 * 
 	 * 
@@ -260,9 +260,9 @@ public final class AddressMACInfo
 
 	/**
 	 * 
-	 * MÈthode triant les informations rÈseau rÈcupÈrer sous Linux gr‚ce ‡ la
+	 * M√©thode triant les informations r√©seau r√©cup√©rer sous Linux gr√¢ce √† la
 	 * 
-	 * mÈthode linuxRunIfConfigCommand pour extraire seulement l'adresse MAC.
+	 * m√©thode linuxRunIfConfigCommand pour extraire seulement l'adresse MAC.
 	 * 
 	 * 
 	 * 
@@ -322,9 +322,9 @@ public final class AddressMACInfo
 
 	/**
 	 * 
-	 * MÈthode triant les informations rÈseau rÈcupÈrer sous OS X (Apple) gr‚ce
+	 * M√©thode triant les informations r√©seau r√©cup√©rer sous OS X (Apple) gr√¢ce
 	 * 
-	 * ‡ la mÈthode osxRunIfConfigCommand pour extraire seulement l'adresse MAC.
+	 * √† la m√©thode osxRunIfConfigCommand pour extraire seulement l'adresse MAC.
 	 * 
 	 * 
 	 * 
@@ -388,7 +388,7 @@ public final class AddressMACInfo
 	 * 
 	 * 
 	 * 
-	 * @return true si l'adresse MAC rÈcupÈrer sous windows est correcte
+	 * @return true si l'adresse MAC r√©cup√©rer sous windows est correcte
 	 * 
 	 */
 
@@ -410,7 +410,7 @@ public final class AddressMACInfo
 	 * 
 	 * 
 	 * 
-	 * @return true si l'adresse MAC rÈcupÈrer sous Linux est correcte
+	 * @return true si l'adresse MAC r√©cup√©rer sous Linux est correcte
 	 * 
 	 */
 
@@ -429,7 +429,7 @@ public final class AddressMACInfo
 	 * 
 	 * @param macAddressCandidate
 	 * 
-	 * @return true si l'adresse MAC rÈcupÈrer sous OS X (Apple) est correcte
+	 * @return true si l'adresse MAC r√©cup√©rer sous OS X (Apple) est correcte
 	 * 
 	 */
 

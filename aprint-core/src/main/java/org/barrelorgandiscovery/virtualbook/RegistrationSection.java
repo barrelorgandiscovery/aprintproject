@@ -11,10 +11,10 @@ import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.tools.SerializeTools;
 
 /**
- * Classe interne définissant une registration sur une période de temps
+ * Classe interne dÃ©finissant une registration sur une pÃ©riode de temps
  * (instrument sur une plage de registres)
  * 
- * pour chaque Jeu de registre, on mémorise les jeux actifs
+ * pour chaque Jeu de registre, on mÃ©morise les jeux actifs
  * 
  * @author Freydiere Patrice
  * 
@@ -28,8 +28,8 @@ class RegistrationSection implements Serializable {
 	private RegistrationSection previous = null;
 
 	/**
-	 * Hash mémorisant les registres activés pour chaque jeu de registre clef :
-	 * jeu de registre valeur : liste des registres activés
+	 * Hash mÃ©morisant les registres activÃ©s pour chaque jeu de registre clef :
+	 * jeu de registre valeur : liste des registres activÃ©s
 	 */
 	private HashMap<String, TreeSet<String>> activatedRegisters = new HashMap<String, TreeSet<String>>();
 
@@ -181,7 +181,7 @@ class RegistrationSection implements Serializable {
 	}
 
 	/**
-	 * liste les registres activés pour un jeu de registres
+	 * liste les registres activÃ©s pour un jeu de registres
 	 * 
 	 * @param registerset
 	 * @return

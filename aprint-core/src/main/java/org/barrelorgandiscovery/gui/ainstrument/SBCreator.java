@@ -181,7 +181,7 @@ public class SBCreator {
 		
 		SF2Layer layer = new SF2Layer(sb);
 
-		// Création d'un patch ...
+		// CrÃ©ation d'un patch ...
 		ModelPatch p = new ModelPatch(isPercussion ? 128 : 0, program, isPercussion); // bank, program ...
 		ins.setPatch(p);
 
@@ -234,7 +234,7 @@ public class SBCreator {
 			/**
 			 * added for smooth the attacks of the instruments
 			 */
-			lr.putShort(SF2Region.GENERATOR_ATTACKVOLENV, (short)-12000); // -12000 par défaut
+			lr.putShort(SF2Region.GENERATOR_ATTACKVOLENV, (short)-12000); // -12000 par dÃ©faut
 			
 			// parameters proposed by Yann Baraffe
 			lr.putShort(SF2Region.GENERATOR_RELEASEVOLENV, (short)-3500);

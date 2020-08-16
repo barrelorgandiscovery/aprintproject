@@ -3,7 +3,7 @@ package org.barrelorgandiscovery.virtualbook;
 import java.io.Serializable;
 
 /**
- * Class d'évènement permettant la gestion d'évènements suplémentaires associés
+ * Class d'Ã©vÃ¨nement permettant la gestion d'Ã©vÃ¨nements suplÃ©mentaires associÃ©s
  * au carton
  * 
  * @author Freydiere Patrice
@@ -19,7 +19,7 @@ public abstract class AbstractEvent implements Comparable<AbstractEvent>,
 	}
 
 	/**
-	 * Récupère l'horodatage de l'évènement
+	 * RÃ©cupÃ¨re l'horodatage de l'Ã©vÃ¨nement
 	 * 
 	 * @return
 	 */
@@ -37,7 +37,7 @@ public abstract class AbstractEvent implements Comparable<AbstractEvent>,
 	}
 
 	/**
-	 * Définition de l'ordre de trie
+	 * DÃ©finition de l'ordre de trie
 	 */
 	public int compareTo(AbstractEvent o) {
 

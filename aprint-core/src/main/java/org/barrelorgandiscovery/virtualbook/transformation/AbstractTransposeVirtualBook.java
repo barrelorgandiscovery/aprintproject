@@ -25,8 +25,8 @@ public abstract class AbstractTransposeVirtualBook extends
 	 * transpose the virtualbook
 	 * 
 	 * @param cartontotranspose
-	 *            le carton à transposer
-	 * @return le carton transposé
+	 *            le carton Ã  transposer
+	 * @return le carton transposÃ©
 	 */
 	public abstract TranspositionResult transpose(VirtualBook cartontotranspose);
 

@@ -299,7 +299,7 @@ public class MidiFileIO {
 		Track[] tracks = seq.getTracks();
 
 		// on fusionne tous les track dans un seul track,
-		// pour rÈsoudre les problËmes de tempo dans la lecture
+		// pour r√©soudre les probl√®mes de tempo dans la lecture
 
 		logger.debug("MergeAllEvents, tracks to analyse :" + tracks.length); //$NON-NLS-1$
 		mergeAllEvents(allevents, tracks);
@@ -308,7 +308,7 @@ public class MidiFileIO {
 
 		// calc time resolution ...
 
-		// CrÈation de l'objet midi associÈ
+		// Cr√©ation de l'objet midi associ√©
 		MidiFile midifile = new MidiFile();
 
 		logger.debug("processAllEvents"); //$NON-NLS-1$
@@ -335,7 +335,7 @@ public class MidiFileIO {
 			List<MidiFileReadError> errors) {
 		int ticksPerBeat = seq.getResolution();
 
-		// resolution pour un tempo ‡ 60 bpm
+		// resolution pour un tempo √† 60 bpm
 		double micropertick = (double) (1000000.0 / ticksPerBeat); // en micro
 		// seconds
 
@@ -344,7 +344,7 @@ public class MidiFileIO {
 		long lasttempotime = 0;
 		long lasttempotick = 0;
 
-		// tableau contenant l'Ètat des diffÈrentes notes ....
+		// tableau contenant l'√©tat des diff√©rentes notes ....
 		// le premier index contient le track, le second, la note
 		long[][][] alltracks = new long[128][16][128];
 
@@ -371,10 +371,10 @@ public class MidiFileIO {
 			currenttime = lasttempotime
 					+ (long) ((me.getTick() - lasttempotick) * micropertick);
 
-			// RÈcupÈration des messages de notes
+			// R√©cup√©ration des messages de notes
 			byte[] message = me.getMessage().getMessage();
 			if (message.length > 0) {
-				// on a des ÈlÈments dans le message ...
+				// on a des √©l√©ments dans le message ...
 
 				int canal = extractChannel(message);
 
@@ -477,7 +477,7 @@ public class MidiFileIO {
 									+ canal
 									+ ",Tick :" + me.getTick() + " track :" + notetrack); //$NON-NLS-1$
 
-						// si la note est dÈj‡ active, on la ferme pour en
+						// si la note est d√©j√† active, on la ferme pour en
 						// creer une autre
 						if (alltracks[notetrack][canal][note] != -1) {
 
@@ -572,7 +572,7 @@ public class MidiFileIO {
 	 */
 	private static void addGenericMessage(MidiFile midifile, long currenttime,
 			MidiEvent me, byte[] message) {
-		logger.warn("Message non traitÈ " + me.getMessage() //$NON-NLS-1$
+		logger.warn("Message non trait√© " + me.getMessage() //$NON-NLS-1$
 				+ " service " + message[1]); //$NON-NLS-1$
 
 		if (me.getMessage() instanceof MetaMessage) {

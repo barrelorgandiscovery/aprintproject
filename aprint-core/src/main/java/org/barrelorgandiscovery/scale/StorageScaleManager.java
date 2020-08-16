@@ -25,7 +25,7 @@ public class StorageScaleManager implements ScaleManager {
 	private static Logger logger = Logger.getLogger(StorageScaleManager.class);
 
 	/**
-	 * liste des gammes présentes dans le répertoire de gammes
+	 * liste des gammes prÃ©sentes dans le rÃ©pertoire de gammes
 	 */
 	private HashMap<String, Scale> scales = new HashMap<String, Scale>();
 
@@ -33,7 +33,7 @@ public class StorageScaleManager implements ScaleManager {
 
 	public StorageScaleManager(StreamStorage iss) {
 
-		// Lecture des gammes contenues dans le répertoire
+		// Lecture des gammes contenues dans le rÃ©pertoire
 
 		String[] listefichiersgamme = iss.listStreams("gamme"); //$NON-NLS-1$
 
@@ -47,7 +47,7 @@ public class StorageScaleManager implements ScaleManager {
 			try {
 				Scale g = ScaleIO.readGamme(iss.openStream(f));
 
-				// Mémorisation de la Gamme ...
+				// MÃ©morisation de la Gamme ...
 				scales.put(g.getName(), g);
 
 			} catch (ScaleException ex) {
@@ -98,7 +98,7 @@ public class StorageScaleManager implements ScaleManager {
 	public Scale getScale(String name) {
 		if (scales.containsKey(name))
 			return scales.get(name);
-		return null; // non trouvée
+		return null; // non trouvÃ©e
 	}
 
 	/*

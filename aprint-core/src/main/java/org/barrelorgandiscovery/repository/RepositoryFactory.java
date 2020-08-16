@@ -5,10 +5,10 @@ import java.util.Properties;
 public class RepositoryFactory {
 
 	/**
-	 * Création d'une nouvelle instance de repository
+	 * CrÃ©ation d'une nouvelle instance de repository
 	 * 
 	 * @param props
-	 *            propriétés de création du Repository
+	 *            propriÃ©tÃ©s de crÃ©ation du Repository
 	 * @return
 	 */
 	public static Repository create(Properties props)

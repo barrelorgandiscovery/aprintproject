@@ -70,7 +70,7 @@ public class SwingUtils {
 	}
 
 	/**
-	 * permet la désactivation/activation d'un ensemble de composans
+	 * permet la dÃ©sactivation/activation d'un ensemble de composans
 	 * 
 	 * @param comp
 	 * @param enable

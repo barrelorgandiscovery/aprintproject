@@ -53,11 +53,11 @@ public class StorageTransformationManager implements TransformationManager {
 
 		logger.debug("Reading Transpositions"); //$NON-NLS-1$
 
-		// Lecture des transposition contenues dans le répertoire
+		// Lecture des transposition contenues dans le rÃ©pertoire
 		String[] listefichierstransposition = reptransposition
 				.listStreams(TRANSPOSITION_TYPE);
 
-		logger.debug("liste des transposition trouvées :" //$NON-NLS-1$
+		logger.debug("liste des transposition trouvÃ©es :" //$NON-NLS-1$
 				+ listefichierstransposition);
 
 		// parcours des fichiers et lecture des transpositions

@@ -10,13 +10,13 @@ import org.barrelorgandiscovery.virtualbook.transformation.importer.MidiEventGro
 public class MidiNoteGroupIsolator {
 
 	/**
-	 * Cette fonction isole les évènements
+	 * Cette fonction isole les Ã©vÃ¨nements
 	 * 
 	 * @param noteisolator
 	 *            le discriminant pour l'isolation
 	 * @param groupbyref
-	 *            le groupe dans lequel retirer les notes discriminées
-	 * @return les notes discriminées
+	 *            le groupe dans lequel retirer les notes discriminÃ©es
+	 * @return les notes discriminÃ©es
 	 */
 	public @ProcessorMethod(labelName = "isole")
 	MidiEventGroup isole(MidiEventIsolator noteisolator,

@@ -28,7 +28,7 @@ public class ExtensionRepository {
 	private URL url;
 
 	public ExtensionRepository(URL url) throws Exception {
-		// récupération du fichier XML ....
+		// rÃ©cupÃ©ration du fichier XML ....
 
 		ConfigurationDocument configurationdocument = ConfigurationDocument.Factory
 				.parse(url.openStream());

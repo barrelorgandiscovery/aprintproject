@@ -6,7 +6,7 @@ import org.barrelorgandiscovery.messages.Messages;
 
 
 /**
- * Classe contenant les constantes associées aux gammes
+ * Classe contenant les constantes associÃ©es aux gammes
  */
 public class PipeStopListReference {
 

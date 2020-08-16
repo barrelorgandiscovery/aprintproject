@@ -6,7 +6,7 @@ import org.barrelorgandiscovery.virtualbook.Hole;
 import org.barrelorgandiscovery.virtualbook.Region;
 
 /**
- * Problème associé à des notes
+ * ProblÃ¨me associÃ© Ã  des notes
  * 
  * @author Freydiere Patrice
  */
@@ -40,7 +40,7 @@ public class IssueHole extends AbstractSpatialIssue {
 	}
 
 	/**
-	 * Récupère les trous associé à cette erreur
+	 * RÃ©cupÃ¨re les trous associÃ© Ã  cette erreur
 	 * 
 	 * @return
 	 */

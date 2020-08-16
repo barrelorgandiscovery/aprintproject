@@ -25,7 +25,7 @@ public class PercussionDef extends ControlTrackDef implements
 	 *            retard de l'instrument par rapport au jeu (en mm sur le
 	 *            carton)
 	 * @param longueur
-	 *            longueur standardisée de la commande de la percussion (en mm
+	 *            longueur standardisÃ©e de la commande de la percussion (en mm
 	 *            sur le carton)
 	 */
 	public PercussionDef(int percussionMidiNote, double retard, double longueur) {
@@ -35,7 +35,7 @@ public class PercussionDef extends ControlTrackDef implements
 	}
 
 	/**
-	 * Récupère la définition midi de la percussion
+	 * RÃ©cupÃ¨re la dÃ©finition midi de la percussion
 	 * 
 	 * @return
 	 */

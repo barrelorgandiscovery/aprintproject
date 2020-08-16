@@ -311,7 +311,7 @@ public class EditableInstrument implements Disposable, IEditableInstrument {
 	}
 
 	/**
-	 * Mémorisation des mappings
+	 * MÃ©morisation des mappings
 	 */
 	private HashMap<String, HashMap<SoundSample, SampleMapping>> mappings = new HashMap<String, HashMap<SoundSample, SampleMapping>>();
 

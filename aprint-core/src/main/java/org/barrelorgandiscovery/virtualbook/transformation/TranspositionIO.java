@@ -74,7 +74,7 @@ public class TranspositionIO {
 	}
 
 	/**
-	 * Ecriture de la transposition dans le fichier spécifié en paramètres
+	 * Ecriture de la transposition dans le fichier spÃ©cifiÃ© en paramÃ¨tres
 	 * 
 	 * @param lt
 	 * @param fichier
@@ -82,7 +82,7 @@ public class TranspositionIO {
 	public static void writeLinearTransposition(LinearTransposition lt,
 			OutputStream stream) throws IOException {
 
-		// création du fichier ...
+		// crÃ©ation du fichier ...
 		Writer w = new OutputStreamWriter(stream);
 		try {
 
@@ -106,7 +106,7 @@ public class TranspositionIO {
 				int[] ai = lt.getAllCorrespondances(i);
 				logger.debug("correspondance :" + ai);
 				if (ai != null && ai.length > 0) {
-					// Ecriture des éléments ....
+					// Ecriture des Ã©lÃ©ments ....
 
 					String r = "";
 					for (int j = 0; j < ai.length; j++) {

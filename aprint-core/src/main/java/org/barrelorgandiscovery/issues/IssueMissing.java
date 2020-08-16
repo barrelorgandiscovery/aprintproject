@@ -22,7 +22,7 @@ public class IssueMissing extends AbstractSpatialIssue {
 
 	public IssueMissing(long start, long length, AbstractTrackDef pisteorigine,
 			int interpolatepos) {
-		super(0); // pas de libellé associé
+		super(0); // pas de libellÃ© associÃ©
 		this.start = start;
 		this.length = length;
 		this.pistedef = pisteorigine;

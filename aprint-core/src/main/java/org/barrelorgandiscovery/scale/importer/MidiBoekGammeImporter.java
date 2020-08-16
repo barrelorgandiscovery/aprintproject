@@ -114,7 +114,7 @@ public class MidiBoekGammeImporter {
 					pistes[line] = nd;
 
 				} else if ("resrv".equals(s)) {
-					// la ligne est réservée ...
+					// la ligne est rÃ©servÃ©e ...
 
 				} else if ("snelh".equals(s)) {
 
@@ -124,10 +124,10 @@ public class MidiBoekGammeImporter {
 
 				} else if ("leima".equals(s)) {
 
-					// Axe de la première piste
+					// Axe de la premiÃ¨re piste
 
 					premierepiste = 1.0 * Integer.parseInt(params[0]) / 10.0;
-					logger.debug("première piste :" + premierepiste);
+					logger.debug("premiÃ¨re piste :" + premierepiste);
 
 				} else if ("ondma".equals(s)) {
 
@@ -190,7 +190,7 @@ public class MidiBoekGammeImporter {
 				} else if ("melod".equals(s)) {
 					line--;
 					logger.debug("melod not supported");
-					throw new Exception("Plusieures mélodies , non supportée .... ");
+					throw new Exception("Plusieures mÃ©lodies , non supportÃ©e .... ");
 				} else {
 					throw new Exception("unsupported command " + s + " line " + lineFile);
 				}
@@ -198,7 +198,7 @@ public class MidiBoekGammeImporter {
 			}
 
 			/**
-			 * Cette fonction cree la gamme à partir du parsing ...
+			 * Cette fonction cree la gamme Ã  partir du parsing ...
 			 * 
 			 * @return
 			 */

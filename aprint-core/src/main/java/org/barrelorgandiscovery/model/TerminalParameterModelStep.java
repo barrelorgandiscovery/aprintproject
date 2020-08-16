@@ -24,17 +24,17 @@ public class TerminalParameterModelStep extends ModelStepWithConsole implements 
 	protected ModelParameter parameter = null;
 
 	/**
-	 * Nom du paramètre
+	 * Nom du paramÃ¨tre
 	 */
 	private String name;
 
 	/**
-	 * Type du paramètre
+	 * Type du paramÃ¨tre
 	 */
 	private ModelType type;
 
 	/**
-	 * Type de paramètre entrée (true), sortie (false)
+	 * Type de paramÃ¨tre entrÃ©e (true), sortie (false)
 	 */
 	private boolean inputParameter;
 
@@ -152,7 +152,7 @@ public class TerminalParameterModelStep extends ModelStepWithConsole implements 
 	}
 
 	/**
-	 * rafraichit le paramètre , en fonction de la configuration
+	 * rafraichit le paramÃ¨tre , en fonction de la configuration
 	 */
 	protected void refreshParameterFromConfiguration() {
 		parameter.setName(this.name);

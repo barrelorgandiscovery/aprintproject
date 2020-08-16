@@ -57,7 +57,7 @@ public class MidiIO {
 			int midicode = mn.getMidiNote();
 			if (mn.getChannel() == 9) {
 				// percussion, on augmente de 128 le midicode car c'est
-				// encodé comme cela sur la gamme midi ....
+				// encodÃ© comme cela sur la gamme midi ....
 				midicode += 128;
 			}
 
@@ -106,7 +106,7 @@ public class MidiIO {
 		// Lecture des sequences
 		VirtualBook c = new VirtualBook(Scale.getGammeMidiInstance());
 
-		// définition du nom du carton, provenant du nom du fichier midi
+		// dÃ©finition du nom du carton, provenant du nom du fichier midi
 		c.setName(filename);
 
 		MidiFileReadResult readWithError = MidiFileIO.readWithError(midiinputstream);
@@ -169,7 +169,7 @@ public class MidiIO {
 	/**
 	 * old function for reading a midi file ...
 	 * 
-	 * @param midifile la référence au fichier midi lu ...
+	 * @param midifile la rÃ©fÃ©rence au fichier midi lu ...
 	 * @return un objet carton virtuel
 	 * @throws MidiIOException
 	 */
@@ -179,7 +179,7 @@ public class MidiIO {
 		// Lecture des sequences
 		VirtualBook c = new VirtualBook(Scale.getGammeMidiInstance());
 
-		// définition du nom du carton, provenant du nom du fichier midi
+		// dÃ©finition du nom du carton, provenant du nom du fichier midi
 		c.setName(midifile.getName());
 
 		logger.debug("Reading sequence"); //$NON-NLS-1$
@@ -196,7 +196,7 @@ public class MidiIO {
 		logger.debug("tracks length " + tracks.length); //$NON-NLS-1$
 
 		// on fusionne tous les track dans un seul track,
-		// pour résoudre les problèmes de tempo dans la lecture
+		// pour rÃ©soudre les problÃ¨mes de tempo dans la lecture
 
 		Sequence lecture = new Sequence(Sequence.PPQ, seq.getResolution());
 		Track t = lecture.createTrack();
@@ -212,7 +212,7 @@ public class MidiIO {
 
 		int resolution = seq.getResolution();
 
-		// resolution pour un tempo à 60 bpm
+		// resolution pour un tempo Ã  60 bpm
 		double micropertick = (double) (1000000.0 / resolution); // en micro
 		// seconds
 
@@ -231,10 +231,10 @@ public class MidiIO {
 		for (int j = 0; j < track.size(); j++) {
 			MidiEvent me = track.get(j);
 			currenttime = lasttempotime + (long) ((me.getTick() - lasttempotick) * micropertick);
-			// Récupération des messages de notes
+			// RÃ©cupÃ©ration des messages de notes
 			byte[] message = me.getMessage().getMessage();
 			if (message.length > 0) {
-				// on a des éléments dans le message ...
+				// on a des Ã©lÃ©ments dans le message ...
 
 				int canal = message[0] & 0x0F;
 
@@ -297,7 +297,7 @@ public class MidiIO {
 					}
 
 					else {
-						logger.debug("Message non traité " + me.getMessage() //$NON-NLS-1$
+						logger.debug("Message non traitÃ© " + me.getMessage() //$NON-NLS-1$
 								+ " service " + message[1]); //$NON-NLS-1$
 					}
 				}

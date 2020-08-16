@@ -15,7 +15,7 @@ public class FilePrefsStorage extends AbstractPrefsStorage {
 	private static Logger logger = Logger.getLogger(FilePrefsStorage.class);
 
 	/**
-	 * Référence au fichier de propriétés
+	 * RÃ©fÃ©rence au fichier de propriÃ©tÃ©s
 	 */
 	private File propertiesfile = null;
 

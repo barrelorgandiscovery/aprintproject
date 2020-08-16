@@ -33,7 +33,7 @@ public class FileNameExtensionFilter extends FileFilter {
 		if (f == null)
 			return false;
 
-		// on accepte les répertoire
+		// on accepte les rÃ©pertoire
 
 		if (f.isDirectory())
 			return true;

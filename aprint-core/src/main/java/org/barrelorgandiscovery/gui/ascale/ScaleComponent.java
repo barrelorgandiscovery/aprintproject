@@ -71,9 +71,9 @@ public class ScaleComponent extends JComponent {
 	private static final Logger logger = Logger.getLogger(ScaleComponent.class);
 
 	// ///////////////////////////////////////////////////////////////////////
-	// Définition de la propriété de la gamme ...
+	// DÃ©finition de la propriÃ©tÃ© de la gamme ...
 
-	private double largeur_carton = 200; // par défaut, 20cm, en mm
+	private double largeur_carton = 200; // par dÃ©faut, 20cm, en mm
 
 	private double entrepiste = 3; // en mm
 
@@ -107,18 +107,18 @@ public class ScaleComponent extends JComponent {
 	private String scalestate = null;
 
 	/**
-	 * Contact associé à la gamme
+	 * Contact associÃ© Ã  la gamme
 	 */
 	private String contact = null;
 
-	// propriétés d'affichage
+	// propriÃ©tÃ©s d'affichage
 
 	// private Color carton_color = new Color(216, 181, 141);
 
 	/**
-	 * Largeur de la gamme dessinée dans le composant
+	 * Largeur de la gamme dessinÃ©e dans le composant
 	 */
-	private double largeur_gamme = 130; // en mm , largeur de la gamme affichée
+	private double largeur_gamme = 130; // en mm , largeur de la gamme affichÃ©e
 
 	/**
 	 * Track highlighted
@@ -126,7 +126,7 @@ public class ScaleComponent extends JComponent {
 	private int highligthed_track = -1;
 
 	/**
-	 * Track sélectionné
+	 * Track sÃ©lectionnÃ©
 	 */
 	private int selected_track = -1;
 
@@ -150,10 +150,10 @@ public class ScaleComponent extends JComponent {
 	/**
 	 * Echelle
 	 */
-	private double scale = 1.0; // par défaut, échelle 1
+	private double scale = 1.0; // par dÃ©faut, Ã©chelle 1
 
 	/**
-	 * cache sur le dpi récupéré
+	 * cache sur le dpi rÃ©cupÃ©rÃ©
 	 */
 	private int dpi = -1;
 
@@ -166,7 +166,7 @@ public class ScaleComponent extends JComponent {
 	private TexturePaint cartontrame = null;
 	
 	/**
-	 * Constructeur par défaut ...
+	 * Constructeur par dÃ©faut ...
 	 */
 	public ScaleComponent() {
 
@@ -254,7 +254,7 @@ public class ScaleComponent extends JComponent {
 					}
 
 					if (highligthed_track == -1) {
-						// pas de sélection ...
+						// pas de sÃ©lection ...
 						highligthed_track = evaluatedtrack;
 						repaint();
 					} else {
@@ -313,7 +313,7 @@ public class ScaleComponent extends JComponent {
 		super.paint(g);
 
 		// note : surcharge de paint pour pouvoir imprimer ...
-		// paintComponent n'est pas appelée sur les demandes d'impression
+		// paintComponent n'est pas appelÃ©e sur les demandes d'impression
 
 		// logger
 		// .debug(Messages.getString("GammeComponent.1") +
@@ -385,10 +385,10 @@ public class ScaleComponent extends JComponent {
 
 				g.setFont(newfont);
 
-				// Dessin du highlight et de la sélection ...
+				// Dessin du highlight et de la sÃ©lection ...
 
 				if (highligthed_track != -1) {
-					// dessin en jaune de la piste highlighté
+					// dessin en jaune de la piste highlightÃ©
 					g.setColor(Color.YELLOW);
 					Rectangle extent = getTrackRectangle(highligthed_track);
 					g.fillRect(extent.x, extent.y, extent.width, extent.height);
@@ -397,7 +397,7 @@ public class ScaleComponent extends JComponent {
 				}
 
 				if (selected_track != -1) {
-					// dessin en jaune de la piste highlighté
+					// dessin en jaune de la piste highlightÃ©
 					g.setColor(Color.BLUE);
 					Rectangle extent = getTrackRectangle(selected_track);
 					g.fillRect(extent.x, extent.y, extent.width, extent.height);
@@ -428,9 +428,9 @@ public class ScaleComponent extends JComponent {
 					g.drawLine(MmToPixel(largeur_gamme / 2), yscreen,
 							MmToPixel(largeur_gamme), yscreen);
 
-					// affichage de la définition de la piste ...
+					// affichage de la dÃ©finition de la piste ...
 
-					// Récupération de la définition de la piste ...
+					// RÃ©cupÃ©ration de la dÃ©finition de la piste ...
 					AbstractTrackDef td = null;
 					if (i < notedefs.size())
 						td = notedefs.get(i);
@@ -459,7 +459,7 @@ public class ScaleComponent extends JComponent {
 
 				}
 
-				// dernière borne
+				// derniÃ¨re borne
 				int yscreen;
 				if (preferredViewedInverted) {
 
@@ -646,7 +646,7 @@ public class ScaleComponent extends JComponent {
 		int yline1; // for the reference
 		int yline2;
 
-		// Dessin de la référence ...
+		// Dessin de la rÃ©fÃ©rence ...
 		if (preferredViewedInverted) {
 			y_reference = convertCartonToScreenY(largeur_carton);
 			x_reference = MmToPixel(largeur_gamme / 2);
@@ -740,7 +740,7 @@ public class ScaleComponent extends JComponent {
 	};
 
 	// ///////////////////////////////////////////////////////////////////
-	// outils de conversion de coordonnées
+	// outils de conversion de coordonnÃ©es
 
 	private Rectangle getTrackRectangle(int trackno) {
 
@@ -761,7 +761,7 @@ public class ScaleComponent extends JComponent {
 	}
 
 	/**
-	 * Récupération du facteur d'échelle, par exemple 2 pour voir la gamme en 2
+	 * RÃ©cupÃ©ration du facteur d'Ã©chelle, par exemple 2 pour voir la gamme en 2
 	 * fois plus gros
 	 * 
 	 * @return
@@ -771,7 +771,7 @@ public class ScaleComponent extends JComponent {
 	}
 
 	/**
-	 * Définition du facteur d'échelle, par exemple 2 pour voir la gamme en 2
+	 * DÃ©finition du facteur d'Ã©chelle, par exemple 2 pour voir la gamme en 2
 	 * fois plus gros
 	 * 
 	 * @param scale
@@ -781,8 +781,8 @@ public class ScaleComponent extends JComponent {
 	}
 
 	/**
-	 * Cette méthode converti la coordonnée de l'espace carton vers les
-	 * coordonnées écran.
+	 * Cette mÃ©thode converti la coordonnÃ©e de l'espace carton vers les
+	 * coordonnÃ©es Ã©cran.
 	 */
 	private int convertCartonToScreenX(double x) {
 		double d = x;
@@ -795,7 +795,7 @@ public class ScaleComponent extends JComponent {
 	}
 
 	/**
-	 * Récupère le DPI associé à l'écran pour l'affichage à l'échelle 1
+	 * RÃ©cupÃ¨re le DPI associÃ© Ã  l'Ã©cran pour l'affichage Ã  l'Ã©chelle 1
 	 * 
 	 * @return
 	 */
@@ -846,7 +846,7 @@ public class ScaleComponent extends JComponent {
 	}
 
 	/**
-	 * Récupération du libellé de la piste
+	 * RÃ©cupÃ©ration du libellÃ© de la piste
 	 * 
 	 * @param td
 	 * @return
@@ -949,7 +949,7 @@ public class ScaleComponent extends JComponent {
 	}
 
 	/**
-	 * Définition du listener de composant ...
+	 * DÃ©finition du listener de composant ...
 	 * 
 	 * @param listener
 	 */
@@ -970,7 +970,7 @@ public class ScaleComponent extends JComponent {
 	// Fonction de gestion de la gamme ...
 
 	public void newScale() {
-		this.largeur_carton = 200; // par défaut, 20cm, en mm
+		this.largeur_carton = 200; // par dÃ©faut, 20cm, en mm
 
 		this.entrepiste = 3; // en mm
 
@@ -1015,7 +1015,7 @@ public class ScaleComponent extends JComponent {
 	}
 
 	/**
-	 * Charge la définition d'une gamme dans le composant
+	 * Charge la dÃ©finition d'une gamme dans le composant
 	 * 
 	 * @param g
 	 */
@@ -1067,7 +1067,7 @@ public class ScaleComponent extends JComponent {
 	}
 
 	/**
-	 * Vérifie la gamme en cours de construction
+	 * VÃ©rifie la gamme en cours de construction
 	 * 
 	 * @return
 	 */
@@ -1085,13 +1085,13 @@ public class ScaleComponent extends JComponent {
 	}
 
 	/**
-	 * Cree la gamme associée à celle modifiée dans le formulaire
+	 * Cree la gamme associÃ©e Ã  celle modifiÃ©e dans le formulaire
 	 * 
 	 * @return
 	 * @throws ScaleException
 	 */
 	public Scale constructScale() throws ScaleException {
-		// Création d'une copie du tableau de définition des pistes
+		// CrÃ©ation d'une copie du tableau de dÃ©finition des pistes
 		AbstractTrackDef[] tds = new AbstractTrackDef[nbpistes];
 		for (int i = 0; i < nbpistes; i++) {
 

@@ -10,12 +10,12 @@ import org.barrelorgandiscovery.virtualbook.transformation.importer.processor.No
 public class Utils {
 
 	/**
-	 * Extrait les notes appartenant à un track midi spécifique
+	 * Extrait les notes appartenant Ã  un track midi spÃ©cifique
 	 * 
 	 * @param track
-	 *            le track souhaité
+	 *            le track souhaitÃ©
 	 * @param group
-	 *            les notes midi associées
+	 *            les notes midi associÃ©es
 	 * @return
 	 */
 	public static MidiEventGroup extractTrack(int track, MidiEventGroup group) {

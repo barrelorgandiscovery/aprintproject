@@ -190,7 +190,7 @@ public class Hole implements Comparable<Hole>, Serializable, ITimedStamped, ITim
 	 * are two holes intersecting ?
 	 * 
 	 * @param a
-	 *            la première note
+	 *            la premiÃ¨re note
 	 * @param b
 	 *            la seconde note
 	 * @return
@@ -274,10 +274,10 @@ public class Hole implements Comparable<Hole>, Serializable, ITimedStamped, ITim
 	}
 
 	/**
-	 * Teste si la note a est complètement à l'intérieur de b
+	 * Teste si la note a est complÃ¨tement Ã  l'intÃ©rieur de b
 	 * 
 	 * @param a
-	 *            la première note
+	 *            la premiÃ¨re note
 	 * @param b
 	 *            la note de test
 	 */
