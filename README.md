@@ -2,7 +2,7 @@
 
 *Barrel organ discovery - 2004-2020*
 
-status of aprint_2020_q2 branch : ![](https://travis-ci.org/barrelorgandiscovery/aprintproject.svg?branch=aprint_2020_q2)
+
 
 This repository contains the **full source** of APrint Studio, more informations can be found on the web site : [http://www.barrel-organ-discovery.org](http://www.barrel-organ-discovery.org)  
 
