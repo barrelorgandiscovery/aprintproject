@@ -56,7 +56,7 @@ import aprintextensions.fr.freydierepatrice.perfo.gerard.PerfoExtensionParameter
 import aprintextensions.fr.freydierepatrice.perfo.gerard.PerfoPunchConverter;
 
 /**
- * Extension de perçage pour la machine à percer de gérard
+ * Extension de perÃ§age pour la machine de gÃ©rard
  * 
  * @author Freydiere Patrice
  * 
@@ -157,9 +157,9 @@ public class PerfoExtensionVirtualBook
 	private JButton mi = null;
 
 	private JButton createOptionButton() {
-		mi = new JButton("Options de perçage ...");
-		// largeur du poinçon ...
-		// hauteur du poinçon ...
+		mi = new JButton("Options de perï¿½age ...");
+		// largeur du poinï¿½on ...
+		// hauteur du poinï¿½on ...
 		mi.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
@@ -216,7 +216,7 @@ public class PerfoExtensionVirtualBook
 
 		this.currentVirtualBook = vb;
 
-		// Vérification des contraintes ...
+		// VÃ©rification des contraintes ...
 		perfoconverter = new PerfoPunchConverter(vb);
 
 		perfoconverter.convertToPunchPage(parameters.poinconsize, parameters.poinconheight, parameters.page_size,
@@ -252,7 +252,7 @@ public class PerfoExtensionVirtualBook
 
 			if (perfoconverter.hasErrors()) {
 				JMessageBox.showMessage(aprintref.getOwnerForDialog(),
-						"des erreurs subsistes dans le carton, le perçage ne reflete pas l'écoute");
+						"des erreurs subsistes dans le carton, le perï¿½age ne reflete pas l'ï¿½coute");
 			}
 
 			// lancement de l'optimisation ...
@@ -263,7 +263,7 @@ public class PerfoExtensionVirtualBook
 
 					CancelTracker ct = new CancelTracker();
 
-					frame.getWaitInterface().infiniteStartWait("Optimisation du tracé", ct);
+					frame.getWaitInterface().infiniteStartWait("Optimisation du tracï¿½", ct);
 					try {
 
 						perfoconverter.optimize(frame.getWaitInterface(), ct);
@@ -296,8 +296,8 @@ public class PerfoExtensionVirtualBook
 				return;
 			}
 
-			// Sélection du fichier ..
-			// demande du fichier à sauvegarder ...
+			// SÃ©lection du fichier ..
+			// demande du fichier  Ã  sauvegarder ...
 			APrintFileChooser choose = new APrintFileChooser();
 
 			choose.setFileSelectionMode(APrintFileChooser.FILES_ONLY);
@@ -308,7 +308,7 @@ public class PerfoExtensionVirtualBook
 
 				AbstractFileObject savedfile = choose.getSelectedFile();
 				if (savedfile == null) {
-					JMessageBox.showMessage(aprintref.getOwnerForDialog(), "pas de fichier sélectionné");
+					JMessageBox.showMessage(aprintref.getOwnerForDialog(), "pas de fichier sÃ©lectionnÃ©");
 					return;
 				}
 
@@ -368,7 +368,7 @@ public class PerfoExtensionVirtualBook
 						os.close();
 					}
 					
-					JMessageBox.showMessage(aprintref.getOwnerForDialog(), "Fichier sauvegardé");
+					JMessageBox.showMessage(aprintref.getOwnerForDialog(), "Fichier sauvegardÃ©");
 
 				} catch (Throwable ex) {
 					JMessageBox.showMessage(aprintref.getOwnerForDialog(), "Erreur dans la sauvegarde du fichier");
@@ -403,7 +403,7 @@ public class PerfoExtensionVirtualBook
 	private JButton savedxf = null;
 
 	private void addPerfoButtonsInToolBar(JToolBar tb) {
-		optimize = new JButton("Optimiser le tracé");
+		optimize = new JButton("Optimiser le tracÃ©");
 		optimize.setIcon(new ImageIcon(getClass().getResource("misc.png")));
 		optimize.setToolTipText("Optimisation du parcours du poincons pour l'extention perfo");
 		optimize.setActionCommand("OPTIMIZE");
@@ -522,7 +522,7 @@ public class PerfoExtensionVirtualBook
 	public void registerToolWindow(MyDoggyToolWindowManager manager) {
 
 		// Register a Tool.
-		manager.registerToolWindow("Erreurs sur le perçage", // Id //$NON-NLS-1$
+		manager.registerToolWindow("Erreurs sur le perÃ§age", // Id //$NON-NLS-1$
 				"Perfo Window", // Title //$NON-NLS-1$
 				null, // Icon
 				issuesPresenter, // Component

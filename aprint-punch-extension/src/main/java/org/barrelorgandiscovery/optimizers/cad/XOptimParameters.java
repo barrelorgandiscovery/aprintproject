@@ -12,7 +12,7 @@ public class XOptimParameters implements Serializable {
 
 
 	/**
-	 * Formes de trous pour les trous généraux
+	 * Formes de trous pour les trous gÃ©nÃ©raux
 	 */
 	private TrouType typeTrous = TrouType.TROUS_RECTANGULAIRES;
 

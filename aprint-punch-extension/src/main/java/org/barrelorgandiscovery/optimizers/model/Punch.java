@@ -3,7 +3,7 @@ package org.barrelorgandiscovery.optimizers.model;
 import org.barrelorgandiscovery.tools.HashCodeUtils;
 
 /**
- * Classe représentant un accoup de la machine à perforer
+ * Classe reprÃ©sentant un accoup de la machine Ã  perforer
  * 
  * @author Freydiere Patrice
  */

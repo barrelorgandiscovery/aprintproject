@@ -117,7 +117,7 @@ public class APrintRecognitionExtension extends BaseExtension {
 				null);
 
 		dc.setSelectedFile(fPrefs);
-		dc.setDialogTitle("Choisissez le répertoire contenant les photos ...");
+		dc.setDialogTitle("Choisissez le rÃ©pertoire contenant les photos ...");
 		if (dc.showOpenDialog((Component) application.getOwnerForDialog()) == JDirectoryChooser.APPROVE_OPTION) {
 			this.extensionPreferences.setFileProperty(PREF_FOLDER,
 					dc.getSelectedFile());
@@ -147,7 +147,7 @@ public class APrintRecognitionExtension extends BaseExtension {
 				null);
 
 		dc.setSelectedFile(fPrefs);
-		dc.setDialogTitle("Choisissez le répertoire contenant les photos ...");
+		dc.setDialogTitle("Choisissez le rÃ©pertoire contenant les photos ...");
 		if (dc.showOpenDialog((Component) application.getOwnerForDialog()) == JDirectoryChooser.APPROVE_OPTION) {
 			this.extensionPreferences.setFileProperty(PREF_FOLDER,
 					dc.getSelectedFile());

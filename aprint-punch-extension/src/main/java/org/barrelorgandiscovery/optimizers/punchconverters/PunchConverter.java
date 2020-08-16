@@ -33,7 +33,7 @@ public class PunchConverter {
 	private double largeurpoincon;
 
 	/**
-	 * recouvrement pour les coups de poinçons
+	 * recouvrement pour les coups de poinÃ§ons
 	 */
 	private double recouvrement;
 	
@@ -73,12 +73,12 @@ public class PunchConverter {
 	}
 
 	/**
-	 * Converti un ensemble de note en coups de poinçon
+	 * Converti un ensemble de note en coups de poinÃ§on
 	 * 
 	 * @param notes
 	 *            la liste des notes
 	 * @param largeurpoincon
-	 *            la largeur du poinçon
+	 *            la largeur du poinÃ§on
 	 * @return
 	 */
 	public OptimizerResult<Punch> convert(List<Hole> notes) {
@@ -94,7 +94,7 @@ public class PunchConverter {
 				result.holeerrors.add(new IssueHole(
 						IssuesConstants.HOLE_TOO_SMALL, new Hole[] { n }));
 				// logger.error("la note " + n
-				// + " est trop petite pour pouvoir être percée");
+				// + " est trop petite pour pouvoir ï¿½tre percï¿½e");
 
 			} else {
 
@@ -113,7 +113,7 @@ public class PunchConverter {
 				}
 
 				if (!Double.isNaN(lastdistance)) {
-					// traitement du dernier coup de poinçon ...
+					// traitement du dernier coup de poinÃ§on ...
 
 					if (currentholepunches.size() > 0
 							&& (end
