@@ -4,6 +4,7 @@ subprojects {
 
     apply plugin: 'eclipse'
     apply plugin: 'java'
+    apply plugin: 'jacoco' 
 
     task sourcesJar(type: Jar, dependsOn: classes) {
        classifier = 'sources'
@@ -29,6 +30,24 @@ subprojects {
         archives sourcesJar
         archives javadocJar
     }
+    java {
+        reporting.baseDir = "${rootProject.buildDir.path}/reports/${project.name}"
+    }
+    jacocoTestReport {
+
+        reports {
+            xml.enabled = true
+            csv.enabled = false
+            html.enabled = true
+            html.destination = file("${buildDir}/reports/jacoco/html")
+        }
+    }
+}
+
+task testReport(type: TestReport) {
+  destinationDir = file("$buildDir/reports/allTests")
+  // Combine all 'test' task results into a single HTML report
+  reportOn subprojects.collect { it.tasks.withType(Test) }
 }
 
 

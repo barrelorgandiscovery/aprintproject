@@ -52,7 +52,10 @@ for creating the Installer with updated extensions launch the following command 
 gradlew createBundles
 ```
 
+### Launch automatic tests and global test report
 
 
-
+```
+gradlew check testReport jacocoTestReport
+```
 
