@@ -17,6 +17,10 @@ compileJava {
 
 dependencies {
     compileOnly project(":aprint-core")
+
+    	// https://mvnrepository.com/artifact/log4j/log4j
+	compile group: 'log4j', name: 'log4j', version: '1.2.14'
+    
     compile files(fileTree(dir:"${projectDir}/libs" , include:['**/*.jar']).toList())
     print("${projectDir}")
     testCompile 'junit:junit:4.12'

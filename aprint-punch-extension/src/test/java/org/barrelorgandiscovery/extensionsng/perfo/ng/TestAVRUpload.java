@@ -114,7 +114,7 @@ public class TestAVRUpload {
 		return r;
 	}
 
-	@Test
+	// @Test
 	public void testSerial() throws Exception {
 
 		class PortReader implements SerialPortEventListener {
