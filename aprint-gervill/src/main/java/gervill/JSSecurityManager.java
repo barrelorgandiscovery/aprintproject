@@ -34,13 +34,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-
+import java.util.ServiceLoader;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
 
 import javax.sound.sampled.AudioPermission;
 
-import sun.misc.Service;
 
 
 /** Managing security in the Java Sound implementation.
@@ -282,15 +281,26 @@ class JSSecurityManager {
     }
 
 
-    static List getProviders(final Class providerClass) {
-        List p = new ArrayList();
-        // Service.providers(Class) just creates "lazy" iterator instance,
-        // so it doesn't require do be called from privileged section
-        final Iterator ps = Service.providers(providerClass);
+
+    static synchronized <T> List<T> getProviders(final Class<T> providerClass) {
+        List<T> p = new ArrayList<>(7);
+        // ServiceLoader creates "lazy" iterator instance, but it ensures that
+        // next/hasNext run with permissions that are restricted by whatever
+        // creates the ServiceLoader instance, so it requires to be called from
+        // privileged section
+        final PrivilegedAction<Iterator<T>> psAction =
+                new PrivilegedAction<Iterator<T>>() {
+                    @Override
+                    public Iterator<T> run() {
+                        return ServiceLoader.load(providerClass).iterator();
+                    }
+                };
+        final Iterator<T> ps = AccessController.doPrivileged(psAction);
 
         // the iterator's hasNext() method looks through classpath for
         // the provider class names, so it requires read permissions
         PrivilegedAction<Boolean> hasNextAction = new PrivilegedAction<Boolean>() {
+            @Override
             public Boolean run() {
                 return ps.hasNext();
             }
@@ -301,7 +311,7 @@ class JSSecurityManager {
                 // the iterator's next() method creates instances of the
                 // providers and it should be called in the current security
                 // context
-                Object provider = ps.next();
+                T provider = ps.next();
                 if (providerClass.isInstance(provider)) {
                     // $$mp 2003-08-22
                     // Always adding at the beginning reverses the
