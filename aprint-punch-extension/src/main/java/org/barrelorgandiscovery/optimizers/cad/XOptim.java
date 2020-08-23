@@ -3,6 +3,7 @@ package org.barrelorgandiscovery.optimizers.cad;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.List;
 import java.util.TreeSet;
 
 import javax.swing.ImageIcon;
@@ -14,8 +15,11 @@ import org.barrelorgandiscovery.gui.ICancelTracker;
 import org.barrelorgandiscovery.optimizers.Optimizer;
 import org.barrelorgandiscovery.optimizers.OptimizerProgress;
 import org.barrelorgandiscovery.optimizers.OptimizerResult;
+import org.barrelorgandiscovery.optimizers.model.CutLine;
 import org.barrelorgandiscovery.optimizers.model.Extent;
+import org.barrelorgandiscovery.optimizers.model.GroupedCutLine;
 import org.barrelorgandiscovery.optimizers.model.OptimizedObject;
+import org.barrelorgandiscovery.tools.SerializeTools;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 
 public class XOptim implements Optimizer<OptimizedObject> {
@@ -63,19 +67,23 @@ public class XOptim implements Optimizer<OptimizedObject> {
 	@Override
 	public OptimizerResult<OptimizedObject> optimize(VirtualBook carton) throws Exception {
 
-		CADParameters parameters = constructCADParameters();
+		CADParameters cadparameters = constructCADParameters();
 
 		CADVirtualBookExporter exporter = new CADVirtualBookExporter();
 
+		// create a punch plan device drawing
 		PunchPlanDeviceDrawing pp = new PunchPlanDeviceDrawing();
-		exporter.export(carton, parameters, pp);
+		exporter.export(carton, cadparameters, pp);
 
 		ArrayList<OptimizedObject> optimized = pp.getCurrentDraw();
 
+		// exported elements have a 1.0 power and speed fraction
+
 		OptimizerResult<OptimizedObject> result = new OptimizerResult<>();
+
 		result.result = optimized.toArray(new OptimizedObject[optimized.size()]);
 
-		// sort the elements by x
+		// sort the elements by x, either groups and cut lines
 		Arrays.sort(result.result, new Comparator<OptimizedObject>() {
 			@Override
 			public int compare(OptimizedObject arg0, OptimizedObject arg1) {
@@ -84,14 +92,67 @@ public class XOptim implements Optimizer<OptimizedObject> {
 
 				Extent e = arg0.getExtent();
 				Extent e2 = arg1.getExtent();
-				int c = Double.compare((e.xmin + e.xmax )/2, (e2.xmin + e2.xmax)/2);
+				int c = Double.compare((e.xmin + e.xmax) / 2, (e2.xmin + e2.xmax) / 2);
 				if (c != 0)
 					return c;
 				return Double.compare(e.ymin, e2.ymin);
 			}
 		});
 
+		// handle pass 1 and pass 2
+		result.result = recurseHandlePasses(result.result);
+
 		return result;
+	}
+
+	/**
+	 * this function change the power and speed parameters, and handle the pass1 and pass2 elements
+	 * @param objects
+	 * @return
+	 */
+	private OptimizedObject[] recurseHandlePasses(OptimizedObject[] objects) {
+		if (objects == null || objects.length == 0) {
+			return new OptimizedObject[0];
+		}
+
+		ArrayList<OptimizedObject> list = new ArrayList<>();
+
+		for (OptimizedObject o : objects) {
+
+			if (o instanceof CutLine) {
+				CutLine cl = (CutLine) o;
+				cl.powerFraction = parameters.getPowerFractionPass1();
+				cl.speedFraction = parameters.getSpeedFractionPass1();
+				list.add(cl);
+
+			} else if (o instanceof GroupedCutLine) {
+
+				GroupedCutLine gcl = (GroupedCutLine) o;
+				{
+					List<CutLine> innerLines = gcl.getLinesByRefs();
+					assert innerLines != null;
+					for (CutLine c : innerLines) {
+						c.powerFraction = parameters.getPowerFractionPass1();
+						c.speedFraction = parameters.getSpeedFractionPass1();
+					}
+				}
+
+				list.add(gcl);
+
+				if (parameters.isHas2pass()) {
+					GroupedCutLine pass2group = SerializeTools.deepClone(gcl);
+					List<CutLine> innerLines = gcl.getLinesByRefs();
+					assert innerLines != null;
+					for (CutLine c : innerLines) {
+						c.powerFraction = parameters.getPowerFractionPass2();
+						c.speedFraction = parameters.getSpeedFractionPass2();
+					}
+					list.add(pass2group);
+				}
+			}
+		}
+		
+		return list.toArray(new OptimizedObject[list.size()]);
 	}
 
 	@Override

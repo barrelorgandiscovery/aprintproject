@@ -66,7 +66,7 @@ public class CADVirtualBookExporter {
 	/**
 	 * Exporte un carton en fichier DXF
 	 * 
-	 * @param vb          le carton à exporter
+	 * @param vb          le carton ï¿½ exporter
 	 * @param mecanique   booleen indiquant si le type est mecanique
 	 * @param tailleTrous taille des trous dans le cas du pneumatique
 	 * @param ponts       taille des ponts pour le pneumatique
@@ -77,7 +77,6 @@ public class CADVirtualBookExporter {
 		CADParameters p = CADParameters.class.newInstance();
 
 		// clone the parameters, in serializing them
-
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ObjectOutputStream os = new ObjectOutputStream(baos);
 		parameters.writeExternal(os);
@@ -137,6 +136,7 @@ public class CADVirtualBookExporter {
 		}
 
 		device.setCurrentLayer(LAYER_REFERENCE);
+		
 		// draw the reference arrow
 		// dest
 		double arrowy = 0;
@@ -192,7 +192,7 @@ public class CADVirtualBookExporter {
 					}
 				} else if (p.getTypePliure() == TypePliure.ALTERNE_CONTINU_POINTILLEE) {
 
-					// pointillé avec non déoupe au bord des deux cotés, sur 5mm (sinon, fragilise
+					// pointillï¿½ avec non dï¿½oupe au bord des deux cotï¿½s, sur 5mm (sinon, fragilise
 					// le carton)
 					double startNoDots = 5.0;
 					double endDotsWidth = scale.getWidth() - 5.0;
@@ -209,7 +209,7 @@ public class CADVirtualBookExporter {
 				start += p.getTaillePagePourPliure() * 2;
 			}
 
-			// fin d'écriture des pliures dans la layer concernée
+			// fin d'ï¿½criture des pliures dans la layer concernï¿½e
 
 			device.setCurrentLayer(LAYER_PLIURES);
 			start = startBook + p.getTaillePagePourPliure();
@@ -229,7 +229,7 @@ public class CADVirtualBookExporter {
 						device.endGroup();
 					}
 				} else if (p.getTypePliure() == TypePliure.ALTERNE_CONTINU_POINTILLEE) {
-					// découpe complete
+					// dï¿½coupe complete
 					device.startGroup();
 					try {
 						device.drawLine(start, 0, start, scale.getWidth());
@@ -297,7 +297,7 @@ public class CADVirtualBookExporter {
 
 		BasicConfigurator.configure(new ConsoleAppender(new PatternLayout()));
 		MidiFile midiFile = MidiFileIO
-				.read(new File("C:/Projets/APrintPerfoExtension/doc/Perçage_Lazer/BEER essai.mid"));
+				.read(new File("C:/Projets/APrintPerfoExtension/doc/Perï¿½age_Lazer/BEER essai.mid"));
 
 		Properties properties = new Properties();
 		properties.setProperty("folder", "C:/Projets/APrint/gammes");

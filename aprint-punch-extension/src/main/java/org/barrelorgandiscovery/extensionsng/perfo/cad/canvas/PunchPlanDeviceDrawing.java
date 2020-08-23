@@ -23,14 +23,27 @@ import com.vividsolutions.jts.geom.LineString;
  */
 public class PunchPlanDeviceDrawing extends DeviceDrawing {
 
+	// current drawing element
 	private ArrayList<OptimizedObject> currentDraw = new ArrayList<>();
 
+	// current constructed group
 	private ArrayList<CutLine> currentGroup = new ArrayList<>();
+
+	private double currentFractionPower = 1.0;
+	private double currentFractionSpeed = 1.0;
 
 	@Override
 	public void setCurrentLayer(String layer) {
 		super.setCurrentLayer(layer);
 
+	}
+
+	public void setCurrentFractionPower(double currentFractionPower) {
+		this.currentFractionPower = currentFractionPower;
+	}
+
+	public void setCurrentFractionSpeed(double currentFractionSpeed) {
+		this.currentFractionSpeed = currentFractionSpeed;
 	}
 
 	private void flushCurrent() {
@@ -89,7 +102,8 @@ public class PunchPlanDeviceDrawing extends DeviceDrawing {
 		Coordinate last = coordinates[0];
 		for (int i = 1; i < coordinates.length; i++) {
 			Coordinate current = coordinates[i];
-			CutLine cutline = new CutLine(last.x, last.y, current.x, current.y);
+			CutLine cutline = new CutLine(last.x, last.y, current.x, current.y, currentFractionPower,
+					currentFractionSpeed);
 			last = current;
 			this.currentGroup.add(cutline);
 		}

@@ -10,6 +10,10 @@ import org.barrelorgandiscovery.extensionsng.perfo.cad.TypePliure;
 
 public class XOptimParameters implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 7295413239681833891L;
 
 	/**
 	 * Formes de trous pour les trous généraux
@@ -36,7 +40,59 @@ public class XOptimParameters implements Serializable {
 	private int nombreDePlisAAjouterAuDebut = 0;
 
 	private TypePliure typePliure = TypePliure.CONTINUE;
+	
+	private double powerFractionPass1 = 1.0; // be default, 100%
 
+	public double getPowerFractionPass1() {
+		return powerFractionPass1;
+	}
+
+	public void setPowerFractionPass1(double powerFractionPass1) {
+		this.powerFractionPass1 = powerFractionPass1;
+	}
+
+	public double getSpeedFractionPass1() {
+		return speedFractionPass1;
+	}
+
+	public void setSpeedFractionPass1(double speedFractionPass1) {
+		this.speedFractionPass1 = speedFractionPass1;
+	}
+
+	public boolean isHas2pass() {
+		return has2pass;
+	}
+
+	public void setHas2pass(boolean has2pass) {
+		this.has2pass = has2pass;
+	}
+
+	public double getPowerFractionPass2() {
+		return powerFractionPass2;
+	}
+
+	public void setPowerFractionPass2(double powerFractionPass2) {
+		this.powerFractionPass2 = powerFractionPass2;
+	}
+
+	public double getSpeedFractionPass2() {
+		return speedFractionPass2;
+	}
+
+	public void setSpeedFractionPass2(double speedFractionPass2) {
+		this.speedFractionPass2 = speedFractionPass2;
+	}
+
+	private double speedFractionPass1 = 1.0;
+	
+	private boolean has2pass = false;
+	
+	private double powerFractionPass2 = 1.0; // be default, 100%
+
+	private double speedFractionPass2 = 1.0;
+	
+	
+	
 	public void setNombreDePlisAAjouterAuDebut(int nombreDePlisAAjouterAuDebut) {
 		this.nombreDePlisAAjouterAuDebut = nombreDePlisAAjouterAuDebut;
 	}
@@ -131,6 +187,14 @@ public class XOptimParameters implements Serializable {
 		startBookAdjustementFromBeginning = in.readDouble();
 		nombreDePlisAAjouterAuDebut = in.readInt();
 		
+		powerFractionPass1 = in.readDouble();
+		speedFractionPass1 = in.readDouble();
+		
+		has2pass = in.readBoolean();
+		powerFractionPass2 = in.readDouble();
+		speedFractionPass2 = in.readDouble();
+		
+		
 	}
 
 	public void writeExternal(ObjectOutput out) throws IOException {
@@ -145,6 +209,12 @@ public class XOptimParameters implements Serializable {
 		out.writeUTF(typePliure.name());
 		out.writeDouble(startBookAdjustementFromBeginning);
 		out.writeInt(nombreDePlisAAjouterAuDebut);
+		out.writeDouble(powerFractionPass1);
+		out.writeDouble(speedFractionPass1);
+		out.writeBoolean(has2pass);
+		out.writeDouble(powerFractionPass2);
+		out.writeDouble(speedFractionPass2);
+		
 	}
 	
 }

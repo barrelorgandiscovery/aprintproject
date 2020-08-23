@@ -1,12 +1,14 @@
 package org.barrelorgandiscovery.optimizers.model;
 
+import java.io.Serializable;
+
 /**
  * these are objects used in optimization
  * 
  * @author pfreydiere
  *
  */
-public abstract class OptimizedObject {
+public abstract class OptimizedObject implements Serializable {
 
 	public abstract Extent getExtent();
 	

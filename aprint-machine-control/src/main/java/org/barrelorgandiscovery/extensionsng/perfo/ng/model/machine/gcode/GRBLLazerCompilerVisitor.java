@@ -54,12 +54,13 @@ public class GRBLLazerCompilerVisitor extends GCodeCompiler {
 		if (commandspeed <= 0)
 			throw new Exception("bad computed speed :" + commandspeed);
 		
-		int powercommand = (int)cutToCommand.getPowerFactor() * maxPower;
+		int powercommand = (int)(cutToCommand.getPowerFactor() * maxPower);
 		if (powercommand <= 0) {
 			throw new Exception("command cut has null power factor :" + cutToCommand);
 		}
 		
 		if (currentPower != powercommand) {
+			// add power change
 			grblCommands.add(String.format(Locale.ENGLISH, "S%1$d\n", //$NON-NLS-1$
 					powercommand));
 			this.currentPower = powercommand;

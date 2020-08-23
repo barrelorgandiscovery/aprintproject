@@ -349,6 +349,7 @@ public abstract class DeviceDrawing {
 
 	/**
 	 * does the export needs to ignore the reference ?
+	 * some export needs to not rotation the book
 	 * @return
 	 */
 	public abstract boolean ignoreReference();

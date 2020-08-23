@@ -139,7 +139,7 @@ public class OptimizersRepository {
 			if (p == null)
 				continue;
 			pp.getCommandsByRef().add(new DisplacementCommand(p.x1, p.y1));
-			pp.getCommandsByRef().add(new CutToCommand(p.x2, p.y2, 1.0, 1.0));
+			pp.getCommandsByRef().add(new CutToCommand(p.x2, p.y2, p.powerFraction, p.speedFraction));
 		}
 
 		return pp;

@@ -2,7 +2,6 @@ package org.barrelorgandiscovery.optimizers.cad;
 
 import org.barrelorgandiscovery.extensionsng.perfo.cad.TrouTypeComboBoxPropertyEditor;
 import org.barrelorgandiscovery.extensionsng.perfo.cad.TypePliuresComboBoxPropertyEditor;
-import org.barrelorgandiscovery.optimizers.punch.PunchConverterOptimizerParametersBeanInfo;
 
 import com.l2fprod.common.beans.BaseBeanInfo;
 import com.l2fprod.common.beans.ExtendedPropertyDescriptor;
@@ -48,12 +47,7 @@ public class XOptimParametersBeanInfo extends BaseBeanInfo {
 		dimensionPonts.setDisplayName("Dimension des ponts (mm)");
 		dimensionPonts.setCategory("Trous");
 
-//		ExtendedPropertyDescriptor typePont = addProperty("typePonts");
-//		typePont.setShortDescription("Forme des ponts");
-//		typePont.setPropertyEditorClass(TrouTypeComboBoxPropertyEditor.class);
-//		typePont.setDisplayName("Forme des ponts");
-//		typePont.setCategory("Trous");
-
+	
 		ExtendedPropertyDescriptor silreste = addProperty("pasDePontSiIlReste");
 		silreste.setShortDescription(
 				"On abandonne le dernier pont s'il reste un petite distance intérieure à la valeure saisie (en mm)");
@@ -63,7 +57,6 @@ public class XOptimParametersBeanInfo extends BaseBeanInfo {
 
 		ExtendedPropertyDescriptor exportPliures = addProperty("exportPliures");
 		exportPliures.setShortDescription("Export des traits de pliures dans le fichier DXF");
-		// taillePage.setPropertyEditorClass(Check.class);
 		exportPliures.setDisplayName("Export Pliures");
 		exportPliures.setCategory("Pliures");
 
@@ -80,6 +73,39 @@ public class XOptimParametersBeanInfo extends BaseBeanInfo {
 		typePliure.setDisplayName("Type de pliures");
 		typePliure.setCategory("Pliures");
 
+		
+		// pass 1 parameters
+		ExtendedPropertyDescriptor percentMaxPower = addProperty("powerFractionPass1");
+		percentMaxPower.setShortDescription("Pourcentage de la puissance pour la passe 1");
+		percentMaxPower.setPropertyEditorClass(DoublePropertyEditor.class);
+		percentMaxPower.setDisplayName("Fraction Puissance Passe 1");
+		percentMaxPower.setCategory("Passe 1");
+		
+		ExtendedPropertyDescriptor percentSpeed = addProperty("speedFractionPass1");
+		percentSpeed.setShortDescription("Pourcentage de la vitesse pour la passe 1");
+		percentSpeed.setPropertyEditorClass(DoublePropertyEditor.class);
+		percentSpeed.setDisplayName("Fraction Vitesse Passe 1");
+		percentSpeed.setCategory("Passe 1");
+
+		ExtendedPropertyDescriptor has2Pass = addProperty("has2pass");
+		has2Pass.setShortDescription("Doit on faire le tracé en 2 passes");
+		has2Pass.setDisplayName("Deux passes ?");
+		has2Pass.setCategory("Passe 2");
+
+		// pass 2 parameters
+		ExtendedPropertyDescriptor percentMaxPower2 = addProperty("powerFractionPass2");
+		percentMaxPower2.setShortDescription("Pourcentage de la puissance pour la passe 2");
+		percentMaxPower2.setPropertyEditorClass(DoublePropertyEditor.class);
+		percentMaxPower2.setDisplayName("Fraction Puissance Passe 2");
+		percentMaxPower2.setCategory("Passe 2");
+		
+		ExtendedPropertyDescriptor percentSpeed2 = addProperty("speedFractionPass2");
+		percentSpeed2.setShortDescription("Pourcentage de la vitesse pour la passe 2");
+		percentSpeed2.setPropertyEditorClass(DoublePropertyEditor.class);
+		percentSpeed2.setDisplayName("Fraction Vitesse Passe 2");
+		percentSpeed2.setCategory("Passe 2");
+
+		
 	}
 
 }
