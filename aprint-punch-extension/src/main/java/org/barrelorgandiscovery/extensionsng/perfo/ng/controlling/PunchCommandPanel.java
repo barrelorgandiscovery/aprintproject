@@ -188,9 +188,10 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 								new PunchCommand(pc.getX() + yMachineOffset + yShift, pc.getY() + xMachineOffset));
 
 					} else if (command instanceof CutToCommand) {
-						CutToCommand cutToCommand = (CutToCommand)command;
-						innerMc.sendCommand(
-								new CutToCommand(cutToCommand.getX() + yMachineOffset + yShift, cutToCommand.getY() + xMachineOffset , cutToCommand.getPowerFactor(), cutToCommand.getSpeedFactor()));
+						CutToCommand cutToCommand = (CutToCommand) command;
+						innerMc.sendCommand(new CutToCommand(cutToCommand.getX() + yMachineOffset + yShift,
+								cutToCommand.getY() + xMachineOffset, cutToCommand.getPowerFactor(),
+								cutToCommand.getSpeedFactor()));
 					} else {
 						throw new Exception("unsupported XYCommand :" + command); //$NON-NLS-1$
 					}
@@ -214,6 +215,16 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 			@Override
 			public void reset() throws Exception {
 				innerMc.reset();
+			}
+
+			@Override
+			public void prepareForWork() throws Exception {
+				innerMc.prepareForWork();
+			}
+
+			@Override
+			public void endingForWork() throws Exception {
+				innerMc.endingForWork();
 			}
 
 		};

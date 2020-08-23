@@ -34,8 +34,7 @@ public class MachineCommandStream {
 		void allCommandsEnded();
 	}
 
-	private static final Logger logger = Logger
-			.getLogger(MachineCommandStream.class);
+	private static final Logger logger = Logger.getLogger(MachineCommandStream.class);
 
 	private MachineControl machineControl;
 
@@ -45,9 +44,8 @@ public class MachineCommandStream {
 
 	private StreamingProcessingListener listener = null;
 
-	public MachineCommandStream(MachineControl machineControl,
-			PunchPlan punchPlan, StreamingProcessingListener listener)
-			throws Exception {
+	public MachineCommandStream(MachineControl machineControl, PunchPlan punchPlan,
+			StreamingProcessingListener listener) throws Exception {
 		assert machineControl != null;
 		this.machineControl = machineControl;
 		assert punchPlan != null;
@@ -77,55 +75,59 @@ public class MachineCommandStream {
 				try {
 					final int j = index;
 					List<Command> commands = punchPlan.getCommandsByRef();
-					for (int i = j; i < commands.size(); i++) {
-						try {
 
-							Command cmd = commands.get(i);
-							logger.debug("stream command sent :" + cmd);
+					machineControl.prepareForWork();
+					try {
 
-							// hack for testing
-							if (System.getProperty("fakeM100") != null) {
-								if (cmd instanceof PunchCommand) {
-									XYCommand c = (XYCommand) cmd;
-									cmd = new DisplacementCommand(c.getX(),
-											c.getY());
-								}
-							}
-							
-							// and hack
-							if (logger.isDebugEnabled()) {
-								logger.debug("command stream send command :"
-										+ cmd);
-							}
-							
-							
-							machineControl.sendCommand(cmd);
-							
-							StreamingProcessingListener l = listener;
-							if (l != null) {
-								logger.debug("command processed");
-								l.commandProcessed(i);
-							}
+						for (int i = j; i < commands.size(); i++) {
+							try {
 
-						} catch (InterruptedException interrupt) {
-							// nothing to report
-						} catch (RuntimeException t) {
+								Command cmd = commands.get(i);
+								logger.debug("stream command sent :" + cmd);
 
-							final Throwable ft = t;
-							logger.error(t.getMessage(), t);
-							SwingUtilities.invokeLater(new Runnable() {
-								@Override
-								public void run() {
-									JMessageBox.showError(null, new Exception(
-											"une erreur a été rencontrée lors du perçage :"
-													+ ft.getMessage(), ft));
+								// hack for testing
+								if (System.getProperty("fakeM100") != null) {
+									if (cmd instanceof PunchCommand) {
+										XYCommand c = (XYCommand) cmd;
+										cmd = new DisplacementCommand(c.getX(), c.getY());
+									}
 								}
 
-							});
+								// and hack
+								if (logger.isDebugEnabled()) {
+									logger.debug("command stream send command :" + cmd);
+								}
 
-							throw t;
+								machineControl.sendCommand(cmd);
+
+								StreamingProcessingListener l = listener;
+								if (l != null) {
+									logger.debug("command processed");
+									l.commandProcessed(i);
+								}
+
+							} catch (InterruptedException interrupt) {
+								// nothing to report
+							} catch (RuntimeException t) {
+
+								final Throwable ft = t;
+								logger.error(t.getMessage(), t);
+								SwingUtilities.invokeLater(new Runnable() {
+									@Override
+									public void run() {
+										JMessageBox.showError(null, new Exception(
+												"une erreur a ï¿½tï¿½ rencontrï¿½e lors du perï¿½age :" + ft.getMessage(), ft));
+									}
+
+								});
+
+								throw t;
+							}
+
 						}
 
+					} finally {
+						machineControl.endingForWork();
 					}
 
 					processingThread = null;
@@ -134,9 +136,7 @@ public class MachineCommandStream {
 					}
 
 				} catch (Exception ex) {
-					logger.error(
-							"Error while processing commands :"
-									+ ex.getMessage(), ex);
+					logger.error("Error while processing commands :" + ex.getMessage(), ex);
 				}
 
 				logger.info("end of command processing");
@@ -147,7 +147,7 @@ public class MachineCommandStream {
 		synchronized (this) {
 			this.processingThread = t;
 			t.start();
-			
+
 		}
 
 	}

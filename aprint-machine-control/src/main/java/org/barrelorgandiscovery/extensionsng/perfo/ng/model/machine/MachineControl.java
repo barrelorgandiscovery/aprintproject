@@ -20,6 +20,20 @@ public interface MachineControl {
 	public void sendCommand(Command command) throws Exception;
 
 	/**
+	 * prepare , and presend some informations, before sending work commands
+	 * 
+	 * @throws Exception
+	 */
+	public void prepareForWork() throws Exception;
+
+	/**
+	 * ending the work, send commands for shutting down some functionnalities
+	 * 
+	 * @throws Exception
+	 */
+	public void endingForWork() throws Exception;
+
+	/**
 	 * close the machine control
 	 */
 	public void close() throws Exception;

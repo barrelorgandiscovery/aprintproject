@@ -49,6 +49,7 @@ public class GRBLLazerCompilerVisitor extends GCodeCompiler {
 
 	@Override
 	public void visit(int index, CutToCommand cutToCommand) throws Exception {
+		
 		int commandspeed = (int) (cutToCommand.getSpeedFactor() * maxspeed);
 		if (commandspeed <= 0)
 			throw new Exception("bad computed speed :" + commandspeed);
@@ -71,6 +72,7 @@ public class GRBLLazerCompilerVisitor extends GCodeCompiler {
 		
 		grblCommands.add(String.format(Locale.ENGLISH, "G1 X%1$f Y%2$f F%3$d\n", //$NON-NLS-1$
 				cutToCommand.getY(), cutToCommand.getX(), speedcommand));
+		
 	}
 
 	public List<String> getGCODECommands() {
@@ -81,8 +83,22 @@ public class GRBLLazerCompilerVisitor extends GCodeCompiler {
 	public void visit(int index, HomingCommand command) throws Exception {
 		grblCommands.add("$H\n"); //$NON-NLS-1$
 		// activate the lazer
-		grblCommands.add("M3\n"); //$NON-NLS-1$
-		
+		grblCommands.add("M3\n"); //$NON-NLS-1$	
 	}
 
+	
+	@Override
+	public List<String> getPreludeCommands() {
+		List<String> list = new ArrayList<String>();
+		list.add("M3\n");
+		return list;
+	}
+	
+	@Override
+	public List<String> getEndingCommands() {
+		ArrayList<String> list = new ArrayList<String>();
+		list.add("M5\n");
+		return list;
+	}
+	
 }

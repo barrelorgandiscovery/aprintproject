@@ -31,6 +31,15 @@ public class MockMachineControl implements MachineControl {
 	public void reset() throws Exception {
 		
 	}
+	
+	@Override
+	public void prepareForWork() throws Exception {
+		
+	}
 
+	@Override
+	public void endingForWork() throws Exception {
+		
+	}
 	
 }

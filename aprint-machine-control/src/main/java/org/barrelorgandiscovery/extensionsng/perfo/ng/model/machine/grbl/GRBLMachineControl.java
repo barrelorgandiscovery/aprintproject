@@ -358,7 +358,27 @@ class GRBLMachineControl implements MachineControl {
 		logger.debug("passed the command lock");
 
 	}
+	
+	@Override
+	public void prepareForWork() throws Exception {
+		List<String> preludeCommands = commandCompiler.getPreludeCommands();
+		if (preludeCommands != null) {
+			for (String s : preludeCommands) {
+				sendOneCommand(s);
+			}
+		}
+	}
 
+	@Override
+	public void endingForWork() throws Exception {
+		List<String> endingCommands = commandCompiler.getPreludeCommands();
+		if (endingCommands != null) {
+			for (String s : endingCommands) {
+				sendOneCommand(s);
+			}
+		}	
+	}
+	
 	/**
 	 * wait for all commands sent, this method wait for the non running status of
 	 * the
@@ -376,7 +396,6 @@ class GRBLMachineControl implements MachineControl {
 		}
 
 		logger.debug("machine is not running");
-
 	}
 
 	private void statusChanged(MachineStatus newStatus) {

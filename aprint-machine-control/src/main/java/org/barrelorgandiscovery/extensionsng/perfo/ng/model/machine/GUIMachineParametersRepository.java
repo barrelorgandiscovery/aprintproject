@@ -19,6 +19,7 @@ public class GUIMachineParametersRepository {
     if (parameters instanceof GRBLPunchMachineParameters) {
       return new GRBLMachineParametersPanel((GRBLPunchMachineParameters) parameters);
     }
+    
     return null; // not found
   }
 }

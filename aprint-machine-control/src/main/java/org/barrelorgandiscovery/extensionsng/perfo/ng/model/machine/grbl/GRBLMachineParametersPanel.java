@@ -73,7 +73,6 @@ public class GRBLMachineParametersPanel extends JPanel {
 		
 		setLayout(new BorderLayout());
 		add(f, BorderLayout.CENTER);
-
 	}
 
 }

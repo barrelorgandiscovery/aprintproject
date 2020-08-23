@@ -1,6 +1,7 @@
 package org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.gcode;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 
@@ -60,6 +61,16 @@ public class GRBLPunchCompilerVisitor extends GCodeCompiler {
 	@Override
 	public void visit(int index, HomingCommand command) throws Exception {
 		grblCommands.add("$H\n"); //$NON-NLS-1$
+	}
+	
+	@Override
+	public List<String> getEndingCommands() {
+		return (List<String>)Collections.EMPTY_LIST;
+	}
+	
+	@Override
+	public List<String> getPreludeCommands() {
+		return (List<String>)Collections.EMPTY_LIST;
 	}
 
 }

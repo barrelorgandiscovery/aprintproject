@@ -3,6 +3,7 @@ package org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
@@ -39,15 +40,25 @@ public class PunchPlanIO {
 
 	public static void exportToGRBL(Writer writer, PunchPlan p, GCodeCompiler gcodeCompiler) throws Exception {
 
-		// write header
-		final AtomicInteger ai = new AtomicInteger(0);
-
-		gcodeCompiler.visit(p);
+		gcodeCompiler.visit(p); // raise an exception if failed
+		
+		writeList(writer, gcodeCompiler.getPreludeCommands());
 		List<String> list = gcodeCompiler.getGCODECommands();
-		for (String s : list) {
-			writer.write(s + "\n");
-		}
+		writeList(writer, list);
+		writeList(writer, gcodeCompiler.getEndingCommands());
 
+	}
+
+	private static void writeList(Writer writer, List<String> list) throws IOException {
+		if (list == null) {
+			return;
+		}
+		for (String s : list) {
+			// all strings contains a "\n" at the end
+			assert s != null;
+			assert s.endsWith("\n");
+			writer.write(s);
+		}
 	}
 
 	/**

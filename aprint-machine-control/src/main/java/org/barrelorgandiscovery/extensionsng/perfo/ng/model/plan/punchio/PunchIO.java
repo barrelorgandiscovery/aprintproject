@@ -28,10 +28,11 @@ import org.barrelorgandiscovery.xml.VirtualBookXmlIO.VirtualBookResult;
 
 public class PunchIO {
 
-	private static final String VIRTUALBOOK_BOOK = "virtualbook.book";
-	private static final String PUNCHPLAN_PUNCH = "punchplan.punch";
 	private static Logger logger = Logger.getLogger(PunchIO.class);
 
+	private static final String VIRTUALBOOK_BOOK = "virtualbook.book";
+	private static final String PUNCHPLAN_PUNCH = "punchplan.punch";
+	
 	public PunchIO() {
 	}
 
@@ -229,7 +230,6 @@ public class PunchIO {
 			}
 
 			return new PunchFileBag(vbr.virtualBook, punchplan);
-
 		} finally {
 			fis.close();
 		}
