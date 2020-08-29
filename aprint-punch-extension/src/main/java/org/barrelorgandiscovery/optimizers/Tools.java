@@ -3,21 +3,22 @@ package org.barrelorgandiscovery.optimizers;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.barrelorgandiscovery.optimizers.model.Extent;
+import org.barrelorgandiscovery.optimizers.model.OptimizedObject;
 import org.barrelorgandiscovery.optimizers.model.Punch;
 import org.barrelorgandiscovery.virtualbook.Hole;
 
 public class Tools {
 
 	/**
-	 * Divise les notes par paquets
+	 * Divide holes by number
 	 * 
 	 * @param notes
-	 * @param number
-	 *            nombre de notes par paquets
+	 * @param number nombre de notes par paquets
 	 * @return
 	 */
 	public static ArrayList<ArrayList<Hole>> divide(List<Hole> holes, int number) {
-		
+
 		ArrayList<Hole> modifiableHoleList = new ArrayList<>(holes);
 
 		ArrayList<ArrayList<Hole>> pages = new ArrayList<ArrayList<Hole>>();
@@ -40,20 +41,18 @@ public class Tools {
 	 * divide the punches into pages
 	 * 
 	 * @param punches
-	 * @param pageSize
-	 *            the page size, from 0.0
+	 * @param pageSize the page size, from 0.0
 	 * @return
 	 * @throws Exception
 	 */
-	public static ArrayList<ArrayList<Punch>> divide(List<Punch> modifiablePunches,
-			double pageSize) throws Exception {
+	public static ArrayList<ArrayList<Punch>> divide(List<Punch> modifiablePunches, double pageSize) throws Exception {
 
 		assert modifiablePunches != null;
 		if (pageSize <= 0)
 			throw new Exception("bad parameters");
 
 		ArrayList<Punch> punches = new ArrayList<Punch>(modifiablePunches);
-		
+
 		ArrayList<ArrayList<Punch>> pages = new ArrayList<>();
 
 		ArrayList<Punch> pagenote = new ArrayList<>();
@@ -83,7 +82,65 @@ public class Tools {
 
 		}
 
-		
+		pages.add(pagenote);
+
+		return pages;
+	}
+
+	/**
+	 * divide the punches into pages
+	 * 
+	 * @param punches
+	 * @param pageSize the page size, from 0.0
+	 * @return
+	 * @throws Exception
+	 */
+	public static ArrayList<ArrayList<OptimizedObject>> divideOptimizedObjects(List<OptimizedObject> objectsList,
+			double pageSize, int maxObjects) throws Exception {
+
+		assert objectsList != null;
+		if (pageSize <= 0)
+			throw new Exception("bad parameters");
+
+		ArrayList<OptimizedObject> objectListCopy = new ArrayList<OptimizedObject>(objectsList);
+
+		ArrayList<ArrayList<OptimizedObject>> pages = new ArrayList<>();
+
+		ArrayList<OptimizedObject> pagenote = new ArrayList<>();
+
+		double distance = 0.0;
+
+		while (objectListCopy.size() > 0) {
+			int objectsCountPerPage = 0;
+			OptimizedObject p = objectListCopy.get(0);
+			assert p != null;
+
+			Extent extent = p.getExtent();
+
+			while (p != null && extent.xmin < distance + pageSize) {
+
+				objectListCopy.remove(0);
+				pagenote.add(p);
+
+				if (objectListCopy.size() > 0) {
+					p = objectListCopy.get(0);
+				} else {
+					p = null;
+				}
+				
+				if (objectsCountPerPage++ > maxObjects) {
+					pages.add(pagenote);
+					pagenote = new ArrayList<>();
+					objectsCountPerPage = 0;
+				}
+			}
+
+			pages.add(pagenote);
+			pagenote = new ArrayList<>();
+			distance += pageSize;
+
+		}
+
 		pages.add(pagenote);
 
 		return pages;

@@ -66,4 +66,5 @@ public class Punch extends OptimizedObject {
 		return y;
 	}
 
+
 }

@@ -2,10 +2,11 @@ package org.barrelorgandiscovery.optimizers.ga;
 
 import java.util.Random;
 
+import org.barrelorgandiscovery.optimizers.model.OptimizedObject;
 import org.barrelorgandiscovery.optimizers.model.Punch;
 
 
-public class Graph {
+public class Graph<T extends OptimizedObject> {
 
 
 	private double distances[][];
@@ -14,7 +15,7 @@ public class Graph {
 
 	private Random rand;
 
-	private Punch points[];
+	private T[] points;
 	
 	
 	public Graph() {
@@ -27,7 +28,7 @@ public class Graph {
 		return a * a;
 	}
 	
-	public Graph(Punch[] punches)
+	public Graph(T[] punches)
 	{
 		this();
 		this.points = punches;
@@ -39,8 +40,8 @@ public class Graph {
 		{
 			for (int j = 0 ; j < count ; j ++ )
 			{
-				distances[i][j] = Math.sqrt( sq(points[i].x - points[j].x) +
-											sq(points[i].y - points[j].y));
+				distances[i][j] = Math.sqrt( sq(points[i].lastX() - points[j].firstX()) +
+											sq(points[i].lastY() - points[j].firstY()));
 			}
 		}
 	}
@@ -50,7 +51,7 @@ public class Graph {
 		return count;
 	}
 
-	public Punch getPoint(int i) {
+	public T getPoint(int i) {
 		return points[i];
 	}
 
