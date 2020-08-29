@@ -5,6 +5,7 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URL;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -39,9 +40,16 @@ public class BookmarkPanel extends JComponent implements ActionListener {
 	Bookmarks model;
 	JTable table;
 	JScrollPane scrollPane;
+
 	Dimension tableSize = new Dimension(350, 200);
+
 	JButton goToBookmark;
+
 	JButton editDialog;
+
+	JButton addNewBookmark;
+
+	JButton removeBookmark;
 
 	VFSJFileChooser chooser;
 
@@ -72,8 +80,14 @@ public class BookmarkPanel extends JComponent implements ActionListener {
 		goToBookmark = new JButton("GoTo");
 		goToBookmark.addActionListener(this);
 
+		addNewBookmark = new JButton("Add new ...");
+		addNewBookmark.addActionListener(this);
+
 		editDialog = new JButton("Edit ...");
 		editDialog.addActionListener(this);
+
+		removeBookmark = new JButton("Remove ...");
+		removeBookmark.addActionListener(this);
 
 		add(scrollPane, BorderLayout.CENTER);
 		add(lbl, BorderLayout.NORTH);
@@ -82,9 +96,11 @@ public class BookmarkPanel extends JComponent implements ActionListener {
 		JPanel btnPanel = new JPanel();
 		btnPanel.setPreferredSize(new Dimension(30, 20));
 		btnPanel.setLayout(hl);
-		btnPanel.add(goToBookmark);
 
+		btnPanel.add(goToBookmark);
 		btnPanel.add(editDialog);
+		btnPanel.add(addNewBookmark);
+		btnPanel.add(removeBookmark);
 
 		add(btnPanel, BorderLayout.SOUTH);
 
@@ -151,8 +167,43 @@ public class BookmarkPanel extends JComponent implements ActionListener {
 			} else {
 				dialog.restoreDefaultView();
 				dialog.setVisible(true);
-				
+
 			}
+		} else if (button.equals(addNewBookmark)) {
+
+			String name = JOptionPane.showInputDialog("Bookmark Name");
+			if (name != null && !"".equals(name)) {
+				try {
+					FileObject currentDirectory = chooser.getCurrentDirectory();
+					URL url = currentDirectory.getURL();
+					TitledURLEntry entry = new TitledURLEntry(name, url.toString());
+					model.add(entry);
+					model.save();
+					model.fireTableDataChanged();
+
+				} catch (Exception ex) {
+					throw new RuntimeException(ex.getMessage(), ex);
+				}
+			}
+
+		} else if (button.equals(removeBookmark)) {
+			if (row != NO_BOOKMARK_SELECTION_INDEX) {
+				TitledURLEntry aTitledURLEntry = model.getEntry(row);
+
+				int showConfirmDialog = JOptionPane.showConfirmDialog(chooser,
+						"Suppress bookmark " + aTitledURLEntry + " ?");
+				if (showConfirmDialog == JOptionPane.YES_OPTION) {
+					try {
+						model.delete(row);
+						model.save();
+						model.fireTableDataChanged();
+
+					} catch (Exception ex) {
+						throw new RuntimeException(ex.getMessage(), ex);
+					}
+				}
+			}
+
 		}
 	}
 
