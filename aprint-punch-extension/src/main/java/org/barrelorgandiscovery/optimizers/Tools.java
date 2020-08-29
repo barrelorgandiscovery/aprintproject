@@ -45,46 +45,8 @@ public class Tools {
 	 * @return
 	 * @throws Exception
 	 */
-	public static ArrayList<ArrayList<Punch>> divide(List<Punch> modifiablePunches, double pageSize) throws Exception {
-
-		assert modifiablePunches != null;
-		if (pageSize <= 0)
-			throw new Exception("bad parameters");
-
-		ArrayList<Punch> punches = new ArrayList<Punch>(modifiablePunches);
-
-		ArrayList<ArrayList<Punch>> pages = new ArrayList<>();
-
-		ArrayList<Punch> pagenote = new ArrayList<>();
-
-		double distance = 0.0;
-
-		while (punches.size() > 0) {
-
-			Punch p = punches.get(0);
-			assert p != null;
-
-			while (p != null && p.x < distance + pageSize) {
-
-				punches.remove(0);
-				pagenote.add(p);
-
-				if (punches.size() > 0) {
-					p = punches.get(0);
-				} else {
-					p = null;
-				}
-			}
-
-			pages.add(pagenote);
-			pagenote = new ArrayList<>();
-			distance += pageSize;
-
-		}
-
-		pages.add(pagenote);
-
-		return pages;
+	public static <T extends OptimizedObject>  ArrayList<ArrayList<T>> divide(List<T> modifiablePunches, double pageSize) throws Exception {
+		return divideOptimizedObjects(modifiablePunches, pageSize, 200);
 	}
 
 	/**
@@ -95,24 +57,22 @@ public class Tools {
 	 * @return
 	 * @throws Exception
 	 */
-	public static ArrayList<ArrayList<OptimizedObject>> divideOptimizedObjects(List<OptimizedObject> objectsList,
+	public static <T extends OptimizedObject> ArrayList<ArrayList<T>> divideOptimizedObjects(List<T> objectsList,
 			double pageSize, int maxObjects) throws Exception {
 
 		assert objectsList != null;
 		if (pageSize <= 0)
 			throw new Exception("bad parameters");
 
-		ArrayList<OptimizedObject> objectListCopy = new ArrayList<OptimizedObject>(objectsList);
-
-		ArrayList<ArrayList<OptimizedObject>> pages = new ArrayList<>();
-
-		ArrayList<OptimizedObject> pagenote = new ArrayList<>();
+		ArrayList<T> objectListCopy = new ArrayList<T>(objectsList);
+		ArrayList<ArrayList<T>> pages = new ArrayList<>();
+		ArrayList<T> pagenote = new ArrayList<>();
 
 		double distance = 0.0;
 
 		while (objectListCopy.size() > 0) {
 			int objectsCountPerPage = 0;
-			OptimizedObject p = objectListCopy.get(0);
+			T p = objectListCopy.get(0);
 			assert p != null;
 
 			Extent extent = p.getExtent();
