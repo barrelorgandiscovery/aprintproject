@@ -53,6 +53,7 @@ public class PunchPlanDeviceDrawing extends DeviceDrawing {
 			return;
 		case 1:
 			currentDraw.add(currentGroup.get(0));
+			currentGroup.clear();
 			break;
 		default:
 			GroupedCutLine g = new GroupedCutLine(currentGroup);

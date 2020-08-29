@@ -56,7 +56,7 @@ public class XOptimParametersBeanInfo extends BaseBeanInfo {
 		silreste.setCategory("Trous");
 
 		ExtendedPropertyDescriptor exportPliures = addProperty("exportPliures");
-		exportPliures.setShortDescription("Export des traits de pliures dans le fichier DXF");
+		exportPliures.setShortDescription("Export des traits de pliures");
 		exportPliures.setDisplayName("Export Pliures");
 		exportPliures.setCategory("Pliures");
 
@@ -72,7 +72,6 @@ public class XOptimParametersBeanInfo extends BaseBeanInfo {
 		typePliure.setPropertyEditorClass(TypePliuresComboBoxPropertyEditor.class);
 		typePliure.setDisplayName("Type de pliures");
 		typePliure.setCategory("Pliures");
-
 		
 		// pass 1 parameters
 		ExtendedPropertyDescriptor percentMaxPower = addProperty("powerFractionPass1");

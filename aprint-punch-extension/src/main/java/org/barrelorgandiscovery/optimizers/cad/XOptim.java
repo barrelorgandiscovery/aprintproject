@@ -48,6 +48,11 @@ public class XOptim implements Optimizer<OptimizedObject> {
 		return parameters;
 	}
 
+	/**
+	 * because we use the export function to convert the book to cad
+	 * this function creates the associated CADParameters 
+	 * @return
+	 */
 	CADParameters constructCADParameters() {
 		CADParameters parameters = new CADParameters();
 		parameters.setExportDecoupeDesBords(false);
@@ -67,7 +72,6 @@ public class XOptim implements Optimizer<OptimizedObject> {
 	public OptimizerResult<OptimizedObject> optimize(VirtualBook carton) throws Exception {
 
 		CADParameters cadparameters = constructCADParameters();
-
 		CADVirtualBookExporter exporter = new CADVirtualBookExporter();
 
 		// create a punch plan device drawing
@@ -77,7 +81,6 @@ public class XOptim implements Optimizer<OptimizedObject> {
 		ArrayList<OptimizedObject> optimized = pp.getCurrentDraw();
 
 		// exported elements have a 1.0 power and speed fraction
-
 		OptimizerResult<OptimizedObject> result = new OptimizerResult<>();
 
 		result.result = optimized.toArray(new OptimizedObject[optimized.size()]);

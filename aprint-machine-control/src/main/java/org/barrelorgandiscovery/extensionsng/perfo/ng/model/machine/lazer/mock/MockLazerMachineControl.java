@@ -14,7 +14,7 @@ public class MockLazerMachineControl implements MachineControl {
 
 	@Override
 	public void sendCommand(Command command) throws Exception {
-		
+		Thread.sleep(100);
 	}
 
 	@Override
