@@ -144,7 +144,8 @@ Section "!APrint Studio"
   
   ; purge the instrument cache directory
   RMDir /r "$APRINTDATAS\aprintstudio\private.cache"
-  
+  ; remove old extensions
+  Delete   "$APRINTDATAS\aprintstudio\*.extension"
   
   
 SectionEnd ; end the section

@@ -153,9 +153,11 @@ Section "!APrint Studio"
   ; this one will use notepad's icon, start it minimized, and give it a hotkey (of Ctrl+Shift+Q)
   WriteUninstaller "ap-uninst.exe"
   
-    ; purge the instrument cache directory
+  ; purge the instrument cache directory
   RMDir /r "$APRINTDATAS\aprintstudio\private.cache"
   
+  ; remove old extensions
+  Delete   "$APRINTDATAS\aprintstudio\*.extension"
   
   
 SectionEnd ; end the section
