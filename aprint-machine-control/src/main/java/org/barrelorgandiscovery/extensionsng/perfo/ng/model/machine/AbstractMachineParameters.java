@@ -23,7 +23,7 @@ public abstract class AbstractMachineParameters implements Serializable {
 
 
 	/**
-	 * create the associated machine instance linked to this parameters
+	 * Create the associated machine instance linked to this parameters
 	 * 
 	 * @return
 	 * @throws Exception

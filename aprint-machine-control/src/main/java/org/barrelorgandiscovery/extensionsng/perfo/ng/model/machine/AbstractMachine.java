@@ -4,7 +4,7 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.gcode.GCodeC
 
 /**
  * abstract machine command, interpreting the punch plan
- * 
+ * this class is serializable
  * @author pfreydiere
  * 
  */
@@ -44,4 +44,15 @@ public abstract class AbstractMachine {
 	 */
 	public abstract GCodeCompiler createNewGCodeCompiler(AbstractMachineParameters parameters) throws Exception;
 
+	/**
+	 * test is this machine model is the same as the one passed in parameters
+	 * @param machine
+	 */
+	public boolean isSameModelAs(AbstractMachine machine) {
+		if (machine == null) {
+			return false;
+		}
+		
+		return machine.getClass().getName().equals(getClass().getName());
+	}
 }

@@ -69,7 +69,7 @@ public class JVirtualBookComponent extends JComponent {
 	private VirtualBook virtualbook = null;
 
 	/**
-	 * Liste des couches supplémentaires à afficher dans le composant
+	 * Liste des couches supplï¿½mentaires ï¿½ afficher dans le composant
 	 */
 	private ArrayList<VirtualBookComponentLayer> layers = new ArrayList<VirtualBookComponentLayer>();
 
@@ -84,7 +84,7 @@ public class JVirtualBookComponent extends JComponent {
 	private double yoffset = 0;
 
 	/**
-	 * Facteur d'échelle d'affichage du carton (en x et y)
+	 * Facteur d'ï¿½chelle d'affichage du carton (en x et y)
 	 */
 	private double xfactor = 1.0;
 
@@ -94,7 +94,7 @@ public class JVirtualBookComponent extends JComponent {
 	private double margin = 2.0;
 
 	/**
-	 * pas des règles
+	 * pas des rï¿½gles
 	 */
 	private long rules = 1000000; // every seconds
 
@@ -104,12 +104,12 @@ public class JVirtualBookComponent extends JComponent {
 	private double hightlight = -1;
 
 	/**
-	 * Début de la sélection, ou -1 s'il n'y a pas de sélection
+	 * Dï¿½but de la sï¿½lection, ou -1 s'il n'y a pas de sï¿½lection
 	 */
 	private long selstart = -1;
 
 	/**
-	 * Longueur de la sélection
+	 * Longueur de la sï¿½lection
 	 */
 	private long sellength = 0;
 
@@ -180,7 +180,9 @@ public class JVirtualBookComponent extends JComponent {
 
 			try {
 				BufferedImage bi = ImageIO.read(rendering.getBackgroundImage());
-				cartontrame = new TexturePaint(bi, new Rectangle2D.Double(0, 0, bi.getWidth(), bi.getHeight()));
+				if (bi != null) {
+					cartontrame = new TexturePaint(bi, new Rectangle2D.Double(0, 0, bi.getWidth(), bi.getHeight()));
+				}
 			} catch (Exception ex) {
 				logger.error("setcarton", ex); //$NON-NLS-1$
 				cartontrame = null;
@@ -225,8 +227,8 @@ public class JVirtualBookComponent extends JComponent {
 	private AtomicLong displaynanos = new AtomicLong(-1);
 
 	/**
-	 * Get the display time ... in nanos, used for debugging purpose to optimize
-	 * the displays
+	 * Get the display time ... in nanos, used for debugging purpose to optimize the
+	 * displays
 	 * 
 	 * @return get the time benchmark of the display
 	 */
@@ -300,8 +302,7 @@ public class JVirtualBookComponent extends JComponent {
 	/**
 	 * convert timestamp to mm distance
 	 * 
-	 * @param timestamp
-	 *            the timestamp
+	 * @param timestamp the timestamp
 	 * @return the mm distance from the start of the book
 	 */
 	public double timestampToMM(long timestamp) {
@@ -311,8 +312,7 @@ public class JVirtualBookComponent extends JComponent {
 	/**
 	 * convert a time in microseconds in mm
 	 * 
-	 * @param time
-	 *            the time
+	 * @param time the time
 	 * @return the mm distance representing the time
 	 */
 	public double timeToMM(long time) {
@@ -322,8 +322,7 @@ public class JVirtualBookComponent extends JComponent {
 	/**
 	 * get the time associated to mm distance...
 	 * 
-	 * @param mm
-	 *            distance in mm
+	 * @param mm distance in mm
 	 * @return the time in microseconds
 	 */
 	public long MMToTime(double mm) {
@@ -357,14 +356,12 @@ public class JVirtualBookComponent extends JComponent {
 	}
 
 	/**
-	 * Cette fonction retourne la position du carton clickée dans le composant,
+	 * Cette fonction retourne la position du carton clickï¿½e dans le composant,
 	 * tiens compte de l'orientation du carton dans le composant
 	 * 
-	 * @param x
-	 *            la position x écran (en pixel)
-	 * @param y
-	 *            la position y écran (en pixel)
-	 * @return un objet Position si celle ci a été trouvé, ou null sinon
+	 * @param x la position x ï¿½cran (en pixel)
+	 * @param y la position y ï¿½cran (en pixel)
+	 * @return un objet Position si celle ci a ï¿½tï¿½ trouvï¿½, ou null sinon
 	 */
 	public Position query(int x, int y) {
 
@@ -423,7 +420,7 @@ public class JVirtualBookComponent extends JComponent {
 	}
 
 	// //////////////////////////////////////////////////////////
-	// fonctions de manipulation de la sélection
+	// fonctions de manipulation de la sï¿½lection
 
 	/**
 	 * clear selection
@@ -481,10 +478,9 @@ public class JVirtualBookComponent extends JComponent {
 	}
 
 	/**
-	 * Cette fonction regarde si une note est sélectionnée
+	 * Cette fonction regarde si une note est sï¿½lectionnï¿½e
 	 * 
-	 * @param n
-	 *            la note
+	 * @param n la note
 	 * @return
 	 */
 	private boolean isSelected(Hole n) {
@@ -494,15 +490,13 @@ public class JVirtualBookComponent extends JComponent {
 	}
 
 	// //////////////////////////////////////////////////////////////////
-	// fonction de sélection
+	// fonction de sï¿½lection
 
 	/**
-	 * définit la sélection affichée
+	 * dï¿½finit la sï¿½lection affichï¿½e
 	 * 
-	 * @param start
-	 *            début de la sélection (en microsecondes)
-	 * @param length
-	 *            longueur de la sélection (en microsecondes)
+	 * @param start  dï¿½but de la sï¿½lection (en microsecondes)
+	 * @param length longueur de la sï¿½lection (en microsecondes)
 	 */
 	public void setBlockSelection(long start, long length) {
 		selstart = start;
@@ -529,7 +523,7 @@ public class JVirtualBookComponent extends JComponent {
 	}
 
 	// ///////////////////////////////////////////////////////////
-	// gestion de l'échelle de visualisation du carton
+	// gestion de l'ï¿½chelle de visualisation du carton
 
 	/*
 	 * public double getXscale() { return xscale; }
@@ -542,7 +536,7 @@ public class JVirtualBookComponent extends JComponent {
 	 */
 
 	/**
-	 * Défini la position du curseur (en mm par rapport au début du carton)
+	 * Dï¿½fini la position du curseur (en mm par rapport au dï¿½but du carton)
 	 * 
 	 * @param position
 	 */
@@ -582,13 +576,12 @@ public class JVirtualBookComponent extends JComponent {
 	}
 
 	// ///////////////////////////////////////////////////////////////////
-	// outils de conversion de coordonnées
+	// outils de conversion de coordonnï¿½es
 
 	/**
 	 * convert the x coordinate from the book space to the screen space
 	 * 
-	 * @param x
-	 *            the x
+	 * @param x the x
 	 * @return the converted coordinate
 	 */
 	public int convertCartonToScreenX(double x) {
@@ -599,8 +592,7 @@ public class JVirtualBookComponent extends JComponent {
 	/**
 	 * convert the y coordinate from the book space to the screen space
 	 * 
-	 * @param y
-	 *            the y
+	 * @param y the y
 	 * @return the converted coordinate
 	 */
 	public int convertCartonToScreenY(double y) {
@@ -611,8 +603,7 @@ public class JVirtualBookComponent extends JComponent {
 	/**
 	 * convert the x coordinate from the screen space to the book space
 	 * 
-	 * @param x
-	 *            the x
+	 * @param x the x
 	 * @return the converted coordinate
 	 */
 	public double convertScreenXToCarton(int x) {
@@ -624,8 +615,7 @@ public class JVirtualBookComponent extends JComponent {
 	/**
 	 * convert the y coordinate from the screen space to the book space
 	 * 
-	 * @param y
-	 *            the y
+	 * @param y the y
 	 * @return the converted coordinate
 	 */
 	public double convertScreenYToCarton(int y) {
@@ -638,8 +628,7 @@ public class JVirtualBookComponent extends JComponent {
 	 * convert a pixel to mm distance
 	 * 
 	 * 
-	 * @param x
-	 *            the number of pixels
+	 * @param x the number of pixels
 	 * @return the distance in mm
 	 */
 	public double pixelToMm(int x) {
@@ -652,8 +641,7 @@ public class JVirtualBookComponent extends JComponent {
 	/**
 	 * Convert a mm distance to pixel
 	 * 
-	 * @param x
-	 *            the mm distance
+	 * @param x the mm distance
 	 * @return the converted pixels number
 	 */
 	public int MmToPixel(double x) {
@@ -689,8 +677,7 @@ public class JVirtualBookComponent extends JComponent {
 	/**
 	 * set the X factory
 	 * 
-	 * @param xfactor
-	 *            the xfactor
+	 * @param xfactor the xfactor
 	 * 
 	 */
 	public void setXfactor(double xfactor) {
@@ -1029,10 +1016,10 @@ public class JVirtualBookComponent extends JComponent {
 		g.setPaintMode();
 		Color lastcolor = g.getColor();
 
-		// récupération de la zone à afficher
+		// rï¿½cupï¿½ration de la zone ï¿½ afficher
 		Rectangle rect = g.getClipBounds(new Rectangle());
 
-		// Correction d'un bug de réaffichage
+		// Correction d'un bug de rï¿½affichage
 		rect.x -= 1;
 		rect.y -= 1;
 		rect.width += 2;
@@ -1070,7 +1057,7 @@ public class JVirtualBookComponent extends JComponent {
 
 		paintCover(g, partiecartonaffichee);
 
-		// Affichage des différentes couches supplémentaires (background)
+		// Affichage des diffï¿½rentes couches supplï¿½mentaires (background)
 
 		for (Iterator<VirtualBookComponentLayer> itl = layers.iterator(); itl.hasNext();) {
 			VirtualBookComponentLayer layer = null;
@@ -1167,7 +1154,7 @@ public class JVirtualBookComponent extends JComponent {
 
 			g.setColor(Color.black);
 
-			// dessin des éléments ...
+			// dessin des ï¿½lï¿½ments ...
 			// recherche des notes ...
 			Region r = new Region();
 
@@ -1198,7 +1185,7 @@ public class JVirtualBookComponent extends JComponent {
 				}
 			}
 
-			// Affichage des différentes couches supplémentaires
+			// Affichage des diffï¿½rentes couches supplï¿½mentaires
 
 			for (Iterator<VirtualBookComponentLayer> itl = layers.iterator(); itl.hasNext();) {
 				VirtualBookComponentLayer layer = null;
@@ -1213,7 +1200,7 @@ public class JVirtualBookComponent extends JComponent {
 			}
 
 			//
-			// // dessin des règles
+			// // dessin des rï¿½gles
 			// g.setColor(Color.red);
 			//
 			// long s = ((long) r.start) / rules * rules;
@@ -1223,7 +1210,7 @@ public class JVirtualBookComponent extends JComponent {
 			// s += rules;
 			// }
 			//
-			// dessin de la sélection
+			// dessin de la sï¿½lection
 
 			if (selstart > 0) {
 				g.setXORMode(new Color(128, 128, 128));

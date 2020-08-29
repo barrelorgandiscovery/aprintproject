@@ -5,8 +5,6 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.InputMethodEvent;
-import java.awt.event.InputMethodListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URL;
@@ -40,6 +38,11 @@ import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
  */
 public class BookmarkPanel extends JComponent implements ActionListener {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7649555599019379378L;
+	
 	BookmarksDialog dialog;
 	Bookmarks model;
 	JTable table;

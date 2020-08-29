@@ -394,7 +394,7 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 		StepPlanningState s = (StepPlanningState) state;
 		if (s != null) {
-			if (s.machine == machine) {
+			if (machine.isSameModelAs(s.machine)) {
 				// keep parameters
 				currentOptimizerParameters = s.parameters;
 				currentOptimizerClass = s.optimizerClass;
@@ -576,15 +576,10 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 	private void saveUserParameters(Class optimizerClass, Serializable savedParameters) {
 		ObjectsPrefsStorage ops = new ObjectsPrefsStorage(prefsStorage);
-
 		logger.debug("save stored parameters"); //$NON-NLS-1$
 		try {
-			ops.saveObjectProperties(optimizerClass.getSimpleName(), savedParameters
-
-			);
-
+			ops.saveObjectProperties(optimizerClass.getSimpleName(), savedParameters);
 			prefsStorage.save();
-
 		} catch (Exception ex) {
 			logger.debug("fail to save optimizer parameters :" + ex.getMessage(), ex); //$NON-NLS-1$
 		}
@@ -592,11 +587,9 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 	@Override
 	public void dispose() {
-
 		if (processingEngine != null) {
 			processingEngine.dispose();
 		}
-
 	}
 
 	/**

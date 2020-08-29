@@ -25,7 +25,6 @@ public class WizardStates implements Serializable {
 	private Map<String, Serializable> states = new HashMap<String, Serializable>();
 
 	public WizardStates() {
-
 	}
 
 	public WizardStates(Serializable initialState) {
@@ -73,8 +72,10 @@ public class WizardStates implements Serializable {
 			} else {
 				logger.debug("state found " + s + " , check if assignable from " + clazz);
 				if (clazz.isAssignableFrom(s.getClass())) {
+					logger.debug("yes state is assignable");
 					return (T) s;
 				}
+				logger.debug("no it is not");
 			}
 			current = current.getParentStep();
 		}

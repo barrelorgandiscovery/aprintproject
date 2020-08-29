@@ -313,7 +313,7 @@ public class Wizard extends JPanel implements Disposable {
 
 		// ensure we can move to the next step
 		if (saveCurrentState) {
-			logger.debug("save state"); //$NON-NLS-1$
+			logger.debug("save state for stepNo " + stepNo); //$NON-NLS-1$
 			// assert getCurrentStep().isStepCompleted(); // the curent is
 			// probably not completed when the user strick "previous"
 			assert stepNo >= 0 && stepNo < steps.size();
@@ -321,8 +321,9 @@ public class Wizard extends JPanel implements Disposable {
 			// unactivate and save the state
 			Step curStep = getCurrentStep();
 			assert curStep != null;
+			logger.debug("unactivate " + curStep);
 			Serializable oldcurrentStepState = curStep.unActivateAndGetSavedState();
-			logger.debug("state saved associatede to the set :" + oldcurrentStepState); //$NON-NLS-1$
+			logger.debug("state saved associated to the set :" + oldcurrentStepState); //$NON-NLS-1$
 			stepsContents.setState(curStep, oldcurrentStepState);
 		}
 
