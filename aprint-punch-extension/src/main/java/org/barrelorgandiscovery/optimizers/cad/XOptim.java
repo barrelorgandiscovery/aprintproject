@@ -100,7 +100,7 @@ public class XOptim implements Optimizer<OptimizedObject> {
 				return Double.compare(e.ymin, e2.ymin);
 			}
 		});
-
+		
 		// handle pass 1 and pass 2
 		result.result = recurseHandlePasses(result.result);
 
@@ -158,8 +158,10 @@ public class XOptim implements Optimizer<OptimizedObject> {
 	}
 
 	@Override
-	public OptimizerResult<OptimizedObject> optimize(VirtualBook carton, OptimizerProgress progress, ICancelTracker ct)
-			throws Exception {
+	public OptimizerResult<OptimizedObject> optimize(VirtualBook carton, 
+			OptimizerProgress progress, 
+			ICancelTracker ct)
+					throws Exception {
 		return optimize(carton);
 	}
 

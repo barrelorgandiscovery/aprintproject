@@ -47,6 +47,11 @@ public class GRBLLazerCompilerVisitor extends GCodeCompiler {
 		throw new Exception("cannot use the punch command for this machine");
 	}
 
+	private static boolean sameWithEpsilon(double a, double b) {
+		return Math.abs(a - b) < 1e-8;
+	}
+	
+	
 	/**
 	 * this function check if the current position is the same as the current one if
 	 * same position, this function returns true if false, this function update the
@@ -58,7 +63,8 @@ public class GRBLLazerCompilerVisitor extends GCodeCompiler {
 	private boolean checkSamePositionOtherwiseUpdateCurrentPosition(XYCommand xyCommand) {
 		if (currentPositionX != null && currentPositionY != null) {
 			// check if we are on the same position
-			if (xyCommand.getX() == currentPositionX && xyCommand.getY() == currentPositionY) {
+			if (sameWithEpsilon(xyCommand.getX() , currentPositionX) && 
+					sameWithEpsilon(xyCommand.getY(), currentPositionY)) {
 				return true;
 			}
 		}
@@ -103,7 +109,7 @@ public class GRBLLazerCompilerVisitor extends GCodeCompiler {
 		}
 
 		// update current position
-		if (checkSamePositionOtherwiseUpdateCurrentPosition(cutToCommand)) {
+		if (!checkSamePositionOtherwiseUpdateCurrentPosition(cutToCommand)) {
 			grblCommands.add(String.format(Locale.ENGLISH, "G1 X%1$f Y%2$f F%3$d\n", //$NON-NLS-1$
 					cutToCommand.getY(), cutToCommand.getX(), speedcommand));
 		}
