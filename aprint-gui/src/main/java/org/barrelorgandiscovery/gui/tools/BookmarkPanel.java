@@ -5,6 +5,10 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.InputMethodEvent;
+import java.awt.event.InputMethodListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.net.URL;
 
 import javax.swing.BorderFactory;
@@ -77,6 +81,17 @@ public class BookmarkPanel extends JComponent implements ActionListener {
 		table.setPreferredScrollableViewportSize(tableSize);
 		table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
+		// double click on bookmark selection
+		table.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount() == 2) {
+					final int row = table.getSelectedRow();
+					gotoSelectedBookMark(row);
+				}
+			}
+		});
+
 		goToBookmark = new JButton("GoTo");
 		goToBookmark.addActionListener(this);
 
@@ -116,47 +131,7 @@ public class BookmarkPanel extends JComponent implements ActionListener {
 		final int row = table.getSelectedRow();
 
 		if (button.equals(goToBookmark)) {
-			if (row != NO_BOOKMARK_SELECTION_INDEX) {
-				Thread worker = new Thread() {
-					@Override
-					public void run() {
-						setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
-
-						TitledURLEntry aTitledURLEntry = model.getEntry(row);
-
-						FileObject fo = null;
-
-						try {
-							fo = VFSUtils.resolveFileObject(aTitledURLEntry.getURL());
-
-							if ((fo != null) && !fo.exists()) {
-								fo = null;
-							}
-						} catch (Exception exc) {
-							fo = null;
-						}
-
-						setCursor(Cursor.getDefaultCursor());
-
-						if (fo == null) {
-							StringBuilder msg = new StringBuilder();
-							msg.append("Failed to connect to ");
-							msg.append(aTitledURLEntry.getURL());
-							msg.append("\n");
-							msg.append("Please check URL entry and try again.");
-							JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
-						} else {
-							chooser.setCurrentDirectory(fo);
-							if (dialog != null) {
-								dialog.setVisible(false);
-							}
-						}
-					}
-				};
-
-				worker.setPriority(Thread.MIN_PRIORITY);
-				SwingUtilities.invokeLater(worker);
-			}
+			gotoSelectedBookMark(row);
 
 		} else if (button.equals(editDialog)) {
 			if (row != NO_BOOKMARK_SELECTION_INDEX) {
@@ -204,6 +179,50 @@ public class BookmarkPanel extends JComponent implements ActionListener {
 				}
 			}
 
+		}
+	}
+
+	private void gotoSelectedBookMark(final int row) {
+		if (row != NO_BOOKMARK_SELECTION_INDEX) {
+			Thread worker = new Thread() {
+				@Override
+				public void run() {
+					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
+
+					TitledURLEntry aTitledURLEntry = model.getEntry(row);
+
+					FileObject fo = null;
+
+					try {
+						fo = VFSUtils.resolveFileObject(aTitledURLEntry.getURL());
+
+						if ((fo != null) && !fo.exists()) {
+							fo = null;
+						}
+					} catch (Exception exc) {
+						fo = null;
+					}
+
+					setCursor(Cursor.getDefaultCursor());
+
+					if (fo == null) {
+						StringBuilder msg = new StringBuilder();
+						msg.append("Failed to connect to ");
+						msg.append(aTitledURLEntry.getURL());
+						msg.append("\n");
+						msg.append("Please check URL entry and try again.");
+						JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
+					} else {
+						chooser.setCurrentDirectory(fo);
+						if (dialog != null) {
+							dialog.setVisible(false);
+						}
+					}
+				}
+			};
+
+			worker.setPriority(Thread.MIN_PRIORITY);
+			SwingUtilities.invokeLater(worker);
 		}
 	}
 
