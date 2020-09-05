@@ -354,6 +354,18 @@ public class StepViewAndEditBook extends BasePanelStep implements Disposable {
 
 						}
 
+						@Override
+						public void errorInProcessingTile(String errormsg) {
+							SwingUtilities.invokeLater(new Runnable() {
+
+								@Override
+								public void run() {
+									JOptionPane.showMessageDialog(null, errormsg);
+								}
+
+							});
+						}
+
 					}, 1);
 
 			if (backProcessing != null) {
@@ -398,6 +410,17 @@ public class StepViewAndEditBook extends BasePanelStep implements Disposable {
 
 						}
 
+						@Override
+						public void errorInProcessingTile(String errormsg) {
+							SwingUtilities.invokeLater(new Runnable() {
+
+								@Override
+								public void run() {
+									JOptionPane.showMessageDialog(null, errormsg);
+								}
+
+							});
+						}
 					}, 1);
 
 			if (backProcessingView != null) {

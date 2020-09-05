@@ -14,7 +14,7 @@ import org.barrelorgandiscovery.tools.Disposable;
 import org.barrelorgandiscovery.tools.ImageTools;
 
 /**
- * background processing
+ * background processing images tile
  * 
  * @author pfreydiere
  *
@@ -23,13 +23,14 @@ public class BackgroundTileImageProcessingThread<T> implements Disposable {
 
 	private static final Logger logger = Logger.getLogger(BackgroundTileImageProcessingThread.class);
 
-	
 	public interface TileProcessing<T> {
 		T process(int index, BufferedImage tile) throws Exception;
 	}
 
 	public interface TiledProcessedListener {
 		<T> void tileProcessed(int index, T result);
+
+		void errorInProcessingTile(String errormsg);
 	}
 
 	private TiledImage image;
@@ -43,9 +44,6 @@ public class BackgroundTileImageProcessingThread<T> implements Disposable {
 		this.image = image;
 		this.l = l;
 		exec = Executors.newFixedThreadPool(nbThreads); // Runtime.getRuntime().availableProcessors()
-
-	
-
 	}
 
 	public <T> void start(TileProcessing<T> p) {
@@ -80,7 +78,12 @@ public class BackgroundTileImageProcessingThread<T> implements Disposable {
 							currentImageProcessed.addAndGet(1);
 						}
 					} catch (Exception ex) {
-						ex.printStackTrace();
+						logger.error(ex.getMessage(), ex);
+						try {
+							l.errorInProcessingTile("error in processing tile " + current + " :" + ex.getMessage());
+						} catch (Exception exerr) {
+							logger.error("error in processin error feedback " + exerr.getMessage(), exerr);
+						}
 					}
 				}
 			};
@@ -116,8 +119,6 @@ public class BackgroundTileImageProcessingThread<T> implements Disposable {
 	@Override
 	public void dispose() {
 		cancel();
-
-	
 	}
 
 }

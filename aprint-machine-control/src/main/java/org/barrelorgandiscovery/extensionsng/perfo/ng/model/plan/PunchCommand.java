@@ -53,4 +53,9 @@ public class PunchCommand extends Command implements XYCommand {
 		return x == n.x && y == n.y;
 	}
 	
+	@Override
+	public String toString() {
+		return "Punch At " + x + "," + y;
+	}
+	
 }

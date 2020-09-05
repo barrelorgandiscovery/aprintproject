@@ -6,15 +6,26 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.Command;
 
 public class MockMachineControl implements MachineControl {
 
+	private MachineControlListener listener;
+	
 	@Override
 	public void setMachineControlListener(MachineControlListener listener) {
-		
-		
+		this.listener = listener;
 	}
 
 	@Override
 	public void sendCommand(Command command) throws Exception {
-		Thread.sleep(100);
+		assert command != null;
+		if (listener != null) {
+			listener.rawCommandSent(command.toString() + "\n");
+		}
+		
+		long millis = (long)(Math.random() * 1000);
+		Thread.sleep(millis);
+		
+		if (listener != null) {
+			listener.rawCommandReceived("OK\n");
+		}
 	}
 
 	@Override

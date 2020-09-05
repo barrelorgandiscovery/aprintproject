@@ -47,6 +47,11 @@ public interface IScriptConsole {
 	public abstract void appendOutputNl(String text, AttributeSet style)
 			throws Exception;
 
+	/**
+	 * append exception to console output
+	 * @param t
+	 * @throws Exception
+	 */
 	public abstract void appendOutput(Throwable t) throws Exception;
 
 	/**

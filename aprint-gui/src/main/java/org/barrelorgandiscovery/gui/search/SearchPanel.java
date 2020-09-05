@@ -16,6 +16,7 @@ import java.util.Date;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -27,8 +28,12 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.text.DateFormatter;
 
+import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Logger;
+import org.apache.log4j.PatternLayout;
 import org.apache.lucene.document.Document;
+import org.barrelorgandiscovery.gui.ICancelTracker;
 import org.barrelorgandiscovery.gui.ProgressIndicator;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
 import org.barrelorgandiscovery.gui.aprintng.IAPrintWait;
@@ -86,8 +91,8 @@ public class SearchPanel extends JPanel implements ActionListener {
 
 	private Object owner;
 
-	public SearchPanel(BookIndexing bi, APrintProperties props,
-			IAPrintWait waitInterface, Object owner) throws Exception {
+	public SearchPanel(BookIndexing bi, APrintProperties props, IAPrintWait waitInterface, Object owner)
+			throws Exception {
 		this.bi = bi;
 		this.props = props;
 		this.waitInterface = waitInterface;
@@ -113,8 +118,7 @@ public class SearchPanel extends JPanel implements ActionListener {
 
 		JTabbedPane tabPane = new JTabbedPane();
 
-		FormPanel spp = new FormPanel(getClass().getResourceAsStream(
-				"searchpropertiespanel.jfrm")); //$NON-NLS-1$
+		FormPanel spp = new FormPanel(getClass().getResourceAsStream("searchpropertiespanel.jfrm")); //$NON-NLS-1$
 
 		JLabel labelsearchproperties = spp.getLabel("labelsearchproperties"); //$NON-NLS-1$
 		assert labelsearchproperties != null;
@@ -147,8 +151,7 @@ public class SearchPanel extends JPanel implements ActionListener {
 		});
 		indexfolder.setText(Messages.getString("SearchPanel.11")); //$NON-NLS-1$
 
-		FormPanel sp = new FormPanel(getClass().getResourceAsStream(
-				"searchpanel.jfrm")); //$NON-NLS-1$
+		FormPanel sp = new FormPanel(getClass().getResourceAsStream("searchpanel.jfrm")); //$NON-NLS-1$
 
 		JLabel searchlabel = sp.getLabel("searchlabel"); //$NON-NLS-1$
 		searchlabel.setText(Messages.getString("SearchPanel.14")); //$NON-NLS-1$
@@ -241,21 +244,18 @@ public class SearchPanel extends JPanel implements ActionListener {
 		assert resultlabel != null;
 		resultlabel.setText(Messages.getString("SearchPanel.42")); //$NON-NLS-1$
 
-		advancedsearchcomponent = (JComponent) sp
-				.getComponentByName("advancedsearchcomponent"); //$NON-NLS-1$
+		advancedsearchcomponent = (JComponent) sp.getComponentByName("advancedsearchcomponent"); //$NON-NLS-1$
 		assert advancedsearchcomponent != null;
 
 		advancedsearchcomponent.setVisible(false);
 
-		JButton toggleadvancedsearch = (JButton) sp
-				.getButton("toggleadvancedsearch"); //$NON-NLS-1$
+		JButton toggleadvancedsearch = (JButton) sp.getButton("toggleadvancedsearch"); //$NON-NLS-1$
 		assert toggleadvancedsearch != null;
 		toggleadvancedsearch.setText(Messages.getString("SearchPanel.45")); //$NON-NLS-1$
 
 		toggleadvancedsearch.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				advancedsearchcomponent.setVisible(!advancedsearchcomponent
-						.isVisible());
+				advancedsearchcomponent.setVisible(!advancedsearchcomponent.isVisible());
 				invalidate();
 
 			}
@@ -366,18 +366,15 @@ public class SearchPanel extends JPanel implements ActionListener {
 				public void run() {
 					try {
 
-						waitInterface.infiniteStartWait(Messages
-								.getString("SearchPanel.63")); //$NON-NLS-1$
+						waitInterface.infiniteStartWait(Messages.getString("SearchPanel.63")); //$NON-NLS-1$
 
 						props.setSearchFolder(sf);
 
 						bi.index(sf, new ProgressIndicator() {
 
 							public void progress(double progress, String message) {
-								waitInterface.infiniteChangeText(Messages
-										.getString("SearchPanel.63")
-										+ " ... "
-										+ message);
+								waitInterface
+										.infiniteChangeText(Messages.getString("SearchPanel.63") + " ... " + message);
 
 							}
 						});
@@ -388,9 +385,8 @@ public class SearchPanel extends JPanel implements ActionListener {
 						logger.error("error in indexing .." + ex.getMessage(), //$NON-NLS-1$
 								ex);
 						waitInterface.infiniteEndWait();
-						JMessageBox.showMessage(owner,
-								Messages.getString("SearchPanel.65") //$NON-NLS-1$
-										+ ex.getMessage());
+						JMessageBox.showMessage(owner, Messages.getString("SearchPanel.65") //$NON-NLS-1$
+								+ ex.getMessage());
 					}
 				}
 			};
@@ -438,8 +434,7 @@ public class SearchPanel extends JPanel implements ActionListener {
 
 			logger.debug("search done"); //$NON-NLS-1$
 
-			DefaultTableModel model = (DefaultTableModel) searchcomponent
-					.getModel();
+			DefaultTableModel model = (DefaultTableModel) searchcomponent.getModel();
 
 			while (model.getRowCount() > 0)
 				model.removeRow(0);
@@ -454,8 +449,7 @@ public class SearchPanel extends JPanel implements ActionListener {
 				String description = document.get("description"); //$NON-NLS-1$
 				String fileref = document.get("fileref"); //$NON-NLS-1$
 
-				model.addRow(new Object[] { name, scale, genre, instrument,
-						description, fileref });
+				model.addRow(new Object[] { name, scale, genre, instrument, description, fileref });
 			}
 
 			DateFormatter df = new DateFormatter();
@@ -468,14 +462,12 @@ public class SearchPanel extends JPanel implements ActionListener {
 
 		} catch (Exception ex) {
 			logger.error("error while searching :" + ex.getMessage(), ex); //$NON-NLS-1$
-			JMessageBox.showMessage(owner,
-					Messages.getString("SearchPanel.81") + ex.getMessage()); //$NON-NLS-1$
+			JMessageBox.showMessage(owner, Messages.getString("SearchPanel.81") + ex.getMessage()); //$NON-NLS-1$
 		}
 
 	}
 
-	private void addField(StringBuilder sb, String fieldname, boolean strict,
-			JTextField field) {
+	private void addField(StringBuilder sb, String fieldname, boolean strict, JTextField field) {
 		if (field == null)
 			return;
 
@@ -512,8 +504,7 @@ public class SearchPanel extends JPanel implements ActionListener {
 
 		} catch (Exception ex) {
 			logger.error("error while searching :" + ex.getMessage(), ex); //$NON-NLS-1$
-			JMessageBox.showMessage(owner,
-					Messages.getString("SearchPanel.94") + ex.getMessage()); //$NON-NLS-1$
+			JMessageBox.showMessage(owner, Messages.getString("SearchPanel.94") + ex.getMessage()); //$NON-NLS-1$
 		}
 	}
 
@@ -540,19 +531,48 @@ public class SearchPanel extends JPanel implements ActionListener {
 	}
 
 	// test method ..
-	/*
-	 * public static void main(String[] args) throws Exception {
-	 * 
-	 * BasicConfigurator.configure(new ConsoleAppender(new PatternLayout()));
-	 * 
-	 * APrintProperties p = new APrintProperties(true); BookIndexing bi = new
-	 * BookIndexing(p); SearchPanel searchPanel = new SearchPanel(bi, p);
-	 * 
-	 * JFrame f = new JFrame(); f.getContentPane().setLayout(new
-	 * BorderLayout()); f.getContentPane().add(searchPanel,
-	 * BorderLayout.CENTER);
-	 * 
-	 * f.setSize(800, 500); f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	 * f.setVisible(true); }
-	 */
+
+	public static void main(String[] args) throws Exception {
+
+		BasicConfigurator.configure(new ConsoleAppender(new PatternLayout()));
+
+		APrintProperties p = new APrintProperties(true);
+		BookIndexing bi = new BookIndexing(p);
+
+		IAPrintWait w = new IAPrintWait() {
+
+			@Override
+			public void infiniteStartWait(String text) {
+
+			}
+
+			@Override
+			public void infiniteStartWait(String text, ICancelTracker cancelTracker) {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void infiniteEndWait() {
+				// TODO Auto-generated method stub
+
+			}
+
+			@Override
+			public void infiniteChangeText(String text) {
+				// TODO Auto-generated method stub
+
+			}
+		};
+		SearchPanel searchPanel = new SearchPanel(bi, p, w, null);
+
+		JFrame f = new JFrame();
+		f.getContentPane().setLayout(new BorderLayout());
+		f.getContentPane().add(searchPanel, BorderLayout.CENTER);
+
+		f.setSize(800, 500);
+		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		f.setVisible(true);
+	}
+
 }

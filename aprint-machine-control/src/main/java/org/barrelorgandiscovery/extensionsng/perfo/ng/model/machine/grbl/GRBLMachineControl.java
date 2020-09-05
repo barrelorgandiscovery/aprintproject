@@ -1,6 +1,7 @@
 package org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
@@ -71,6 +72,7 @@ class GRBLMachineControl implements MachineControl {
 					receivedData = serialPort.readString(event.getEventValue());
 
 					logger.debug("received data from grbl machine :" + receivedData);
+					machineInteractionLog.add(new TimestampedMachineInteraction(System.nanoTime(), true, receivedData));
 					grblProtocolState.received(receivedData);
 
 				} catch (Exception ex) {
@@ -141,9 +143,11 @@ class GRBLMachineControl implements MachineControl {
 		grblProtocolState = new GRBLProtocolState(new SendString() {
 			@Override
 			public void sendString(String stringToSend) throws Exception {
-
+				if (stringToSend != null) {
+					machineInteractionLog
+							.add(new TimestampedMachineInteraction(System.nanoTime(), false, stringToSend));
+				}
 				serialPort.writeString(stringToSend);
-
 			}
 		}, new GRBLProtocolStateListener() {
 
@@ -284,7 +288,28 @@ class GRBLMachineControl implements MachineControl {
 					if (grblProtocolState != null) {
 						grblProtocolState.sendStatusRequest();
 					}
-				} catch (Exception ex) {
+
+					MachineControlListener v = listener;
+					if (v != null) {
+						// pulling elements
+						try {
+							// pump messages
+							TimestampedMachineInteraction s = machineInteractionLog.poll();
+							while (s != null) {
+								if (s.isIn) {
+									v.rawCommandReceived(s.command);
+								} else {
+									v.rawCommandSent(s.command);
+								}
+								s = machineInteractionLog.poll();
+							}
+						} catch (Throwable t) {
+							logger.debug(t.getMessage(), t);
+						}
+
+					}
+
+				} catch (Throwable ex) {
 					logger.error("error sending status command :" + ex.getMessage(), ex);
 				}
 			}
@@ -292,6 +317,24 @@ class GRBLMachineControl implements MachineControl {
 	}
 
 	private MachineControlListener listener;
+
+	public static class TimestampedMachineInteraction {
+		public final long timestamp;
+		/**
+		 * true if the command is received from machine
+		 */
+		public final boolean isIn; 
+		public final String command;
+
+		public TimestampedMachineInteraction(long timestamp, boolean isIn, String command) {
+			this.timestamp = timestamp;
+			this.isIn = isIn;
+			this.command = command;
+		}
+	}
+
+	// reported sent commands
+	private ConcurrentLinkedQueue<TimestampedMachineInteraction> machineInteractionLog = new ConcurrentLinkedQueue<>();
 
 	@Override
 	public void setMachineControlListener(MachineControlListener listener) {
@@ -315,7 +358,7 @@ class GRBLMachineControl implements MachineControl {
 		checkState();
 
 		this.commandCompiler.reset();
-		
+
 		command.accept(0, commandCompiler);
 
 		List<String> commands = commandCompiler.getGCODECommands();
@@ -358,7 +401,7 @@ class GRBLMachineControl implements MachineControl {
 		logger.debug("passed the command lock");
 
 	}
-	
+
 	@Override
 	public void prepareForWork() throws Exception {
 		List<String> preludeCommands = commandCompiler.getPreludeCommands();
@@ -376,9 +419,9 @@ class GRBLMachineControl implements MachineControl {
 			for (String s : endingCommands) {
 				sendOneCommand(s);
 			}
-		}	
+		}
 	}
-	
+
 	/**
 	 * wait for all commands sent, this method wait for the non running status of
 	 * the

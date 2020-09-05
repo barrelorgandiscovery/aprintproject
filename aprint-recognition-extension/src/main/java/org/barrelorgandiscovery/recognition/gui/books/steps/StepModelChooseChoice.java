@@ -18,6 +18,7 @@ import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
@@ -205,6 +206,18 @@ public class StepModelChooseChoice extends BasePanelStep implements Step, Dispos
 									}
 								});
 							}
+
+							@Override
+							public void errorInProcessingTile(String errormsg) {
+								SwingUtilities.invokeLater(new Runnable() {
+
+									@Override
+									public void run() {
+										JOptionPane.showMessageDialog(null, errormsg);
+									}
+
+								});
+							}
 						},
 						// nb of threads for processing
 						1); // for huge images
@@ -225,8 +238,12 @@ public class StepModelChooseChoice extends BasePanelStep implements Step, Dispos
 							input.setImage(tile);
 
 							WekaSegmentation ws = new WekaSegmentation(input);
-							ws.loadClassifier(selectedModel.createInputStream());
-
+							try {
+								ws.loadClassifier(selectedModel.createInputStream());
+							} catch (Exception ex) {
+								logger.error("error in loading model :" + selectedModel + " :" + ex.getMessage(), ex);
+								throw ex;
+							}
 							ImagePlus r = ws.applyClassifier(input);
 
 							ImageProcessor processor = r.getProcessor();
@@ -454,8 +471,8 @@ public class StepModelChooseChoice extends BasePanelStep implements Step, Dispos
 			AbstractFileObject file = fc.getSelectedFile();
 			if (file != null) {
 				String filename = file.getName().getBaseName();
-				customModel = new Model(filename, filename,
-						new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB), file.getURL());
+				customModel = new Model(filename, filename, new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB),
+						file.getURL());
 			}
 		}
 	}

@@ -2,6 +2,7 @@ package org.barrelorgandiscovery.extensionsng.perfo.ng.controlling;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -14,10 +15,15 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
+import javax.swing.text.AttributeSet;
 
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.controlling.XYPanel.XYListener;
@@ -41,6 +47,8 @@ import org.barrelorgandiscovery.gui.aedit.JEditableVirtualBookComponent;
 import org.barrelorgandiscovery.gui.aedit.Tool;
 import org.barrelorgandiscovery.gui.aedit.UndoStack;
 import org.barrelorgandiscovery.gui.aedit.toolbar.JVBToolingToolbar;
+import org.barrelorgandiscovery.gui.script.groovy.ASyncConsoleOutput;
+import org.barrelorgandiscovery.gui.script.groovy.IScriptConsole;
 import org.barrelorgandiscovery.gui.tools.CursorTools;
 import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.StepChanged;
@@ -58,6 +66,7 @@ import org.barrelorgandiscovery.tools.SwingUtils;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 import org.barrelorgandiscovery.xml.VirtualBookXmlIO;
 import org.barrelorgandiscovery.xml.VirtualBookXmlIO.VirtualBookResult;
+import org.jdesktop.swingx.VerticalLayout;
 
 import com.jeta.forms.components.border.TitledBorderLabel;
 import com.jeta.forms.components.panel.FormPanel;
@@ -95,6 +104,8 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 	private JEditableVirtualBookComponent virtualBookComponent;
 
 	private DistanceLayer distanceLayer;
+
+	private IScriptConsole console;
 
 	// /////////////////////////////////////
 	// offset for home delta
@@ -168,6 +179,17 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 						listener.currentMachinePosition(status, wx, wy, mx + xMachineOffset,
 								my + yMachineOffset + yShift);
 					}
+
+					@Override
+					public void rawCommandSent(String commandSent) {
+						listener.rawCommandSent(commandSent);
+					}
+
+					@Override
+					public void rawCommandReceived(String commandReceived) {
+						listener.rawCommandReceived(commandReceived);
+					}
+
 				});
 
 			}
@@ -242,6 +264,32 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 			@Override
 			public void error(String message) {
 
+			}
+
+			@Override
+			public void rawCommandSent(String commandSent) {
+
+				SwingUtilities.invokeLater(() -> {
+					try {
+						console.clearConsole();
+						console.appendOutput(commandSent, null);
+
+					} catch (Exception ex) {
+
+					}
+				});
+			}
+
+			@Override
+			public void rawCommandReceived(String commandReceived) {
+				SwingUtilities.invokeLater(() -> {
+					try {
+						console.appendOutput(commandReceived, null);
+
+					} catch (Exception ex) {
+
+					}
+				});
 			}
 
 			long lastDisplayedFeedBack = System.currentTimeMillis();
@@ -448,10 +496,23 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 		add(wizardPunch, BorderLayout.WEST);
 
 		// /////////////////////////////////////////////////////////
-		// status
+		// status component
 
+		JPanel pStatus = new JPanel();
+		TitledBorder titleBorder = new TitledBorder("Status");
+		pStatus.setBorder(titleBorder);
+		pStatus.setLayout(new VerticalLayout());
 		statusLabel = new JLabel();
-		add(statusLabel, BorderLayout.SOUTH);
+
+		machineConsoleTextArea = new JTextPane();
+		machineConsoleTextArea.setPreferredSize(new Dimension(200, 50));
+		console = new ASyncConsoleOutput(machineConsoleTextArea, null);
+
+		
+		pStatus.add(statusLabel);
+		pStatus.add(machineConsoleTextArea);
+
+		add(pStatus, BorderLayout.SOUTH);
 		updateStatus(Messages.getString("PunchCommandPanel.26")); //$NON-NLS-1$
 
 		// //////////////////////////////////////////////////////////////////////////////
@@ -718,6 +779,8 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 	private Tool positionMachineTool;
 
 	private JToggleButton moveBookDuringPunch;
+
+	private JTextPane machineConsoleTextArea;
 
 	/**
 	 * user has pushed the homing button
