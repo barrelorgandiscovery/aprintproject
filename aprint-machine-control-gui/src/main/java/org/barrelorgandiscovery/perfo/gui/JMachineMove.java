@@ -215,18 +215,28 @@ public class JMachineMove extends JPanel implements IPunchMachinePanelActivate {
 
             @Override
             public void currentMachinePosition(
-                String status, double wx, double wy, double mx, double my) {
+                String status, double mx, double my) {
               try {
                 SwingUtilities.invokeLater(
                     () -> {
-                      poslabel.setText("" + status + ":" + wx + ";" + wy);
-                      currentX = wy;
-                      currentY = wx;
+                      poslabel.setText("" + status + ":" + mx + ";" + my);
+                      currentX = my;
+                      currentY = mx;
                     });
 
               } catch (Exception ex) {
                 logger.error(ex.getMessage(), ex);
               }
+            }
+            
+            @Override
+            public void rawCommandReceived(String commandReceived) {
+            	
+            }
+            
+            @Override
+            public void rawCommandSent(String commandSent) {
+            	
             }
           });
 

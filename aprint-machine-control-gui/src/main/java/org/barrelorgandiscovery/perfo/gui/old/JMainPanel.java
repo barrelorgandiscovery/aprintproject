@@ -16,63 +16,68 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.DisplacementCom
 
 public class JMainPanel extends JPanel {
 
-  private JLabel connectedStatus = new JLabel();
+	private JLabel connectedStatus = new JLabel();
 
-  public JMainPanel() throws Exception {
-    initComponents();
-  }
+	public JMainPanel() throws Exception {
+		initComponents();
+	}
 
-  protected void initComponents() throws Exception {
-    setLayout(new BorderLayout());
+	protected void initComponents() throws Exception {
+		setLayout(new BorderLayout());
 
-    add(connectedStatus, BorderLayout.SOUTH);
+		add(connectedStatus, BorderLayout.SOUTH);
 
-    GRBLPunchMachine g = new GRBLPunchMachine();
-    GRBLPunchMachineParameters p = new GRBLPunchMachineParameters();
-    p.setComPort("/dev/ttyUSB0");
-    MachineControl m = g.open(p);
+		GRBLPunchMachine g = new GRBLPunchMachine();
+		GRBLPunchMachineParameters p = new GRBLPunchMachineParameters();
+		p.setComPort("/dev/ttyUSB0");
+		MachineControl m = g.open(p);
 
-    m.setMachineControlListener(
-        new MachineControlListener() {
+		m.setMachineControlListener(new MachineControlListener() {
 
-          @Override
-          public void statusChanged(MachineStatus status) {}
+			@Override
+			public void statusChanged(MachineStatus status) {
+			}
 
-          @Override
-          public void error(String message) {
-            // TODO Auto-generated method stub
+			@Override
+			public void error(String message) {
+				// TODO Auto-generated method stub
 
-          }
+			}
 
-          @Override
-          public void currentMachinePosition(
-              String status, double wx, double wy, double mx, double my) {
-            try {
-              SwingUtilities.invokeAndWait(
-                  new Runnable() {
-                    public void run() {
+			@Override
+			public void currentMachinePosition(String status, double mx, double my) {
+				try {
+					SwingUtilities.invokeAndWait(new Runnable() {
+						public void run() {
+							connectedStatus.setText(status + "-" + "(" + mx + "," + my + ")");
+						};
+					});
 
-                      connectedStatus.setText(status + "-" + "(" + wx + "," + wy + ")");
-                    };
-                  });
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
 
-            } catch (Exception ex) {
-              ex.printStackTrace();
-            }
-          }
-        });
+			@Override
+			public void rawCommandReceived(String commandReceived) {
 
-    JButton btn = new JButton("move");
-    add(btn, BorderLayout.EAST);
-    btn.addActionListener(
-        (e) -> {
-          try {
-            m.sendCommand(
-                new DisplacementCommand(Math.random() * 100 + 50, Math.random() * 100 + 50));
-          } catch (Exception ex) {
-            ex.printStackTrace();
-          }
-        });
-    
-  }
+			}
+
+			@Override
+			public void rawCommandSent(String commandSent) {
+			
+			}
+		});
+
+		JButton btn = new JButton("move");
+		add(btn, BorderLayout.EAST);
+		btn.addActionListener((e) -> {
+			try {
+				m.sendCommand(new DisplacementCommand(Math.random() * 100 + 50, Math.random() * 100 + 50));
+			} catch (Exception ex) {
+				ex.printStackTrace();
+			}
+		});
+
+	}
 }

@@ -193,9 +193,12 @@ class GRBLMachineControl implements MachineControl {
 			public void statusReceived(GRBLStatus status) {
 
 				if (listener != null && status != null && status.machinePosition != null) {
+
 					// logger.debug("status received :" + status);
-					listener.currentMachinePosition(status.status, status.workingPosition.x, status.workingPosition.y,
-							status.machinePosition.x, status.machinePosition.y);
+					listener.currentMachinePosition(status.status, 
+							status.machinePosition.x, status.machinePosition.y
+							);
+					
 				}
 
 				assert status != null;
@@ -216,6 +219,17 @@ class GRBLMachineControl implements MachineControl {
 						}
 					}
 
+				} else if (status.availableCommandsInPlannedBuffer != null) {
+					int permits = commandQueue.availablePermits();
+					int delta = status.availableCommandsInPlannedBuffer - permits;
+					if (delta > 0) {
+						//
+						logger.debug("readjust command Queue from delta " + delta);
+						for (int i = 0; i < delta; i++) {
+							commandQueue.release();
+						}
+					}
+					
 				} else {
 					// status.bufferSize == null
 
@@ -323,7 +337,7 @@ class GRBLMachineControl implements MachineControl {
 		/**
 		 * true if the command is received from machine
 		 */
-		public final boolean isIn; 
+		public final boolean isIn;
 		public final String command;
 
 		public TimestampedMachineInteraction(long timestamp, boolean isIn, String command) {

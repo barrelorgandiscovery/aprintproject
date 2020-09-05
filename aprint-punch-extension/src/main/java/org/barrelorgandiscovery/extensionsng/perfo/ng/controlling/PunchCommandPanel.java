@@ -175,8 +175,8 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 					}
 
 					@Override
-					public void currentMachinePosition(String status, double wx, double wy, double mx, double my) {
-						listener.currentMachinePosition(status, wx, wy, mx + xMachineOffset,
+					public void currentMachinePosition(String status, double mx, double my) {
+						listener.currentMachinePosition(status, mx + xMachineOffset,
 								my + yMachineOffset + yShift);
 					}
 
@@ -295,7 +295,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 			long lastDisplayedFeedBack = System.currentTimeMillis();
 
 			@Override
-			public void currentMachinePosition(final String status, final double wx, final double wy, final double mx,
+			public void currentMachinePosition(final String status, final double mx,
 					final double my) {
 				try {
 
@@ -306,12 +306,12 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 							public void run() {
 								// "Machine Position X:" + mx + " Y:"
 								// + my + " ,
-								updateStatus(Messages.getString("PunchCommandPanel.3") + wx //$NON-NLS-1$
-										+ "  Y:" + wy); //$NON-NLS-1$
-								lastpositionMachineY = wy;
+								updateStatus(Messages.getString("PunchCommandPanel.3") + mx //$NON-NLS-1$
+										+ "  Y:" + my); //$NON-NLS-1$
+								lastpositionMachineY = my;
 
-								machinePositionLayer.setMachinePosition(wx - xMachineOffset,
-										wy - yMachineOffset - yShift);
+								machinePositionLayer.setMachinePosition(mx - xMachineOffset,
+										my - yMachineOffset - yShift);
 
 								// if machine position is outside the current
 								// view

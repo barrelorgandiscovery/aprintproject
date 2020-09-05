@@ -24,7 +24,7 @@ public interface MachineControlListener {
 	 * @param mx machine x
 	 * @param my machine y
 	 */
-	public void currentMachinePosition(String status, double wx, double wy, double mx, double my);
+	public void currentMachinePosition(String status, double mx, double my);
 
 	/**
 	 * report the sent command
