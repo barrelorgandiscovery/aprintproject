@@ -14,9 +14,9 @@ public class TestGRBL11StatusParsing {
 
 		// Run|MPos:0.000,16.276,0.000|Bf:14,31|FS:500,0
 		Pattern p = Pattern
-				.compile("([^|]+)\\|MPos(.*)");
+				.compile("([^|]+)\\|WPos(.*)");
 		//|MPos:([^,|]+),([^,|]+),([^,|]+)
-		String s =  "Run|MPos:0.000,16.276,0.000";
+		String s =  "Run|WPos:0.000,16.276,0.000";
 		Matcher m = p.matcher(s);
 		
 		m.matches();
@@ -28,7 +28,7 @@ public class TestGRBL11StatusParsing {
 	
 	@Test
 	public void testStatusParsing() throws Exception {
-		String s =  "Run|MPos:0.000,16.276,0.000|Bf:14,31|FS:500,0";
+		String s =  "Run|WPos:0.000,16.276,0.000|Bf:14,31|FS:500,0";
 		GRBLStatus status = GRBLStatus.parse11(s);
 		
 		System.out.println(status);
