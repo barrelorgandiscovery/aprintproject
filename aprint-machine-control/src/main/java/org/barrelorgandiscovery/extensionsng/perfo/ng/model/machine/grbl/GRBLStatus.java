@@ -30,7 +30,7 @@ public class GRBLStatus {
 	// Run|MPos:0.000,16.276,0.000|Bf:14,31|FS:500,0
 	// Run|MPos:0.000,83.252,0.000|Bf:14,31|FS:500,0|Ov:100,100,100
 	private static final Pattern PATTERN_STATUS11 = Pattern
-			.compile("([^|]+)\\|MPos:([^,|]+),([^,|]+),([^,|]+)(\\|Bf:([^,|]+),([^,|]+))?(\\|FS:([^,|])+,([^,|])+)?(\\|.*)?");
+			.compile("([^|]+)\\|WPos:([^,|]+),([^,|]+),([^,|]+)(\\|Bf:([^,|]+),([^,|]+))?(\\|FS:([^,|])+,([^,|])+)?(\\|.*)?");
 	
 	
 	
@@ -76,9 +76,9 @@ public class GRBLStatus {
 		GRBLStatus status = new GRBLStatus();
 		status.status = m.group(1);
 		// no machine position
-		status.machinePosition = readPosFromMatcher(m, 2);
+		// status.machinePosition = readPosFromMatcher(m, 2);
 		// only one status
-		// status.workingPosition = readPosFromMatcher(m, 2);
+		status.workingPosition = readPosFromMatcher(m, 2);
 
 		if (m.group(5) != null) {
 			// TODO hardening this

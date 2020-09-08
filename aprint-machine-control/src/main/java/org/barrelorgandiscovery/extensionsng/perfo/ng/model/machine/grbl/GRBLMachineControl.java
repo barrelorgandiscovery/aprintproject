@@ -192,11 +192,11 @@ class GRBLMachineControl implements MachineControl {
 			@Override
 			public void statusReceived(GRBLStatus status) {
 
-				if (listener != null && status != null && status.machinePosition != null) {
+				if (listener != null && status != null && status.workingPosition != null) {
 
 					// logger.debug("status received :" + status);
 					listener.currentMachinePosition(status.status, 
-							status.machinePosition.x, status.machinePosition.y
+							status.workingPosition.x, status.workingPosition.y
 							);
 					
 				}

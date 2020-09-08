@@ -306,8 +306,8 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 							public void run() {
 								// "Machine Position X:" + mx + " Y:"
 								// + my + " ,
-								updateStatus(Messages.getString("PunchCommandPanel.3") + mx //$NON-NLS-1$
-										+ "  Y:" + my); //$NON-NLS-1$
+								updateStatus("", mx //$NON-NLS-1$
+										, my); //$NON-NLS-1$
 								lastpositionMachineY = my;
 
 								machinePositionLayer.setMachinePosition(mx - xMachineOffset,
@@ -513,7 +513,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 		pStatus.add(machineConsoleTextArea);
 
 		add(pStatus, BorderLayout.SOUTH);
-		updateStatus(Messages.getString("PunchCommandPanel.26")); //$NON-NLS-1$
+		updateStatus(Messages.getString("PunchCommandPanel.26"), Double.NaN, Double.NaN); //$NON-NLS-1$
 
 		// //////////////////////////////////////////////////////////////////////////////
 		// Virtual book events
@@ -757,8 +757,8 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 	// ///////////////////////////////////////////////////////////////
 	//
 
-	private void updateStatus(String statusMessage) {
-		String status = Messages.getString("PunchCommandPanel.61") + statusMessage; //$NON-NLS-1$
+	private void updateStatus(String statusMessage, double posx, double posy) {
+		String status = Messages.getString("PunchCommandPanel.61") + statusMessage + " Position :" + posx + "," + posy; //$NON-NLS-1$
 		statusLabel.setText(status);
 	}
 
