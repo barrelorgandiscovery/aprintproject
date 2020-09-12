@@ -7,6 +7,7 @@ import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
@@ -189,6 +190,14 @@ public class StepResume extends JPanel implements Step {
 
 					PunchBookAndPlan reversed = reverseToHaveTheReferenceUp(vb, currentPlan);
 
+					// get the Maxx of the commands
+					Double maxX = reversed.punchplan.getCommandsByRef().stream().map((Command i) -> {
+						if (i instanceof XYCommand) {
+							return ((XYCommand) i).getX();
+						}
+						return 0.0;
+					}).reduce((a, b) -> Math.max(a, b)).get();
+
 					OutputStream os = fileToSave.getOutputStream();
 					try {
 						OutputStreamWriter w = new OutputStreamWriter(os);
@@ -240,12 +249,40 @@ public class StepResume extends JPanel implements Step {
 			assert reverseToHaveTheReferenceUp.punchplan != null;
 			assert reverseToHaveTheReferenceUp.virtualBook != null;
 
-			// prepend the origin displacement
+			// shift all element if there are below zero elements
+
+			// get the Minx on the punch objects,
+			Double minX = reverseToHaveTheReferenceUp.punchplan.getCommandsByRef().stream().map((Command i) -> {
+				if (i instanceof XYCommand) {
+					return ((XYCommand) i).getX();
+				}
+				return Double.MAX_VALUE;
+			}).reduce((a, b) -> Math.min(a, b)).get();
+
+			assert minX != Double.MAX_VALUE;
+					
+			// shift the book and also the punchplan
+			List<Command> shiftedCommands = applyTransformToPunchPlan((x) -> x - minX,reverseToHaveTheReferenceUp.punchplan.getCommandsByRef());
+			PunchPlan shiftedPunchPlan = new PunchPlan();
+			shiftedPunchPlan.getCommandsByRef().addAll(shiftedCommands);
+			
+			
+			
+			
+			// prepend the origin displacement (from homing)
 			DisplacementCommand origin = new DisplacementCommand(0, 0);
 
-			PunchPlan planCopy = new PunchPlan(reverseToHaveTheReferenceUp.punchplan);
+			PunchPlan planCopy = new PunchPlan(shiftedPunchPlan);
 			planCopy.getCommandsByRef().add(0, origin);
-
+			
+			
+			// shift the virtualbook
+			Scale scale = reverseToHaveTheReferenceUp.virtualBook.getScale();
+			reverseToHaveTheReferenceUp.virtualBook.shift(scale.mmToTime(-minX));
+			
+			
+			
+			
 			PunchCommandPanel punchCommandPanel = new PunchCommandPanel(planCopy,
 					reverseToHaveTheReferenceUp.virtualBook, ps);
 
@@ -319,6 +356,7 @@ public class StepResume extends JPanel implements Step {
 		if (!scale.isPreferredViewedInversed()) {
 			retvalue.punchplan = punchplan;
 			retvalue.virtualBook = vb;
+			retvalue.hasBeenChanged = false;
 			return retvalue;
 		}
 
@@ -332,10 +370,18 @@ public class StepResume extends JPanel implements Step {
 				scale.getState(), scale.getContact(), scale.getRendering(), false, scale.isBookMovingRightToLeft(),
 				scale.getAllProperties());
 
-		VirtualBook newReversed = new VirtualBook(modifiedScale);
+		// get the Maxx on the punch objects,
+		Double maxX = punchplan.getCommandsByRef().stream().map((Command i) -> {
+			if (i instanceof XYCommand) {
+				return ((XYCommand) i).getX();
+			}
+			return 0.0;
+		}).reduce((a, b) -> Math.max(a, b)).get();
 
-		Long maxTimeStamp = vb.getHolesCopy().stream().map((Hole h) -> h.getTimestamp() + h.getTimeLength())
-				.reduce((a, b) -> Math.max(a, b)).get();
+		// compute the reversed time
+		Long maxTimeStamp = modifiedScale.mmToTime(maxX);
+
+		VirtualBook newReversed = new VirtualBook(modifiedScale);
 
 		// long maxTimestamp =
 		for (Hole h : vb.getHolesCopy()) {
@@ -346,45 +392,9 @@ public class StepResume extends JPanel implements Step {
 		// clone and reverse the punchplan
 		PunchPlan modifiedPunchPlan = new PunchPlan();
 
-		Double maxX = punchplan.getCommandsByRef().stream().map((Command i) -> {
-			if (i instanceof XYCommand) {
-				return ((XYCommand) i).getX();
-			}
-			return 0.0;
-		}).reduce((a, b) -> Math.max(a, b)).get();
-
 		List<Command> originalCommands = punchplan.getCommandsByRef();
 
-		List<Command> reversedCommands = new ArrayList<Command>();
-		for (Command c : originalCommands) {
-			if (c instanceof XYCommand) {
-				if (c instanceof DisplacementCommand) {
-
-					DisplacementCommand displacementCommand = (DisplacementCommand) c;
-					reversedCommands.add(
-							new DisplacementCommand(maxX - displacementCommand.getX(), displacementCommand.getY()));
-
-				} else if (c instanceof PunchCommand) {
-					PunchCommand displacementCommand = (PunchCommand) c;
-					reversedCommands
-							.add(new PunchCommand(maxX - displacementCommand.getX(), displacementCommand.getY()));
-
-				} else if (c instanceof CutToCommand) {
-					CutToCommand cutcommand = (CutToCommand)c;
-					reversedCommands.add(new CutToCommand(
-							maxX - cutcommand.getX(),
-							cutcommand.getY(), 
-							cutcommand.getPowerFactor(),
-							cutcommand.getSpeedFactor()
-							));
-				} else {
-					throw new Exception("unsupported command type, implementation error :" + c);
-				}
-
-			} else {
-				reversedCommands.add(c);
-			}
-		}
+		List<Command> reversedCommands = applyTransformToPunchPlan((x) -> maxX - x, originalCommands);
 
 		// reverse all commands
 		while (reversedCommands.size() > 0) {
@@ -398,6 +408,45 @@ public class StepResume extends JPanel implements Step {
 		retvalue.hasBeenChanged = true;
 
 		return retvalue;
+	}
+
+	/**
+	 * apply a X function
+	 * 
+	 * @param functionX
+	 * @param originalCommands
+	 * @return
+	 * @throws Exception
+	 */
+	private static List<Command> applyTransformToPunchPlan(Function<Double, Double> functionX,
+			List<Command> originalCommands) throws Exception {
+		List<Command> reversedCommands = new ArrayList<Command>();
+		for (Command c : originalCommands) {
+			if (c instanceof XYCommand) {
+				if (c instanceof DisplacementCommand) {
+
+					DisplacementCommand displacementCommand = (DisplacementCommand) c;
+					reversedCommands.add(new DisplacementCommand(functionX.apply(displacementCommand.getX()),
+							displacementCommand.getY()));
+
+				} else if (c instanceof PunchCommand) {
+					PunchCommand displacementCommand = (PunchCommand) c;
+					reversedCommands.add(
+							new PunchCommand(functionX.apply(displacementCommand.getX()), displacementCommand.getY()));
+
+				} else if (c instanceof CutToCommand) {
+					CutToCommand cutcommand = (CutToCommand) c;
+					reversedCommands.add(new CutToCommand(functionX.apply(cutcommand.getX()), cutcommand.getY(),
+							cutcommand.getPowerFactor(), cutcommand.getSpeedFactor()));
+				} else {
+					throw new Exception("unsupported command type, implementation error :" + c);
+				}
+
+			} else {
+				reversedCommands.add(c);
+			}
+		}
+		return reversedCommands;
 	}
 
 	public static class PunchBookAndPlan {
