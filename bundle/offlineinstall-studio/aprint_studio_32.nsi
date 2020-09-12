@@ -18,7 +18,7 @@ Function .onInit
         
         InitPluginsDir
         
-        File /oname=$PLUGINSDIR\splash.bmp "..\images\splash-aprint-studio-2017.bmp"
+        File /oname=$PLUGINSDIR\splash.bmp "..\images\splash-aprint-studio-2020-beta.bmp"
         #optional
         File /oname=$PLUGINSDIR\splash.wav "button-19.wav"
 
