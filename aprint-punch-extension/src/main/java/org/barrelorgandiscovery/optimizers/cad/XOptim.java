@@ -173,7 +173,11 @@ public class XOptim implements Optimizer<OptimizedObject> {
 		
 		// optimize placement
 		
-		double pageSize = 50.0;
+		double pageSize = parameters.getOptimPageSize() * 10.0;// in mm
+		if (pageSize <= 10.0) {
+			logger.warn("pageSize at " + pageSize + " mm is too small, extend it to 10.0 mm");
+			pageSize = 10.0;
+		}
 		int MAX_OBJECTS = 100; // limit the number of objects
 
 		final ArrayList<ArrayList<OptimizedObject>> pageObjects = Tools.divideOptimizedObjects(Arrays.asList(result.result),pageSize, MAX_OBJECTS );

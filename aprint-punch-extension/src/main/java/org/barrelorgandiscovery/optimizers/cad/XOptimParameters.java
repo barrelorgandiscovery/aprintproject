@@ -91,7 +91,15 @@ public class XOptimParameters implements Serializable {
 
 	private double speedFractionPass2 = 1.0;
 	
+	private double optimPageSize = 5.0; // 5 cm par défaut
 	
+	public void setOptimPageSize(double optimPageSize) {
+		this.optimPageSize = optimPageSize;
+	}
+	
+	public double getOptimPageSize() {
+		return optimPageSize;
+	}
 	
 	public void setNombreDePlisAAjouterAuDebut(int nombreDePlisAAjouterAuDebut) {
 		this.nombreDePlisAAjouterAuDebut = nombreDePlisAAjouterAuDebut;
@@ -194,7 +202,7 @@ public class XOptimParameters implements Serializable {
 		powerFractionPass2 = in.readDouble();
 		speedFractionPass2 = in.readDouble();
 		
-		
+		optimPageSize = in.readDouble();
 	}
 
 	public void writeExternal(ObjectOutput out) throws IOException {
@@ -214,6 +222,7 @@ public class XOptimParameters implements Serializable {
 		out.writeBoolean(has2pass);
 		out.writeDouble(powerFractionPass2);
 		out.writeDouble(speedFractionPass2);
+		out.writeDouble(optimPageSize);
 		
 	}
 	

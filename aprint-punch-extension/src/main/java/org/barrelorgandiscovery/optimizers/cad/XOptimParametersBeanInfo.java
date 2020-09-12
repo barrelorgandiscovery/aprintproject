@@ -104,6 +104,11 @@ public class XOptimParametersBeanInfo extends BaseBeanInfo {
 		percentSpeed2.setDisplayName("Fraction Vitesse Passe 2");
 		percentSpeed2.setCategory("Passe 2");
 
+		ExtendedPropertyDescriptor optimPageSize = addProperty("optimPageSize");
+		optimPageSize.setShortDescription("Taille de la page pour optimisation du déplacement de la tête");
+		optimPageSize.setPropertyEditorClass(DoublePropertyEditor.class);
+		optimPageSize.setDisplayName("Taille de la page d'optimisation (cm)");
+		optimPageSize.setCategory("Optimisation");
 		
 	}
 
