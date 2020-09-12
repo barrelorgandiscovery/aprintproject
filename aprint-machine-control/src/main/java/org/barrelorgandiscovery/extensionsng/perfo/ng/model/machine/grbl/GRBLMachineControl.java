@@ -1,5 +1,6 @@
 package org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl;
 
+import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
@@ -11,12 +12,11 @@ import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControl;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControlListener;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.gcode.GCodeCompiler;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.serial.ISerialPort;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.Command;
 
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
-import jssc.SerialPortEventListener;
-import jssc.SerialPortException;
 
 /**
  * Communicator with the GRBL middleware
@@ -35,11 +35,14 @@ class GRBLMachineControl implements MachineControl {
 
 	private static Logger logger = Logger.getLogger(GRBLMachineControl.class);
 
-	private SerialPort serialPort;
+	ISerialPort serialPort;
 
 	private GRBLProtocolState grblProtocolState;
 
 	private ScheduledExecutorService status;
+
+	// used for debug
+	static Class serialPortClass = org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.serial.SerialPort.class;
 
 	/**
 	 * semaphore for command sending a command, block if there is too much command
@@ -58,10 +61,36 @@ class GRBLMachineControl implements MachineControl {
 	private MachineStatus lastMachineStatus = MachineStatus.UNKNOWN;
 
 	enum MachineStatus {
-		UNKNOWN, ALARM, RUNNING, IDLE_OR_ERROR
+		UNKNOWN, ALARM, RUNNING, IDLE, ERROR
 	}
 
-	private class PortReader implements SerialPortEventListener {
+	@Override
+	public org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineStatus getStatus() {
+
+		MachineStatus finalLastMachineStatus = lastMachineStatus;
+		if (finalLastMachineStatus == null) {
+			return null;
+		}
+
+		switch (finalLastMachineStatus) {
+		case ALARM:
+			return org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineStatus.ERROR;
+		case RUNNING:
+			return org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineStatus.RUNNING;
+		case IDLE:
+			return org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineStatus.IDLE;
+		case ERROR:
+			return org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineStatus.ERROR;
+		case UNKNOWN:
+			return org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineStatus.UNKNOWN;
+		}
+
+		return org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineStatus.UNKNOWN;
+
+	}
+
+	private class PortReader implements
+			org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.serial.SerialPortEventListener {
 
 		@Override
 		public void serialEvent(SerialPortEvent event) {
@@ -102,7 +131,7 @@ class GRBLMachineControl implements MachineControl {
 	private String currentPortName;
 	private GCodeCompiler commandCompiler;
 
-	private void init(String portName) throws SerialPortException {
+	private void init(String portName) throws Exception {
 
 		/**
 		 * reinit
@@ -124,7 +153,10 @@ class GRBLMachineControl implements MachineControl {
 		 * start init
 		 */
 
-		serialPort = new SerialPort(portName);
+		// this trick is done for testing purpose
+		Constructor serialPortConstructor = serialPortClass.getConstructor(new Class[] { String.class });
+
+		serialPort = (ISerialPort) serialPortConstructor.newInstance(portName);
 
 		logger.debug("opening " + portName);
 
@@ -167,12 +199,13 @@ class GRBLMachineControl implements MachineControl {
 					logger.error("ALARM RECEIVED FROM ARDUINO");
 				} else if (line.startsWith("error: Unsupported command")) {
 					logger.error("COMMAND IS NOT SUPPORTED");
+					logger.debug("release command queue");
 					commandQueue.release();
 				}
 
-				logger.debug("release command sem");
+				logger.debug("release command sent");
 				commandSendLockSem.release();
-				logger.debug("command sem released");
+				logger.debug("command command sent released");
 
 			}
 
@@ -195,10 +228,8 @@ class GRBLMachineControl implements MachineControl {
 				if (listener != null && status != null && status.workingPosition != null) {
 
 					// logger.debug("status received :" + status);
-					listener.currentMachinePosition(status.status, 
-							status.workingPosition.x, status.workingPosition.y
-							);
-					
+					listener.currentMachinePosition(status.status, status.workingPosition.x, status.workingPosition.y);
+
 				}
 
 				assert status != null;
@@ -215,6 +246,8 @@ class GRBLMachineControl implements MachineControl {
 							for (int i = 0; i < delta; i++) {
 								commandQueue.release();
 							}
+							logger.debug("available in command send lock :" + commandSendLockSem.availablePermits());
+							logger.debug("available in command queue :" + commandQueue.availablePermits());
 
 						}
 					}
@@ -227,9 +260,12 @@ class GRBLMachineControl implements MachineControl {
 						logger.debug("readjust command Queue from delta " + delta);
 						for (int i = 0; i < delta; i++) {
 							commandQueue.release();
+							logger.debug("available in command send lock :" + commandSendLockSem.availablePermits());
+							logger.debug("available in command queue :" + commandQueue.availablePermits());
+
 						}
 					}
-					
+
 				} else {
 					// status.bufferSize == null
 
@@ -237,6 +273,9 @@ class GRBLMachineControl implements MachineControl {
 					if (commandQueue.availablePermits() < 1) {
 						logger.debug("no commands regulation");
 						commandQueue.release();
+						logger.debug("available in command send lock :" + commandSendLockSem.availablePermits());
+						logger.debug("available in command queue :" + commandQueue.availablePermits());
+
 					}
 				}
 
@@ -249,7 +288,7 @@ class GRBLMachineControl implements MachineControl {
 					if ("Run".equalsIgnoreCase(status.status)) {
 						current = MachineStatus.RUNNING;
 					} else if ("Idle".equalsIgnoreCase(status.status)) {
-						current = MachineStatus.IDLE_OR_ERROR;
+						current = MachineStatus.IDLE;
 					} else if ("Alarm".equalsIgnoreCase(status.status)) {
 						current = MachineStatus.ALARM;
 					} else {
@@ -280,10 +319,13 @@ class GRBLMachineControl implements MachineControl {
 				// synchronized (commandSendLockSem) {
 				// try {
 				// unblock one command
-				logger.debug("release ... ");
+				logger.debug("release send command ... ");
 				commandSendLockSem.release();
 				// commandQueue.release();
-				logger.debug("release .. done");
+				logger.debug("release send command .. done");
+				logger.debug("available in command send lock :" + commandSendLockSem.availablePermits());
+				logger.debug("available in command queue :" + commandQueue.availablePermits());
+
 				// } catch (Throwable t) {
 				// logger.error("" + t.getMessage(), t);
 				// }
@@ -420,6 +462,7 @@ class GRBLMachineControl implements MachineControl {
 	public void prepareForWork() throws Exception {
 		List<String> preludeCommands = commandCompiler.getPreludeCommands();
 		if (preludeCommands != null) {
+			logger.debug("sending prelude command");
 			for (String s : preludeCommands) {
 				sendOneCommand(s);
 			}
@@ -428,8 +471,9 @@ class GRBLMachineControl implements MachineControl {
 
 	@Override
 	public void endingForWork() throws Exception {
-		List<String> endingCommands = commandCompiler.getPreludeCommands();
+		List<String> endingCommands = commandCompiler.getEndingCommands();
 		if (endingCommands != null) {
+			logger.debug("sending ending command");
 			for (String s : endingCommands) {
 				sendOneCommand(s);
 			}

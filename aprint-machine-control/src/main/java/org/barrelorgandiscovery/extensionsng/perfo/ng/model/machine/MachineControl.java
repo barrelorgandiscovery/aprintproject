@@ -51,5 +51,11 @@ public interface MachineControl {
 	 * @throws Exception
 	 */
 	public void reset() throws Exception;
+	
+	/**
+	 * return the machine current status
+	 * @return
+	 */
+	public MachineStatus getStatus();
 
 }

@@ -14,6 +14,7 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchPlan;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.StatisticVisitor;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.XYCommand;
 import org.barrelorgandiscovery.tools.Disposable;
+import org.barrelorgandiscovery.tools.JMessageBox;
 
 /**
  * manage the punch process state
@@ -236,17 +237,19 @@ public class PunchController implements PositionPanelListener, Disposable {
 									"%1$6.3f m", //$NON-NLS-1$
 									punchStatisticCollector.getDistanceLeft() / 1000.0);
 
-							// if (index % 20 == 0) {
-							// update Feedback
-
+							
 							SwingUtilities.invokeLater(new Runnable() {
 								@Override
 								public void run() {
 									defineNewPosAndUpdatePanel(index);
 								}
 							});
-
-							// }
+							
+							// if status is at alarm, 
+							// warn the user
+							
+							
+							
 						}
 
 						@Override
@@ -262,6 +265,18 @@ public class PunchController implements PositionPanelListener, Disposable {
 										"error while stopping the stream ," //$NON-NLS-1$
 												+ ex.getMessage(), ex);
 							}
+						}
+						
+						@Override
+						public void errorInProcessing(Exception ex) {
+							
+							SwingUtilities.invokeLater(new Runnable() {
+								@Override
+								public void run() {
+									JMessageBox.showError(null, ex);
+								}
+							});
+
 						}
 					});
 

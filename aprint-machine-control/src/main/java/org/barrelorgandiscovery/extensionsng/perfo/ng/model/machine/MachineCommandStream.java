@@ -32,6 +32,13 @@ public class MachineCommandStream {
 		 * end of stream
 		 */
 		void allCommandsEnded();
+
+		/**
+		 * error while processing
+		 * 
+		 * @param ex
+		 */
+		void errorInProcessing(Exception ex);
 	}
 
 	private static final Logger logger = Logger.getLogger(MachineCommandStream.class);
@@ -98,6 +105,10 @@ public class MachineCommandStream {
 									logger.debug("command stream send command :" + cmd);
 								}
 
+								if (machineControl.getStatus() == MachineStatus.ERROR) {
+									throw new Exception("Machine has been returned an alarm");
+								}
+
 								machineControl.sendCommand(cmd);
 
 								StreamingProcessingListener l = listener;
@@ -116,11 +127,11 @@ public class MachineCommandStream {
 									@Override
 									public void run() {
 										JMessageBox.showError(null, new Exception(
-												"une erreur a ï¿½tï¿½ rencontrï¿½e lors du perï¿½age :" + ft.getMessage(), ft));
+												"une erreur a été rencontrée lors du perçage :" + ft.getMessage(), ft));
 									}
 
 								});
-
+								// raise
 								throw t;
 							}
 
@@ -128,15 +139,18 @@ public class MachineCommandStream {
 
 					} finally {
 						machineControl.endingForWork();
-					}
 
-					processingThread = null;
-					if (listener != null) {
-						listener.allCommandsEnded();
+						processingThread = null;
+						if (listener != null) {
+							listener.allCommandsEnded();
+						}
 					}
 
 				} catch (Exception ex) {
-					logger.error("Error while processing commands :" + ex.getMessage(), ex);
+					if (!(ex instanceof InterruptedException)) {
+						logger.error("Error while processing commands :" + ex.getMessage(), ex);
+						listener.errorInProcessing(ex);
+					}
 				}
 
 				logger.info("end of command processing");

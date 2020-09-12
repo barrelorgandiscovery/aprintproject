@@ -15,25 +15,24 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
-import javax.swing.text.AttributeSet;
 
+import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
+import org.apache.log4j.lf5.LF5Appender;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.controlling.XYPanel.XYListener;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.controlling.wizard.PanelStep;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.messages.Messages;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachine;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControl;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControlListener;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineStatus;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.mock.MockMachineParameters;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.gcode.GCodeCompiler;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLLazerMachine;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLLazerMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.Command;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.CutToCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.DisplacementCommand;
@@ -42,6 +41,7 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.NearestCommandX
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchPlan;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.XYCommand;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.optimizers.OptimizersRepository;
 import org.barrelorgandiscovery.gui.aedit.DistanceLayer;
 import org.barrelorgandiscovery.gui.aedit.JEditableVirtualBookComponent;
 import org.barrelorgandiscovery.gui.aedit.Tool;
@@ -53,10 +53,9 @@ import org.barrelorgandiscovery.gui.tools.CursorTools;
 import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.StepChanged;
 import org.barrelorgandiscovery.gui.wizard.Wizard;
+import org.barrelorgandiscovery.optimizers.Optimizer;
 import org.barrelorgandiscovery.optimizers.OptimizerResult;
-import org.barrelorgandiscovery.optimizers.PunchDefaultConverter;
-import org.barrelorgandiscovery.optimizers.model.Punch;
-import org.barrelorgandiscovery.optimizers.punchconverters.PunchConverter;
+import org.barrelorgandiscovery.optimizers.cad.XOptim;
 import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.tools.Disposable;
@@ -176,8 +175,8 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 
 					@Override
 					public void currentMachinePosition(String status, double mx, double my) {
-						listener.currentMachinePosition(status, mx + xMachineOffset,
-								my + yMachineOffset + yShift);
+
+						listener.currentMachinePosition(status, mx + xMachineOffset, my + yMachineOffset + yShift);
 					}
 
 					@Override
@@ -249,6 +248,11 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 				innerMc.endingForWork();
 			}
 
+			@Override
+			public MachineStatus getStatus() {
+				return innerMc.getStatus();
+			}
+
 		};
 
 		this.machineControl = withOffsetMachineControl;
@@ -263,7 +267,19 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 
 			@Override
 			public void error(String message) {
+				
+				SwingUtilities.invokeLater(() -> {
+					try {
+						
+						if (!"?".equals(message)) {
+							console.clearConsole();
+							console.appendOutput(message, null);
+						}
+					} catch (Exception ex) {
 
+					}
+				});
+				
 			}
 
 			@Override
@@ -271,9 +287,11 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 
 				SwingUtilities.invokeLater(() -> {
 					try {
-						console.clearConsole();
-						console.appendOutput(commandSent, null);
-
+					
+						if (!"?".equals(commandSent)) {
+							console.clearConsole();
+							console.appendOutput(commandSent, null);
+						}
 					} catch (Exception ex) {
 
 					}
@@ -295,8 +313,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 			long lastDisplayedFeedBack = System.currentTimeMillis();
 
 			@Override
-			public void currentMachinePosition(final String status, final double mx,
-					final double my) {
+			public void currentMachinePosition(final String status, final double mx, final double my) {
 				try {
 
 					if ((System.currentTimeMillis() - lastDisplayedFeedBack) > 500) {
@@ -306,8 +323,8 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 							public void run() {
 								// "Machine Position X:" + mx + " Y:"
 								// + my + " ,
-								updateStatus("", mx //$NON-NLS-1$
-										, my); //$NON-NLS-1$
+								updateStatus(status, mx // $NON-NLS-1$
+								, my); // $NON-NLS-1$
 								lastpositionMachineY = my;
 
 								machinePositionLayer.setMachinePosition(mx - xMachineOffset,
@@ -508,7 +525,6 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 		machineConsoleTextArea.setPreferredSize(new Dimension(200, 50));
 		console = new ASyncConsoleOutput(machineConsoleTextArea, null);
 
-		
 		pStatus.add(statusLabel);
 		pStatus.add(machineConsoleTextArea);
 
@@ -858,7 +874,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 	 */
 	public static void main(String[] args) throws Exception {
 
-		// BasicConfigurator.configure();
+		BasicConfigurator.configure(new LF5Appender());
 
 		JFrame f = new JFrame();
 		f.setSize(600, 400);
@@ -869,22 +885,37 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 				.read(new File("C:\\Users\\use\\Dropbox\\APrint\\Books\\27-29\\Complainte de la butte.book")); //$NON-NLS-1$
 
 		// convert to punchplan
+//
+//		PunchConverter pc = new PunchConverter(r.virtualBook.getScale(), 3.0);
+//		OptimizerResult<Punch> punches = pc.convert(r.virtualBook.getHolesCopy());
+//
+//		PunchPlan pp = PunchDefaultConverter.createDefaultPunchPlan(punches.result);
+//		pp.getCommandsByRef().add(0, new DisplacementCommand(0, 0));
 
-		PunchConverter pc = new PunchConverter(r.virtualBook.getScale(), 3.0);
-		OptimizerResult<Punch> punches = pc.convert(r.virtualBook.getHolesCopy());
-
-		PunchPlan pp = PunchDefaultConverter.createDefaultPunchPlan(punches.result);
-		pp.getCommandsByRef().add(0, new DisplacementCommand(0, 0));
-
-		MockMachineParameters mockMachineParameters = new MockMachineParameters();
-		AbstractMachine machine = mockMachineParameters.createAssociatedMachineInstance();
-		MachineControl machineControl = machine.open(mockMachineParameters);
+//		MockMachineParameters mockMachineParameters = new MockMachineParameters();
+//		AbstractMachine machine = mockMachineParameters.createAssociatedMachineInstance();
+//		MachineControl machineControl = machine.open(mockMachineParameters);
+//		
 
 //		GRBLPunchMachineParameters grblMachineParameters = new GRBLPunchMachineParameters();
 //		grblMachineParameters.setComPort("COM4");
 //
 //		GRBLPunchMachine grblMachine = new GRBLPunchMachine();
 //		MachineControl machineControl = grblMachine.open(grblMachineParameters);
+
+		
+		
+		
+		GRBLLazerMachineParameters grblMachineParameters = new GRBLLazerMachineParameters();
+		grblMachineParameters.setComPort("COM4");
+
+		GRBLLazerMachine grblMachine = new GRBLLazerMachine();
+		OptimizersRepository optRepository = new OptimizersRepository();
+		Optimizer opt = optRepository.newOptimizerWithParameters(optRepository.instanciateParametersForOptimizer(XOptim.class));
+		OptimizerResult optimize = opt.optimize(r.virtualBook);
+		PunchPlan pp = optRepository.createDefaultPunchPlanForLazerMachine(grblMachineParameters, optimize.result);
+		
+		MachineControl machineControl = grblMachine.open(grblMachineParameters);
 
 		IPrefsStorage dps = new FilePrefsStorage(new File("c:\\temp\\prefsperfo"));
 		dps.load();

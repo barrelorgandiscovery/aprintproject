@@ -2,6 +2,7 @@ package org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.lazer.mock;
 
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControl;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControlListener;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineStatus;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.Command;
 
 public class MockLazerMachineControl implements MachineControl {
@@ -40,6 +41,11 @@ public class MockLazerMachineControl implements MachineControl {
 	@Override
 	public void endingForWork() throws Exception {
 		
+	}
+	
+	@Override
+	public MachineStatus getStatus() {
+		return MachineStatus.CONNECTED;
 	}
 	
 }
