@@ -150,6 +150,7 @@ import org.barrelorgandiscovery.tools.StringTools;
 import org.barrelorgandiscovery.tools.SwingUtils;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
 import org.barrelorgandiscovery.tools.html.HTMLParsingTools;
+import org.barrelorgandiscovery.ui.tools.VFSTools;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 import org.barrelorgandiscovery.virtualbook.transformation.TransformationManager;
 import org.barrelorgandiscovery.xml.VirtualBookXmlIO;
@@ -1889,7 +1890,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 	}
 
 	public void loadBookInNewFrame(final File result) throws Exception, FileNotFoundException {
-
+		loadBookInNewFrame(VFSTools.fromRegularFile(result));	
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -2464,8 +2465,10 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 							if (eira != null) {
 								EditableInstrumentManager im = eira.getEditableInstrumentManager();
 
+								AbstractFileObject fso = VFSTools.fromRegularFile(file);
+								
 								importInstrumentToRepository(im,
-										(AbstractFileObject) VFS.getManager().resolveFile(file.getAbsolutePath()));
+										fso);
 							}
 						}
 
@@ -2491,14 +2494,13 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 				+ APrintGroovyConsole.APRINTGROOVYSCRIPTEXTENSION)) {
 			logger.debug("opening aprint groovy script"); //$NON-NLS-1$
 			APrintGroovyInnerConsole gc = openGroovyScriptConsole();
-			AbstractFileObject fso = (AbstractFileObject) VFS.getManager().resolveFile(file.toURL().toString());
+			AbstractFileObject fso = VFSTools.fromRegularFile(file);
 			gc.openScript(fso);
 
 		} else if (lowerCaseFileName.endsWith(".mid") || lowerCaseFileName.endsWith(".kar")) { //$NON-NLS-2$
 
 			APrintNGImporterInternalFrame midiImportFrame = openNewImportMidiFrame();
-			FileObject fso = VFS.getManager().resolveFile(file.toURL().toString());
-			AbstractFileObject resolvedFile = (AbstractFileObject) fso;
+			AbstractFileObject resolvedFile = VFSTools.fromRegularFile(file);
 			midiImportFrame.defineCurrentMidiFile(resolvedFile);
 
 		} else if (lowerCaseFileName.endsWith(QuickScriptManager.APRINTBOOKGROOVYSCRIPTEXTENSION)) {

@@ -4,10 +4,20 @@ import java.io.File;
 
 import org.apache.commons.vfs2.FileName;
 import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.VFS;
 import org.apache.commons.vfs2.provider.AbstractFileObject;
 
 public class VFSTools {
 
+	public static AbstractFileObject fromRegularFile(File file) throws Exception {
+		FileObject f = VFS.getManager().resolveFile(file.toURL().toString());
+		if (!f.exists()) {
+			throw new Exception("file " + file + " does not exists");
+		}
+		assert f.isAttached();
+		return (AbstractFileObject)f;
+	}
+	
 	public static File convertToFile(FileObject fo) throws Exception {
 		if (fo == null) {
 			return null;
