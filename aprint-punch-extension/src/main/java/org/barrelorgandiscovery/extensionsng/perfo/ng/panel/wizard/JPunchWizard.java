@@ -19,6 +19,7 @@ import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.Wizard;
 import org.barrelorgandiscovery.issues.IssueLayer;
 import org.barrelorgandiscovery.prefs.DummyPrefsStorage;
+import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.tools.Disposable;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
@@ -125,11 +126,15 @@ public class JPunchWizard extends JPanel implements Disposable {
 
 		// define a virtualbook
 		engine.changeVirtualBook(vb.virtualBook);
+		
+		
+		FilePrefsStorage prefsStorage = new FilePrefsStorage(new File("c:\\tmp\\testperfsstorage.properties"));
+		prefsStorage.load();
 
-		StepChooseMachine stepChooseMachine = new StepChooseMachine(new DummyPrefsStorage());
-		StepPlanning splanning = new StepPlanning(oRepository, stepChooseMachine, engine, vbv, new DummyPrefsStorage());
+		StepChooseMachine stepChooseMachine = new StepChooseMachine(prefsStorage);
+		StepPlanning splanning = new StepPlanning(oRepository, stepChooseMachine, engine, vbv, prefsStorage);
 		splanning.setParentStep(stepChooseMachine);
-		StepResume sresume = new StepResume(stepChooseMachine, vb.virtualBook, new DummyPrefsStorage());
+		StepResume sresume = new StepResume(stepChooseMachine, vb.virtualBook, prefsStorage);
 		sresume.setParentStep(splanning);
 		
 		

@@ -136,20 +136,20 @@ public class CADVirtualBookExporter {
 		}
 
 		device.setCurrentLayer(LAYER_REFERENCE);
-		
+
 		// draw the reference arrow
 		// dest
 		double arrowy = 0;
-	
+
 		// origin
 		double arrowlength = 30; // length of the reference arrow
-		
+
 		Coordinate origin = new Coordinate(10 /* X */, arrowy + arrowlength);
 		device.startGroup();
 		try {
 
-			Vect arrowVector = new Vect(0, - arrowlength);
-			
+			Vect arrowVector = new Vect(0, -arrowlength);
+
 			if (!device.ignoreReference() && !scale.isPreferredViewedInversed()) {
 				// reference is at the bottom
 				// move origin, and revert the arrow vector
@@ -157,13 +157,13 @@ public class CADVirtualBookExporter {
 				// revert the arrow
 				arrowVector = arrowVector.moins();
 			}
-			
+
 			device.drawArrow(arrowVector, origin, 10);
-			
+
 		} finally {
 			device.endGroup();
 		}
-		
+
 		if (p.isExportPliures()) {
 
 			logger.debug("ajout pliures ... ");
@@ -172,8 +172,7 @@ public class CADVirtualBookExporter {
 
 			device.setCurrentLayer(LAYER_PLIURES_VERSO);
 			double start = startBook;
-			
-			
+
 			while (start <= vbend + 1) {
 
 				if (p.getTypePliure() == TypePliure.POINTILLEE) {
@@ -192,7 +191,8 @@ public class CADVirtualBookExporter {
 					}
 				} else if (p.getTypePliure() == TypePliure.ALTERNE_CONTINU_POINTILLEE) {
 
-					// pointill� avec non d�oupe au bord des deux cot�s, sur 5mm (sinon, fragilise
+					// pointill� avec non d�oupe au bord des deux cot�s, sur 5mm (sinon,
+					// fragilise
 					// le carton)
 					double startNoDots = 5.0;
 					double endDotsWidth = scale.getWidth() - 5.0;
@@ -248,44 +248,47 @@ public class CADVirtualBookExporter {
 
 		device.setCurrentLayer(LAYER_TROUS);
 
-		HoleDrawer drawer = null;
+		if (parameters.isExportTrous()) {
 
-		if (p.getTypeTrous().getType() == TrouType.TROUS_RECTANGULAIRES.getType()) {
-			drawer = new RectangularHoleDrawer(device, p.getTailleTrous(), p.getPont(), p.getPasDePontSiIlReste());
-		} else if (p.getTypeTrous().getType() == TrouType.TROUS_ARRONDIS.getType()) {
-			drawer = new ArrondiHoleDrawer(device, p.getTailleTrous(), p.getPont(), p.getPasDePontSiIlReste());
-		} else if (p.getTypeTrous().getType() == TrouType.TROUS_RONDS.getType()) {
-			drawer = new RondHoleDrawer(device, p.getTailleTrous(), p.getPont(), p.getPasDePontSiIlReste());
-		} else {
-			throw new Exception("unsupported type " + p.getTypeTrous().getType());
-		}
+			HoleDrawer drawer = null;
 
-		for (Iterator<Hole> iterator = holesCopy.iterator(); iterator.hasNext();) {
-			Hole hole = iterator.next();
-
-			int piste = hole.getTrack();
-
-			double ypiste = piste * scale.getIntertrackHeight() + scale.getFirstTrackAxis();
-
-			if (!device.ignoreReference() && !scale.isPreferredViewedInversed()) {
-				ypiste = scale.getWidth() - ypiste;
+			if (p.getTypeTrous().getType() == TrouType.TROUS_RECTANGULAIRES.getType()) {
+				drawer = new RectangularHoleDrawer(device, p.getTailleTrous(), p.getPont(), p.getPasDePontSiIlReste());
+			} else if (p.getTypeTrous().getType() == TrouType.TROUS_ARRONDIS.getType()) {
+				drawer = new ArrondiHoleDrawer(device, p.getTailleTrous(), p.getPont(), p.getPasDePontSiIlReste());
+			} else if (p.getTypeTrous().getType() == TrouType.TROUS_RONDS.getType()) {
+				drawer = new RondHoleDrawer(device, p.getTailleTrous(), p.getPont(), p.getPasDePontSiIlReste());
+			} else {
+				throw new Exception("unsupported type " + p.getTypeTrous().getType());
 			}
 
-			double halfheight = scale.getTrackWidth() / 2;
+			for (Iterator<Hole> iterator = holesCopy.iterator(); iterator.hasNext();) {
+				Hole hole = iterator.next();
 
-			double x = hole.getTimestamp() * xratio;
-			double endx = (hole.getTimestamp() + hole.getTimeLength()) * xratio;
+				int piste = hole.getTrack();
 
-			// ecriture des trous ...
-			device.startGroup();
-			try {
-				drawer.drawHole(ypiste, halfheight, x, endx);
-			} finally {
-				device.endGroup();
+				double ypiste = piste * scale.getIntertrackHeight() + scale.getFirstTrackAxis();
+
+				if (!device.ignoreReference() && !scale.isPreferredViewedInversed()) {
+					ypiste = scale.getWidth() - ypiste;
+				}
+
+				double halfheight = scale.getTrackWidth() / 2;
+
+				double x = hole.getTimestamp() * xratio;
+				double endx = (hole.getTimestamp() + hole.getTimeLength()) * xratio;
+
+				// ecriture des trous ...
+				device.startGroup();
+				try {
+					drawer.drawHole(ypiste, halfheight, x, endx);
+				} finally {
+					device.endGroup();
+				}
+				logger.debug("export :" + hole);
 			}
-			logger.debug("export :" + hole);
-		}
 
+		}
 	}
 
 	/**

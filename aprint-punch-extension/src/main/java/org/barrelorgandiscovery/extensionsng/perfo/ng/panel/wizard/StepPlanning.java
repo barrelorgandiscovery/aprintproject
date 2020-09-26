@@ -50,6 +50,7 @@ import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.prefs.ObjectsPrefsStorage;
 import org.barrelorgandiscovery.prefs.PrefixedNamePrefsStorage;
 import org.barrelorgandiscovery.tools.Disposable;
+import org.barrelorgandiscovery.tools.StringTools;
 import org.barrelorgandiscovery.ui.animation.InfiniteProgressPanel;
 import org.barrelorgandiscovery.virtualbook.Hole;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
@@ -90,7 +91,7 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 	private InfiniteProgressPanel infiniteprogresspanel = new InfiniteProgressPanel(null, 20, 0.5f, 0.5f);
 
-	private IPrefsStorage prefsStorage;
+	private IPrefsStorage rootPrefsStorage;
 
 	private AtomicBoolean userHasBeenAskedForSmallHoles = new AtomicBoolean(false);
 
@@ -105,7 +106,8 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 		this.processingEngine = ppt;
 		assert pianoroll != null;
 		this.pianoroll = pianoroll;
-		this.prefsStorage = new PrefixedNamePrefsStorage("perfoextensionoptimizers", prefsStorage); //$NON-NLS-1$
+
+		this.rootPrefsStorage =  prefsStorage; 
 
 		ppt.setProcessingOptimizerEngineProgress(new ProcessingOptimizerEngineCallBack() {
 
@@ -240,10 +242,10 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 		// optimizing properties definition
 		this.ppPanel = new PropertySheetPanel();
-		ppPanel.setMinimumSize(new Dimension(100, 200));
-		ppPanel.setPreferredSize(new Dimension(200, 200));
+		ppPanel.setMinimumSize(new Dimension(100, 300));
+		ppPanel.setPreferredSize(new Dimension(200, 300));
 		ppPanel.setDescriptionVisible(true);
-
+		
 		panel.getFormAccessor().replaceBean("parameters", ppPanel); //$NON-NLS-1$
 
 		progress = new ProgressPanelWithText();
@@ -325,6 +327,7 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 			// informationConsole.clearScreen();
 			progress.reset();
+			
 
 		} catch (Exception ex) {
 
@@ -374,6 +377,8 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 		}
 
 	}
+	
+	private IPrefsStorage currentMachinePrefsStorage = null;
 
 	public void activate(Serializable state, WizardStates allStepsStates, StepStatusChangedListener stepListener)
 			throws Exception {
@@ -383,7 +388,20 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 		AbstractMachine machine = sm.getSelectedMachine();
 		assert machine != null;
+		
+		// adjust the preference storage,
+		String prefsPrefix = "perfoextensionoptimizers";
+		AbstractMachine selectedMachine = sm.getSelectedMachine();
+		if (selectedMachine != null) {
+			prefsPrefix = StringTools.toHex(selectedMachine.getTitle());
+		}
 
+		this.currentMachinePrefsStorage = new PrefixedNamePrefsStorage(prefsPrefix, rootPrefsStorage); // $NON-NLS-1$
+		try {
+		this.currentMachinePrefsStorage.load();
+		} catch(Exception ex) {
+			logger.debug("error in loading preferences " + ex.getMessage(), ex);
+		}
 		currentOptimizerParameters = null;
 		currentOptimizerClass = null;
 		definePunchPlanning(currentPunchPlan);
@@ -392,6 +410,7 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 		processingEngine.getPunchLayer().setVisible(true);
 
+		// reinstall parameter if the state is given
 		StepPlanningState s = (StepPlanningState) state;
 		if (s != null) {
 			if (machine.isSameModelAs(s.machine)) {
@@ -410,7 +429,7 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 		ButtonGroup buttonGroup = new ButtonGroup();
 
-		ObjectsPrefsStorage ops = new ObjectsPrefsStorage(prefsStorage);
+		ObjectsPrefsStorage ops = new ObjectsPrefsStorage(currentMachinePrefsStorage);
 
 		JOptimizerRadioButton firstStrategyButton = null;
 
@@ -421,9 +440,10 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 			assert Optimizer.class.isAssignableFrom(c);
 			Optimizer o = (Optimizer) c.newInstance();
+			
 			JOptimizerRadioButton jRadioButton = new JOptimizerRadioButton(o.getTitle());
 
-			if (firstStrategyButton == null && c == NoReturnPunchConverterOptimizer.class) {
+			if (firstStrategyButton == null /* && c == NoReturnPunchConverterOptimizer.class*/) {
 				firstStrategyButton = jRadioButton;
 			}
 
@@ -436,7 +456,7 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 				Serializable storedObject = ops.loadObjectProperties(c.getSimpleName());
 
-				if (storedObject != null && storedObject.getClass() == instanciatedParametersForOptimizer.getClass()) {
+				if (storedObject != null && storedObject.getClass().getName().equals(instanciatedParametersForOptimizer.getClass().getName())) {
 					instanciatedParametersForOptimizer = storedObject;
 				}
 			} catch (Exception ex) {
@@ -451,6 +471,8 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 			if (currentOptimizerClass != null) {
 				if (currentOptimizerClass.equals(c)) {
 					jRadioButton.setSelected(true);
+					// define the parmeters
+					currentOptimizerParameters = instanciatedParametersForOptimizer;
 				}
 			}
 
@@ -541,6 +563,8 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 		sps.machine = sm.getSelectedMachine();
 
 		definePunchPlanning(currentPunchPlan);
+		
+		saveUserParameters(currentOptimizerClass, sps.parameters);
 
 		return sps;
 	}
@@ -575,11 +599,12 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 	}
 
 	private void saveUserParameters(Class optimizerClass, Serializable savedParameters) {
-		ObjectsPrefsStorage ops = new ObjectsPrefsStorage(prefsStorage);
+		assert currentMachinePrefsStorage != null;
+		ObjectsPrefsStorage ops = new ObjectsPrefsStorage(currentMachinePrefsStorage);
 		logger.debug("save stored parameters"); //$NON-NLS-1$
 		try {
 			ops.saveObjectProperties(optimizerClass.getSimpleName(), savedParameters);
-			prefsStorage.save();
+			rootPrefsStorage.save();
 		} catch (Exception ex) {
 			logger.debug("fail to save optimizer parameters :" + ex.getMessage(), ex); //$NON-NLS-1$
 		}

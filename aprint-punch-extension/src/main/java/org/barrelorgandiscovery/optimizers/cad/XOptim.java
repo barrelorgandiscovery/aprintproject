@@ -78,6 +78,7 @@ public class XOptim implements Optimizer<OptimizedObject> {
 		parameters.setTypePliure(this.parameters.getTypePliure());
 		parameters.setTypeTrous(this.parameters.getTypeTrous());
 		parameters.setTypePonts(this.parameters.getTypePonts());
+		parameters.setExportTrous(this.parameters.isExportTrous());
 		return parameters;
 	}
 

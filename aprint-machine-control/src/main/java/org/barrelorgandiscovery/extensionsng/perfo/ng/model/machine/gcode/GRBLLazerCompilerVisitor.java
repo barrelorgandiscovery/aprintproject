@@ -19,6 +19,8 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.XYCommand;
  */
 public class GRBLLazerCompilerVisitor extends GCodeCompiler {
 
+	private static final String STARTCMD = "M4";
+	
 	private ArrayList<String> grblCommands = new ArrayList<>();
 
 	private int maxspeed;
@@ -123,13 +125,13 @@ public class GRBLLazerCompilerVisitor extends GCodeCompiler {
 	public void visit(int index, HomingCommand command) throws Exception {
 		grblCommands.add("$H\n"); //$NON-NLS-1$
 		// activate the lazer
-		grblCommands.add("M3\n"); //$NON-NLS-1$
+		grblCommands.add(STARTCMD + "\n"); //$NON-NLS-1$
 	}
 
 	@Override
 	public List<String> getPreludeCommands() {
 		List<String> list = new ArrayList<String>();
-		list.add("M3\n");
+		list.add(STARTCMD + "\n");
 		return list;
 	}
 

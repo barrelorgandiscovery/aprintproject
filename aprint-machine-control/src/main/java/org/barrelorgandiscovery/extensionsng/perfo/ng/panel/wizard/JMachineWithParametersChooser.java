@@ -27,6 +27,7 @@ import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.prefs.PrefixedNamePrefsStorage;
 import org.barrelorgandiscovery.tools.JMessageBox;
+import org.barrelorgandiscovery.tools.StringTools;
 import org.barrelorgandiscovery.tools.SwingUtils;
 
 import com.jeta.forms.components.panel.FormPanel;
@@ -68,8 +69,11 @@ public class JMachineWithParametersChooser extends JPanel {
 	}
 
 	public PrefixedNamePrefsStorage constructMachinePreferenceStorage(AbstractMachineParameters gp) {
+		
+		String machineLabelDomain = StringTools.toHex(gp.getLabelName());
+		
 		PrefixedNamePrefsStorage pps = new PrefixedNamePrefsStorage(
-				STORAGE_MACHINE_PROPERTIES_DOMAIN + gp.getLabelName(), preferences);
+				STORAGE_MACHINE_PROPERTIES_DOMAIN + machineLabelDomain, preferences);
 		return pps;
 	}
 

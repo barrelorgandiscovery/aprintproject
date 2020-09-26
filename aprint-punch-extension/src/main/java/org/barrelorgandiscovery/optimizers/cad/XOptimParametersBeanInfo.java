@@ -5,6 +5,7 @@ import org.barrelorgandiscovery.extensionsng.perfo.cad.TypePliuresComboBoxProper
 
 import com.l2fprod.common.beans.BaseBeanInfo;
 import com.l2fprod.common.beans.ExtendedPropertyDescriptor;
+import com.l2fprod.common.beans.editor.BooleanPropertyEditor;
 import com.l2fprod.common.beans.editor.DoublePropertyEditor;
 import com.l2fprod.common.beans.editor.IntegerPropertyEditor;
 
@@ -28,6 +29,13 @@ public class XOptimParametersBeanInfo extends BaseBeanInfo {
 		nombreDePlisAAjouterAuDebut.setPropertyEditorClass(IntegerPropertyEditor.class);
 		nombreDePlisAAjouterAuDebut.setCategory("Carton");
 
+		
+		ExtendedPropertyDescriptor exportTrous = addProperty("exportTrous");
+		exportTrous.setShortDescription("Export des trous");
+		exportTrous.setDisplayName("Export des trous");
+		exportTrous.setCategory("Trous");
+		
+		
 		ExtendedPropertyDescriptor typeTrous = addProperty("typeTrous");
 		typeTrous.setShortDescription("Type de trous");
 		typeTrous.setDisplayName("Types de trous");

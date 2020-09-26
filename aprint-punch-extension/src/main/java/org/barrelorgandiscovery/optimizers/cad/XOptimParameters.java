@@ -33,6 +33,8 @@ public class XOptimParameters implements Serializable {
 
 	private double taillePagePourPliure = 160.0;
 
+	private boolean exportTrous = true;
+	
 	private boolean exportPliures = false;
 
 	private double startBookAdjustementFromBeginning = 80; // 80mm by default
@@ -43,6 +45,13 @@ public class XOptimParameters implements Serializable {
 	
 	private double powerFractionPass1 = 1.0; // be default, 100%
 
+	public boolean isExportTrous() {
+		return exportTrous;
+	}
+	public void setExportTrous(boolean exportTrous) {
+		this.exportTrous = exportTrous;
+	}
+	
 	public double getPowerFractionPass1() {
 		return powerFractionPass1;
 	}
@@ -203,6 +212,8 @@ public class XOptimParameters implements Serializable {
 		speedFractionPass2 = in.readDouble();
 		
 		optimPageSize = in.readDouble();
+		
+		exportTrous = in.readBoolean();
 	}
 
 	public void writeExternal(ObjectOutput out) throws IOException {
@@ -223,7 +234,7 @@ public class XOptimParameters implements Serializable {
 		out.writeDouble(powerFractionPass2);
 		out.writeDouble(speedFractionPass2);
 		out.writeDouble(optimPageSize);
-		
+		out.writeBoolean(exportTrous);
 	}
 	
 }

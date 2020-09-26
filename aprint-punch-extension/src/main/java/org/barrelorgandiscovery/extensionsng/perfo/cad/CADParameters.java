@@ -35,6 +35,8 @@ public class CADParameters implements Serializable, Externalizable {
 	private TypePliure typePliure = TypePliure.CONTINUE;
 
 	private boolean exportDecoupeDesBords = true;
+	
+	private boolean exportTrous = true;
 
 	public void setNombreDePlisAAjouterAuDebut(int nombreDePlisAAjouterAuDebut) {
 		this.nombreDePlisAAjouterAuDebut = nombreDePlisAAjouterAuDebut;
@@ -60,6 +62,14 @@ public class CADParameters implements Serializable, Externalizable {
 		return exportPliures;
 	}
 
+	public boolean isExportTrous() {
+		return exportTrous;
+	}
+	
+	public void setExportTrous(boolean exportTrous) {
+		this.exportTrous = exportTrous;
+	}
+	
 	public TrouType getTypeTrous() {
 		return typeTrous;
 	}
@@ -141,6 +151,11 @@ public class CADParameters implements Serializable, Externalizable {
 		} catch (Exception ex) {
 			// for maintaining compatibility
 		}
+		try {
+			exportTrous = in.readBoolean();
+		} catch(Exception ex) {
+			
+		}
 	}
 
 	public void writeExternal(ObjectOutput out) throws IOException {
@@ -156,6 +171,7 @@ public class CADParameters implements Serializable, Externalizable {
 		out.writeDouble(startBookAdjustementFromBeginning);
 		out.writeInt(nombreDePlisAAjouterAuDebut);
 		out.writeBoolean(exportDecoupeDesBords);
+		out.writeBoolean(exportTrous);
 	}
 
 }
