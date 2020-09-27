@@ -41,6 +41,9 @@ class GRBLMachineControl implements MachineControl {
 
 	private ScheduledExecutorService status;
 
+	// don't go to zero, otherwise grbl strip commands
+	public static int COMMANDS_IN_BUFFER_OBJECTIVE = 3;
+	
 	// used for debug
 	static Class serialPortClass = org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.serial.SerialPort.class;
 
@@ -299,7 +302,7 @@ class GRBLMachineControl implements MachineControl {
 				} else if (status.availableCommandsInPlannedBuffer != null) {
 					int permits = commandQueue.availablePermits();
 					int delta = status.availableCommandsInPlannedBuffer - permits;
-					if (delta > 0) {
+					if (delta > COMMANDS_IN_BUFFER_OBJECTIVE) {
 						//
 						logger.debug("readjust command Queue from delta " + delta);
 						for (int i = 0; i < delta; i++) {
