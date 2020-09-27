@@ -38,7 +38,7 @@ public class JConsole extends JComponent implements HierarchyListener {
 	private static final Color DEFAULT_BACKGROUND = Color.BLACK;
 	private static final Font DEFAULT_FONT = new Font("Courier New", Font.PLAIN, 18);
 	private static final int DEFAULT_BLINKRATE = 200;
-	private static final boolean DEFAULT_BLINK_ON = true;
+	private static final boolean DEFAULT_BLINK_ON = false;
  
 	private ConsoleData data = new ConsoleData();
 
@@ -46,7 +46,7 @@ public class JConsole extends JComponent implements HierarchyListener {
 	private int fontHeight;
 	private int fontYOffset;
 
-	private boolean cursorVisible = false;
+	private boolean cursorVisible = true;
 	private boolean cursorBlinkOn = true;
 	private boolean cursorInverted = true;
 
@@ -249,8 +249,9 @@ public class JConsole extends JComponent implements HierarchyListener {
 		int y1 = 0;
 		int y2 = data.rows;
 
-		int curX = getCursorX();
-		int curY = getCursorY();
+		
+		final int curX = getCursorX();
+		final int curY = getCursorY();
 
 		for (int j = Math.max(0, y1); j < Math.min(y2, data.rows); j++) {
 			int offset = j * data.columns;
@@ -299,6 +300,7 @@ public class JConsole extends JComponent implements HierarchyListener {
 				start = i;
 			}
 		}
+		
 	}
 
 	public void setCursorPos(int column, int row) {
@@ -364,8 +366,14 @@ public class JConsole extends JComponent implements HierarchyListener {
 	}
 
 	public void write(char c) {
+		while (data.isOutOfConsole(cursorX, cursorY)) {
+			data.scrollUp();
+			cursorY -= 1;
+		}
+		
 		data.setDataAt(cursorX, cursorY, c, currentForeground,
 				currentBackground, currentFont);
+		
 		moveCursor(c);
 	}
 
@@ -374,11 +382,6 @@ public class JConsole extends JComponent implements HierarchyListener {
 		case '\n':
 			cursorY++;
 			cursorX = 0;
-			if (cursorY == data.rows) {
-				// clear console
-				clearScreen();
-			}
-			
 			break;
 		default:
 			cursorX++;

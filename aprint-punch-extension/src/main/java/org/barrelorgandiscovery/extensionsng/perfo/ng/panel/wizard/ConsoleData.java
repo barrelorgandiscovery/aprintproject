@@ -51,12 +51,45 @@ public final class ConsoleData {
 		this.columns = columns;
 	}
 
+	public boolean isOutOfConsole(int column, int row) {
+		return column + row * columns >= text.length;
+	}
+
+	public void scrollUp() {
+
+		for (int j = 1; j < rows; j++) {
+			for (int i = 0; i < columns; i++) {
+				final int dest = i + (j - 1) * columns;
+				final int source = i + j * columns;
+
+				text[dest] = text[source];
+				foreground[dest] = foreground[source];
+				background[dest] = background[source];
+				font[dest] = font[source];
+			}
+		}
+		for (int i = 0; i < columns; i++) {
+
+			final int dest = i + (rows - 1) * columns;
+			text[dest] = ' ';
+		}
+
+	}
+
 	/**
 	 * Sets a single character position
 	 */
-	public void setDataAt(int column, int row, char c, Color fg, Color bg,
-			Font f) {
+	public void setDataAt(int column, int row, char c, Color fg, Color bg, Font f) {
 		int pos = column + row * columns;
+
+		while (pos >= text.length) {
+			scrollUp();
+			row = row - 1;
+			pos = column + row * columns;
+		}
+
+		assert pos < text.length;
+
 		text[pos] = c;
 		foreground[pos] = fg;
 		background[pos] = bg;
@@ -83,11 +116,9 @@ public final class ConsoleData {
 		return font[offset];
 	}
 
-	public void fillArea(char c, Color fg, Color bg, Font f, int column,
-			int row, int width, int height) {
+	public void fillArea(char c, Color fg, Color bg, Font f, int column, int row, int width, int height) {
 		for (int q = Math.max(0, row); q < Math.min(row + height, rows); q++) {
-			for (int p = Math.max(0, column); p < Math.min(column + width,
-					columns); p++) {
+			for (int p = Math.max(0, column); p < Math.min(column + width, columns); p++) {
 				int offset = p + q * columns;
 				text[offset] = c;
 				foreground[offset] = fg;
