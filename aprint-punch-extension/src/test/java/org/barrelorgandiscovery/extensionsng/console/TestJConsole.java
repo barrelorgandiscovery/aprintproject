@@ -19,7 +19,7 @@ public class TestJConsole {
 		frame.setSize(800,600);
 		frame.getContentPane().setLayout(new BorderLayout());
 		
-		JConsole console = new JConsole(80, 20);
+		JConsole console = new JConsole();
 		console.setBlinkDelay(1000);
 		console.setCursorBlink(true);
 		console.setAutoscrolls(true);

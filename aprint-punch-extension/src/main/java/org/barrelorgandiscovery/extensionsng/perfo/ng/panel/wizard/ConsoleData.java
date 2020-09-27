@@ -2,6 +2,7 @@ package org.barrelorgandiscovery.extensionsng.perfo.ng.panel.wizard;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.util.Arrays;
 
 /**
  * Class used for storing console data
@@ -9,6 +10,11 @@ import java.awt.Font;
  * @author Mike
  */
 public final class ConsoleData {
+
+	public static final Color DEFAULT_FOREGROUND = Color.LIGHT_GRAY;
+	public static final Color DEFAULT_BACKGROUND = Color.BLACK;
+	public static final Font DEFAULT_FONT = new Font("Courier New", Font.PLAIN, 18);
+
 	private int capacity = 0;
 	public int rows;
 	public int columns;
@@ -21,34 +27,46 @@ public final class ConsoleData {
 		// create empty console data
 	}
 
-	private void ensureCapacity(int minCapacity) {
-		if (capacity >= minCapacity)
-			return;
+	private void ensureCapacity(int newSize) {
+		assert newSize >= 0;
+		char[] newText = new char[newSize];
+		Color[] newBackground = new Color[newSize];
+		Color[] newForeground = new Color[newSize];
+		Font[] newFont = new Font[newSize];
 
-		char[] newText = new char[minCapacity];
-		Color[] newBackground = new Color[minCapacity];
-		Color[] newForeground = new Color[minCapacity];
-		Font[] newFont = new Font[minCapacity];
+		Arrays.fill(newBackground, Color.black);
+		Arrays.fill(newForeground, Color.white);
+		Arrays.fill(newFont, DEFAULT_FONT);
+		Arrays.fill(newText, ' ');
 
-		int size = rows * columns;
-		if (size > 0) {
-			System.arraycopy(text, 0, newText, 0, size);
-			System.arraycopy(foreground, 0, newForeground, 0, size);
-			System.arraycopy(background, 0, newBackground, 0, size);
-			System.arraycopy(font, 0, newFont, 0, size);
+		if (newSize > 0) {
+			int sizeToCopy = Math.min(newSize, text.length);
+			System.arraycopy(text, 0, newText, 0, sizeToCopy);
+			System.arraycopy(foreground, 0, newForeground, 0, sizeToCopy);
+			System.arraycopy(background, 0, newBackground, 0, sizeToCopy);
+			System.arraycopy(font, 0, newFont, 0, sizeToCopy);
 		}
 
 		text = newText;
 		foreground = newForeground;
 		background = newBackground;
 		font = newFont;
-		capacity = minCapacity;
+		capacity = newSize;
 	}
 
 	void init(int columns, int rows) {
+		resize(columns, rows);
+
+	}
+
+	public void resize(int columns, int rows) {
 		ensureCapacity(rows * columns);
 		this.rows = rows;
 		this.columns = columns;
+	}
+
+	void init() {
+		init(0, 0);
 	}
 
 	public boolean isOutOfConsole(int column, int row) {

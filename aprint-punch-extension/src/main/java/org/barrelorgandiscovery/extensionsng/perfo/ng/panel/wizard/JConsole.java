@@ -1,7 +1,7 @@
 package org.barrelorgandiscovery.extensionsng.perfo.ng.panel.wizard;
 
-
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
@@ -9,6 +9,8 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
 import java.awt.font.FontRenderContext;
@@ -19,14 +21,12 @@ import java.util.Arrays;
 import javax.swing.JComponent;
 import javax.swing.Timer;
 
-
 /**
  * Class implementing a Swing-based text console
  * 
- * Principles:
- * - provides a fixed number of rows and columns, but can be resized
- * - each cell can have its own foreground and background colour
- * - The main font determines the grid size
+ * Principles: - provides a fixed number of rows and columns, but can be resized
+ * - each cell can have its own foreground and background colour - The main font
+ * determines the grid size
  * 
  * @author Mike Anderson
  * 
@@ -34,12 +34,9 @@ import javax.swing.Timer;
 public class JConsole extends JComponent implements HierarchyListener {
 	private static final long serialVersionUID = 3571518591759968333L;
 
-	private static final Color DEFAULT_FOREGROUND = Color.LIGHT_GRAY;
-	private static final Color DEFAULT_BACKGROUND = Color.BLACK;
-	private static final Font DEFAULT_FONT = new Font("Courier New", Font.PLAIN, 18);
 	private static final int DEFAULT_BLINKRATE = 200;
 	private static final boolean DEFAULT_BLINK_ON = false;
- 
+
 	private ConsoleData data = new ConsoleData();
 
 	private int fontWidth;
@@ -54,18 +51,28 @@ public class JConsole extends JComponent implements HierarchyListener {
 	private int cursorY = 0;
 	private Font mainFont = null;
 	private Font currentFont = null;
-	private Color currentForeground = DEFAULT_FOREGROUND;
-	private Color currentBackground = DEFAULT_BACKGROUND;
+	private Color currentForeground = ConsoleData.DEFAULT_FOREGROUND;
+	private Color currentBackground = ConsoleData.DEFAULT_BACKGROUND;
 
 	private Timer blinkTimer;
 
-	public JConsole(int columns, int rows) {
-		setMainFont(DEFAULT_FONT);
+	public JConsole() {
+		setMainFont(ConsoleData.DEFAULT_FONT);
 		setFont(mainFont);
-		init(columns, rows);
+		init();
 		if (DEFAULT_BLINK_ON) {
 			setCursorBlink(true);
 		}
+
+		addComponentListener(new ComponentAdapter() {
+			@Override
+			public void componentResized(ComponentEvent e) {
+				Component source = e.getComponent();
+				Dimension d = source.getSize();
+				resizeComponentAndAdjustInternalStructures(d);
+			}
+		});
+
 	}
 
 	/**
@@ -77,14 +84,12 @@ public class JConsole extends JComponent implements HierarchyListener {
 	public void setMainFont(Font font) {
 		mainFont = font;
 
-		FontRenderContext fontRenderContext = new FontRenderContext(
-				mainFont.getTransform(), false, false);
-		Rectangle2D charBounds = mainFont.getStringBounds("X",
-				fontRenderContext);
+		FontRenderContext fontRenderContext = new FontRenderContext(mainFont.getTransform(), false, false);
+		Rectangle2D charBounds = mainFont.getStringBounds("X", fontRenderContext);
 		fontWidth = (int) charBounds.getWidth();
 		fontHeight = (int) charBounds.getHeight();
 		fontYOffset = -(int) charBounds.getMinY();
-		
+
 		setPreferredSize(new Dimension(data.columns * fontWidth, data.rows * fontHeight));
 
 		repaint();
@@ -186,8 +191,7 @@ public class JConsole extends JComponent implements HierarchyListener {
 	}
 
 	/**
-	 * Fires a repaint event on a specified rectangle of characters in the
-	 * console
+	 * Fires a repaint event on a specified rectangle of characters in the console
 	 */
 	public void repaintArea(int column, int row, int width, int height) {
 		int fw = getFontWidth();
@@ -198,18 +202,12 @@ public class JConsole extends JComponent implements HierarchyListener {
 	/**
 	 * Initialises the console to a specified size
 	 */
-	protected void init(int columns, int rows) {
-		data.init(columns, rows);
-		Arrays.fill(data.background, DEFAULT_BACKGROUND);
-		Arrays.fill(data.foreground, DEFAULT_FOREGROUND);
-		Arrays.fill(data.font, DEFAULT_FONT);
-		Arrays.fill(data.text, ' ');
+	protected void init() {
 
-		setPreferredSize(new Dimension(columns * fontWidth, rows * fontHeight));
-	}
+		data.init();
 
-	public void resize(int columns, int rows) {
-		throw new UnsupportedOperationException();
+		setPreferredSize(new Dimension(400, 200));
+
 	}
 
 	public void clear() {
@@ -229,8 +227,7 @@ public class JConsole extends JComponent implements HierarchyListener {
 	}
 
 	private void clearArea(int column, int row, int width, int height) {
-		data.fillArea(' ', currentForeground, currentBackground, currentFont,
-				column, row, width, height);
+		data.fillArea(' ', currentForeground, currentBackground, currentFont, column, row, width, height);
 		repaintArea(0, 0, width, height);
 	}
 
@@ -249,7 +246,6 @@ public class JConsole extends JComponent implements HierarchyListener {
 		int y1 = 0;
 		int y2 = data.rows;
 
-		
 		final int curX = getCursorX();
 		final int curY = getCursorY();
 
@@ -275,10 +271,8 @@ public class JConsole extends JComponent implements HierarchyListener {
 					}
 				} else {
 					// detect run
-					while ((i < end) && (!((j == curY) && (i == curX)))
-							&& (nfg == data.foreground[offset + i])
-							&& (nbg == data.background[offset + i])
-							&& (nf == data.font[offset + i])) {
+					while ((i < end) && (!((j == curY) && (i == curX))) && (nfg == data.foreground[offset + i])
+							&& (nbg == data.background[offset + i]) && (nf == data.font[offset + i])) {
 						i++;
 					}
 				}
@@ -288,26 +282,27 @@ public class JConsole extends JComponent implements HierarchyListener {
 
 				// draw background
 				g.setBackground(nbg);
-				g.clearRect(fontWidth * start, j * fontHeight, fontWidth
-						* (i - start), fontHeight);
+				g.clearRect(fontWidth * start, j * fontHeight, fontWidth * (i - start), fontHeight);
 
 				// draw chars up to this point
 				g.setColor(nfg);
-				for (int k=start; k<i; k++) { 
-					g.drawChars(data.text, offset + k, 1, k
-							* fontWidth, j * fontHeight + fontYOffset);
+				for (int k = start; k < i; k++) {
+					g.drawChars(data.text, offset + k, 1, k * fontWidth, j * fontHeight + fontYOffset);
 				}
 				start = i;
 			}
 		}
-		
+
 	}
 
 	public void setCursorPos(int column, int row) {
-		if ((column < 0) || (column >= data.columns))
-			throw new Error("Invalid X cursor position: " + column);
-		if ((row < 0) || (row >= data.rows))
-			throw new Error("Invalid Y cursor position: " + row);
+		/*
+		 * does not behave well
+		 * 
+		 * if ((column < 0) || (column >= data.columns)) throw new
+		 * Error("Invalid X cursor position: " + column); if ((row < 0) || (row >=
+		 * data.rows)) throw new Error("Invalid Y cursor position: " + row);
+		 */
 		cursorX = column;
 		cursorY = row;
 	}
@@ -370,10 +365,9 @@ public class JConsole extends JComponent implements HierarchyListener {
 			data.scrollUp();
 			cursorY -= 1;
 		}
-		
-		data.setDataAt(cursorX, cursorY, c, currentForeground,
-				currentBackground, currentFont);
-		
+
+		data.setDataAt(cursorX, cursorY, c, currentForeground, currentBackground, currentFont);
+
 		moveCursor(c);
 	}
 
@@ -415,8 +409,7 @@ public class JConsole extends JComponent implements HierarchyListener {
 		}
 	}
 
-	public void fillArea(char c, Color fg, Color bg, int column, int row,
-			int width, int height) {
+	public void fillArea(char c, Color fg, Color bg, int column, int row, int width, int height) {
 		data.fillArea(c, fg, bg, currentFont, column, row, width, height);
 		repaintArea(column, row, width, height);
 	}
@@ -430,6 +423,37 @@ public class JConsole extends JComponent implements HierarchyListener {
 				stopBlinking();
 			}
 		}
+	}
+
+	private void resizeComponentAndAdjustInternalStructures(Dimension d) {
+		if (d == null)
+			return;
+
+		int columns = (int) (d.getWidth() / fontWidth);
+		int rows = (int) (d.getHeight() / fontHeight);
+
+		int curPos = cursorY * data.columns + cursorX;
+		
+		// recompute pos
+		cursorX = curPos % columns;
+		cursorY = curPos / columns;
+		
+		// adjust pos for cursor with new size
+		if (cursorX >= columns) {
+			cursorX = columns - 1;
+		}
+
+		if (cursorY >= rows) {
+			cursorY = rows - 1;
+		}
+		if (cursorX < 0) {
+			cursorX = 0;
+		}
+		if (cursorY < 0) {
+			cursorY = 0;
+		}
+
+		data.resize(columns, rows);
 	}
 
 }
