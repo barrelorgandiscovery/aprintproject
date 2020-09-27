@@ -28,7 +28,17 @@ public class SerialPort implements ISerialPort {
 	@Override
 	public void closePort() throws SerialPortException {
 		try {
+			// this function don't work and don't clear the event listener
+			// the issue is that the event is called multiple times, 
+
+			try {
+				innerSerialPort.removeEventListener();
+			} catch(Throwable t) {};
+			
 			innerSerialPort.closePort();
+			
+			
+			
 		} catch (jssc.SerialPortException ex) {
 			throw new org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.serial.SerialPortException(
 					ex.getMessage(), ex);

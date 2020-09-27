@@ -59,10 +59,16 @@ class GRBLMachineControl implements MachineControl {
 
 	private long lastMachineStatusTime = 0;
 	private MachineStatus lastMachineStatus = MachineStatus.UNKNOWN;
+	
+	PortReader listener2 = new PortReader();
 
 	enum MachineStatus {
 		UNKNOWN, ALARM, RUNNING, IDLE, ERROR
 	}
+	
+
+	private String currentPortName;
+	private GCodeCompiler commandCompiler;
 
 	@Override
 	public org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineStatus getStatus() {
@@ -126,10 +132,45 @@ class GRBLMachineControl implements MachineControl {
 		currentPortName = portName;
 		assert commandCompiler != null;
 		this.commandCompiler = commandCompiler;
+		
+		logger.debug("schedule status watchdog");
+		status = Executors.newSingleThreadScheduledExecutor();
+		status.scheduleAtFixedRate(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					if (grblProtocolState != null) {
+						grblProtocolState.sendStatusRequest();
+					}
+
+					MachineControlListener v = listener;
+					if (v != null) {
+						// pulling elements
+						try {
+							// pump messages
+							TimestampedMachineInteraction s = machineInteractionLog.poll();
+							while (s != null) {
+								if (s.isIn) {
+									v.rawCommandReceived(s.command);
+								} else {
+									v.rawCommandSent(s.command);
+								}
+								s = machineInteractionLog.poll();
+							}
+						} catch (Throwable t) {
+							logger.debug(t.getMessage(), t);
+						}
+
+					}
+
+				} catch (Throwable ex) {
+					logger.error("error sending status command :" + ex.getMessage(), ex);
+				}
+			}
+		}, TRIGGERED_STATUS_TIMER, TRIGGERED_STATUS_TIMER, TimeUnit.MILLISECONDS);
 	}
 
-	private String currentPortName;
-	private GCodeCompiler commandCompiler;
 
 	private void init(String portName) throws Exception {
 
@@ -170,9 +211,12 @@ class GRBLMachineControl implements MachineControl {
 		serialPort.setParams(SerialPort.BAUDRATE_115200, SerialPort.DATABITS_8, SerialPort.STOPBITS_1,
 				SerialPort.PARITY_NONE);
 
-		serialPort.addEventListener(new PortReader(), SerialPort.MASK_RXCHAR);
+		
+		serialPort.addEventListener(listener2, SerialPort.MASK_RXCHAR);
 
-		grblProtocolState = new GRBLProtocolState(new SendString() {
+		grblProtocolState = 
+				
+				new GRBLProtocolState(new SendString() {
 			@Override
 			public void sendString(String stringToSend) throws Exception {
 				if (stringToSend != null) {
@@ -334,42 +378,7 @@ class GRBLMachineControl implements MachineControl {
 			}
 		});
 
-		logger.debug("schedule status watchdog");
-		status = Executors.newSingleThreadScheduledExecutor();
-		status.scheduleAtFixedRate(new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					if (grblProtocolState != null) {
-						grblProtocolState.sendStatusRequest();
-					}
-
-					MachineControlListener v = listener;
-					if (v != null) {
-						// pulling elements
-						try {
-							// pump messages
-							TimestampedMachineInteraction s = machineInteractionLog.poll();
-							while (s != null) {
-								if (s.isIn) {
-									v.rawCommandReceived(s.command);
-								} else {
-									v.rawCommandSent(s.command);
-								}
-								s = machineInteractionLog.poll();
-							}
-						} catch (Throwable t) {
-							logger.debug(t.getMessage(), t);
-						}
-
-					}
-
-				} catch (Throwable ex) {
-					logger.error("error sending status command :" + ex.getMessage(), ex);
-				}
-			}
-		}, TRIGGERED_STATUS_TIMER, TRIGGERED_STATUS_TIMER, TimeUnit.MILLISECONDS);
+		
 	}
 
 	private MachineControlListener listener;

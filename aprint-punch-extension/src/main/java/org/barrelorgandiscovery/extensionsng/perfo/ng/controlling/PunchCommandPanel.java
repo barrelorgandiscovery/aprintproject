@@ -42,6 +42,7 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchPlan;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.XYCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.optimizers.OptimizersRepository;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.panel.wizard.JConsole;
 import org.barrelorgandiscovery.gui.aedit.DistanceLayer;
 import org.barrelorgandiscovery.gui.aedit.JEditableVirtualBookComponent;
 import org.barrelorgandiscovery.gui.aedit.Tool;
@@ -104,7 +105,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 
 	private DistanceLayer distanceLayer;
 
-	private IScriptConsole console;
+	private JConsole console;
 
 	// /////////////////////////////////////
 	// offset for home delta
@@ -152,6 +153,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 
 		if (this.machineControl != null) {
 			logger.debug("unregister events"); //$NON-NLS-1$
+			
 		}
 
 		MachineControl withOffsetMachineControl = new MachineControl() {
@@ -257,120 +259,8 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 
 		this.machineControl = withOffsetMachineControl;
 
-		// registering machineControl events
-		machineControl.setMachineControlListener(new MachineControlListener() {
-
-			@Override
-			public void statusChanged(MachineStatus status) {
-
-			}
-
-			@Override
-			public void error(String message) {
-				
-				SwingUtilities.invokeLater(() -> {
-					try {
-						
-						if (!"?".equals(message)) {
-							console.clearConsole();
-							console.appendOutput(message, null);
-						}
-					} catch (Exception ex) {
-
-					}
-				});
-				
-			}
-
-			@Override
-			public void rawCommandSent(String commandSent) {
-
-				SwingUtilities.invokeLater(() -> {
-					try {
-					
-						if (!"?".equals(commandSent)) {
-							console.clearConsole();
-							console.appendOutput(commandSent, null);
-						}
-					} catch (Exception ex) {
-
-					}
-				});
-			}
-
-			@Override
-			public void rawCommandReceived(String commandReceived) {
-				SwingUtilities.invokeLater(() -> {
-					try {
-						console.appendOutput(commandReceived, null);
-
-					} catch (Exception ex) {
-
-					}
-				});
-			}
-
-			long lastDisplayedFeedBack = System.currentTimeMillis();
-
-			@Override
-			public void currentMachinePosition(final String status, final double mx, final double my) {
-				try {
-
-					if ((System.currentTimeMillis() - lastDisplayedFeedBack) > 500) {
-
-						SwingUtilities.invokeLater(new Runnable() {
-							@Override
-							public void run() {
-								// "Machine Position X:" + mx + " Y:"
-								// + my + " ,
-								updateStatus(status, mx // $NON-NLS-1$
-								, my); // $NON-NLS-1$
-								lastpositionMachineY = my;
-
-								machinePositionLayer.setMachinePosition(mx - xMachineOffset,
-										my - yMachineOffset - yShift);
-
-								// if machine position is outside the current
-								// view
-								// move the view to see it
-								if (moveBookDuringPunch.isSelected()) {
-
-									boolean isIn = true;
-									double machinex = machinePositionLayer.getY();
-
-									double xmax = virtualBookComponent
-											.convertScreenXToCarton(virtualBookComponent.getWidth());
-
-									if (machinex > xmax)
-										isIn = false;
-
-									if (machinex < virtualBookComponent.convertScreenXToCarton(0))
-										isIn = false;
-
-									double widthInMM = virtualBookComponent.pixelToMM(virtualBookComponent.getWidth());
-
-									if (!isIn) {
-										if (controller.isRunning()) {
-											// align the punch on left, 1/5
-											virtualBookComponent.setXoffset(machinex - 1.0 / 5 * widthInMM);
-
-										}
-									}
-
-								}
-
-								machinePositionLayer.setStatus(status);
-								virtualBookComponent.repaint();
-							}
-						});
-						lastDisplayedFeedBack = System.currentTimeMillis();
-					}
-
-				} catch (Exception ex) {
-					logger.error("error in feedback :" + ex.getMessage(), ex); //$NON-NLS-1$
-				}
-			}
-		});
+		
+		machineControl.setMachineControlListener(listenerGuiMachineControl);
 
 		controller.setMachineControl(machineControl);
 
@@ -489,8 +379,6 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 		TitledBorderLabel labelsettingposition = (TitledBorderLabel) settingsPanel.getComponentByName("lblposition"); //$NON-NLS-1$
 		labelsettingposition.setText(Messages.getString("PunchCommandPanel.15")); //$NON-NLS-1$
 
-		// add(tabs, BorderLayout.WEST);
-
 		settingsPanel.getFormAccessor().replaceBean("xpanel", xypanel); //$NON-NLS-1$
 		PanelStep settingsStep = new PanelStep(settingsPanel, "settings", //$NON-NLS-1$
 				Messages.getString("PunchCommandPanel.18"), Messages.getString("PunchCommandPanel.19"), //$NON-NLS-1$ //$NON-NLS-2$
@@ -521,12 +409,11 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 		pStatus.setLayout(new VerticalLayout());
 		statusLabel = new JLabel();
 
-		machineConsoleTextArea = new JTextPane();
-		machineConsoleTextArea.setPreferredSize(new Dimension(200, 50));
-		console = new ASyncConsoleOutput(machineConsoleTextArea, null);
+		console = new JConsole();
+		console.setPreferredSize(new Dimension(200, 100));
 
 		pStatus.add(statusLabel);
-		pStatus.add(machineConsoleTextArea);
+		pStatus.add(console);
 
 		add(pStatus, BorderLayout.SOUTH);
 		updateStatus(Messages.getString("PunchCommandPanel.26"), Double.NaN, Double.NaN); //$NON-NLS-1$
@@ -796,7 +683,121 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 
 	private JToggleButton moveBookDuringPunch;
 
-	private JTextPane machineConsoleTextArea;
+	private MachineControlListener listenerGuiMachineControl = new MachineControlListener() {
+
+		@Override
+		public void statusChanged(MachineStatus status) {
+
+		}
+
+		@Override
+		public void error(String message) {
+
+			SwingUtilities.invokeLater(() -> {
+				try {
+
+					if (!"?".equals(message)) {
+						console.writeln(message);
+						console.repaint();
+					}
+				} catch (Exception ex) {
+
+				}
+			});
+
+		}
+
+		@Override
+		public void rawCommandSent(String commandSent) {
+
+			SwingUtilities.invokeLater(() -> {
+				try {
+
+					if (!"?".equals(commandSent)) {
+						console.write(commandSent);
+						console.repaint();
+					}
+				} catch (Exception ex) {
+
+				}
+			});
+		}
+
+		@Override
+		public void rawCommandReceived(String commandReceived) {
+			SwingUtilities.invokeLater(() -> {
+				try {
+					if (!"?".equals(commandReceived)) {
+						console.write(commandReceived);
+						console.repaint();
+					}
+				} catch (Exception ex) {
+
+				}
+			});
+		}
+
+		long lastDisplayedFeedBack = System.currentTimeMillis();
+
+		@Override
+		public void currentMachinePosition(final String status, final double mx, final double my) {
+			try {
+
+				if ((System.currentTimeMillis() - lastDisplayedFeedBack) > 500) {
+
+					SwingUtilities.invokeLater(new Runnable() {
+						@Override
+						public void run() {
+							// "Machine Position X:" + mx + " Y:"
+							// + my + " ,
+							updateStatus(status, mx // $NON-NLS-1$
+							, my); // $NON-NLS-1$
+							lastpositionMachineY = my;
+
+							machinePositionLayer.setMachinePosition(mx - xMachineOffset,
+									my - yMachineOffset - yShift);
+
+							// if machine position is outside the current
+							// view
+							// move the view to see it
+							if (moveBookDuringPunch.isSelected()) {
+
+								boolean isIn = true;
+								double machinex = machinePositionLayer.getY();
+
+								double xmax = virtualBookComponent
+										.convertScreenXToCarton(virtualBookComponent.getWidth());
+
+								if (machinex > xmax)
+									isIn = false;
+
+								if (machinex < virtualBookComponent.convertScreenXToCarton(0))
+									isIn = false;
+
+								double widthInMM = virtualBookComponent.pixelToMM(virtualBookComponent.getWidth());
+
+								if (!isIn) {
+									if (controller.isRunning()) {
+										// align the punch on left, 1/5
+										virtualBookComponent.setXoffset(machinex - 1.0 / 5 * widthInMM);
+
+									}
+								}
+
+							}
+
+							machinePositionLayer.setStatus(status);
+							virtualBookComponent.repaint();
+						}
+					});
+					lastDisplayedFeedBack = System.currentTimeMillis();
+				}
+
+			} catch (Exception ex) {
+				logger.error("error in feedback :" + ex.getMessage(), ex); //$NON-NLS-1$
+			}
+		}
+	};
 
 	/**
 	 * user has pushed the homing button
@@ -905,16 +906,16 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 
 		
 		
-		
 		GRBLLazerMachineParameters grblMachineParameters = new GRBLLazerMachineParameters();
 		grblMachineParameters.setComPort("COM4");
 
 		GRBLLazerMachine grblMachine = new GRBLLazerMachine();
 		OptimizersRepository optRepository = new OptimizersRepository();
-		Optimizer opt = optRepository.newOptimizerWithParameters(optRepository.instanciateParametersForOptimizer(XOptim.class));
+		Optimizer opt = optRepository
+				.newOptimizerWithParameters(optRepository.instanciateParametersForOptimizer(XOptim.class));
 		OptimizerResult optimize = opt.optimize(r.virtualBook);
 		PunchPlan pp = optRepository.createDefaultPunchPlanForLazerMachine(grblMachineParameters, optimize.result);
-		
+
 		MachineControl machineControl = grblMachine.open(grblMachineParameters);
 
 		IPrefsStorage dps = new FilePrefsStorage(new File("c:\\temp\\prefsperfo"));
