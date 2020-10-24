@@ -1,4 +1,4 @@
-package org.barrelorgandiscovery.extensionsng.perfo.ng.panel.wizard;
+package org.barrelorgandiscovery.extensionsng.console;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -15,7 +15,6 @@ public final class ConsoleData {
 	public static final Color DEFAULT_BACKGROUND = Color.BLACK;
 	public static final Font DEFAULT_FONT = new Font("Courier New", Font.PLAIN, 18);
 
-	private int capacity = 0;
 	public int rows;
 	public int columns;
 	public Color[] background;
@@ -27,7 +26,11 @@ public final class ConsoleData {
 		// create empty console data
 	}
 
-	private void ensureCapacity(int newSize) {
+	private void ensureCapacity(int newSize, int newcolumns, int newrows) {
+
+		if (text != null && newSize == text.length)
+			return;
+
 		assert newSize >= 0;
 		char[] newText = new char[newSize];
 		Color[] newBackground = new Color[newSize];
@@ -40,18 +43,28 @@ public final class ConsoleData {
 		Arrays.fill(newText, ' ');
 
 		if (newSize > 0) {
+
 			int sizeToCopy = Math.min(newSize, text.length);
-			System.arraycopy(text, 0, newText, 0, sizeToCopy);
-			System.arraycopy(foreground, 0, newForeground, 0, sizeToCopy);
-			System.arraycopy(background, 0, newBackground, 0, sizeToCopy);
-			System.arraycopy(font, 0, newFont, 0, sizeToCopy);
+			for (int j = 0; j < rows; j++) {
+				for (int i = 0; i < columns; i++) {
+					int oldaddress = j*columns + i;
+					int newAddress = j * newcolumns + i;
+					if (newAddress < newSize) {
+						newText[newAddress] = text[oldaddress];
+						newBackground[newAddress] = background[oldaddress];
+						newForeground[newAddress] = foreground[oldaddress];
+						newFont[newAddress] = font[oldaddress];
+							
+					}
+				}
+			}
 		}
 
 		text = newText;
 		foreground = newForeground;
 		background = newBackground;
 		font = newFont;
-		capacity = newSize;
+		
 	}
 
 	void init(int columns, int rows) {
@@ -60,7 +73,7 @@ public final class ConsoleData {
 	}
 
 	public void resize(int columns, int rows) {
-		ensureCapacity(rows * columns);
+		ensureCapacity(rows * columns, columns,  rows);
 		this.rows = rows;
 		this.columns = columns;
 	}

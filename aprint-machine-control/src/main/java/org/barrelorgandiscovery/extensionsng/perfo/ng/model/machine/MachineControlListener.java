@@ -31,13 +31,20 @@ public interface MachineControlListener {
 	 * 
 	 * @param commandSent
 	 */
-	public void rawCommandSent(String commandSent);
+	public void rawElementSent(String commandSent);
 
 	/**
 	 * report the raw command received
 	 * 
 	 * @param commandReceived
 	 */
-	public void rawCommandReceived(String commandReceived);
+	public void rawElementReceived(String commandReceived);
+	
+	/**
+	 * 
+	 * @param commands
+	 */
+	public void informationReceived(String commands);
+	
 
 }

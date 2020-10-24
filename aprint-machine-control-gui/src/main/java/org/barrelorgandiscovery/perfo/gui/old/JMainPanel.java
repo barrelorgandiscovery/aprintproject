@@ -59,13 +59,17 @@ public class JMainPanel extends JPanel {
 			}
 
 			@Override
-			public void rawCommandReceived(String commandReceived) {
+			public void rawElementReceived(String commandReceived) {
 
 			}
 
 			@Override
-			public void rawCommandSent(String commandSent) {
+			public void rawElementSent(String commandSent) {
 			
+			}
+			@Override
+			public void informationReceived(String commands) {
+				
 			}
 		});
 

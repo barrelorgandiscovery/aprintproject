@@ -10,8 +10,6 @@ import java.awt.event.KeyEvent;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 
-import org.barrelorgandiscovery.extensionsng.perfo.ng.panel.wizard.JConsole;
-
 public class TestJConsole {
 
 	public static void main(String[] args) throws Exception {

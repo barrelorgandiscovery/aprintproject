@@ -1,4 +1,4 @@
-package org.barrelorgandiscovery.extensionsng.perfo.ng.panel.wizard;
+package org.barrelorgandiscovery.extensionsng.console;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -431,13 +431,7 @@ public class JConsole extends JComponent implements HierarchyListener {
 
 		int columns = (int) (d.getWidth() / fontWidth);
 		int rows = (int) (d.getHeight() / fontHeight);
-
-		int curPos = cursorY * data.columns + cursorX;
-		
-		// recompute pos
-		cursorX = curPos % columns;
-		cursorY = curPos / columns;
-		
+	
 		// adjust pos for cursor with new size
 		if (cursorX >= columns) {
 			cursorX = columns - 1;

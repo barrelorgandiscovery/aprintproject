@@ -31,12 +31,12 @@ public class TestMachineDefectsBehaviour {
 			}
 
 			@Override
-			public void rawCommandSent(String commandSent) {
+			public void rawElementSent(String commandSent) {
 
 			}
 
 			@Override
-			public void rawCommandReceived(String commandReceived) {
+			public void rawElementReceived(String commandReceived) {
 
 			}
 
@@ -49,6 +49,12 @@ public class TestMachineDefectsBehaviour {
 			public void currentMachinePosition(String status, double mx, double my) {
 				System.out.println("current machine state :" + status + " :" + mx + " " + my);
 			}
+			
+			@Override
+			public void informationReceived(String commands) {
+				System.out.println(commands);
+			}
+			
 		});
 		try {
 			long l = 0;

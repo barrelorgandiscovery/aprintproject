@@ -18,14 +18,14 @@ public class MockMachineControl implements MachineControl {
 	public void sendCommand(Command command) throws Exception {
 		assert command != null;
 		if (listener != null) {
-			listener.rawCommandSent(command.toString() + "\n");
+			listener.rawElementSent(command.toString() + "\n");
 		}
 
 		long millis = (long) (Math.random() * 1000);
 		Thread.sleep(millis);
 
 		if (listener != null) {
-			listener.rawCommandReceived("OK\n");
+			listener.rawElementReceived("OK\n");
 		}
 	}
 

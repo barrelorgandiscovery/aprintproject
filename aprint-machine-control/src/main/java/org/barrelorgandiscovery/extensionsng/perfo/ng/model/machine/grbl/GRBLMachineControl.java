@@ -11,6 +11,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControl;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControlListener;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineDirectControl;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.gcode.GCodeCompiler;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.serial.ISerialPort;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.Command;
@@ -24,7 +25,7 @@ import jssc.SerialPortEvent;
  * @author pfreydiere
  * 
  */
-class GRBLMachineControl implements MachineControl {
+class GRBLMachineControl implements MachineControl, MachineDirectControl {
 
 	private static final String ALARM_RECEIVED_STATUS = "Alarm:";
 
@@ -43,7 +44,7 @@ class GRBLMachineControl implements MachineControl {
 
 	// don't go to zero, otherwise grbl strip commands
 	public static int COMMANDS_IN_BUFFER_OBJECTIVE = 3;
-	
+
 	// used for debug
 	static Class serialPortClass = org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.serial.SerialPort.class;
 
@@ -62,13 +63,12 @@ class GRBLMachineControl implements MachineControl {
 
 	private long lastMachineStatusTime = 0;
 	private MachineStatus lastMachineStatus = MachineStatus.UNKNOWN;
-	
+
 	PortReader listener2 = new PortReader();
 
 	enum MachineStatus {
 		UNKNOWN, ALARM, RUNNING, IDLE, ERROR
 	}
-	
 
 	private String currentPortName;
 	private GCodeCompiler commandCompiler;
@@ -135,7 +135,7 @@ class GRBLMachineControl implements MachineControl {
 		currentPortName = portName;
 		assert commandCompiler != null;
 		this.commandCompiler = commandCompiler;
-		
+
 		logger.debug("schedule status watchdog");
 		status = Executors.newSingleThreadScheduledExecutor();
 		status.scheduleAtFixedRate(new Runnable() {
@@ -155,9 +155,9 @@ class GRBLMachineControl implements MachineControl {
 							TimestampedMachineInteraction s = machineInteractionLog.poll();
 							while (s != null) {
 								if (s.isIn) {
-									v.rawCommandReceived(s.command);
+									v.rawElementReceived(s.command);
 								} else {
-									v.rawCommandSent(s.command);
+									v.rawElementSent(s.command);
 								}
 								s = machineInteractionLog.poll();
 							}
@@ -173,7 +173,6 @@ class GRBLMachineControl implements MachineControl {
 			}
 		}, TRIGGERED_STATUS_TIMER, TRIGGERED_STATUS_TIMER, TimeUnit.MILLISECONDS);
 	}
-
 
 	private void init(String portName) throws Exception {
 
@@ -214,174 +213,180 @@ class GRBLMachineControl implements MachineControl {
 		serialPort.setParams(SerialPort.BAUDRATE_115200, SerialPort.DATABITS_8, SerialPort.STOPBITS_1,
 				SerialPort.PARITY_NONE);
 
-		
 		serialPort.addEventListener(listener2, SerialPort.MASK_RXCHAR);
 
-		grblProtocolState = 
-				
+		grblProtocolState =
+
 				new GRBLProtocolState(new SendString() {
-			@Override
-			public void sendString(String stringToSend) throws Exception {
-				if (stringToSend != null) {
-					machineInteractionLog
-							.add(new TimestampedMachineInteraction(System.nanoTime(), false, stringToSend));
-				}
-				serialPort.writeString(stringToSend);
-			}
-		}, new GRBLProtocolStateListener() {
-
-			@Override
-			public void unknownReceived(String line) {
-
-				logger.debug("unknown Received :" + line);
-
-				if (line == null || line.length() == 0)
-					return;
-
-				assert line != null && line.length() > 0;
-
-				if (line.startsWith(ALARM_RECEIVED_STATUS)) { // "ALARM: Hard
-																// limit"
-					// must do a RESET to Restart
-					logger.error("ALARM RECEIVED FROM ARDUINO");
-				} else if (line.startsWith("error: Unsupported command")) {
-					logger.error("COMMAND IS NOT SUPPORTED");
-					logger.debug("release command queue");
-					commandQueue.release();
-				}
-
-				logger.debug("release command sent");
-				commandSendLockSem.release();
-				logger.debug("command command sent released");
-
-			}
-
-			@Override
-			public void resetted() {
-				// if resetted, unlock all sended commands
-				// there may still have pipelined commands
-
-				commandSendLockSem.release(100);
-				commandSendLockSem = new Semaphore(MAX_PERMIT_SEND);
-
-				commandQueue.release(MAX_QUEUE);
-				commandQueue = new Semaphore(MAX_QUEUE, true);
-
-			}
-
-			@Override
-			public void statusReceived(GRBLStatus status) {
-
-				if (listener != null && status != null && status.workingPosition != null) {
-
-					// logger.debug("status received :" + status);
-					listener.currentMachinePosition(status.status, status.workingPosition.x, status.workingPosition.y);
-
-				}
-
-				assert status != null;
-
-				if (status.bufferSize != null) {
-
-					int permits = commandQueue.availablePermits();
-					int delta = (MAX_QUEUE - status.bufferSize) - permits; // used buffer
-
-					if (delta != 0) {
-						if (delta > 0) {
-							//
-							logger.debug("readjust command Queue from delta " + delta);
-							for (int i = 0; i < delta; i++) {
-								commandQueue.release();
-							}
-							logger.debug("available in command send lock :" + commandSendLockSem.availablePermits());
-							logger.debug("available in command queue :" + commandQueue.availablePermits());
-
+					@Override
+					public void sendString(String stringToSend) throws Exception {
+						if (stringToSend != null) {
+							machineInteractionLog
+									.add(new TimestampedMachineInteraction(System.nanoTime(), false, stringToSend));
 						}
+						serialPort.writeString(stringToSend);
 					}
+				}, new GRBLProtocolStateListener() {
 
-				} else if (status.availableCommandsInPlannedBuffer != null) {
-					int permits = commandQueue.availablePermits();
-					int delta = status.availableCommandsInPlannedBuffer - permits;
-					if (delta > COMMANDS_IN_BUFFER_OBJECTIVE) {
-						//
-						logger.debug("readjust command Queue from delta " + delta);
-						for (int i = 0; i < delta; i++) {
+					@Override
+					public void unknownReceived(String line) {
+
+						logger.debug("unknown Received :" + line);
+
+						if (line == null || line.length() == 0)
+							return;
+
+						assert line != null && line.length() > 0;
+
+						if (line.startsWith(ALARM_RECEIVED_STATUS)) { // "ALARM: Hard
+																		// limit"
+							// must do a RESET to Restart
+							logger.error("ALARM RECEIVED FROM ARDUINO");
+						} else if (line.startsWith("error: Unsupported command")) {
+							logger.error("COMMAND IS NOT SUPPORTED");
+							logger.debug("release command queue");
 							commandQueue.release();
-							logger.debug("available in command send lock :" + commandSendLockSem.availablePermits());
-							logger.debug("available in command queue :" + commandQueue.availablePermits());
-
 						}
+
+						logger.debug("release command sent");
+						commandSendLockSem.release();
+						logger.debug("command command sent released");
+
+						if (listener != null) {
+							listener.informationReceived(line);
+						}
+						
 					}
 
-				} else {
-					// status.bufferSize == null
+					@Override
+					public void resetted() {
+						// if resetted, unlock all sended commands
+						// there may still have pipelined commands
 
-					// no status come from the device, so release depending on the status
-					if (commandQueue.availablePermits() < 1) {
-						logger.debug("no commands regulation");
-						commandQueue.release();
+						commandSendLockSem.release(100);
+						commandSendLockSem = new Semaphore(MAX_PERMIT_SEND);
+
+						commandQueue.release(MAX_QUEUE);
+						commandQueue = new Semaphore(MAX_QUEUE, true);
+
+					}
+
+					@Override
+					public void statusReceived(GRBLStatus status) {
+
+						if (listener != null && status != null && status.workingPosition != null) {
+
+							// logger.debug("status received :" + status);
+							listener.currentMachinePosition(status.status, status.workingPosition.x,
+									status.workingPosition.y);
+
+						}
+
+						assert status != null;
+
+						if (status.bufferSize != null) {
+
+							int permits = commandQueue.availablePermits();
+							int delta = (MAX_QUEUE - status.bufferSize) - permits; // used buffer
+
+							if (delta != 0) {
+								if (delta > 0) {
+									//
+									logger.debug("readjust command Queue from delta " + delta);
+									for (int i = 0; i < delta; i++) {
+										commandQueue.release();
+									}
+									logger.debug(
+											"available in command send lock :" + commandSendLockSem.availablePermits());
+									logger.debug("available in command queue :" + commandQueue.availablePermits());
+
+								}
+							}
+
+						} else if (status.availableCommandsInPlannedBuffer != null) {
+							int permits = commandQueue.availablePermits();
+							int delta = status.availableCommandsInPlannedBuffer - permits;
+							if (delta > COMMANDS_IN_BUFFER_OBJECTIVE) {
+								//
+								logger.debug("readjust command Queue from delta " + delta);
+								for (int i = 0; i < delta; i++) {
+									commandQueue.release();
+									logger.debug(
+											"available in command send lock :" + commandSendLockSem.availablePermits());
+									logger.debug("available in command queue :" + commandQueue.availablePermits());
+
+								}
+							}
+
+						} else {
+							// status.bufferSize == null
+
+							// no status come from the device, so release depending on the status
+							if (commandQueue.availablePermits() < 1) {
+								logger.debug("no commands regulation");
+								commandQueue.release();
+								logger.debug(
+										"available in command send lock :" + commandSendLockSem.availablePermits());
+								logger.debug("available in command queue :" + commandQueue.availablePermits());
+
+							}
+						}
+
+						if (status != null) {
+
+							// decode machine status
+
+							MachineStatus current = MachineStatus.UNKNOWN;
+
+							if ("Run".equalsIgnoreCase(status.status)) {
+								current = MachineStatus.RUNNING;
+							} else if ("Idle".equalsIgnoreCase(status.status)) {
+								current = MachineStatus.IDLE;
+							} else if ("Alarm".equalsIgnoreCase(status.status)) {
+								current = MachineStatus.ALARM;
+							} else {
+								current = MachineStatus.UNKNOWN;
+							}
+
+							if (lastMachineStatus != current) {
+
+								try {
+									statusChanged(current);
+								} catch (Exception ex) {
+									logger.error("error in changing status " + ex.getMessage(), ex);
+								}
+
+								lastMachineStatus = current;
+
+							}
+
+						} // null status
+						lastMachineStatusTime = System.currentTimeMillis();
+
+					}
+
+					@Override
+					public void commandAck() {
+						logger.debug("command ack received");
+						// notify
+						// synchronized (commandSendLockSem) {
+						// try {
+						// unblock one command
+						logger.debug("release send command ... ");
+						commandSendLockSem.release();
+						// commandQueue.release();
+						logger.debug("release send command .. done");
 						logger.debug("available in command send lock :" + commandSendLockSem.availablePermits());
 						logger.debug("available in command queue :" + commandQueue.availablePermits());
 
-					}
-				}
-
-				if (status != null) {
-
-					// decode machine status
-
-					MachineStatus current = MachineStatus.UNKNOWN;
-
-					if ("Run".equalsIgnoreCase(status.status)) {
-						current = MachineStatus.RUNNING;
-					} else if ("Idle".equalsIgnoreCase(status.status)) {
-						current = MachineStatus.IDLE;
-					} else if ("Alarm".equalsIgnoreCase(status.status)) {
-						current = MachineStatus.ALARM;
-					} else {
-						current = MachineStatus.UNKNOWN;
-					}
-
-					if (lastMachineStatus != current) {
-
-						try {
-							statusChanged(current);
-						} catch (Exception ex) {
-							logger.error("error in changing status " + ex.getMessage(), ex);
-						}
-
-						lastMachineStatus = current;
+						// } catch (Throwable t) {
+						// logger.error("" + t.getMessage(), t);
+						// }
+						// }
 
 					}
+				});
 
-				} // null status
-				lastMachineStatusTime = System.currentTimeMillis();
-
-			}
-
-			@Override
-			public void commandAck() {
-				logger.debug("command ack received");
-				// notify
-				// synchronized (commandSendLockSem) {
-				// try {
-				// unblock one command
-				logger.debug("release send command ... ");
-				commandSendLockSem.release();
-				// commandQueue.release();
-				logger.debug("release send command .. done");
-				logger.debug("available in command send lock :" + commandSendLockSem.availablePermits());
-				logger.debug("available in command queue :" + commandQueue.availablePermits());
-
-				// } catch (Throwable t) {
-				// logger.error("" + t.getMessage(), t);
-				// }
-				// }
-
-			}
-		});
-
-		
 	}
 
 	private MachineControlListener listener;
@@ -513,6 +518,14 @@ class GRBLMachineControl implements MachineControl {
 
 	private void statusChanged(MachineStatus newStatus) {
 		logger.debug("new machine status :" + newStatus);
+	}
+
+	@Override
+	public void directCommand(String command) throws Exception {
+		if (command != null && !command.isEmpty()) {
+			logger.debug("send command " + command);
+			this.sendOneCommand(command);
+		}
 	}
 
 }

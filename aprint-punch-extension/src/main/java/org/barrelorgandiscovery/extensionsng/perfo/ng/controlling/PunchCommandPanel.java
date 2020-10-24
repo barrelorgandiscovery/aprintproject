@@ -24,6 +24,7 @@ import javax.swing.border.TitledBorder;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.lf5.LF5Appender;
+import org.barrelorgandiscovery.extensionsng.console.JConsole;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.controlling.XYPanel.XYListener;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.controlling.wizard.PanelStep;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.messages.Messages;
@@ -42,7 +43,6 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchPlan;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.XYCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.optimizers.OptimizersRepository;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.panel.wizard.JConsole;
 import org.barrelorgandiscovery.gui.aedit.DistanceLayer;
 import org.barrelorgandiscovery.gui.aedit.JEditableVirtualBookComponent;
 import org.barrelorgandiscovery.gui.aedit.Tool;
@@ -182,13 +182,18 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 					}
 
 					@Override
-					public void rawCommandSent(String commandSent) {
-						listener.rawCommandSent(commandSent);
+					public void rawElementSent(String commandSent) {
+						listener.rawElementSent(commandSent);
 					}
 
 					@Override
-					public void rawCommandReceived(String commandReceived) {
-						listener.rawCommandReceived(commandReceived);
+					public void rawElementReceived(String commandReceived) {
+						listener.rawElementReceived(commandReceived);
+					}
+					
+					@Override
+					public void informationReceived(String commands) {
+						listener.informationReceived(commands);
 					}
 
 				});
@@ -708,7 +713,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 		}
 
 		@Override
-		public void rawCommandSent(String commandSent) {
+		public void rawElementSent(String commandSent) {
 
 			SwingUtilities.invokeLater(() -> {
 				try {
@@ -724,11 +729,16 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 		}
 
 		@Override
-		public void rawCommandReceived(String commandReceived) {
+		public void rawElementReceived(String commandReceived) {
+			
+		}
+		
+		@Override
+		public void informationReceived(String commands) {
 			SwingUtilities.invokeLater(() -> {
 				try {
-					if (!"?".equals(commandReceived)) {
-						console.write(commandReceived);
+					if (!"?".equals(commands)) {
+						console.write(commands);
 						console.repaint();
 					}
 				} catch (Exception ex) {
@@ -736,6 +746,8 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 				}
 			});
 		}
+		
+		
 
 		long lastDisplayedFeedBack = System.currentTimeMillis();
 
@@ -797,6 +809,8 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 				logger.error("error in feedback :" + ex.getMessage(), ex); //$NON-NLS-1$
 			}
 		}
+
+		
 	};
 
 	/**
