@@ -313,7 +313,7 @@ public class XMLConverter2016 {
 			xmlmetadata.setAuthor(mt.getAuthor());
 			xmlmetadata.setArranger(mt.getArranger());
 			xmlmetadata.setDescription(mt.getDescription());
-
+			
 			if (mt.getCover() != null) {
 				Image cover = mt.getCover();
 				BufferedImage bi = ImageTools.loadImage(cover);
@@ -568,49 +568,51 @@ public class XMLConverter2016 {
 	public static VirtualBook fromVirtualBookDocument(VirtualBookDocument vbd)
 			throws Exception {
 
-		org.barrelorgandiscovery.virtualbook.x2016.VirtualBook virtualBook = vbd
+		org.barrelorgandiscovery.virtualbook.x2016.VirtualBook xmlvirtualBook = vbd
 				.getVirtualBook();
-		org.barrelorgandiscovery.scale.Scale s = fromScale(virtualBook
+		org.barrelorgandiscovery.scale.Scale s = fromScale(xmlvirtualBook
 				.getScale());
 
 		logger.debug("converting holes ...");
 
 		ArrayList<Hole> holes = new ArrayList<Hole>();
 
-		org.barrelorgandiscovery.virtualbook.x2016.Hole[] holeArray = virtualBook
+		org.barrelorgandiscovery.virtualbook.x2016.Hole[] xmlholeArray = xmlvirtualBook
 				.getHoles().getHoleArray();
-		for (org.barrelorgandiscovery.virtualbook.x2016.Hole h : holeArray) {
+		for (org.barrelorgandiscovery.virtualbook.x2016.Hole h : xmlholeArray) {
 
 			Hole hole = new Hole(h.getTrack(), h.getTimestamp(), h.getLength());
 			holes.add(hole);
 		}
 
-		VirtualBook v = new VirtualBook(s, holes);
+		VirtualBook outVirtualBook = new VirtualBook(s, holes);
 
-		VirtualBookMetadata metadata = virtualBook.getMetadata();
-		if (metadata != null) {
+		outVirtualBook.setName(xmlvirtualBook.getTitle());
+		
+		VirtualBookMetadata xmlmetadata = xmlvirtualBook.getMetadata();
+		if (xmlmetadata != null) {
 
 			org.barrelorgandiscovery.virtualbook.VirtualBookMetadata m = new org.barrelorgandiscovery.virtualbook.VirtualBookMetadata();
-			m.setArranger(metadata.getArranger());
-			m.setAuthor(metadata.getAuthor());
-			m.setGenre(metadata.getGenre());
+			m.setArranger(xmlmetadata.getArranger());
+			m.setAuthor(xmlmetadata.getAuthor());
+			m.setGenre(xmlmetadata.getGenre());
 
-			if (metadata.getCreationDate() != null) {
-				Calendar c = metadata.getCreationDate();
+			if (xmlmetadata.getCreationDate() != null) {
+				Calendar c = xmlmetadata.getCreationDate();
 				m.setCreationDate(new Date(c.getTimeInMillis()));
 			}
 
-			if (metadata.getLastModificationDate() != null) {
-				Calendar c = metadata.getLastModificationDate();
+			if (xmlmetadata.getLastModificationDate() != null) {
+				Calendar c = xmlmetadata.getLastModificationDate();
 				m.setLastModifiedDate(new Date(c.getTimeInMillis()));
 			}
 
-			m.setDescription(metadata.getDescription());
-			// m.setName(virtualBook.getTitle());
+			m.setDescription(xmlmetadata.getDescription());
+			m.setName(xmlvirtualBook.getTitle());
+			outVirtualBook.setName( m.getName());
+			outVirtualBook.setMetadata(m);
 
-			v.setMetadata(m);
-
-			byte[] frontimage = virtualBook.getFrontimage();
+			byte[] frontimage = xmlvirtualBook.getFrontimage();
 			if (frontimage != null) {
 				try {
 					BufferedImage image = ImageIO
@@ -624,9 +626,8 @@ public class XMLConverter2016 {
 
 		}
 
-		v.setName(virtualBook.getTitle());
 
-		Annotation[] annotationsArray = virtualBook.getAnnotationsArray();
+		Annotation[] annotationsArray = xmlvirtualBook.getAnnotationsArray();
 		if (annotationsArray != null) {
 			logger.debug("reading annotations");
 			for (int i = 0; i < annotationsArray.length; i++) {
@@ -642,7 +643,7 @@ public class XMLConverter2016 {
 							sig.getNumerator(), sig.getDenominator());
 					if (logger.isDebugEnabled())
 						logger.debug("signature event :" + signatureEvent);
-					v.addEvent(signatureEvent);
+					outVirtualBook.addEvent(signatureEvent);
 
 				} else if (annotation instanceof TempoAnnotation) {
 					TempoAnnotation ta = (TempoAnnotation) annotation;
@@ -652,7 +653,7 @@ public class XMLConverter2016 {
 					if (logger.isDebugEnabled()) {
 						logger.debug("tempo change event :" + tce);
 					}
-					v.addEvent(tce);
+					outVirtualBook.addEvent(tce);
 
 				} else if (annotation instanceof MarkerAnnotation) {
 					MarkerAnnotation ta = (MarkerAnnotation) annotation;
@@ -661,7 +662,7 @@ public class XMLConverter2016 {
 					if (logger.isDebugEnabled()) {
 						logger.debug("Marker event :" + tce);
 					}
-					v.addEvent(tce);
+					outVirtualBook.addEvent(tce);
 
 				} else {
 					logger.warn(" annotation :" + annotation
@@ -671,7 +672,7 @@ public class XMLConverter2016 {
 
 		}
 
-		return v;
+		return outVirtualBook;
 
 	}
 

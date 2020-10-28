@@ -31,6 +31,7 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMach
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchPlan;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.StatisticVisitor;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.optimizers.OptimizersRepository;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.tools.ClassLoaderObjectsPrefsStorage;
 import org.barrelorgandiscovery.gui.aedit.JEditableVirtualBookComponent;
 import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
 import org.barrelorgandiscovery.gui.issues.IssueSelector;
@@ -45,9 +46,7 @@ import org.barrelorgandiscovery.issues.IssuesConstants;
 import org.barrelorgandiscovery.optimizers.Optimizer;
 import org.barrelorgandiscovery.optimizers.OptimizerResult;
 import org.barrelorgandiscovery.optimizers.model.OptimizedObject;
-import org.barrelorgandiscovery.optimizers.punch.NoReturnPunchConverterOptimizer;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
-import org.barrelorgandiscovery.prefs.ObjectsPrefsStorage;
 import org.barrelorgandiscovery.prefs.PrefixedNamePrefsStorage;
 import org.barrelorgandiscovery.tools.Disposable;
 import org.barrelorgandiscovery.tools.StringTools;
@@ -429,7 +428,7 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 		ButtonGroup buttonGroup = new ButtonGroup();
 
-		ObjectsPrefsStorage ops = new ObjectsPrefsStorage(currentMachinePrefsStorage);
+		ClassLoaderObjectsPrefsStorage ops = new ClassLoaderObjectsPrefsStorage(currentMachinePrefsStorage);
 
 		JOptimizerRadioButton firstStrategyButton = null;
 
@@ -600,7 +599,7 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 	private void saveUserParameters(Class optimizerClass, Serializable savedParameters) {
 		assert currentMachinePrefsStorage != null;
-		ObjectsPrefsStorage ops = new ObjectsPrefsStorage(currentMachinePrefsStorage);
+		ClassLoaderObjectsPrefsStorage ops = new ClassLoaderObjectsPrefsStorage(currentMachinePrefsStorage);
 		logger.debug("save stored parameters"); //$NON-NLS-1$
 		try {
 			ops.saveObjectProperties(optimizerClass.getSimpleName(), savedParameters);

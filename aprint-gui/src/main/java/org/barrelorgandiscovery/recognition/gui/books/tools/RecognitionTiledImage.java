@@ -1,4 +1,4 @@
-package org.barrelorgandiscovery.recognition.gui.books;
+package org.barrelorgandiscovery.recognition.gui.books.tools;
 
 import java.io.File;
 

@@ -9,7 +9,6 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.Serializable;
-import java.net.URL;
 
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
@@ -40,8 +39,8 @@ import org.barrelorgandiscovery.recognition.ImageAndHolesVisualizationLayer;
 import org.barrelorgandiscovery.recognition.gui.books.BackgroundTileImageProcessingThread;
 import org.barrelorgandiscovery.recognition.gui.books.BookReadProcessor;
 import org.barrelorgandiscovery.recognition.gui.books.BookReadProcessor.ReadResultBag;
-import org.barrelorgandiscovery.recognition.gui.books.RecognitionTiledImage;
 import org.barrelorgandiscovery.recognition.gui.books.states.EdgesStates;
+import org.barrelorgandiscovery.recognition.gui.books.tools.RecognitionTiledImage;
 import org.barrelorgandiscovery.recognition.gui.booktoolbar.JVBToolingToolbar;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.states.Book;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.states.ImageFileAndInstrument;

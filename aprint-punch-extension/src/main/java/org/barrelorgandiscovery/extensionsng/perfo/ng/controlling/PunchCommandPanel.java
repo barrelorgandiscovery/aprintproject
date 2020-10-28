@@ -352,7 +352,6 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 			public void unactivated() {
 				virtualBookComponent.setCursor(Cursor.getDefaultCursor());
 			}
-
 		};
 
 		JToggleButton t = tb.addTool(positionMachineTool);

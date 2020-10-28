@@ -15,6 +15,7 @@ import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensionsng.perfo.cad.CADParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.cad.CADVirtualBookExporter;
 import org.barrelorgandiscovery.extensionsng.perfo.cad.canvas.PunchPlanDeviceDrawing;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.tools.PunchClassloaderSerializeTools;
 import org.barrelorgandiscovery.gui.ICancelTracker;
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.optimizers.Optimizer;
@@ -28,8 +29,7 @@ import org.barrelorgandiscovery.optimizers.model.CutLine;
 import org.barrelorgandiscovery.optimizers.model.Extent;
 import org.barrelorgandiscovery.optimizers.model.GroupedCutLine;
 import org.barrelorgandiscovery.optimizers.model.OptimizedObject;
-import org.barrelorgandiscovery.optimizers.model.Punch;
-import org.barrelorgandiscovery.tools.SerializeTools;
+
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 
 public class XOptim implements Optimizer<OptimizedObject> {
@@ -37,6 +37,9 @@ public class XOptim implements Optimizer<OptimizedObject> {
 	private static Logger logger = Logger.getLogger(XOptim.class);
 	
 	private XOptimParameters parameters = new XOptimParameters();
+	
+	// used for classloading issues
+	private PunchClassloaderSerializeTools serializeTools = new PunchClassloaderSerializeTools();
 
 	public XOptim() {
 
@@ -122,7 +125,11 @@ public class XOptim implements Optimizer<OptimizedObject> {
 				list.add(gcl);
 
 				if (parameters.isHas2pass()) {
-					GroupedCutLine pass2group = SerializeTools.deepClone(gcl);
+					
+					// as we are not in the same classloader
+					// serialization tool must be instanciated in this class loader
+					
+					GroupedCutLine pass2group = serializeTools.deepClone(gcl);
 					List<CutLine> innerLines = gcl.getLinesByRefs();
 					assert innerLines != null;
 					for (CutLine c : innerLines) {

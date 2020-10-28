@@ -23,6 +23,8 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.awt.print.PageFormat;
 import java.awt.print.PrinterJob;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -43,6 +45,7 @@ import java.util.concurrent.Future;
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.Sequence;
 import javax.sound.midi.Soundbank;
+import javax.swing.AbstractAction;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultComboBoxModel;
@@ -84,6 +87,7 @@ import org.barrelorgandiscovery.gui.aedit.CreationTool;
 import org.barrelorgandiscovery.gui.aedit.GlobalVirtualBookUndoOperation;
 import org.barrelorgandiscovery.gui.aedit.HoleSelectTool;
 import org.barrelorgandiscovery.gui.aedit.IVirtualBookChangedListener;
+import org.barrelorgandiscovery.gui.aedit.ImageAndHolesVisualizationLayer;
 import org.barrelorgandiscovery.gui.aedit.JEditableVirtualBookComponent;
 import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
 import org.barrelorgandiscovery.gui.aedit.PipeSetGroupLayer;
@@ -144,6 +148,7 @@ import org.barrelorgandiscovery.playsubsystem.PlaySubSystem;
 import org.barrelorgandiscovery.playsubsystem.prepared.IPreparedCapableSubSystem;
 import org.barrelorgandiscovery.playsubsystem.prepared.IPreparedPlaying;
 import org.barrelorgandiscovery.prefs.PrefixedNamePrefsStorage;
+import org.barrelorgandiscovery.recognition.gui.books.tools.RecognitionTiledImage;
 import org.barrelorgandiscovery.repository.Repository2;
 import org.barrelorgandiscovery.repository.Repository2Collection;
 import org.barrelorgandiscovery.scale.Scale;
@@ -171,6 +176,10 @@ import org.noos.xing.mydoggy.ToolWindowAnchor;
 import org.noos.xing.mydoggy.ToolWindowType;
 import org.noos.xing.mydoggy.plaf.MyDoggyToolWindowManager;
 
+import com.l2fprod.common.demo.BeanBinder;
+import com.l2fprod.common.propertysheet.Property;
+import com.l2fprod.common.propertysheet.PropertySheetPanel;
+
 import groovy.lang.Binding;
 import groovy.ui.GroovyMain;
 
@@ -188,6 +197,40 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 	private static final long serialVersionUID = -6330679425485407354L;
 
 	static Logger logger = Logger.getLogger(APrintNGVirtualBookInternalFrame.class);
+
+	private class SetBackGroundAction extends AbstractAction {
+		
+		public SetBackGroundAction(String name) {
+			super(name);
+		}
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			try {
+
+				APrintFileChooser aPrintFileChooser = new APrintFileChooser();
+				aPrintFileChooser.addFileFilter(
+						new VFSFileNameExtensionFilter("Images PNG", new String[] { "png", "jpg", "jpeg" }));
+
+				int returnedValue = aPrintFileChooser.showOpenDialog(APrintNGVirtualBookInternalFrame.this);
+				if (returnedValue == APrintFileChooser.APPROVE_OPTION) {
+					AbstractFileObject selectedFile = aPrintFileChooser.getSelectedFile();
+					if (selectedFile != null) {
+						File f = VFSTools.convertToFile(selectedFile);
+						RecognitionTiledImage tiledImage = new RecognitionTiledImage(
+								new File(f.getParentFile(), f.getName()));
+						tiledImage.setCurrentImageFamilyDisplay("renormed");
+
+						imageBackGroundLayer.setTiledBackgroundimage(tiledImage);
+
+					}
+				}
+
+			} catch (Exception ex) {
+				logger.error(ex.getMessage(), ex);
+			}
+		}
+	}
 
 	private Instrument instrument = null;
 
@@ -264,6 +307,8 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 
 	private TempoChangedLayer tcl = new TempoChangedLayer();
 
+	private ImageAndHolesVisualizationLayer imageBackGroundLayer = new ImageAndHolesVisualizationLayer();
+
 	private MarkerLayer markerLayer = new MarkerLayer();
 
 	private IAPrintWait waitininterface;
@@ -289,6 +334,9 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 	/** Remembered saved file ... */
 	private AbstractFileObject currentSavedFile = null;
 
+	/**
+	 * tool window manager
+	 */
 	private MyDoggyToolWindowManager toolWindowManager;
 
 	private JButton lengthButton = new JButton();
@@ -318,6 +366,26 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		this.currentSavedFile = virtualBookFile;
 
 		internalDefineInstrument(instrument);
+
+		bookPropertiesPropertySheetPanel = new PropertySheetPanel();
+		bookPropertiesPropertySheetPanel.setBeanInfo(new VirtualBookMetadataBeanInfo());
+		bookPropertiesPropertySheetPanel.addPropertySheetChangeListener(new PropertyChangeListener() {
+
+			@Override
+			public void propertyChange(PropertyChangeEvent evt) {
+				String name = getVirtualBook().getMetadata().getName();
+				if (evt.getSource() instanceof Property) {
+					if ("name".equals(((Property) evt.getSource()).getName())) {//$NON-NLS-1$
+						name = "" + evt.getNewValue();//$NON-NLS-1$
+					}
+				}
+				getVirtualBook().setName(name);
+				toggleDirty();
+				updateTitle();
+			}
+		});
+
+		// book properties panel must be defined before
 		internalChangeVirtualBook(vb);
 
 		layerPreferences = new PrefixedNamePrefsStorage("layervisibilitypreferences", //$NON-NLS-1$
@@ -471,6 +539,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		aSyncPreparePlayin = new ASyncPreparePlayin();
 
 		clearVirtualBookState();
+		clearDirty();
 	}
 
 	protected void internalDefineInstrument(Instrument instrument) {
@@ -489,6 +558,15 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 	/** @param vb */
 	protected void internalChangeVirtualBook(VirtualBook vb) {
 		pianoroll.setVirtualBook(vb);
+
+		VirtualBookMetadata metadata = vb.getMetadata();
+		if (metadata == null) {
+			metadata = new VirtualBookMetadata();
+			vb.setMetadata(metadata);
+		}
+		new BeanBinder(metadata, bookPropertiesPropertySheetPanel, new VirtualBookMetadataBeanInfo());
+		metadata.setName(vb.getName());
+
 		touchVirtualBook();
 	}
 
@@ -593,16 +671,11 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		});
 		editMenu.add(paste);
 
+		editMenu.addSeparator();
+
+		editMenu.add(new SetBackGroundAction("Définir l'image de fond du carton .."));
+
 		mb.add(editMenu);
-
-		JMenu propertiesMenu = new JMenu(Messages.getString("APrintNGVirtualBookInternalFrame.2003")); //$NON-NLS-1$
-
-		JMenuItem props = new JMenuItem(Messages.getString("APrintNGVirtualBookInternalFrame.2003") //$NON-NLS-1$
-				+ " ... "); //$NON-NLS-1$
-		props.setActionCommand("EDITMETADATA"); //$NON-NLS-1$
-		props.addActionListener(this);
-		propertiesMenu.add(props);
-		mb.add(propertiesMenu);
 
 		toolbarMenu = new JMenu(Messages.getString("APrintNGVirtualBookInternalFrame.1130")); //$NON-NLS-1$
 		mb.add(toolbarMenu);
@@ -720,6 +793,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		pianoroll.addLayer(vbml);
 		pianoroll.addLayer(tcl);
 		pianoroll.addLayer(markerLayer);
+		pianoroll.addLayer(imageBackGroundLayer);
 
 		logger.debug("add layers from extensions"); //$NON-NLS-1$
 		LayersExtensionPoint[] allLayersPoints = ExtensionPointProvider.getAllPoints(LayersExtensionPoint.class, exts);
@@ -846,10 +920,6 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 			}
 		});
 
-		// issuePresenter = new JIssuePresenter(services.getOwnerForDialog());
-		// final JSplitPane pianorollsplit = new JSplitPane(
-		// JSplitPane.HORIZONTAL_SPLIT, pianoroll, issuePresenter);
-
 		JIssuePresenter issuePresenter = new JIssuePresenter(this);
 		issuePresenter.setIssueLayer(il);
 		issuePresenter.setVirtualBook(getVirtualBook());
@@ -890,7 +960,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		MyDoggyToolWindowManager myDoggyToolWindowManager = new MyDoggyToolWindowManager();
 		this.toolWindowManager = myDoggyToolWindowManager;
 
-		// Register a Tool.
+		// issue window
 		ToolWindow tw = toolWindowManager.registerToolWindow(
 				Messages.getString("APrintNGVirtualBookInternalFrame.2100"), // Id //$NON-NLS-1$
 				Messages.getString("APrintNGVirtualBookInternalFrame.2101"), // Title //$NON-NLS-1$
@@ -899,6 +969,8 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 				ToolWindowAnchor.RIGHT); // Anchor
 
 		ToolWindowTools.defineProperties(tw);
+
+		logger.debug("register marker tool window");
 		// change width
 		DockedTypeDescriptor desc = (DockedTypeDescriptor) tw.getTypeDescriptor(ToolWindowType.DOCKED);
 		desc.setDockLength(400);
@@ -908,12 +980,22 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 				null, // Icon
 				markerComponents, // Component
 				ToolWindowAnchor.RIGHT); // Anchor
-
 		ToolWindowTools.defineProperties(tw);
+
+		JPanel bookPropertiesPanel = new JPanel();
+		bookPropertiesPanel.setLayout(new BorderLayout());
+
+		bookPropertiesPanel.add(bookPropertiesPropertySheetPanel, BorderLayout.CENTER);
+
+		logger.debug("register book properties window");
+		tw = toolWindowManager.registerToolWindow("Propriétés du carton",
+				"Propriétés du carton", null, bookPropertiesPanel, ToolWindowAnchor.LEFT);
+
 		// change width
 		desc = (DockedTypeDescriptor) tw.getTypeDescriptor(ToolWindowType.DOCKED);
 		desc.setDockLength(480);
 
+		logger.debug("add extensions register tool windows");
 		VirtualBookFrameToolRegister[] allVBTool = ExtensionPointProvider
 				.getAllPoints(VirtualBookFrameToolRegister.class, exts);
 
@@ -940,9 +1022,6 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 				null, null, pianoroll);
 
 		pianorollpanel.add(toolWindowManager, BorderLayout.CENTER);
-		// toolWindowManager.setPreferredSize(new Dimension(500,700));
-
-		// loadToolbarPreferences();
 
 		// boutons de visualisation du pianoroll ...
 
@@ -961,9 +1040,6 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 
 		toolbarPanel = new JPanel();
 		WrappingLayout wrappingLayout = new WrappingLayout(WrappingLayout.LEFT, 1, 1);
-
-		// BoxLayout boxLayoutToolbars = new BoxLayout(toolbarPanel,
-		// BoxLayout.LINE_AXIS);
 
 		toolbarPanel.setLayout(wrappingLayout);
 		toolbarPanel.add(pianorollbutton);
@@ -1140,32 +1216,6 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 
 		panelPrincipal.setLayout(new BorderLayout());
 
-		// issuePresenter.addAncestorListener(new AncestorListener() {
-		//
-		// public void ancestorAdded(AncestorEvent event) {
-		//
-		// }
-		//
-		// public void ancestorMoved(AncestorEvent event) {
-		// try {
-		// if (pianorollsplit.getDividerLocation() < 0)
-		// return;
-		//
-		// aprintproperties.setPianorollDividerLocation(1.0
-		// * pianorollsplit.getDividerLocation()
-		// / pianorollsplit.getWidth());
-		// } catch (Exception ex) {
-		// logger.error("divider storage :" + ex.getMessage(), ex);
-		// //$NON-NLS-1$
-		// }
-		//
-		// }
-		//
-		// public void ancestorRemoved(AncestorEvent event) {
-		//
-		// }
-		// });
-
 		setLayout(new BorderLayout());
 		getContentPane().add(pianorollpanel, BorderLayout.CENTER);
 
@@ -1176,19 +1226,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 
 		logger.debug("width :" + width); //$NON-NLS-1$
 
-		// pianorollsplit.setLastDividerLocation(300);
-
-		// BasicSplitPaneUI ui = (BasicSplitPaneUI)pianorollsplit.getUI();
-		// BasicSplitPaneDivider divider = ui.getDivider();
-		// JButton max = (JButton)divider.getComponent(1);
-		// max.doClick();
-
 		il.setIssueCollection(ic, virtualBook);
-
-		/*
-		 * pianorollsplit.setDividerLocation((int) (aprintproperties
-		 * .getPianorollDividerLocation() * pianorollsplit .getWidth()));
-		 */
 
 		pianoroll.addKeyListener(new KeyAdapter() {
 			@Override
@@ -1305,6 +1343,8 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 
 		VirtualBook virtualBook = getVirtualBook();
 
+		// bookPropertiesPropertySheetPanel.set
+
 		if (virtualBook != null) {
 			long length = virtualBook.getLength();
 
@@ -1366,7 +1406,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 
 		setTitle(Messages.getString("APrintNGVirtualBookInternalFrame.1") //$NON-NLS-1$
 				+ " " //$NON-NLS-1$
-				+ vbName + "," //$NON-NLS-1$
+				+ vbName + (isDirty() ? "*" : "") + "," //$NON-NLS-1$
 				+ " " //$NON-NLS-1$
 				+ Messages.getString("APrintNGVirtualBookInternalFrame.2000") //$NON-NLS-1$
 				+ displayInstrumentName + filePathSuffix + (isVirtualBookDirty() ? "*" : "")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -1427,9 +1467,16 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 	private IScriptManagerListener scriptRefreeshListener;
 
 	/**
+	 * propery bean for virtual book properties
+	 */
+	private PropertySheetPanel bookPropertiesPropertySheetPanel;
+
+	/**
 	 * Touch layer visibility from existing preferences
 	 *
-	 * @param c
+	 * @param c    component layer
+	 * @param name
+	 * 
 	 */
 	private void touchLayerVisibilityFromPreferences(VirtualBookComponentLayer c, String name) {
 		if (c == null)
@@ -1629,30 +1676,6 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 				saveAsBook();
 			} else if ("SAVEAS2010".equals(e.getActionCommand())) { //$NON-NLS-1$
 				saveAsFormat2010();
-			} else if ("EDITMETADATA".equals(e.getActionCommand())) { //$NON-NLS-1$
-
-				VirtualBook virtualBook = getVirtualBook();
-
-				if (virtualBook.getMetadata() == null) {
-					virtualBook.setMetadata(new VirtualBookMetadata());
-				}
-
-				VirtualBookMetadata newm = virtualBook.getMetadata();
-				newm.setName(virtualBook.getName());
-
-				touchVirtualBook();
-
-				Object o = BeanAsk.askForParameters((Frame) this,
-						Messages.getString("APrintNGVirtualBookInternalFrame.2006"), virtualBook // $NON-NLS-1$
-								.getMetadata(),
-						new VirtualBookMetadataBeanInfo());
-
-				if (o != null) {
-					VirtualBookMetadata modifiedMetadata = (VirtualBookMetadata) o;
-					virtualBook.setMetadata(modifiedMetadata);
-					virtualBook.setName(modifiedMetadata.getName());
-				}
-
 			} else if ("IMPRIMER".equals(e.getActionCommand())) { //$NON-NLS-1$
 
 				setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -1902,14 +1925,21 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		OutputStream outputStream = result.getOutputStream();
 		assert outputStream != null;
 		try {
+			// ensure properties are properly getted
+			if (getVirtualBook().getMetadata() != null) {
+				getVirtualBook().setName(getVirtualBook().getMetadata().getName());
+			}
+
 			VirtualBookXmlIO.write(outputStream, getVirtualBook(), instrument.getName());
 
 			logger.debug("virtual book written"); //$NON-NLS-1$
 
 			currentSavedFile = result;
 
-			JMessageBox.showMessage(this, Messages.getString("APrintNGVirtualBookInternalFrame.44") + result.getName() // $NON-NLS-1$
-					+ Messages.getString("APrintNGVirtualBookInternalFrame.45")); //$NON-NLS-1$
+			// JMessageBox.showMessage(this,
+			// Messages.getString("APrintNGVirtualBookInternalFrame.44") + result.getName()
+			// // $NON-NLS-1$
+			// + Messages.getString("APrintNGVirtualBookInternalFrame.45")); //$NON-NLS-1$
 
 			clearDirty();
 			clearVirtualBookState();
@@ -2397,7 +2427,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 
 			asyncJobsManager.submitAndExecuteJob(new Callable<Void>() {
 				public Void call() throws Exception {
-					
+
 					MovieConverter.convertToMovie(getVirtualBook(), instrument, finalwrittenFile, p, ct, params);
 
 					return null;
@@ -2504,8 +2534,8 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 			AbstractFileObject choosenfile = choose.getSelectedFile();
 			String filename = choosenfile.getName().getBaseName();
 			if (!filename.toLowerCase().endsWith(".ogg")) { //$NON-NLS-1$
-				choosenfile = (AbstractFileObject)
-						choosenfile.getFileSystem().resolveFile(choosenfile.getName().toString() + ".ogg"); //$NON-NLS-1$
+				choosenfile = (AbstractFileObject) choosenfile.getFileSystem()
+						.resolveFile(choosenfile.getName().toString() + ".ogg"); //$NON-NLS-1$
 			}
 
 			final AbstractFileObject writtenfile = choosenfile;

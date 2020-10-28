@@ -23,7 +23,8 @@ public class VFSFileNameExtensionFilter extends AbstractVFSFileFilter {
 	 */
 	public VFSFileNameExtensionFilter(String description, String extension) {
 		this.description = description;
-
+		assert extension != null;
+		assert !extension.startsWith(".");
 		this.extensions = new String[] { extension.toLowerCase() };
 	}
 

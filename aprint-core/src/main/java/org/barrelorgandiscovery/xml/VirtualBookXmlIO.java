@@ -208,6 +208,28 @@ public class VirtualBookXmlIO {
 
 	}
 
+	public static void write(OutputStream os, VirtualBook vb,
+			String preferredInstrument) throws Exception {
+		
+		if (logger.isDebugEnabled())
+			logger.debug("saving " + vb + " with preferred instrument :"
+					+ preferredInstrument);
+
+		org.barrelorgandiscovery.virtualbook.x2016.VirtualBookDocument virtualBookDocument = XMLConverter2016
+				.toVirtualBookDocument(vb);
+
+		org.barrelorgandiscovery.virtualbook.x2016.VirtualBookMetadata xmlmetadata = virtualBookDocument
+				.getVirtualBook().getMetadata();
+		assert xmlmetadata != null;
+
+		xmlmetadata.setDesignedInstrumentName(preferredInstrument);
+
+		XmlOptions options = new XmlOptions();
+		options.setSavePrettyPrint();
+
+		virtualBookDocument.save(os, options);
+	}
+	
 	/**
 	 * Write in the current 2014 version of book specification
 	 * 
@@ -216,7 +238,7 @@ public class VirtualBookXmlIO {
 	 * @param preferredInstrument
 	 * @throws Exception
 	 */
-	public static void write(OutputStream os, VirtualBook vb,
+	public static void write_2014(OutputStream os, VirtualBook vb,
 			String preferredInstrument) throws Exception {
 
 		if (logger.isDebugEnabled())

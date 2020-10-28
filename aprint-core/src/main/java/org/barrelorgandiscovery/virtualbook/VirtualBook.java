@@ -97,7 +97,6 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	 *            the scale of this book
 	 */
 	public VirtualBook(Scale scale) {
-		super();
 		this.bookscale = scale;
 
 		trackIndex = new ArrayList[scale.getTrackNb()];
@@ -1024,6 +1023,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	 */
 	public void setMetadata(VirtualBookMetadata metadata) {
 		this.metadata = metadata;
+		setName(metadata.getName());
 	}
 
 	/**
