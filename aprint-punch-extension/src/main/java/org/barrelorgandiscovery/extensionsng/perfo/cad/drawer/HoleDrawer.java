@@ -58,13 +58,15 @@ public abstract class HoleDrawer {
 				// reste la longueurmin ...
 
 				// dernier trou à dessiner, en alongeant le trou
-
+				this.d.endGroup();
+				this.d.startGroup();
 				drawPart(ypiste, halfheight, (d == x ? d : d + margin), endx,
 						totaliteration > 1, false);
-
+				
 				break;
 			}
-
+			this.d.endGroup();
+			this.d.startGroup();
 			drawPart(ypiste, halfheight, (d == x ? d : d + margin),
 					(nbiterations == 0 ? end : end - margin), d != x,
 					nbiterations > 0);

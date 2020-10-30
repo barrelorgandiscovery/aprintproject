@@ -172,7 +172,9 @@ public class XOptim implements Optimizer<OptimizedObject> {
 
 				Extent e = arg0.getExtent();
 				Extent e2 = arg1.getExtent();
-				int c = Double.compare((e.xmin + e.xmax) / 2, (e2.xmin + e2.xmax) / 2);
+				int c = Double.compare(e.xmin , e2.xmin);
+				
+				// int c = Double.compare((e.xmin + e.xmax) / 2, (e2.xmin + e2.xmax) / 2);
 				if (c != 0)
 					return c;
 				return Double.compare(e.ymin, e2.ymin);
@@ -186,9 +188,10 @@ public class XOptim implements Optimizer<OptimizedObject> {
 			logger.warn("pageSize at " + pageSize + " mm is too small, extend it to 10.0 mm");
 			pageSize = 10.0;
 		}
-		int MAX_OBJECTS = 100; // limit the number of objects
+		int MAX_OBJECTS = 300; // limit the number of objects
 
-		final ArrayList<ArrayList<OptimizedObject>> pageObjects = Tools.divideOptimizedObjects(Arrays.asList(result.result),pageSize, MAX_OBJECTS );
+		final ArrayList<ArrayList<OptimizedObject>> pageObjects = Tools.divideOptimizedObjects(
+				Arrays.asList(result.result),pageSize, MAX_OBJECTS );
 
 		final ArrayList<OptimizedObject>[] pagesObjectsResult = (ArrayList<OptimizedObject>[]) new ArrayList[pageObjects
 				.size()];
@@ -219,6 +222,8 @@ public class XOptim implements Optimizer<OptimizedObject> {
 					
 					OptimizedObject[] p = originPunchList.toArray(new OptimizedObject[originPunchList.size()]);
 
+					//listobject = originPunchList;
+					
 					if (p != null && p.length > 0) {
 						// optimisation ...
 

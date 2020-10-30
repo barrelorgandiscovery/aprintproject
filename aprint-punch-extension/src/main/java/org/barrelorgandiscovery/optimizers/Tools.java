@@ -84,6 +84,7 @@ public class Tools {
 
 				if (objectListCopy.size() > 0) {
 					p = objectListCopy.get(0);
+					extent = p.getExtent();
 				} else {
 					p = null;
 				}
