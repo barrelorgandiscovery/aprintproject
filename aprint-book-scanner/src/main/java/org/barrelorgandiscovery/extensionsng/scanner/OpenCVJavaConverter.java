@@ -61,6 +61,8 @@ public class OpenCVJavaConverter {
 				dest.put(r, c, buffer
 						 );
 
+				
+				
 			}
 		} else {
 			throw new RuntimeException("unsupported image type :" + bi.getType());
