@@ -12,10 +12,11 @@ import org.barrelorgandiscovery.tools.ImageTools;
 
 /**
  * Base class for listing images, using a pattern
+ * 
  * @author use
  *
  */
-public class FamilyImageFolder {
+public class FamilyImageFolder implements IFamilyImageSeeker {
 	
 	private static Logger logger = Logger.getLogger(FamilyImageFolder.class);
 	

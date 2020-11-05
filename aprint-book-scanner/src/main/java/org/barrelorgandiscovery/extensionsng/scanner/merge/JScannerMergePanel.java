@@ -35,9 +35,20 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.apache.commons.math3.exception.DimensionMismatchException;
+import org.apache.commons.math3.ml.clustering.CentroidCluster;
+import org.apache.commons.math3.ml.clustering.Clusterable;
+import org.apache.commons.math3.ml.clustering.DoublePoint;
+import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
+import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensionsng.scanner.FamilyImageFolder;
+import org.barrelorgandiscovery.extensionsng.scanner.IFamilyImageSeeker;
+import org.barrelorgandiscovery.extensionsng.scanner.OpenCVJavaConverter;
+import org.barrelorgandiscovery.extensionsng.scanner.OpenCVVideoFamilyImageSeeker;
+import org.barrelorgandiscovery.extensionsng.scanner.merge.tools.BooksImagesCalculation;
+import org.barrelorgandiscovery.extensionsng.scanner.merge.tools.BooksImagesCalculation.KeyPointMatch;
 import org.barrelorgandiscovery.gui.CancelTracker;
 import org.barrelorgandiscovery.gui.ICancelTracker;
 import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
@@ -56,6 +67,11 @@ import org.barrelorgandiscovery.recognition.gui.interactivecanvas.tools.JViewing
 import org.barrelorgandiscovery.tools.Disposable;
 import org.barrelorgandiscovery.tools.ImageTools;
 import org.barrelorgandiscovery.tools.JMessageBox;
+import org.bytedeco.javacpp.Loader;
+import org.bytedeco.opencv.opencv_java;
+import org.opencv.core.Mat;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
 
 import com.jeta.forms.components.panel.FormPanel;
 import com.jeta.forms.gui.form.FormAccessor;
@@ -72,20 +88,20 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 
 	private Logger logger = Logger.getLogger(JScannerMergePanel.class);
 
-	FamilyImageFolder perfoScanFolder;
+	IFamilyImageSeeker perfoScanFolder;
 
 	JDisplay workImageDisplay;
 
 	/** preview of result image **/
 	JDisplay resultImageDisplay;
+
 	private JImageDisplayLayer resultImageLayer;
 
 	private JImageDisplayLayer image1Layer;
 
 	private JCheckBox overlapLock;
-	
-	private JSpinner overlappixelsspinner;
 
+	private JSpinner overlappixelsspinner;
 
 	private JSlider currentResultImageSlider;
 
@@ -105,7 +121,7 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 	 * @param preferences
 	 * @throws Exception
 	 */
-	public JScannerMergePanel(FamilyImageFolder perfoScanFolder, IPrefsStorage preferences) throws Exception {
+	public JScannerMergePanel(IFamilyImageSeeker perfoScanFolder, IPrefsStorage preferences) throws Exception {
 		assert perfoScanFolder != null;
 		this.perfoScanFolder = perfoScanFolder;
 		assert preferences != null;
@@ -122,6 +138,8 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 	protected void initComponent() throws Exception {
 		setLayout(new BorderLayout());
 
+		Loader.load(opencv_java.class);
+		
 		FormPanel fp = new FormPanel(getClass().getResourceAsStream("mergepanel.jfrm"));
 
 		fp.getLabel("positionning").setText("Positionning Elements");
@@ -145,7 +163,6 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 		saveparameters.addActionListener((e) -> {
 			try {
 
-			
 				APrintFileChooser fc = new APrintFileChooser();
 				int result = fc.showSaveDialog(this);
 				if (result == APrintFileChooser.APPROVE_OPTION) {
@@ -168,7 +185,6 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 		loadparameters.addActionListener((e) -> {
 			try {
 
-		
 				APrintFileChooser fc = new APrintFileChooser();
 				int result = fc.showOpenDialog(this);
 				if (result == JFileChooser.APPROVE_OPTION) {
@@ -187,6 +203,63 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 			}
 		});
 
+		AbstractButton btnautoparameters = formAccessorParameters.getButton("btnautoparameters");
+		btnautoparameters.setText("Auto Detect parameters");
+		btnautoparameters.addActionListener((e) -> {
+			try {
+
+				int current = currentResultImageSlider.getValue();
+				int next = current + 1;
+				if (next >= currentResultImageSlider.getMaximum()) {
+					JMessageBox.showMessage(this, "cannot compute parmeters for the latest image");
+					return;
+				}
+				BufferedImage i1 = perfoScanFolder.loadImage(current);
+				BufferedImage i2 = perfoScanFolder.loadImage(next);
+
+				int reductedFactor = 8;
+				
+				Mat m1 = new Mat();
+				OpenCVJavaConverter.toOpenCV(i1, m1);
+				Mat rm1 = new Mat();
+				Imgproc.resize(m1, rm1, new Size(m1.width() / reductedFactor ,m1.height() / reductedFactor));
+				
+				Mat m2 = new Mat();
+				OpenCVJavaConverter.toOpenCV(i2, m2);
+				Mat rm2 = new Mat();
+				Imgproc.resize(m2, rm2, new Size(m2.width() / reductedFactor ,m2.height() / reductedFactor));
+			
+				List<KeyPointMatch> goodMatches = BooksImagesCalculation.detectKeyPoint(rm1, rm2);
+
+				// knn the displacement vector
+				KMeansPlusPlusClusterer<KeyPointMatch> kpm = new KMeansPlusPlusClusterer<KeyPointMatch>(10, 1000,
+						new DistanceMeasure() {
+							@Override
+							public double compute(double[] a, double[] b) throws DimensionMismatchException {
+								return Math.abs(Math.atan2(a[1], a[0]) - Math.atan2(b[1], b[0]));
+							}
+						});
+				List<CentroidCluster<KeyPointMatch>> resultClusterDisplacement = kpm.cluster(goodMatches);
+
+				if (resultClusterDisplacement.size() <= 0) {
+					JMessageBox.showMessage(this, "cannot classify image");
+					return;
+				}
+				
+				CentroidCluster<KeyPointMatch> centroidCluster = resultClusterDisplacement.get(0);
+				DoublePoint center = (DoublePoint)centroidCluster
+						.getCenter();
+				
+				MathVect displacement = new MathVect(center.getPoint()[0], center.getPoint()[1]);
+				overlappixelsspinner.setValue(displacement.norme() * reductedFactor);
+				repaint();
+				
+			} catch (Exception ex) {
+				logger.error("error in saving parameters :" + ex.getMessage(), ex);
+				JMessageBox.showError(this, ex);
+			}
+		});
+
 		// construct result
 		resultImageDisplay = new JDisplay();
 		resultImageLayer = new JImageDisplayLayer();
@@ -196,14 +269,14 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 
 		image1Layer = new JImageDisplayLayer();
 		workImageDisplay.addLayer(image1Layer);
-		
+
 		int folderimagecount = perfoScanFolder.getImageCount();
-		
+
 		FormAccessor resultfunctions = fp.getFormAccessor("resultfunctions");
 
 		currentResultImageSlider = (JSlider) resultfunctions.getComponentByName("currentresultimage");
 		currentResultImageSlider.setValue(1);
-		
+
 		currentResultImageSlider.setMaximum(folderimagecount);
 		currentResultImageSlider.setMajorTickSpacing(150);
 		currentResultImageSlider.setMinorTickSpacing(50);
@@ -219,7 +292,6 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 				}
 			}
 		});
-		
 
 		final JShapeLayer<Polygon> zoneLayer = new JShapeLayer<>();
 
@@ -285,7 +357,7 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 
 				// origin point
 				Rectangle2D.Double p1 = (Rectangle2D.Double) shapes.get(0);
-				
+
 				// angle point
 				Rectangle2D.Double p2 = (Rectangle2D.Double) shapes.get(1);
 				// distance point
@@ -308,24 +380,23 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 
 				if (p == p2) {
 					// angle displacement
-					
+
 					// rotate the length also
-					
+
 					// compute rotation
 					MathVect mp2 = new MathVect(p2.x, p2.y);
 					MathVect mp1 = new MathVect(p1.x, p1.y);
 					MathVect v1 = mp2.moins(mp1);
 					MathVect v2 = displacement.plus(mp2).moins(mp1);
-					
+
 					double angle = v2.angle(v1);
-					
+
 					MathVect mp3 = new MathVect(p3.x, p3.y);
 					MathVect final3 = mp3.moins(mp1).rotate(-angle).plus(mp1);
-					
+
 					p3.setRect(final3.getX(), final3.getY(), p3.getWidth(), p3.getHeight());
 				}
-				
-				
+
 				if (p == p3 && overlapLock.isSelected()) {
 					// prop, delta
 
@@ -450,9 +521,8 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 		MathVect angleVect = new MathVect(anglePoint.x, anglePoint.y).moins(originVect);
 		MathVect distanceVect = new MathVect(distancePoint.x, distancePoint.y).moins(originVect);
 
-		
 		// draw rectangle
-		
+
 		Path2D.Double p = new Path2D.Double();
 		p.moveTo(originVect.getX(), originVect.getY());
 
@@ -472,25 +542,21 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 		matriceShapesLayer.add(p);
 
 		// draw arrow for book move
-		
+
 		Path2D.Double p2 = new Path2D.Double();
 		MathVect mid = topVect.scale(0.5).plus(originVect);
-				MathVect startMid = mid.plus(angleVect.scale(0.1));
+		MathVect startMid = mid.plus(angleVect.scale(0.1));
 		MathVect midL = mid.plus(angleVect.scale(0.9));
-		
+
 		MathVect arrowEl = angleVect.scale(0.2);
-		
-		
+
 		p2.moveTo(midL.getX(), midL.getY());
 		p2.lineTo(startMid.getX(), startMid.getY());
 		p2.lineTo(startMid.plus(arrowEl.rotate(0.2)).getX(), startMid.plus(arrowEl.rotate(0.2)).getY());
 		p2.lineTo(startMid.getX(), startMid.getY());
 		p2.lineTo(startMid.plus(arrowEl.rotate(-0.2)).getX(), startMid.plus(arrowEl.rotate(-0.2)).getY());
-		
-		
-		matriceShapesLayer.add(p2);
 
-		
+		matriceShapesLayer.add(p2);
 
 		p = new Path2D.Double();
 		double radius = 20.0;
@@ -505,7 +571,7 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 			}
 		}
 		p.closePath();
-		
+
 		matriceShapesLayer.add(p);
 
 	}
@@ -521,7 +587,7 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 
 	final int FINAL_IMAGE_HEIGHT = 1200;
 	final int FINAL_IMAGE_WIDTH = 1600;
-	
+
 	private class ComputeResultImage implements Runnable {
 
 		private ICancelTracker cancelTracker;
@@ -608,7 +674,8 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 			throws Exception {
 
 		// clone the model
-		final ImageBookMergeModel innerModel = (ImageBookMergeModel) org.barrelorgandiscovery.extensionsng.scanner.wizard.scanormerge.SerializeTools.deepClone(model);
+		final ImageBookMergeModel innerModel = (ImageBookMergeModel) org.barrelorgandiscovery.extensionsng.scanner.wizard.scanormerge.SerializeTools
+				.deepClone(model);
 
 		// RAZ
 		int NBCOMPONENTS = 4;
@@ -630,11 +697,9 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 			}
 
 			/*
-			File f = perfoScanFolder.constructImageFile(j);
-			if (!f.exists()) {
-				continue;
-			}
-			*/
+			 * File f = perfoScanFolder.constructImageFile(j); if (!f.exists()) { continue;
+			 * }
+			 */
 			BufferedImage current = perfoScanFolder.loadImage(j);
 
 			BufferedImage newImage = innerModel.createSlice(current, pixelsForEachImage, FINAL_IMAGE_HEIGHT);
@@ -686,13 +751,13 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 	/**
 	 * save result image in folder, to be able to display it
 	 *
-	 * @param folder
+	 * @param destinationFolder
 	 * @throws Exception
 	 */
-	public void saveImage(File folder) throws Exception {
-		assert folder != null;
-		assert folder.exists();
-		assert folder.isDirectory();
+	public void saveImage(File destinationFolder) throws Exception {
+		assert destinationFolder != null;
+		assert destinationFolder.exists();
+		assert destinationFolder.isDirectory();
 
 		boolean endreach = false;
 		int currentimageindex = 0;
@@ -708,7 +773,7 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 					FINAL_IMAGE_HEIGHT, model.overlappDistance, indexFirstImage, indexFirstImage + 30,
 					(int) ((indexFirstImage) * model.overlappDistance - l), null);
 
-			ImageIO.write(img, "JPEG", new File(folder, "" + currentimageindex + ".jpg"));
+			ImageIO.write(img, "JPEG", new File(destinationFolder, "" + currentimageindex + ".jpg"));
 
 			if (lastIndexImage >= perfoScanFolder.getImageCount()) {
 				endreach = true;
@@ -762,14 +827,7 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 		model.saveTo(storage);
 	}
 
-	/**
-	 * Test method
-	 * 
-	 * @param args
-	 * @throws Exception
-	 */
-	public static void main(String[] args) throws Exception {
-
+	private static void testWithImageFolder() throws Exception {
 		// File scanfolder = new File("C:\\temp\\perfo20180721");
 
 		// File scanfolder = new
@@ -799,5 +857,41 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 		f.setVisible(true);
+	}
+
+	private static void testWithVideo() throws Exception {
+
+		File scanfolder = new File(
+				"C:\\projets\\APrint\\contributions\\plf\\2020-10_Essais saisie video\\carton ancien avec fond blanc.mp4");
+		OpenCVVideoFamilyImageSeeker perfoScanFolder = new OpenCVVideoFamilyImageSeeker(scanfolder, 2, 5);
+
+		JFrame f = new JFrame();
+
+		f.setSize(800, 800);
+
+		f.getContentPane().setLayout(new BorderLayout());
+
+		FilePrefsStorage p = new FilePrefsStorage(new File("c:\\temp\\preferencesStorage_video.properties"));
+		p.load();
+
+		JScannerMergePanel scanMergePanel = new JScannerMergePanel(perfoScanFolder, p);
+		f.getContentPane().add(scanMergePanel, BorderLayout.CENTER);
+
+		scanMergePanel.setCurrentImage(1);
+
+		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		f.setVisible(true);
+	}
+
+	/**
+	 * Test method
+	 * 
+	 * @param args
+	 * @throws Exception
+	 */
+	public static void main(String[] args) throws Exception {
+		Loader.load(opencv_java.class);
+		testWithVideo();
 	}
 }

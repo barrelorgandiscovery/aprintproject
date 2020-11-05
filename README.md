@@ -46,7 +46,7 @@ Windows installer is available, using the NSIS project, **NSIS** must be install
 for creating the Installer with updated extensions launch the following command :
 
 ```
-gradlew createBundles
+gradlew createAllInstaller
 ```
 
 ### for DEVS : Launch automatic tests and global test report

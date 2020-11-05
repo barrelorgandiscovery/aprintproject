@@ -1023,7 +1023,9 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	 */
 	public void setMetadata(VirtualBookMetadata metadata) {
 		this.metadata = metadata;
-		setName(metadata.getName());
+		if (metadata != null) {
+			setName(metadata.getName());
+		}
 	}
 
 	/**

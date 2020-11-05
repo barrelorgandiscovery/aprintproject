@@ -16,6 +16,7 @@ import javax.swing.JTextField;
 
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensionsng.scanner.FamilyImageFolder;
+import org.barrelorgandiscovery.extensionsng.scanner.IFamilyImageSeeker;
 import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
 import org.barrelorgandiscovery.gui.wizard.BasePanelStep;
 import org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener;
@@ -163,7 +164,7 @@ public class JChooseFolderStep extends BasePanelStep {
 
 	private File folderChoosen = null;
 
-	private FamilyImageFolder perfoScanFolder = null;
+	private IFamilyImageSeeker perfoScanFolder = null;
 
 	private StepStatusChangedListener listener = null;
 
@@ -201,3 +202,5 @@ public class JChooseFolderStep extends BasePanelStep {
 		return folderChoosen;
 	}
 }
+
+

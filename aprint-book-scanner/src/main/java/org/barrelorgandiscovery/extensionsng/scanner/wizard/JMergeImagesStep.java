@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.Serializable;
 
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.extensionsng.scanner.IFamilyImageSeeker;
 import org.barrelorgandiscovery.extensionsng.scanner.PerfoScanFolder;
 import org.barrelorgandiscovery.extensionsng.scanner.merge.JScannerMergePanel;
 import org.barrelorgandiscovery.gui.wizard.BasePanelStep;
@@ -19,7 +20,7 @@ public class JMergeImagesStep extends BasePanelStep {
 	
 	private JScannerMergePanel mergePanel;
 
-	private PerfoScanFolder perfoScanFolder;
+	private IFamilyImageSeeker perfoScanFolder;
 
 	private IPrefsStorage ps;
 

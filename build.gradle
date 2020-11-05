@@ -120,7 +120,13 @@ project(':bundle') {
     }
 
     task createAllJars(dependsOn: [copyOutputJars, copyExtensionJars]) {
+    }
 
+    task createNixMacBundle(type:Zip /*, dependsOn: [createAllJars]*/) {
+       archiveName "nix-and-macosX.zip"
+       from ('build') { include 'aprint.jar' }
+       from ('offlineinstall-extensions') { include '**/*' }
+       from ('maxosx-bundle') { include '**/*' }
     }
 
     // create installer
@@ -144,6 +150,7 @@ project(':bundle') {
         workingDir = 'offlineinstall-studio'
     }
 
+    // create x86 installer
     task createInstaller32(dependsOn: ['createBundles32']) { 
         doLast {
             def f = file('offlineinstall-studio/APrintStudioInstall32.exe')
@@ -152,5 +159,17 @@ project(':bundle') {
         }
     }
 
+    // create zip for linux and macos
+    task createMacOsAndLinuxBundle(dependsOn: ['createNixMacBundle']) {
+        doLast {
+         def f = file('build/distributions/nix-and-macosX.zip')
+         assert f.exists()
+         assert f.renameTo(new File('build_file_NixAndMacOsX_' + rootProject.ext.currentVersion + ".zip"))
+        }
+    }
+
+    task createAllInstaller(dependsOn: ['createInstaller', 'createInstaller32', 'createMacOsAndLinuxBundle']) {
+
+    }
 }
 

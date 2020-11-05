@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -113,7 +114,8 @@ public class JImageFolderPreviewer extends JPanel implements Disposable {
 				
 				boolean filtered = true;
 				if (filePatternFiltering != null) {
-					filtered =  filePatternFiltering.matcher(filename).matches();
+					Matcher matcher = filePatternFiltering.matcher(filename);
+					filtered =  matcher.matches();
 				}
 				
 				return isImage && filtered;

@@ -38,6 +38,17 @@ dependencies {
 	
     compile files(fileTree(dir:"${projectDir}/libs" , 
                     include:['**/*.jar']).toList())
+
+ 	compile group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.4'
+
+	// https://mvnrepository.com/artifact/org.apache.commons/commons-math3
+	compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
+
+
+	// compile 'org.openpnp:opencv:3.2.0-0'
+	// https://mvnrepository.com/artifact/org.bytedeco/ffmpeg
+	//compile group: 'org.bytedeco', name: 'ffmpeg', version: '4.1.3-1.5'
+	
                     
     testCompile 'junit:junit:4.12'
 }
