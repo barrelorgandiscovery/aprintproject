@@ -16,16 +16,19 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.bookimage.BookImage;
+import org.barrelorgandiscovery.bookimage.ZipBookImage;
 import org.barrelorgandiscovery.gui.wizard.BasePanelStep;
 import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener;
 import org.barrelorgandiscovery.gui.wizard.WizardStates;
+import org.barrelorgandiscovery.images.books.tools.BookImageRecognitionTiledImage;
+import org.barrelorgandiscovery.images.books.tools.IFileFamilyTiledImage;
+import org.barrelorgandiscovery.images.books.tools.RecognitionTiledImage;
 import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.recognition.gui.books.BookReadProcessor;
 import org.barrelorgandiscovery.recognition.gui.books.JScaleDisplayLayer;
 import org.barrelorgandiscovery.recognition.gui.books.states.EdgesStates;
-import org.barrelorgandiscovery.recognition.gui.books.tools.RecognitionTiledImage;
-import org.barrelorgandiscovery.recognition.gui.books.tools.TiledImage;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.states.IInstrumentName;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.states.INumericImage;
 import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JDisplay;
@@ -46,6 +49,11 @@ import org.barrelorgandiscovery.tools.ImageTools;
  * 
  */
 public class StepChooseEdges extends BasePanelStep implements Step {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8702037126200332798L;
 
 	private static Logger logger = Logger.getLogger(StepChooseEdges.class);
 
@@ -181,9 +189,19 @@ public class StepChooseEdges extends BasePanelStep implements Step {
 		File imageFile = previousStateImplementing.getImageFile();
 		
 		// read the imageSize
-		TiledImage ti = new RecognitionTiledImage(imageFile);
+		IFileFamilyTiledImage tileImage = null;
+		if (imageFile.getName().endsWith(BookImage.BOOKIMAGE_EXTENSION)) {
+		
+			tileImage = new BookImageRecognitionTiledImage(new ZipBookImage(imageFile));
+			
+		} else {
 
-		imageDisplayLayer.setImageToDisplay(ti);
+			tileImage = new RecognitionTiledImage(imageFile);
+
+		}
+		
+		
+		imageDisplayLayer.setImageToDisplay(tileImage);
 
 		if (currentState == null) {
 			currentState = new EdgesStates();
@@ -197,13 +215,13 @@ public class StepChooseEdges extends BasePanelStep implements Step {
 
 			double factor = 0.1;
 
-			currentState.top.add(new Point2D.Double(0, factor * ti.getHeight()));
-			currentState.top.add(new Point2D.Double(ti.getWidth(), factor * ti.getHeight()));
+			currentState.top.add(new Point2D.Double(0, factor * tileImage.getHeight()));
+			currentState.top.add(new Point2D.Double(tileImage.getWidth(), factor * tileImage.getHeight()));
 
 			factor = 0.9;
 
-			currentState.bottom.add(new Point2D.Double(0, factor * ti.getHeight()));
-			currentState.bottom.add(new Point2D.Double(ti.getWidth(), factor * ti.getHeight()));
+			currentState.bottom.add(new Point2D.Double(0, factor * tileImage.getHeight()));
+			currentState.bottom.add(new Point2D.Double(tileImage.getWidth(), factor * tileImage.getHeight()));
 
 		}
 

@@ -22,17 +22,19 @@ public class OpenCVJavaConverter {
 		Imgproc.cvtColor(m, m, Imgproc.COLOR_RGB2RGBA, 0);
 		Imgproc.resize(m, d, new Size(m.width() / resizeFactor, m.height() / resizeFactor));
 
-		BufferedImage gray = new BufferedImage(d.width(), d.height(), BufferedImage.TYPE_INT_RGB);
+		BufferedImage gray = new BufferedImage(d.width(), d.height(), BufferedImage.TYPE_INT_ARGB);
 		byte[] rgbcv = new byte[4 * d.height() * d.width()];
 
 		// Get the BufferedImage's backing array and copy the pixels directly into it
 		int[] data = ((DataBufferInt) gray.getRaster().getDataBuffer()).getData();
 
 		d.get(0, 0, rgbcv);
+		
 		// change image alignment
 		for (int i = 0; i < data.length; i++) {
-			final int value = rgbcv[i * 4] | (((int) rgbcv[i * 4 + 1]) & 0xFF) << 8
+			int value = rgbcv[i * 4] | (((int) rgbcv[i * 4 + 1]) & 0xFF) << 8
 					| ((int) rgbcv[i * 4 + 2] & 0xFF) << 16;
+			value = value | (0xFF << 24);
 			data[i] = value;
 		}
 		final BufferedImage b = gray;
@@ -54,15 +56,13 @@ public class OpenCVJavaConverter {
 				final int c = i % bi.getWidth();
 
 				int v = data[i];
-				buffer[0] =  (byte) (v & 0xFF);
-				buffer[1] =  (byte) ((v >> 8) & 0xFF);
+				buffer[0] = (byte) (v & 0xFF);
+				buffer[1] = (byte) ((v >> 8) & 0xFF);
 				buffer[2] = (byte) ((v >> 16) & 0xFF);
 				
-				dest.put(r, c, buffer
-						 );
 
-				
-				
+				dest.put(r, c, buffer);
+
 			}
 		} else {
 			throw new RuntimeException("unsupported image type :" + bi.getType());

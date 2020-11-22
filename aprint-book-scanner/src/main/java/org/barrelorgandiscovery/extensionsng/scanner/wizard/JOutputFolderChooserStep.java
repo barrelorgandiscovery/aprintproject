@@ -11,7 +11,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 
 import org.apache.log4j.Logger;
-import org.barrelorgandiscovery.extensionsng.scanner.PerfoScanFolder;
+import org.barrelorgandiscovery.bookimage.PerfoScanFolder;
 import org.barrelorgandiscovery.gui.wizard.BasePanelStep;
 import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener;

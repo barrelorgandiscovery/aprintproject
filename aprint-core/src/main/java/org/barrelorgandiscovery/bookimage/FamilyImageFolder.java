@@ -1,4 +1,4 @@
-package org.barrelorgandiscovery.extensionsng.scanner;
+package org.barrelorgandiscovery.bookimage;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -11,9 +11,9 @@ import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.tools.ImageTools;
 
 /**
- * Base class for listing images, using a pattern
+ * Base class for listing images, using a filtering pattern
  * 
- * @author use
+ * @author pfreydiere
  *
  */
 public class FamilyImageFolder implements IFamilyImageSeeker {
@@ -30,8 +30,6 @@ public class FamilyImageFolder implements IFamilyImageSeeker {
 		assert folder != null;
 		assert folder.exists();
 		assert folder.isDirectory();
-		
-		
 		
 		this.folder = folder;
 		this.filePatternMatching = filePatternMatching;

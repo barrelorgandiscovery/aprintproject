@@ -4,7 +4,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-import org.barrelorgandiscovery.extensionsng.scanner.PerfoScanFolder;
+import org.barrelorgandiscovery.bookimage.PerfoScanFolder;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.IWebCamListener;
 import org.barrelorgandiscovery.tools.Disposable;
 

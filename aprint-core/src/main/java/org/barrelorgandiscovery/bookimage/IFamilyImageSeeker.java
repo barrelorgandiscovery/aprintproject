@@ -1,4 +1,4 @@
-package org.barrelorgandiscovery.extensionsng.scanner;
+package org.barrelorgandiscovery.bookimage;
 
 import java.awt.image.BufferedImage;
 

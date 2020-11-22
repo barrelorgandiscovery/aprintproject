@@ -9,10 +9,13 @@ import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Properties;
@@ -30,6 +33,7 @@ import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.lf5.LF5Appender;
+import org.barrelorgandiscovery.bookimage.BookImage;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
 import org.barrelorgandiscovery.gui.aprintng.APrintNGGeneralServices;
 import org.barrelorgandiscovery.gui.aprintng.APrintNGVirtualBookFrame;
@@ -41,13 +45,13 @@ import org.barrelorgandiscovery.gui.wizard.StepBeforeChanged;
 import org.barrelorgandiscovery.gui.wizard.StepChanged;
 import org.barrelorgandiscovery.gui.wizard.Wizard;
 import org.barrelorgandiscovery.gui.wizard.WizardStates;
+import org.barrelorgandiscovery.images.books.tools.TiledImage;
 import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.recognition.gui.books.steps.StepChooseEdges;
 import org.barrelorgandiscovery.recognition.gui.books.steps.StepModelChooseChoice;
 import org.barrelorgandiscovery.recognition.gui.books.steps.StepViewAndEditBook;
-import org.barrelorgandiscovery.recognition.gui.books.tools.TiledImage;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.StepChooseFilesAndInstrument;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.states.Book;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.states.INumericImage;
@@ -124,7 +128,6 @@ public class JBookRecognition extends JPanel {
 				try {
 					logger.debug("saving the state ..."); //$NON-NLS-1$
 
-					
 					OutputStream outStream = new FileOutputStream(JBookRecognition.this.serializeFile);
 					try {
 						SerializeTools.save(wizard.getPagesStates(), outStream);
@@ -163,65 +166,75 @@ public class JBookRecognition extends JPanel {
 						} catch (Exception ex) {
 							logger.debug(ex.getMessage(), ex);
 						}
-						
 
-						try (InputStream fis = new FileInputStream(imageFile)) {
-							Dimension d = TiledImage.readImageSize(fis);
-							if (d.getHeight() > 800) {
-								int result = JOptionPane.showConfirmDialog(wizard,
-										"Height dimension is larger than 800 pixels \n "
-												+ "do you want to reduce the size to be more efficient ?",
-										"Reduce image size", JOptionPane.YES_NO_OPTION);
+						if (!imageFile.getName().endsWith(BookImage.BOOKIMAGE_EXTENSION)) {
+							
+							// this is an image file
+							
+							try (InputStream fis = new FileInputStream(imageFile)) {
+								Dimension d = TiledImage.readImageSize(fis);
+								if (d.getHeight() > 800) {
+									int result = JOptionPane.showConfirmDialog(wizard,
+											"Height dimension is larger than 800 pixels \n "
+													+ "do you want to reduce the size to be more efficient ?",
+											"Reduce image size", JOptionPane.YES_NO_OPTION);
 
-								if (result == JOptionPane.YES_OPTION) {
+									if (result == JOptionPane.YES_OPTION) {
 
-									int newwidth = d.width * 800 / d.height;
+										int newwidth = d.width * 800 / d.height;
 
-									// move to jpeg ...
-									String rootName = imageFile.getName();
-									
-									int extensionpoint = rootName.lastIndexOf('.');
-									if (extensionpoint != -1) {
-										rootName = rootName.substring(0, extensionpoint);
-										rootName += ".jpg"; //$NON-NLS-1$
+										// move to jpeg ...
+										String rootName = imageFile.getName();
+
+										int extensionpoint = rootName.lastIndexOf('.');
+										if (extensionpoint != -1) {
+											rootName = rootName.substring(0, extensionpoint);
+											rootName += ".jpg"; //$NON-NLS-1$
+										}
+
+										File newFileName = new File(imageFile.getParentFile(), "rescaled_" + rootName);//$NON-NLS-1$
+
+										rescaleImageFile(imageFile, newwidth, newFileName);
+										stepChooseFilesAndInstrument.setImageFile(newFileName);
+										logger.debug("image resized"); //$NON-NLS-1$
 									}
 
-									File newFileName = new File(imageFile.getParentFile(),
-													"rescaled_" + rootName);//$NON-NLS-1$
-
-									Image loadImage = Toolkit.getDefaultToolkit()
-											.createImage(imageFile.toURL())
-											.getScaledInstance(newwidth, PREFERRED_COMPUTED_HEIGHT, 0);
-									// load image
-									JLabel l = new JLabel(new ImageIcon(loadImage));
-									MediaTracker mt = new MediaTracker(l);
-									mt.waitForAll();
-
-									BufferedImage newImage = new BufferedImage(loadImage.getWidth(null),
-											loadImage.getHeight(null), BufferedImage.TYPE_INT_RGB);
-									Graphics2D g = newImage.createGraphics();
-									try {
-										g.drawImage(loadImage, 0, 0, newwidth, 800, null);
-									} finally {
-										g.dispose();
-									}
-
-									OutputStream outStream = new FileOutputStream(newFileName);
-									try {
-										ImageIO.write(newImage, "JPEG", outStream); //$NON-NLS-1$
-									} finally {
-										outStream.close();
-									}
-									stepChooseFilesAndInstrument.setImageFile(newFileName);
-									logger.debug("image resized"); //$NON-NLS-1$
 								}
-
 							}
+						} else {
+							assert imageFile.getName().endsWith(BookImage.BOOKIMAGE_EXTENSION);
+							
+							
 						}
 					}
 				}
-
 				return true;
+			}
+
+			private void rescaleImageFile(File imageFile, int newwidth, File newFileName)
+					throws MalformedURLException, InterruptedException, FileNotFoundException, IOException {
+				Image loadImage = Toolkit.getDefaultToolkit().createImage(imageFile.toURL()).getScaledInstance(newwidth,
+						PREFERRED_COMPUTED_HEIGHT, 0);
+				// load image
+				JLabel l = new JLabel(new ImageIcon(loadImage));
+				MediaTracker mt = new MediaTracker(l);
+				mt.waitForAll();
+
+				BufferedImage newImage = new BufferedImage(loadImage.getWidth(null), loadImage.getHeight(null),
+						BufferedImage.TYPE_INT_RGB);
+				Graphics2D g = newImage.createGraphics();
+				try {
+					g.drawImage(loadImage, 0, 0, newwidth, PREFERRED_COMPUTED_HEIGHT, null);
+				} finally {
+					g.dispose();
+				}
+
+				OutputStream outStream = new FileOutputStream(newFileName);
+				try {
+					ImageIO.write(newImage, "JPEG", outStream); //$NON-NLS-1$
+				} finally {
+					outStream.close();
+				}
 			}
 		});
 

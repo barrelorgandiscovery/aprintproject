@@ -10,8 +10,8 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
+import org.barrelorgandiscovery.bookimage.PerfoScanFolder;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.panel.wizard.JMachineWithParametersChooser;
-import org.barrelorgandiscovery.extensionsng.scanner.PerfoScanFolder;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.ITriggerFactory;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.MachineTrigger;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.TimeTrigger;

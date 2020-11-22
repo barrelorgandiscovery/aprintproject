@@ -1,6 +1,6 @@
 package org.barrelorgandiscovery.extensionsng.scanner.scan.trigger;
 
-import org.barrelorgandiscovery.extensionsng.scanner.PerfoScanFolder;
+import org.barrelorgandiscovery.bookimage.PerfoScanFolder;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.IWebCamListener;
 
 import com.github.sarxos.webcam.Webcam;

@@ -28,13 +28,17 @@ import javax.swing.event.ChangeListener;
 
 import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.bookimage.BookImage;
+import org.barrelorgandiscovery.bookimage.ZipBookImage;
 import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
 import org.barrelorgandiscovery.gui.wizard.BasePanelStep;
 import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener;
 import org.barrelorgandiscovery.gui.wizard.WizardStates;
+import org.barrelorgandiscovery.images.books.tools.BookImageRecognitionTiledImage;
+import org.barrelorgandiscovery.images.books.tools.IFileFamilyTiledImage;
+import org.barrelorgandiscovery.images.books.tools.RecognitionTiledImage;
 import org.barrelorgandiscovery.recognition.gui.books.BackgroundTileImageProcessingThread;
-import org.barrelorgandiscovery.recognition.gui.books.tools.RecognitionTiledImage;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.states.ImageFileAndInstrument;
 import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JDisplay;
 import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JTiledImageDisplayLayer;
@@ -174,7 +178,7 @@ public class StepModelChooseChoice extends BasePanelStep implements Step, Dispos
 
 		currentmodel = selectedModel;
 
-		RecognitionTiledImage ti = (RecognitionTiledImage) imageDisplayLayer.getImageToDisplay();
+		IFileFamilyTiledImage ti = (IFileFamilyTiledImage) imageDisplayLayer.getImageToDisplay();
 		if (ti != null) {
 
 			if (selectedModel != null) {
@@ -228,11 +232,15 @@ public class StepModelChooseChoice extends BasePanelStep implements Step, Dispos
 					@Override
 					public Void process(int index, BufferedImage tile) throws Exception {
 
-						File outputTile = ti.constructImagePath(index, selectedModel.getName());
+						
+						
+						File outputModelTile = ti.constructImagePath(index, selectedModel.getName());
 
-						if (!outputTile.exists()) // already computed ?
+						if (!outputModelTile.exists()) // already computed ?
 						{
 							// compute
+							logger.debug("computing");
+							
 							ImagePlus input = new ImagePlus();
 							input.setImage(tile);
 
@@ -251,12 +259,15 @@ public class StepModelChooseChoice extends BasePanelStep implements Step, Dispos
 							ByteProcessor bp = processor.convertToByteProcessor(true);
 
 							ImagePlus binary = new ImagePlus("", bp); //$NON-NLS-1$
-							ij.IJ.save(binary, outputTile.getAbsolutePath());
+							ij.IJ.save(binary, outputModelTile.getAbsolutePath());
 						}
 
 						File outputTileBook = ti.constructImagePath(index, selectedModel.getName() + "_book"); //$NON-NLS-1$
 						if (!outputTileBook.exists()) {
-							ImagePlus handled = IJ.openImage(outputTile.getAbsolutePath());
+							
+							logger.debug("constructing " + outputTileBook);
+							
+							ImagePlus handled = IJ.openImage(outputModelTile.getAbsolutePath());
 
 							// estimate the pixel size
 
@@ -276,8 +287,8 @@ public class StepModelChooseChoice extends BasePanelStep implements Step, Dispos
 
 				progressBar.setValue((int) (Math.ceil(c.currentProgress() * 100)));
 
-				RecognitionTiledImage mo = new RecognitionTiledImage(
-						(RecognitionTiledImage) imageDisplayLayer.getImageToDisplay());
+				IFileFamilyTiledImage mo = (IFileFamilyTiledImage) imageDisplayLayer.getImageToDisplay();
+
 				mo.setCurrentImageFamilyDisplay(selectedModel.getName());
 
 				modelpreviewImage.setImageToDisplay(mo);
@@ -421,10 +432,22 @@ public class StepModelChooseChoice extends BasePanelStep implements Step, Dispos
 		if (d != null) {
 			File imageFile = d.diskFile;
 
-			RecognitionTiledImage ti = new RecognitionTiledImage(imageFile);
-			ti.constructTiles();
+			if (imageFile.getName().endsWith(BookImage.BOOKIMAGE_EXTENSION)) {
 
-			imageDisplayLayer.setImageToDisplay(ti);
+				ZipBookImage z = new ZipBookImage(imageFile);
+
+				BookImageRecognitionTiledImage bookImageRecognitionTiledImage = new BookImageRecognitionTiledImage(z);
+
+				imageDisplayLayer.setImageToDisplay(bookImageRecognitionTiledImage);
+
+			} else {
+				RecognitionTiledImage ti = new RecognitionTiledImage(imageFile);
+				ti.constructTiles();
+
+				imageDisplayLayer.setImageToDisplay(ti);
+
+			}
+
 		}
 
 		if (state != null) {

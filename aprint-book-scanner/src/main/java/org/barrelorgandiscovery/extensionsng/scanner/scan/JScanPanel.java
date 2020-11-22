@@ -23,7 +23,7 @@ import javax.swing.SwingUtilities;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.lf5.LF5Appender;
-import org.barrelorgandiscovery.extensionsng.scanner.PerfoScanFolder;
+import org.barrelorgandiscovery.bookimage.PerfoScanFolder;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.ITriggerFactory;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.TimeTrigger;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.Trigger;

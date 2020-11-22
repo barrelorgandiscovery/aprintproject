@@ -129,7 +129,6 @@ public class APrintRecognitionExtension extends BaseExtension {
 
 			rpw.setSize(800, 600);
 			rpw.setVisible(true);
-
 		}
 
 	}

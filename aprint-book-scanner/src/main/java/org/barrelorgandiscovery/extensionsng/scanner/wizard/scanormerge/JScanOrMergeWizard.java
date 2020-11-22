@@ -3,6 +3,7 @@ package org.barrelorgandiscovery.extensionsng.scanner.wizard.scanormerge;
 import java.awt.BorderLayout;
 import java.io.File;
 import java.util.Arrays;
+import java.util.Properties;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -12,11 +13,15 @@ import org.apache.log4j.lf5.LF5Appender;
 import org.barrelorgandiscovery.extensionsng.scanner.wizard.JChooseFolderStep;
 import org.barrelorgandiscovery.extensionsng.scanner.wizard.JMergeImagesStep;
 import org.barrelorgandiscovery.extensionsng.scanner.wizard.JOutputFolderChooserStep;
+import org.barrelorgandiscovery.extensionsng.scanner.wizard.JVideoInput;
 import org.barrelorgandiscovery.extensionsng.scanner.wizardscan.JScanParameterStep;
 import org.barrelorgandiscovery.extensionsng.scanner.wizardscan.JScanStep;
+import org.barrelorgandiscovery.gui.aprint.APrintProperties;
 import org.barrelorgandiscovery.gui.wizard.Wizard;
 import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
+import org.barrelorgandiscovery.repository.Repository2;
+import org.barrelorgandiscovery.repository.Repository2Factory;
 
 public class JScanOrMergeWizard extends JPanel {
 
@@ -29,8 +34,11 @@ public class JScanOrMergeWizard extends JPanel {
 
 	private Wizard wizard;
 
-	public JScanOrMergeWizard(IPrefsStorage ps) throws Exception {
+	private Repository2 repository;
+
+	public JScanOrMergeWizard(IPrefsStorage ps, Repository2 repository) throws Exception {
 		this.ps = ps;
+		this.repository = repository;
 		initComponents();
 	}
 
@@ -41,17 +49,21 @@ public class JScanOrMergeWizard extends JPanel {
 		s.setLabelOutputFolder("Choose Written Output Folder for images ...");
 		JScanParameterStep p = new JScanParameterStep(s, ps);
 		JScanStep scanStep = new JScanStep(p, s);
+		
+		JVideoInput videoFileInputStep = new JVideoInput(null);
+		JMergeImagesStep mergeVideoStep = new JMergeImagesStep(videoFileInputStep, ps, repository);
 
+		
 		// merge steps
 
 		// folder step for choosing folder
 		JChooseFolderStep sf = new JChooseFolderStep(ps);
 
-		JMergeImagesStep m = new JMergeImagesStep(sf, ps);
+		JMergeImagesStep m = new JMergeImagesStep(sf, ps, repository);
 
 		// this is the alternative step, to choose between methods
 		JScanOrMergeStep scanOrmergeStep = new JScanOrMergeStep(null, Arrays.asList(sf, m),
-				Arrays.asList(s, p, scanStep), ps);
+				Arrays.asList(s, p, scanStep), Arrays.asList(videoFileInputStep, mergeVideoStep), ps);
 
 		wizard = new Wizard(Arrays.asList(scanOrmergeStep), null);
 		// give the context to step
@@ -67,12 +79,15 @@ public class JScanOrMergeWizard extends JPanel {
 
 		BasicConfigurator.configure(new LF5Appender());
 
+		APrintProperties aPrintProperties = new APrintProperties(false);
+		Repository2 rep = Repository2Factory.create(new Properties(), aPrintProperties);
+
 		FilePrefsStorage p = new FilePrefsStorage(new File("c:\\temp\\wizardscan.properties"));
 		p.load();
 
 		JFrame f = new JFrame();
 		f.getContentPane().setLayout(new BorderLayout());
-		f.getContentPane().add(new JScanOrMergeWizard(p), BorderLayout.CENTER);
+		f.getContentPane().add(new JScanOrMergeWizard(p, rep), BorderLayout.CENTER);
 
 		f.setSize(800, 600);
 		f.setVisible(true);

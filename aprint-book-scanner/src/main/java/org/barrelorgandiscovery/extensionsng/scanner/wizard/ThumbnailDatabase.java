@@ -9,7 +9,8 @@ import javax.imageio.ImageIO;
 import org.barrelorgandiscovery.tools.ImageTools;
 
 /**
- * class managing a thumbnail creation for folder having images
+ * class managing a thumbnail creation for folder having images.
+ * handle a resample level in the view, with folder storage
  * 
  * @author pfreydiere
  *

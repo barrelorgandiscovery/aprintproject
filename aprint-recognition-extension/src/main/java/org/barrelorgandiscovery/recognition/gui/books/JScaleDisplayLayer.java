@@ -72,6 +72,11 @@ public class JScaleDisplayLayer extends JLayer {
 	@Override
 	public void drawLayer(Graphics2D g2d) {
 
+		if (!isVisible()) {
+			return;
+		}
+		
+		
 		if (top.getGraphics().size() < 2 || bottom.getGraphics().size() < 2)
 			return;
 

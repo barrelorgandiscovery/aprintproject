@@ -4,12 +4,12 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
-import org.barrelorgandiscovery.recognition.gui.books.tools.TiledImage;
+import org.barrelorgandiscovery.bookimage.IFamilyImageSeeker;
+import org.barrelorgandiscovery.images.books.tools.IFileBasedTiledImage;
+import org.barrelorgandiscovery.images.books.tools.IFileFamilyTiledImage;
 import org.barrelorgandiscovery.tools.Disposable;
 import org.barrelorgandiscovery.tools.ImageTools;
 
@@ -33,14 +33,14 @@ public class BackgroundTileImageProcessingThread<T> implements Disposable {
 		void errorInProcessingTile(String errormsg);
 	}
 
-	private TiledImage image;
+	private IFileFamilyTiledImage image;
 	private TiledProcessedListener l;
 	private ExecutorService exec;
 
 	private boolean aborted = false;
 	private AtomicInteger currentImageProcessed = new AtomicInteger(0);
 
-	public BackgroundTileImageProcessingThread(TiledImage image, TiledProcessedListener l, int nbThreads) {
+	public BackgroundTileImageProcessingThread(IFileFamilyTiledImage image, TiledProcessedListener l, int nbThreads) {
 		this.image = image;
 		this.l = l;
 		exec = Executors.newFixedThreadPool(nbThreads); // Runtime.getRuntime().availableProcessors()
@@ -54,8 +54,6 @@ public class BackgroundTileImageProcessingThread<T> implements Disposable {
 		currentImageProcessed.set(0);
 
 		for (int i = 0; i < image.getImageCount(); i++) {
-
-			File imagePath = image.getImagePath(i);
 			final int current = i;
 			Runnable c = new Runnable() {
 				@Override
@@ -64,10 +62,17 @@ public class BackgroundTileImageProcessingThread<T> implements Disposable {
 						if (aborted)
 							return;
 
-						if (!imagePath.exists())
+						if (!(image instanceof IFileFamilyTiledImage)) {
+							throw new Exception("image " + image + " does not implements " + IFileFamilyTiledImage.class);
+						} 
+						
+						// take the root image
+						
+						BufferedImage bi = ((IFileFamilyTiledImage)image).loadImage(current, null);
+						if (bi == null) {
 							return;
-
-						BufferedImage bi = ImageTools.loadImage(imagePath.toURL());
+						}
+						
 						T result = p.process(current, bi);
 						if (l != null) {
 							try {

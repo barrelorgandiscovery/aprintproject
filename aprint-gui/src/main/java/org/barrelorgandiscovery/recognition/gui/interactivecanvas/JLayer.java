@@ -16,6 +16,17 @@ public abstract class JLayer {
 
 	private static Logger logger = Logger.getLogger(JLayer.class);
 
+	private boolean visible = true;
+	
+	public void setVisible(boolean visible) {
+		this.visible = visible;
+	}
+	
+	public boolean isVisible() {
+		return visible;
+	}
+	
+	
 	/**
 	 * get the name of the layer
 	 * 

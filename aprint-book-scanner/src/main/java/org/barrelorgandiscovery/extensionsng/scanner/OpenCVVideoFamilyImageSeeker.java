@@ -1,19 +1,23 @@
 package org.barrelorgandiscovery.extensionsng.scanner;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferInt;
 import java.io.File;
 
+import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.bookimage.IFamilyImageSeeker;
 import org.barrelorgandiscovery.tools.Disposable;
+import org.bytedeco.javacpp.Loader;
+import org.bytedeco.opencv.opencv_java;
 import org.opencv.core.Mat;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
 import org.opencv.videoio.VideoCapture;
 import org.opencv.videoio.Videoio;
 
 public class OpenCVVideoFamilyImageSeeker implements IFamilyImageSeeker, Disposable {
 
+	private static Logger logger = Logger.getLogger(OpenCVVideoFamilyImageSeeker.class);
+	
 	private File videoFile;
+	
 	private VideoCapture videoCapture;
 	// CAP_PROP_POS_FRAMES -> pos frame
 
@@ -24,6 +28,8 @@ public class OpenCVVideoFamilyImageSeeker implements IFamilyImageSeeker, Disposa
 	private int imageInterval;
 
 	public OpenCVVideoFamilyImageSeeker(File videoFile, int resizeFactor, int imageinterval) throws Exception {
+		Loader.load(opencv_java.class);
+		
 		assert videoFile != null;
 		assert videoFile.exists();
 		assert videoFile.isFile();
@@ -40,9 +46,16 @@ public class OpenCVVideoFamilyImageSeeker implements IFamilyImageSeeker, Disposa
 		}
 		// remember the video file, to be able to reopen it
 		this.videoFile = videoFile;
+		
+		logger.info("video information HEIGHT : " +  videoCapture.get(Videoio.CAP_PROP_FRAME_HEIGHT));
+		logger.info("video information WIDTH : " +  videoCapture.get(Videoio.CAP_PROP_FRAME_WIDTH));
+		
 
 		// get the frame count
 		frameVideoCount = (int) videoCapture.get(Videoio.CAP_PROP_FRAME_COUNT);
+		
+		videoCapture.set(48, 0);
+		videoCapture.set(49, 1); // Videoio.CAP_PROP_ORIENTATION_AUTO 
 
 	}
 

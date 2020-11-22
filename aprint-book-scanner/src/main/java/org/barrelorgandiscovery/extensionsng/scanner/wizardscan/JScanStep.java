@@ -4,7 +4,7 @@ import java.awt.BorderLayout;
 import java.io.File;
 import java.io.Serializable;
 
-import org.barrelorgandiscovery.extensionsng.scanner.PerfoScanFolder;
+import org.barrelorgandiscovery.bookimage.PerfoScanFolder;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.JScanPanel;
 import org.barrelorgandiscovery.extensionsng.scanner.wizard.JOutputFolderChooserStep;
 import org.barrelorgandiscovery.gui.wizard.BasePanelStep;

@@ -15,7 +15,7 @@ import org.barrelorgandiscovery.prefs.IPrefsStorage;
  * @author pfreydiere
  *
  */
-public class ImageBookMergeModel implements Serializable{
+public class ImageBookMergeModel implements Serializable {
 
   public ImageBookMergeModel() {}
 
@@ -54,9 +54,9 @@ public class ImageBookMergeModel implements Serializable{
 
   public BufferedImage createSlice(BufferedImage current, int outImageWidth, int outImageHeight) {
 
-    MathVect b = getBookWidthVector();
-    double factor = 1.0 / b.norme() * outImageHeight;
-
+    // double factor = 1.0 / b.norme() * outImageHeight;
+    double factor = 1.0;
+    
     AffineTransform t = computeTransform(factor);
 
     BufferedImage newImage =

@@ -5,28 +5,32 @@ import java.io.File;
 import java.io.Serializable;
 
 import org.apache.log4j.Logger;
-import org.barrelorgandiscovery.extensionsng.scanner.IFamilyImageSeeker;
-import org.barrelorgandiscovery.extensionsng.scanner.PerfoScanFolder;
+import org.barrelorgandiscovery.bookimage.IFamilyImageSeeker;
+import org.barrelorgandiscovery.bookimage.PerfoScanFolder;
+import org.barrelorgandiscovery.extensionsng.scanner.OpenCVVideoFamilyImageSeeker;
 import org.barrelorgandiscovery.extensionsng.scanner.merge.JScannerMergePanel;
 import org.barrelorgandiscovery.gui.wizard.BasePanelStep;
 import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener;
 import org.barrelorgandiscovery.gui.wizard.WizardStates;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
+import org.barrelorgandiscovery.repository.Repository2;
 
 public class JMergeImagesStep extends BasePanelStep {
 
 	private static Logger logger = Logger.getLogger(JMergeImagesStep.class);
-	
+
 	private JScannerMergePanel mergePanel;
 
 	private IFamilyImageSeeker perfoScanFolder;
 
 	private IPrefsStorage ps;
+	private Repository2 repository;
 
-	public JMergeImagesStep(Step parent, IPrefsStorage prefsStorage) throws Exception {
+	public JMergeImagesStep(Step parent, IPrefsStorage prefsStorage, Repository2 repository2) throws Exception {
 		super("mergeimagestep", parent);
 		this.ps = prefsStorage;
+		this.repository = repository2;
 		initComponents();
 	}
 
@@ -54,15 +58,28 @@ public class JMergeImagesStep extends BasePanelStep {
 			remove(mergePanel);
 		}
 
-		File scanfolder = passedFolder;
-		PerfoScanFolder perfoScanFolder = new PerfoScanFolder(scanfolder);
+		// there might have video files !
 
-		mergePanel = new JScannerMergePanel(perfoScanFolder, ps);
-		int firstIndex = perfoScanFolder.getFirstImageIndex();
-		if (firstIndex != -1) {
-			logger.warn("no images in the folder");
-			mergePanel.setCurrentImage(firstIndex);
+		File scanfolder = passedFolder;
+		IFamilyImageSeeker imageScan = null;
+
+		if (scanfolder.isDirectory()) {
+			imageScan = new PerfoScanFolder(scanfolder);
+		} else {
+			imageScan = new OpenCVVideoFamilyImageSeeker(scanfolder, 2, 5);
+
 		}
+		assert imageScan != null;
+		mergePanel = new JScannerMergePanel(imageScan, ps, repository);
+
+		if (imageScan instanceof PerfoScanFolder) {
+			int firstIndex = ((PerfoScanFolder) imageScan).getFirstImageIndex();
+			if (firstIndex != -1) {
+				logger.warn("no images in the folder");
+				mergePanel.setCurrentImage(firstIndex);
+			}
+		}
+
 		add(mergePanel, BorderLayout.CENTER);
 	}
 
@@ -73,7 +90,6 @@ public class JMergeImagesStep extends BasePanelStep {
 
 	@Override
 	public Serializable unActivateAndGetSavedState() throws Exception {
-		// no saved state
 		return null;
 	}
 

@@ -15,8 +15,8 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 
 import org.apache.log4j.Logger;
-import org.barrelorgandiscovery.extensionsng.scanner.FamilyImageFolder;
-import org.barrelorgandiscovery.extensionsng.scanner.IFamilyImageSeeker;
+import org.barrelorgandiscovery.bookimage.FamilyImageFolder;
+import org.barrelorgandiscovery.bookimage.IFamilyImageSeeker;
 import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
 import org.barrelorgandiscovery.gui.wizard.BasePanelStep;
 import org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener;

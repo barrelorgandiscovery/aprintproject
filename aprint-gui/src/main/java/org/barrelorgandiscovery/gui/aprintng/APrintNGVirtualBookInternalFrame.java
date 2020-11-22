@@ -74,6 +74,8 @@ import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.AsyncJobsManager;
 import org.barrelorgandiscovery.JobEvent;
+import org.barrelorgandiscovery.bookimage.BookImage;
+import org.barrelorgandiscovery.bookimage.ZipBookImage;
 import org.barrelorgandiscovery.editableinstrument.EditableInstrumentManagerRepository2Adapter;
 import org.barrelorgandiscovery.editableinstrument.IEditableInstrument;
 import org.barrelorgandiscovery.editableinstrument.InstrumentScript;
@@ -130,6 +132,7 @@ import org.barrelorgandiscovery.gui.issues.JIssuePresenter;
 import org.barrelorgandiscovery.gui.script.groovy.APrintGroovyConsolePanel;
 import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
 import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
+import org.barrelorgandiscovery.images.books.tools.RecognitionTiledImage;
 import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.issues.IssueCollection;
 import org.barrelorgandiscovery.issues.IssueLayer;
@@ -148,7 +151,6 @@ import org.barrelorgandiscovery.playsubsystem.PlaySubSystem;
 import org.barrelorgandiscovery.playsubsystem.prepared.IPreparedCapableSubSystem;
 import org.barrelorgandiscovery.playsubsystem.prepared.IPreparedPlaying;
 import org.barrelorgandiscovery.prefs.PrefixedNamePrefsStorage;
-import org.barrelorgandiscovery.recognition.gui.books.tools.RecognitionTiledImage;
 import org.barrelorgandiscovery.repository.Repository2;
 import org.barrelorgandiscovery.repository.Repository2Collection;
 import org.barrelorgandiscovery.scale.Scale;
@@ -199,11 +201,16 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 	static Logger logger = Logger.getLogger(APrintNGVirtualBookInternalFrame.class);
 
 	private class SetBackGroundAction extends AbstractAction {
-		
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -6972644892906915997L;
+
 		public SetBackGroundAction(String name) {
 			super(name);
 		}
-		
+
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			try {
@@ -212,17 +219,30 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 				aPrintFileChooser.addFileFilter(
 						new VFSFileNameExtensionFilter("Images PNG", new String[] { "png", "jpg", "jpeg" }));
 
+				aPrintFileChooser.addFileFilter(new VFSFileNameExtensionFilter("Book image",
+						new String[] { BookImage.BOOKIMAGE_EXTENSION_WITHOUT_DOT }));
+
 				int returnedValue = aPrintFileChooser.showOpenDialog(APrintNGVirtualBookInternalFrame.this);
 				if (returnedValue == APrintFileChooser.APPROVE_OPTION) {
 					AbstractFileObject selectedFile = aPrintFileChooser.getSelectedFile();
 					if (selectedFile != null) {
 						File f = VFSTools.convertToFile(selectedFile);
-						RecognitionTiledImage tiledImage = new RecognitionTiledImage(
-								new File(f.getParentFile(), f.getName()));
-						tiledImage.setCurrentImageFamilyDisplay("renormed");
 
-						imageBackGroundLayer.setTiledBackgroundimage(tiledImage);
+						if (f.getName().toLowerCase().endsWith(BookImage.BOOKIMAGE_EXTENSION)) {
 
+							ZipBookImage zbook = new ZipBookImage(f);
+							
+							imageBackGroundLayer.setTiledBackgroundimage(zbook);
+						} else if (f.isDirectory()) {
+
+							RecognitionTiledImage tiledImage = new RecognitionTiledImage(
+									new File(f.getParentFile(), f.getName()));
+							tiledImage.setCurrentImageFamilyDisplay("renormed");
+
+							imageBackGroundLayer.setTiledBackgroundimage(tiledImage);
+						} else {
+							logger.error("cannot display image " + f);
+						}
 					}
 				}
 
@@ -988,8 +1008,8 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		bookPropertiesPanel.add(bookPropertiesPropertySheetPanel, BorderLayout.CENTER);
 
 		logger.debug("register book properties window");
-		tw = toolWindowManager.registerToolWindow("Propriétés du carton",
-				"Propriétés du carton", null, bookPropertiesPanel, ToolWindowAnchor.LEFT);
+		tw = toolWindowManager.registerToolWindow("Propriétés du carton", "Propriétés du carton", null,
+				bookPropertiesPanel, ToolWindowAnchor.LEFT);
 
 		// change width
 		desc = (DockedTypeDescriptor) tw.getTypeDescriptor(ToolWindowType.DOCKED);

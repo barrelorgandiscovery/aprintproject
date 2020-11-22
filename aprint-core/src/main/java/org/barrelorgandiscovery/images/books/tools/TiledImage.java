@@ -1,4 +1,4 @@
-package org.barrelorgandiscovery.recognition.gui.books.tools;
+package org.barrelorgandiscovery.images.books.tools;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -25,7 +25,7 @@ import javax.swing.JLabel;
  * @author pfreydiere
  *
  */
-public class TiledImage implements ITiledImage {
+public class TiledImage implements ITiledImage, IFileBasedTiledImage {
 
 	private File imagePath;
 	private File outputRecognitionProject;
@@ -155,7 +155,7 @@ public class TiledImage implements ITiledImage {
 		return imagecount;
 	}
 
-	protected File constructImagePath(int i, String suffix) {
+	public File constructImagePath(int i, String suffix) {
 		return new File(outputRecognitionProject, "" + i + (suffix == null ? "" : "_" + suffix) + ".jpg");
 	}
 

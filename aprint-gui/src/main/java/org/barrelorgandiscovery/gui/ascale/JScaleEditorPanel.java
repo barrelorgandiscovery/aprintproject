@@ -215,7 +215,7 @@ public class JScaleEditorPanel extends JPanel {
 		spinneraxepremierepiste = (JSpinner) generalProperties
 				.getComponentByName("firstTrackAxis"); //$NON-NLS-1$
 		spinneraxepremierepiste.setModel(new SpinnerNumberModel(10.0, 0.0,
-				100.0, 0.1));
+				1000.0, 0.1));
 
 		spinneraxepremierepiste.setEditor(new JSpinner.NumberEditor(
 				spinneraxepremierepiste, "0.000")); //$NON-NLS-1$
@@ -233,7 +233,7 @@ public class JScaleEditorPanel extends JPanel {
 
 		spinnerentreaxepiste = (JSpinner) generalProperties
 				.getComponentByName("intertrackWidth"); //$NON-NLS-1$
-		spinnerentreaxepiste.setModel(new SpinnerNumberModel(5.0, 0.0, 30.0,
+		spinnerentreaxepiste.setModel(new SpinnerNumberModel(5.0, 0.0, 100.0,
 				0.1));
 
 		spinnerentreaxepiste.setEditor(new JSpinner.NumberEditor(
