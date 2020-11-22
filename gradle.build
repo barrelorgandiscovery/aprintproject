@@ -1,0 +1,12 @@
+apply plugin: 'java'
+
+allprojects {
+
+    
+    compileJava.options.encoding = 'UTF-8'
+    tasks.withType(Compile) {
+        options.fork = true
+        options.encoding = "UTF-8"
+        options.forkOptions.executable = 'javac'
+    }
+}
