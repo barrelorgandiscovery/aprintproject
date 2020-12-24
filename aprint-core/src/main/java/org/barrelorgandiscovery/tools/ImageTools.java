@@ -212,9 +212,10 @@ public class ImageTools {
 
 	public static BufferedImage loadImage(Image image) throws Exception {
 
-		if (image == null)
+		if (image == null) {
 			return null;
-
+		}
+		
 		JLabel l = new JLabel();
 		l.setIcon(new ImageIcon(image));
 		MediaTracker mt = new MediaTracker(l);

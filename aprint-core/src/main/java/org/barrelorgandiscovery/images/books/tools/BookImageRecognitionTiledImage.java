@@ -55,7 +55,7 @@ public class BookImageRecognitionTiledImage implements ITiledImage, IFileFamilyT
 
 	@Override
 	public File constructImagePath(int index, String suffix) {
-		if (currentImageFamilyDisplay == null) {
+		if (suffix == null) {
 			throw new RuntimeException("null family display has no filepath");
 		}
 

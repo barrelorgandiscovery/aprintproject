@@ -543,6 +543,7 @@ public class ExtensionManager implements ExtensionFactory {
 				logger.error("extension doesn't implement proper interface", //$NON-NLS-1$
 						cce);
 			} catch (Throwable t) {
+				t.printStackTrace(System.err);
 				logger.error("error in creating extension", t); //$NON-NLS-1$
 			}
 		}

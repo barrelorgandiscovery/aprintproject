@@ -1,8 +1,13 @@
 package org.barrelorgandiscovery.extensionsng.scanner;
 
+import java.awt.BorderLayout;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferInt;
 import java.io.File;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 import org.barrelorgandiscovery.tools.ImageTools;
 import org.bytedeco.javacpp.Loader;
@@ -19,22 +24,29 @@ public class OpenCVJavaConverter {
 
 		Mat d = new Mat();
 
-		Imgproc.cvtColor(m, m, Imgproc.COLOR_RGB2RGBA, 0);
-		Imgproc.resize(m, d, new Size(m.width() / resizeFactor, m.height() / resizeFactor));
+		Imgproc.cvtColor(m, d, Imgproc.COLOR_RGB2RGBA, 0);
 
-		BufferedImage gray = new BufferedImage(d.width(), d.height(), BufferedImage.TYPE_INT_ARGB);
+		
+		// Imgproc.resize(m, d, new Size(m.width() / resizeFactor, m.height() /
+		// resizeFactor));
+
+		BufferedImage gray = new BufferedImage(d.width(), d.height(), BufferedImage.TYPE_INT_RGB);
 		byte[] rgbcv = new byte[4 * d.height() * d.width()];
 
 		// Get the BufferedImage's backing array and copy the pixels directly into it
-		int[] data = ((DataBufferInt) gray.getRaster().getDataBuffer()).getData();
+
+		DataBufferInt bdata = (DataBufferInt) gray.getRaster().getDataBuffer();
+		int[] data = bdata.getData();
 
 		d.get(0, 0, rgbcv);
-		
+
 		// change image alignment
 		for (int i = 0; i < data.length; i++) {
-			int value = rgbcv[i * 4] | (((int) rgbcv[i * 4 + 1]) & 0xFF) << 8
-					| ((int) rgbcv[i * 4 + 2] & 0xFF) << 16;
-			value = value | (0xFF << 24);
+			int r = rgbcv[i * 4] & 0xFF;
+			int g = rgbcv[i * 4 + 1] & 0xFF;
+			int b = rgbcv[i * 4 + 2] & 0xFF;
+			
+			int value = r | g << 8 | b << 16;
 			data[i] = value;
 		}
 		final BufferedImage b = gray;
@@ -59,7 +71,6 @@ public class OpenCVJavaConverter {
 				buffer[0] = (byte) (v & 0xFF);
 				buffer[1] = (byte) ((v >> 8) & 0xFF);
 				buffer[2] = (byte) ((v >> 16) & 0xFF);
-				
 
 				dest.put(r, c, buffer);
 
@@ -79,9 +90,16 @@ public class OpenCVJavaConverter {
 		Mat dest = new Mat();
 		toOpenCV(bi, dest);
 
-		HighGui.imshow("img2", dest);
+		// HighGui.imshow("img2", dest);
+		// HighGui.waitKey();
 
-		HighGui.waitKey();
+		BufferedImage bit = convertOpenCVToJava(dest, 1);
+
+		JFrame f = new JFrame();
+		f.getContentPane().setLayout(new BorderLayout());
+		f.getContentPane().add(new JLabel(new ImageIcon(bit)));
+		f.setSize(200, 400);
+		f.setVisible(true);
 
 	}
 

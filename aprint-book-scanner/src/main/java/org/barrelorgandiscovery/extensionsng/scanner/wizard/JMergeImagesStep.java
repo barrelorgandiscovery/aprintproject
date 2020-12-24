@@ -20,6 +20,9 @@ public class JMergeImagesStep extends BasePanelStep {
 
 	private static Logger logger = Logger.getLogger(JMergeImagesStep.class);
 
+	public static int rescaleFactor = 1;
+	public static int everyFrames = 5;
+	
 	private JScannerMergePanel mergePanel;
 
 	private IFamilyImageSeeker perfoScanFolder;
@@ -66,7 +69,7 @@ public class JMergeImagesStep extends BasePanelStep {
 		if (scanfolder.isDirectory()) {
 			imageScan = new PerfoScanFolder(scanfolder);
 		} else {
-			imageScan = new OpenCVVideoFamilyImageSeeker(scanfolder, 2, 5);
+			imageScan = new OpenCVVideoFamilyImageSeeker(scanfolder, rescaleFactor, everyFrames);
 
 		}
 		assert imageScan != null;

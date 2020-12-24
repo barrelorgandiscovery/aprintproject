@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.tools.BareBonesBrowserLaunch;
 import org.barrelorgandiscovery.tools.Disposable;
+import org.barrelorgandiscovery.tools.JMessageBox;
 
 import com.jeta.forms.components.panel.FormPanel;
 import com.jeta.forms.gui.form.FormAccessor;
@@ -258,6 +259,7 @@ public class Wizard extends JPanel implements Disposable {
 				} catch (Exception ex) {
 					logger.error("error while going next :" + ex.getMessage(), //$NON-NLS-1$
 							ex);
+					JMessageBox.showError(this, ex);
 				}
 			}
 		});
@@ -360,8 +362,10 @@ public class Wizard extends JPanel implements Disposable {
 		Serializable currentStepState = stepsContents.getState(getCurrentStep());
 
 		logger.debug("activate :" + nextstep); //$NON-NLS-1$
+		
+	
 		nextstep.activate(currentStepState, stepsContents, stepStatusChangedListener);
-
+		
 		// adjust the buttons states
 
 		refreshButtons();

@@ -4,8 +4,21 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * grouped cut line are lines that are always groupped, with no optimization in between.
+ * Why ? because we don't want to displace much the lazer head.
+ * 
+ * @author pfreydiere
+ *
+ */
 public class GroupedCutLine extends OptimizedObject {
-
+	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 662132798318799494L;
+	
+	
 	private List<CutLine> lines = new ArrayList<>();
 
 	public GroupedCutLine(List<CutLine> lines) {
@@ -60,5 +73,5 @@ public class GroupedCutLine extends OptimizedObject {
 		assert lines.size() > 0;
 		return lines.get(lines.size() - 1).lastY();
 	}
-
 }
+

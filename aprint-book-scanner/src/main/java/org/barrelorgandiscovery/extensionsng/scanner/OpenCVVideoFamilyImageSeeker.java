@@ -24,6 +24,7 @@ public class OpenCVVideoFamilyImageSeeker implements IFamilyImageSeeker, Disposa
 	private int frameVideoCount;
 
 	private int resizeFactor;
+	
 	// take image every XX
 	private int imageInterval;
 
@@ -54,8 +55,8 @@ public class OpenCVVideoFamilyImageSeeker implements IFamilyImageSeeker, Disposa
 		// get the frame count
 		frameVideoCount = (int) videoCapture.get(Videoio.CAP_PROP_FRAME_COUNT);
 		
-		videoCapture.set(48, 0);
-		videoCapture.set(49, 1); // Videoio.CAP_PROP_ORIENTATION_AUTO 
+		videoCapture.set(48, 1);
+		videoCapture.set(49, 0); // Videoio.CAP_PROP_ORIENTATION_AUTO 
 
 	}
 

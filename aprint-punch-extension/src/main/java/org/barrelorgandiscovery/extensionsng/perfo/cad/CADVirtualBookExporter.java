@@ -41,7 +41,7 @@ import com.vividsolutions.jts.geom.Coordinate;
  * or DXF, SVG, or GCODE
  * 
  * @author pfreydiere
- *
+ * 
  */
 public class CADVirtualBookExporter {
 
@@ -53,12 +53,16 @@ public class CADVirtualBookExporter {
 
 	public final static String LAYER_PLIURES = "PLIURES";
 
+	public final static String LAYER_PLIURES_NON_CUT = "PLIURES_NON_CUT";
+
 	public final static String LAYER_PLIURES_VERSO = "PLIURES_VERSO";
+
+	public final static String LAYER_PLIURES_VERSO_NON_CUT = "PLIURES_VERSO_NON_CUT";
 
 	public final static String LAYER_REFERENCE = "REFERENCE";
 
 	public static String[] LAYERS = new String[] { LAYER_BORDS, LAYER_TROUS, LAYER_PLIURES, LAYER_PLIURES_VERSO,
-			LAYER_REFERENCE };
+			LAYER_REFERENCE, LAYER_PLIURES_NON_CUT, LAYER_PLIURES_VERSO_NON_CUT };
 
 	public CADVirtualBookExporter() {
 	}
@@ -66,7 +70,7 @@ public class CADVirtualBookExporter {
 	/**
 	 * Exporte un carton en fichier DXF
 	 * 
-	 * @param vb          le carton ï¿½ exporter
+	 * @param vb          le carton à exporter
 	 * @param mecanique   booleen indiquant si le type est mecanique
 	 * @param tailleTrous taille des trous dans le cas du pneumatique
 	 * @param ponts       taille des ponts pour le pneumatique
@@ -123,16 +127,13 @@ public class CADVirtualBookExporter {
 				device.endGroup();
 			}
 			// verticales ?
-			// device.drawLine(vbend, 0, vbend, scale.getWidth());
 			device.startGroup();
 			try {
 				device.drawLine(vbend, scale.getWidth(), startBook, scale.getWidth());
 			} finally {
 				device.endGroup();
 			}
-			// verticale ?
-			// device.drawLine(0, scale.getWidth(), 0, 0);
-
+			
 		}
 
 		device.setCurrentLayer(LAYER_REFERENCE);
@@ -183,17 +184,22 @@ public class CADVirtualBookExporter {
 						device.endGroup();
 					}
 				} else if (p.getTypePliure() == TypePliure.CONTINUE) {
-					device.startGroup();
+
+					device.setCurrentLayer(LAYER_PLIURES_VERSO_NON_CUT);
 					try {
-						device.drawLine(start, 0, start, scale.getWidth());
+						device.startGroup();
+						try {
+							device.drawLine(start, 0, start, scale.getWidth());
+						} finally {
+							device.endGroup();
+						}
 					} finally {
-						device.endGroup();
+						device.setCurrentLayer(LAYER_PLIURES_VERSO);
 					}
 				} else if (p.getTypePliure() == TypePliure.ALTERNE_CONTINU_POINTILLEE) {
 
-					// pointillï¿½ avec non dï¿½oupe au bord des deux cotï¿½s, sur 5mm (sinon,
-					// fragilise
-					// le carton)
+					// pointillés avec non déoupe au bord des deux cotés, sur 5mm (sinon,
+					// fragilise carton)
 					double startNoDots = 5.0;
 					double endDotsWidth = scale.getWidth() - 5.0;
 					assert scale.getWidth() > 10.0;
@@ -204,12 +210,12 @@ public class CADVirtualBookExporter {
 						device.endGroup();
 					}
 				} else {
-					throw new Exception("type pliure " + p.getTypePliure() + " unknown");
+					throw new Exception("unknown bend : " + p.getTypePliure() + " unknown");
 				}
 				start += p.getTaillePagePourPliure() * 2;
 			}
 
-			// fin d'ï¿½criture des pliures dans la layer concernï¿½e
+			// fin d'écriture des pliures dans la layer concernée
 
 			device.setCurrentLayer(LAYER_PLIURES);
 			start = startBook + p.getTaillePagePourPliure();
@@ -222,19 +228,30 @@ public class CADVirtualBookExporter {
 						device.endGroup();
 					}
 				} else if (p.getTypePliure() == TypePliure.CONTINUE) {
-					device.startGroup();
+
+					device.setCurrentLayer(LAYER_PLIURES_NON_CUT);
 					try {
-						device.drawLine(start, 0, start, scale.getWidth());
+						device.startGroup();
+						try {
+							device.drawLine(start, 0, start, scale.getWidth());
+						} finally {
+							device.endGroup();
+						}
 					} finally {
-						device.endGroup();
+						device.setCurrentLayer(LAYER_PLIURES);
 					}
 				} else if (p.getTypePliure() == TypePliure.ALTERNE_CONTINU_POINTILLEE) {
-					// dï¿½coupe complete
-					device.startGroup();
+
+					device.setCurrentLayer(LAYER_PLIURES_NON_CUT);
 					try {
-						device.drawLine(start, 0, start, scale.getWidth());
+						device.startGroup();
+						try {
+							device.drawLine(start, 0, start, scale.getWidth());
+						} finally {
+							device.endGroup();
+						}
 					} finally {
-						device.endGroup();
+						device.setCurrentLayer(LAYER_PLIURES);
 					}
 				} else {
 					throw new Exception("type pliure " + p.getTypePliure() + " unknown");
@@ -300,7 +317,7 @@ public class CADVirtualBookExporter {
 
 		BasicConfigurator.configure(new ConsoleAppender(new PatternLayout()));
 		MidiFile midiFile = MidiFileIO
-				.read(new File("C:/Projets/APrintPerfoExtension/doc/Perï¿½age_Lazer/BEER essai.mid"));
+				.read(new File("C:/Projets/APrintPerfoExtension/doc/Perçage_Lazer/BEER essai.mid"));
 
 		Properties properties = new Properties();
 		properties.setProperty("folder", "C:/Projets/APrint/gammes");

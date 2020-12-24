@@ -4,6 +4,7 @@ import java.awt.geom.Rectangle2D.Double;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
+import java.lang.ref.WeakReference;
 import java.util.Enumeration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,6 +14,7 @@ import java.util.zip.ZipFile;
 import javax.imageio.ImageIO;
 
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.tools.Disposable;
 
 /**
  * this file is a seekable image file family,
@@ -20,7 +22,7 @@ import org.apache.log4j.Logger;
  * @author pfreydiere
  *
  */
-public class ZipBookImage extends BookImage {
+public class ZipBookImage extends BookImage implements Disposable {
 
 	public static final String IMAGE_PREFIX = "image_";
 
@@ -58,9 +60,18 @@ public class ZipBookImage extends BookImage {
 		return IMAGE_PREFIX + String.format("%04d", i) + ".jpg";
 	}
 
+	private LRUCache<Integer, WeakReference<BufferedImage>> lruCache = new LRUCache<>(10);
+
 	@Override
 	public BufferedImage loadImage(int imageNumber) throws Exception {
 
+		WeakReference<BufferedImage> ref = lruCache.get((Integer) imageNumber);
+		if (ref != null) {
+			BufferedImage r = ref.get();
+			if (r != null) {
+				return r;
+			}
+		}
 		String entryName = constructEntryName(imageNumber);
 		ZipEntry zipEntry = zipFile.getEntry(entryName);
 		if (zipEntry == null) {
@@ -71,7 +82,9 @@ public class ZipBookImage extends BookImage {
 		if (istream == null) {
 			return null;
 		}
-		return ImageIO.read(istream);
+		BufferedImage b = ImageIO.read(istream);
+		lruCache.set((Integer) imageNumber, new WeakReference<BufferedImage>(b));
+		return b;
 	}
 
 	int width = -1;
@@ -104,7 +117,6 @@ public class ZipBookImage extends BookImage {
 		return this.height;
 	}
 
-
 	@Override
 	public Double subTileDimension(int index) {
 		return new Double(index * getWidth(), 0, (index + 1) * getWidth(), getHeight());
@@ -120,9 +132,14 @@ public class ZipBookImage extends BookImage {
 		}
 		return result;
 	}
-	
+
 	public File getBookImageFile() {
 		return this.zipFilePath;
+	}
+
+	@Override
+	public void dispose() {
+		lruCache.clear();
 	}
 
 }

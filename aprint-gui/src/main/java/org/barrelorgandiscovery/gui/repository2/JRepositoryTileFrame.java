@@ -316,6 +316,11 @@ public class JRepositoryTileFrame extends JFrameWaitable {
 			public void instrumentSelected(Instrument ins) {
 				checkState();
 			}
+			
+			@Override
+			public void instrumentDoubleClicked(Instrument ins) {
+				checkState();
+			}
 		});
 
 		// double click

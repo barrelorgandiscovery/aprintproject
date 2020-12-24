@@ -20,29 +20,24 @@ public class RecognitionVirtualBookExtensionWindow extends BaseVirtualBookExtens
 
 	public RecognitionVirtualBookExtensionWindow() throws Exception {
 		super();
-
 		recognitionPanel = new JRecognitionVirtualBookPanel();
 	}
 
 	@Override
 	protected void setupExtensionPoint(List<ExtensionPoint> initExtensionPoints) throws Exception {
 		super.setupExtensionPoint(initExtensionPoints);
-
 		initExtensionPoints.add(new SimpleExtensionPoint(VirtualBookFrameToolRegister.class, this));
-
 	}
 
 	@Override
 	public void informVirtualBookFrame(APrintNGVirtualBookFrame frame) {
 		super.informVirtualBookFrame(frame);
-
 		JVirtualBookScrollableComponent pianoroll = frame.getPianoRoll();
 		recognitionPanel.setVirtualBookComponent(pianoroll);
 	}
 
 	@Override
 	public void addLayers(JVirtualBookScrollableComponent c) {
-
 		c.addLayer(recognitionPanel.backgroundBook);
 
 		c.addLayer(recognitionPanel.recognitionDisplay);
@@ -50,7 +45,6 @@ public class RecognitionVirtualBookExtensionWindow extends BaseVirtualBookExtens
 		c.addLayer(recognitionPanel.bookRegionDisplay);
 
 		c.addLayer(recognitionPanel.holeRegionDisplay);
-
 	}
 
 	@Override

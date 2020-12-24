@@ -13,7 +13,6 @@ public class XOptimParametersBeanInfo extends BaseBeanInfo {
 
 	public XOptimParametersBeanInfo() {
 		super(XOptimParameters.class);
-		
 
 		ExtendedPropertyDescriptor startBookAdjustementFromBeginning = addProperty("startBookAdjustementFromBeginning");
 		startBookAdjustementFromBeginning
@@ -29,13 +28,11 @@ public class XOptimParametersBeanInfo extends BaseBeanInfo {
 		nombreDePlisAAjouterAuDebut.setPropertyEditorClass(IntegerPropertyEditor.class);
 		nombreDePlisAAjouterAuDebut.setCategory("Carton");
 
-		
 		ExtendedPropertyDescriptor exportTrous = addProperty("exportTrous");
 		exportTrous.setShortDescription("Export des trous");
 		exportTrous.setDisplayName("Export des trous");
 		exportTrous.setCategory("Trous");
-		
-		
+
 		ExtendedPropertyDescriptor typeTrous = addProperty("typeTrous");
 		typeTrous.setShortDescription("Type de trous");
 		typeTrous.setDisplayName("Types de trous");
@@ -55,7 +52,6 @@ public class XOptimParametersBeanInfo extends BaseBeanInfo {
 		dimensionPonts.setDisplayName("Dimension des ponts (mm)");
 		dimensionPonts.setCategory("Trous");
 
-	
 		ExtendedPropertyDescriptor silreste = addProperty("pasDePontSiIlReste");
 		silreste.setShortDescription(
 				"On abandonne le dernier pont s'il reste un petite distance intérieure à la valeure saisie (en mm)");
@@ -80,14 +76,14 @@ public class XOptimParametersBeanInfo extends BaseBeanInfo {
 		typePliure.setPropertyEditorClass(TypePliuresComboBoxPropertyEditor.class);
 		typePliure.setDisplayName("Type de pliures");
 		typePliure.setCategory("Pliures");
-		
+
 		// pass 1 parameters
 		ExtendedPropertyDescriptor percentMaxPower = addProperty("powerFractionPass1");
 		percentMaxPower.setShortDescription("Pourcentage de la puissance pour la passe 1");
 		percentMaxPower.setPropertyEditorClass(DoublePropertyEditor.class);
 		percentMaxPower.setDisplayName("Fraction Puissance Passe 1");
 		percentMaxPower.setCategory("Passe 1");
-		
+
 		ExtendedPropertyDescriptor percentSpeed = addProperty("speedFractionPass1");
 		percentSpeed.setShortDescription("Pourcentage de la vitesse pour la passe 1");
 		percentSpeed.setPropertyEditorClass(DoublePropertyEditor.class);
@@ -105,19 +101,26 @@ public class XOptimParametersBeanInfo extends BaseBeanInfo {
 		percentMaxPower2.setPropertyEditorClass(DoublePropertyEditor.class);
 		percentMaxPower2.setDisplayName("Fraction Puissance Passe 2");
 		percentMaxPower2.setCategory("Passe 2");
-		
+
 		ExtendedPropertyDescriptor percentSpeed2 = addProperty("speedFractionPass2");
 		percentSpeed2.setShortDescription("Pourcentage de la vitesse pour la passe 2");
 		percentSpeed2.setPropertyEditorClass(DoublePropertyEditor.class);
 		percentSpeed2.setDisplayName("Fraction Vitesse Passe 2");
 		percentSpeed2.setCategory("Passe 2");
 
+		// pass 1 parameters
+		ExtendedPropertyDescriptor halfCutPowerProperty = addProperty("halfCutPower");
+		halfCutPowerProperty.setShortDescription("Pourcentage de puissance pour couper à mi chaire");
+		halfCutPowerProperty.setPropertyEditorClass(DoublePropertyEditor.class);
+		halfCutPowerProperty.setDisplayName("Fraction Puissance Mi Decoupe");
+		halfCutPowerProperty.setCategory("Puissance Lazer");
+
 		ExtendedPropertyDescriptor optimPageSize = addProperty("optimPageSize");
 		optimPageSize.setShortDescription("Taille de la page pour optimisation du déplacement de la tête");
 		optimPageSize.setPropertyEditorClass(DoublePropertyEditor.class);
 		optimPageSize.setDisplayName("Taille de la page d'optimisation (cm)");
 		optimPageSize.setCategory("Optimisation");
-		
+
 	}
 
 }

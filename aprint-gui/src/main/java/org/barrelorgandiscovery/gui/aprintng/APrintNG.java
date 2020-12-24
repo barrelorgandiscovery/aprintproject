@@ -90,6 +90,7 @@ import org.barrelorgandiscovery.gaerepositoryclient.synchroreport.MessageSynchro
 import org.barrelorgandiscovery.gaerepositoryclient.synchroreport.SynchroElement;
 import org.barrelorgandiscovery.gaerepositoryclient.synchroreport.SynchronizationReport;
 import org.barrelorgandiscovery.gui.APrintConstants;
+import org.barrelorgandiscovery.gui.ainstrument.InstrumentSelectedListener;
 import org.barrelorgandiscovery.gui.ainstrument.JInstrumentTileViewerPanel;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
 import org.barrelorgandiscovery.gui.aprint.AboutFrame;
@@ -1588,14 +1589,31 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 						Messages.getString("APrintNG.4000"), true); // $NON-NLS-1$
 				intf.getContentPane().setLayout(new BorderLayout());
 
-				JInstrumentTileViewerPanel p = new JInstrumentTileViewerPanel(i -> {
-					try {
-						newVirtualBook(i);
-						intf.dispose();
-					} catch (Exception ex) {
-						logger.error("error while creating a new book with instrument " + i, ex); //$NON-NLS-1$
-					}
-				}, Messages.getString("APrintNG.4000"), this.repository.getRepository2()); // $NON-NLS-1$
+				JInstrumentTileViewerPanel p = new JInstrumentTileViewerPanel(
+
+						new InstrumentSelectedListener() {
+
+							@Override
+							public void instrumentSelected(Instrument i) {
+								try {
+									newVirtualBook(i);
+									intf.dispose();
+								} catch (Exception ex) {
+									logger.error("error while creating a new book with instrument " + i, ex); //$NON-NLS-1$
+								}
+							}
+
+							@Override
+							public void instrumentDoubleClicked(Instrument i) {
+								try {
+									newVirtualBook(i);
+									intf.dispose();
+								} catch (Exception ex) {
+									logger.error("error while creating a new book with instrument " + i, ex); //$NON-NLS-1$
+								}
+							}
+
+						}, Messages.getString("APrintNG.4000"), this.repository.getRepository2()); // $NON-NLS-1$
 
 				intf.getContentPane().add(p, BorderLayout.CENTER);
 				intf.setVisible(true);
@@ -1890,7 +1908,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 	}
 
 	public void loadBookInNewFrame(final File result) throws Exception, FileNotFoundException {
-		loadBookInNewFrame(VFSTools.fromRegularFile(result));	
+		loadBookInNewFrame(VFSTools.fromRegularFile(result));
 	}
 
 	public static void main(String[] args) throws Exception {
@@ -2466,9 +2484,8 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 								EditableInstrumentManager im = eira.getEditableInstrumentManager();
 
 								AbstractFileObject fso = VFSTools.fromRegularFile(file);
-								
-								importInstrumentToRepository(im,
-										fso);
+
+								importInstrumentToRepository(im, fso);
 							}
 						}
 

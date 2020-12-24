@@ -1,29 +1,19 @@
 package org.barrelorgandiscovery.extensionsng.scanner.merge;
 
 import java.awt.event.ActionEvent;
-import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.AbstractAction;
 
-import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.ml.clustering.CentroidCluster;
 import org.apache.commons.math3.ml.clustering.DoublePoint;
-import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
-import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.bookimage.IFamilyImageSeeker;
-import org.barrelorgandiscovery.extensionsng.scanner.OpenCVJavaConverter;
-import org.barrelorgandiscovery.extensionsng.scanner.merge.tools.BooksImagesDisplacementsCalculation;
-import org.barrelorgandiscovery.extensionsng.scanner.merge.tools.BooksImagesDisplacementsCalculation.DisplacementCalculationResult;
 import org.barrelorgandiscovery.extensionsng.scanner.merge.tools.BooksImagesDisplacementsCalculation.KeyPointMatch;
 import org.barrelorgandiscovery.math.MathVect;
 import org.barrelorgandiscovery.tools.JMessageBox;
-import org.opencv.core.Mat;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
 
 public class AutomaticDetectionComputing extends AbstractAction {
 
@@ -41,8 +31,8 @@ public class AutomaticDetectionComputing extends AbstractAction {
 		this.mergePanel = mergePanel;
 	}
 
+	
 	@Override
-
 	public void actionPerformed(ActionEvent e) {
 		try {
 

@@ -1,63 +1,90 @@
 package org.barrelorgandiscovery.gui.aprintng;
 
+import java.awt.Component;
 import java.awt.GraphicsConfiguration;
 import java.awt.HeadlessException;
+import java.awt.LayoutManager;
 
-import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JRootPane;
 import javax.swing.SwingUtilities;
 
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.gui.ICancelTracker;
 import org.barrelorgandiscovery.ui.animation.InfiniteProgressPanel;
 
-public class JFrameWaitable extends JFrame implements IAPrintWait{
+public class JPanelWaitableInJFrameWaitable extends JPanel implements IAPrintWait {
+
+	private static Logger logger = Logger.getLogger(JPanelWaitableInJFrameWaitable.class);
 
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = -1547398895400684254L;
+	private static final long serialVersionUID = 3737504716262151042L;
 
-	private static Logger logger = Logger.getLogger(JFrameWaitable.class);
-	
+	public JPanelWaitableInJFrameWaitable() {
+		super();
+	}
+
+	public JPanelWaitableInJFrameWaitable(boolean isDoubleBuffered) {
+		super(isDoubleBuffered);
+	}
+
+	public JPanelWaitableInJFrameWaitable(LayoutManager layout, boolean isDoubleBuffered) {
+		super(layout, isDoubleBuffered);
+	}
+
+	public JPanelWaitableInJFrameWaitable(LayoutManager layout) {
+		super(layout);
+
+	}
+
 	/**
 	 * sequencer utilisé pour jouer le morceau
 	 */
-	private InfiniteProgressPanel infiniteprogresspanel = new InfiniteProgressPanel(
-				null, 20, 0.5f, 0.5f);
+	private InfiniteProgressPanel infiniteprogresspanel = new InfiniteProgressPanel(null, 20, 0.5f, 0.5f);
 
-	public JFrameWaitable() throws HeadlessException {
-		super();
-		setGlassPane(infiniteprogresspanel);
+	Component oldGlassPane = null;
+
+	private InfiniteProgressPanel getOrSetGlassPane() {
+		JRootPane old = SwingUtilities.getRootPane(this);
+		if (old == null) {
+			return null;
+		}
+		this.oldGlassPane = old.getGlassPane();
+		old.invalidate();
+		old.setGlassPane(infiniteprogresspanel);
+		old.revalidate();
+		return infiniteprogresspanel;
 	}
 
-	public JFrameWaitable(GraphicsConfiguration gc) {
-		super(gc);
-		setGlassPane(infiniteprogresspanel);
-	}
-
-	public JFrameWaitable(String title) throws HeadlessException {
-		super(title);
-		setGlassPane(infiniteprogresspanel);
-	}
-
-	public JFrameWaitable(String title, GraphicsConfiguration gc) {
-		super(title, gc);
-		setGlassPane(infiniteprogresspanel);
+	private void releaseGlassPane() {
+		if (oldGlassPane == null) {
+			return;
+		}
+		JRootPane old = SwingUtilities.getRootPane(this);
+		old.setGlassPane(oldGlassPane);
+		oldGlassPane = null;
 	}
 
 	public void infiniteStartWait(String text, ICancelTracker cancelTracker) {
-	
+
+		// put the glasspane
+
 		assert !infiniteprogresspanel.isStarted();
 		final String finalText = text;
-	
+
 		infiniteprogresspanel.setCancelTracker(cancelTracker);
-	
+
 		Runnable r = new Runnable() {
 			public void run() {
+				getOrSetGlassPane();
 				infiniteprogresspanel.start(finalText);
+
+				infiniteprogresspanel.repaint();
 			}
 		};
-	
+
 		if (!SwingUtilities.isEventDispatchThread()) {
 			try {
 				SwingUtilities.invokeAndWait(r);
@@ -74,10 +101,11 @@ public class JFrameWaitable extends JFrame implements IAPrintWait{
 	}
 
 	public void infiniteEndWait() {
-	
+
 		Runnable r = new Runnable() {
 			public void run() {
 				infiniteprogresspanel.stop();
+				releaseGlassPane();
 			}
 		};
 		if (!SwingUtilities.isEventDispatchThread()) {
@@ -92,13 +120,13 @@ public class JFrameWaitable extends JFrame implements IAPrintWait{
 	}
 
 	public void infiniteChangeText(final String text) {
-	
+
 		Runnable r = new Runnable() {
 			public void run() {
 				infiniteprogresspanel.setText(text);
 			}
 		};
-	
+
 		if (!SwingUtilities.isEventDispatchThread()) {
 			try {
 				SwingUtilities.invokeAndWait(r);
@@ -108,7 +136,7 @@ public class JFrameWaitable extends JFrame implements IAPrintWait{
 		} else {
 			r.run();
 		}
-	
+
 	}
 
 }

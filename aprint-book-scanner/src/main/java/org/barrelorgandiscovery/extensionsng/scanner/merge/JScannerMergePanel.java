@@ -49,6 +49,7 @@ import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
 import org.apache.commons.math3.ml.distance.DistanceMeasure;
 import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.bookimage.BookImage;
 import org.barrelorgandiscovery.bookimage.FamilyImageFolder;
 import org.barrelorgandiscovery.bookimage.IFamilyImageSeeker;
 import org.barrelorgandiscovery.bookimage.ZipBookImage;
@@ -64,7 +65,9 @@ import org.barrelorgandiscovery.gui.aedit.ImageAndHolesVisualizationLayer;
 import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
 import org.barrelorgandiscovery.gui.aprint.instrumentchoice.JInstrumentCombo;
+import org.barrelorgandiscovery.gui.aprintng.JPanelWaitableInJFrameWaitable;
 import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
+import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.images.books.tools.StandaloneTiledImage;
 import org.barrelorgandiscovery.math.MathVect;
 import org.barrelorgandiscovery.prefs.AbstractFileObjectPrefsStorage;
@@ -102,7 +105,7 @@ import com.jeta.forms.gui.form.FormAccessor;
  *
  * @author pfreydiere
  */
-public class JScannerMergePanel extends JPanel implements Disposable {
+public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implements Disposable {
 
 	/** */
 	private static final long serialVersionUID = -7007011059478439720L;
@@ -121,8 +124,6 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 	JImageDisplayLayer movingResult; // result of keypoints
 
 	ImageAndHolesVisualizationLayer workingLayer; // show when the result is computing
-
-	private JCheckBox overlapLock;
 
 	JSpinner overlappixelsspinner;
 
@@ -181,8 +182,6 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 
 		formAccessorParameters.replaceBean("overlappixels", overlappixelsspinner);
 
-		overlapLock = new JCheckBox("Lock Overlap to resolution");
-		formAccessorParameters.replaceBean("overlaplock", overlapLock);
 
 		// load and save parameters
 		AbstractButton saveparameters = formAccessorParameters.getButton("saveparameters");
@@ -231,9 +230,11 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 
 		AbstractButton btnautoparameters = formAccessorParameters.getButton("btnautoparameters");
 
-		btnautoparameters.setText("Auto Detect parameters");
+		
 		btnautoparameters.setAction(new AutomaticDetectionComputing(this));
-
+		btnautoparameters.setText("Auto Detect parameters");
+		
+		
 		// construct result
 		resultPreview = new JVirtualBookScrollableComponent();
 		resultPreview.setVirtualBook(new VirtualBook(Scale.getGammeMidiInstance()));
@@ -384,19 +385,6 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 					p3.setRect(final3.getX(), final3.getY(), p3.getWidth(), p3.getHeight());
 				}
 
-				if (p == p3 && overlapLock.isSelected()) {
-					// prop, delta
-
-					MathVect newdist = new MathVect(p3.getX() - p1.getX(), p3.getY() - p1.getY());
-					MathVect oldDist = newdist.moins(displacement);
-
-					Number n = (Number) overlappixelsspinner.getValue();
-					double d = n.doubleValue();
-
-					double newD = /* old */
-							(1.0 - (newdist.norme() - oldDist.norme()) / oldDist.norme()) * d;
-					overlappixelsspinner.setValue(newD);
-				}
 			}
 		});
 
@@ -438,31 +426,44 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 						new File(System.getProperties().getProperty("user.home")));
 				APrintFileChooser fc = new APrintFileChooser(preferenceStorage);
 
+				fc.addFileFilter(new VFSFileNameExtensionFilter("Book image",
+						new String[] { BookImage.BOOKIMAGE_EXTENSION_WITHOUT_DOT }));
+
 				int result = fc.showSaveDialog(this);
 				if (result == JFileChooser.APPROVE_OPTION) {
 					File savedFile = VFSTools.convertToFile(fc.getSelectedFile());
 					if (savedFile != null) {
 						logger.debug("saving images");
 
+						if (!savedFile.getName().endsWith(BookImage.BOOKIMAGE_EXTENSION)) {
+							// add bookimage extension if not specified
+							savedFile = new File(savedFile.getParentFile(),
+									savedFile.getName() + BookImage.BOOKIMAGE_EXTENSION);
+						}
+						
+						final File finalSavedFile = savedFile;
+
 						CancelTracker cancelTracker = new CancelTracker();
 						ProgressIndicator p = new ProgressIndicator() {
 
 							@Override
 							public void progress(double progress, String message) {
-								System.out.println("saving .... ");
-
+								infiniteChangeText("Saving .. " + (int)(progress * 100) + " %");
 							}
 						};
 						executor.submit(() -> {
+							
+							infiniteStartWait("saving bookimage ...", cancelTracker);
 							try {
-								saveImage(savedFile, cancelTracker, p);
-								preferences.setFileProperty("mergescannerfolder", savedFile);
+								saveImage(finalSavedFile, cancelTracker, p);
+								preferences.setFileProperty("mergescannerfolder", finalSavedFile);
 							} catch (Exception ex) {
 								logger.error(ex.getMessage(), ex);
+							} finally {
+								infiniteEndWait();
 							}
 						});
 
-						
 					}
 				}
 
@@ -828,11 +829,11 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 	public void saveImage(File destinationBookImage, ICancelTracker cancelTracker, ProgressIndicator progress)
 			throws Exception {
 		assert destinationBookImage != null;
-		
+
 		int sliceWidth = (int) model.getAngleAndImageWidthVector().norme();
 		double overlappDistance = model.overlappDistance;
 		int height = (int) model.getBookWidthVector().norme();
-		
+
 		FileOutputStream fos = new FileOutputStream(destinationBookImage);
 		try {
 			ZipOutputStream zipOutputStream = new ZipOutputStream(fos);
@@ -841,7 +842,7 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 				int currentimageindex = 0;
 
 				// each image is a square of "height" dimensions
-				
+
 				while (!endreach) {
 					logger.debug("writing image " + currentimageindex);
 
@@ -851,13 +852,10 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 					}
 
 					double initialPixelOfGeneratedImage = currentimageindex * height;
-					
+
 					int indexFirstImage = (int) Math.ceil(initialPixelOfGeneratedImage / overlappDistance);
 					indexFirstImage = Math.max(indexFirstImage - 1, 0);
-					int lastIndexImage = (int) Math
-							.floor((initialPixelOfGeneratedImage + height) / overlappDistance);
-
-					
+					int lastIndexImage = (int) Math.floor((initialPixelOfGeneratedImage + height) / overlappDistance);
 
 					BufferedImage img = constructMergeImage(sliceWidth, height, height, overlappDistance,
 							indexFirstImage, lastIndexImage,
@@ -987,8 +985,9 @@ public class JScannerMergePanel extends JPanel implements Disposable {
 //		File scanfolder = new File(
 //				"C:\\projets\\APrint\\contributions\\plf\\2020-10_Essais saisie video\\carton ancien avec fond noir.mp4");
 
-		File scanfolder = new File("C:\\projets\\APrint\\contributions\\plf\\2020-10_Essais saisie video\\videos 45 limonaire\\La reine du bal .mp4");
-		
+		File scanfolder = new File(
+				"C:\\projets\\APrint\\contributions\\plf\\2020-10_Essais saisie video\\videos 45 limonaire\\La reine du bal .mp4");
+
 //		File scanfolder = new File(
 //				"C:\\projets\\APrint\\contributions\\plf\\2020-10_Essais saisie video\\Carton neuf avec fond noir.mp4");
 

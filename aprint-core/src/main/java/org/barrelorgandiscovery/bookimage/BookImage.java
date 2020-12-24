@@ -15,7 +15,7 @@ public abstract class BookImage implements IFamilyImageSeeker, ITiledImage {
 
 	public static final String BOOKIMAGE_EXTENSION_WITHOUT_DOT = "bookimage";
 	public static final String BOOKIMAGE_EXTENSION = "." + BOOKIMAGE_EXTENSION_WITHOUT_DOT;
-
+	
 	private Scale virtualBookScale;
 
 	BookImage() {

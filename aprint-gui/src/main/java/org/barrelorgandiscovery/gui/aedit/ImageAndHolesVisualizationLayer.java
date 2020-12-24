@@ -3,6 +3,7 @@ package org.barrelorgandiscovery.gui.aedit;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -14,8 +15,10 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.barrelorgandiscovery.bookimage.BookImage;
+import org.barrelorgandiscovery.bookimage.IFamilyImageSeeker;
 import org.barrelorgandiscovery.images.books.tools.IFileBasedTiledImage;
 import org.barrelorgandiscovery.images.books.tools.ITiledImage;
 import org.barrelorgandiscovery.images.books.tools.StandaloneTiledImage;
@@ -125,6 +128,16 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 		return visible;
 	}
 
+	private float opacity = 1.0f;
+
+	public void setOpacity(float opacity) {
+		this.opacity = opacity;
+	}
+
+	public float getOpacity() {
+		return opacity;
+	}
+
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -136,109 +149,126 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 		if (!isVisible())
 			return;
 
-		if (backgroundimage != null) {
+		Graphics2D g2d = (Graphics2D) g;
+		Composite oldComposite = g2d.getComposite();
+		try {
 
-			VirtualBook vb = component.getVirtualBook();
+			AlphaComposite transparencyComposite = AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, opacity);
+			g2d.setComposite(transparencyComposite);
 
-			if (vb == null)
-				return;
+			if (backgroundimage != null) {
 
-			Scale s = vb.getScale();
-			double width = s.getWidth();
-
-			BufferedImage imageToDisplay = backgroundimage;
-			if (flipHorizontallyTheImage) {
-				imageToDisplay = reverseImage(backgroundimage);
-			}
-
-			int iwidth = (int) ((1.0 * component.MmToPixel(width) / imageToDisplay.getHeight())
-					* imageToDisplay.getWidth());
-			int iheight = component.MmToPixel(width);
-
-			if (disableRescale) {
-				iwidth = imageToDisplay.getWidth();
-				iheight = imageToDisplay.getHeight();
-			}
-
-			g.drawImage(imageToDisplay, component.convertCartonToScreenX(xoffset), component.convertCartonToScreenY(0),
-					iwidth, iheight, component);
-		}
-
-		if (tileImage != null) {
-
-			try {
-				Graphics2D g2d = (Graphics2D) g;
-
-				/////////// compute transform
 				VirtualBook vb = component.getVirtualBook();
+
+				if (vb == null)
+					return;
 
 				Scale s = vb.getScale();
 				double width = s.getWidth();
-				double f = 1.0 * width / tileImage.getHeight() * component.MmToPixel(1000) / 1000;
-				AffineTransform scaling = AffineTransform.getScaleInstance(f, f);
-				AffineTransform xoff = AffineTransform.getTranslateInstance(
-						component.MmToPixel(-component.getXoffset() + component.getMargin()),
-						component.MmToPixel(-component.getYoffset() + component.getMargin()));
 
-				// scaling.concatenate(t);
-				if (!disableRescale) {
-					xoff.concatenate(scaling);
+				BufferedImage imageToDisplay = backgroundimage;
+				if (flipHorizontallyTheImage) {
+					imageToDisplay = reverseImage(backgroundimage);
 				}
 
-				Rectangle bounds = g2d.getClipBounds();
-				Rectangle2D.Double r = new Rectangle2D.Double(bounds.getX(), bounds.getY(), bounds.getWidth(),
-						bounds.getHeight());
+				int iwidth = (int) ((1.0 * component.MmToPixel(width) / imageToDisplay.getHeight())
+						* imageToDisplay.getWidth());
+				int iheight = component.MmToPixel(width);
 
-				AffineTransform inverse = xoff.createInverse();
-				Shape invertedBox = inverse.createTransformedShape(r);
-
-				int[] images = tileImage.subTiles((Rectangle2D.Double) invertedBox.getBounds2D());
-
-				for (int i = 0; i < images.length; i++) {
-					try {
-						Double d = tileImage.subTileDimension(images[i]);
-
-						AffineTransform t = AffineTransform.getTranslateInstance(d.getX(), 0);
-
-						BufferedImage loadImage = null;
-
-						if (tileImage instanceof StandaloneTiledImage) {
-							loadImage = ((StandaloneTiledImage) tileImage).getImage();
-						} else if (tileImage instanceof IFileBasedTiledImage) {
-
-							File filePath = ((IFileBasedTiledImage) tileImage).getImagePath(images[i]);
-							if (filePath != null && filePath.exists()) {
-								loadImage = ImageTools.loadImage(filePath.toURL());
-
-							}
-						} else if (tileImage instanceof BookImage) {
-							loadImage = ((BookImage) tileImage).loadImage(images[i]);
-						}
-
-						if (loadImage != null) {
-
-							if (flipHorizontallyTheImage) {
-								loadImage = reverseImage(loadImage);
-							}
-
-							AffineTransform scaling2 = AffineTransform.getScaleInstance(f, f);
-							AffineTransform xoff2 = AffineTransform.getTranslateInstance(
-									component.MmToPixel(-component.getXoffset() + component.getMargin()),
-									component.MmToPixel(-component.getYoffset() + component.getMargin()));
-
-							scaling2.concatenate(t);
-							xoff2.concatenate(scaling2);
-
-							g2d.drawImage(loadImage, xoff2, null);
-						}
-
-					} catch (Exception ex) {
-						ex.printStackTrace();
-					}
+				if (disableRescale) {
+					iwidth = imageToDisplay.getWidth();
+					iheight = imageToDisplay.getHeight();
 				}
-			} catch (Exception ex) {
-				ex.printStackTrace();
+
+				g.drawImage(imageToDisplay, component.convertCartonToScreenX(xoffset),
+						component.convertCartonToScreenY(0), iwidth, iheight, component);
 			}
+
+			if (tileImage != null) {
+
+				try {
+
+					/////////// compute transform
+					VirtualBook vb = component.getVirtualBook();
+
+					Scale s = vb.getScale();
+					double width = s.getWidth();
+					double f = 1.0 * width / tileImage.getHeight() * component.MmToPixel(1000) / 1000;
+					AffineTransform scaling = AffineTransform.getScaleInstance(f, f);
+					AffineTransform xoff = AffineTransform.getTranslateInstance(
+							component.MmToPixel(-component.getXoffset() + component.getMargin()),
+							component.MmToPixel(-component.getYoffset() + component.getMargin()));
+
+					// scaling.concatenate(t);
+					if (!disableRescale) {
+						xoff.concatenate(scaling);
+					}
+
+					Rectangle bounds = g2d.getClipBounds();
+					Rectangle2D.Double r = new Rectangle2D.Double(bounds.getX(), bounds.getY(), bounds.getWidth(),
+							bounds.getHeight());
+
+					AffineTransform inverse = xoff.createInverse();
+					Shape invertedBox = inverse.createTransformedShape(r);
+
+					int[] images = tileImage.subTiles((Rectangle2D.Double) invertedBox.getBounds2D());
+
+					if (images != null) {
+						currentVisibleTiles.set(images);
+					}
+					for (int i = 0; i < images.length; i++) {
+						try {
+							Double d = tileImage.subTileDimension(images[i]);
+
+							AffineTransform t = AffineTransform.getTranslateInstance(d.getX(), 0);
+
+							BufferedImage loadImage = null;
+
+							if (tileImage instanceof StandaloneTiledImage) {
+								loadImage = ((StandaloneTiledImage) tileImage).getImage();
+
+							} else if (tileImage instanceof IFamilyImageSeeker) {
+								loadImage = ((IFamilyImageSeeker) tileImage).loadImage(images[i]);
+
+							} else if (tileImage instanceof IFileBasedTiledImage) {
+
+								File filePath = ((IFileBasedTiledImage) tileImage).getImagePath(images[i]);
+								if (filePath != null && filePath.exists()) {
+									loadImage = ImageTools.loadImage(filePath.toURL());
+
+								}
+							} else if (tileImage instanceof BookImage) {
+								loadImage = ((BookImage) tileImage).loadImage(images[i]);
+							}
+
+							if (loadImage != null) {
+
+								if (flipHorizontallyTheImage) {
+									loadImage = reverseImage(loadImage);
+								}
+
+								AffineTransform scaling2 = AffineTransform.getScaleInstance(f, f);
+								AffineTransform xoff2 = AffineTransform.getTranslateInstance(
+										component.MmToPixel(-component.getXoffset() + component.getMargin()),
+										component.MmToPixel(-component.getYoffset() + component.getMargin()));
+
+								scaling2.concatenate(t);
+								xoff2.concatenate(scaling2);
+
+								g2d.drawImage(loadImage, xoff2, null);
+							}
+
+						} catch (Exception ex) {
+							ex.printStackTrace();
+						}
+					}
+				} catch (Exception ex) {
+					ex.printStackTrace();
+				}
+			}
+
+		} finally {
+			g2d.setComposite(oldComposite);
 		}
 
 	}
@@ -332,6 +362,14 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 
 	public boolean isFlipHorizontallyTheImage() {
 		return flipHorizontallyTheImage;
+	}
+
+	private AtomicReference<int[]> currentVisibleTiles = new AtomicReference<int[]>(new int[0]);
+
+	public int[] getCurrentVisibleTiles() {
+		int[] c = currentVisibleTiles.get();
+		assert c != null;
+		return c;
 	}
 
 }

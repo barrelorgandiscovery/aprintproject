@@ -77,7 +77,7 @@ public class CADExporterExtensionVirtualBook extends BaseVirtualBookExtension
 	public CADExporterExtensionVirtualBook() throws Exception {
 		graphicLayer = new GraphicsLayer("Tracé Vectoriel");
 		defaultAboutAuthor = "Patrice Freydiere";
-		defaultAboutVersion = "2020.7.08";
+		defaultAboutVersion = "2020.12.12";
 		createParametersPanel();
 	}
 

@@ -12,6 +12,8 @@ import java.util.Map.Entry;
 import java.util.Properties;
 import java.util.Set;
 
+import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensions.ChildFirstClassLoader;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
 
@@ -39,7 +41,7 @@ public class APrintApplicationBootStrap {
 
     Properties sysprop = System.getProperties();
 
-    // Logger.getRootLogger().setLevel(Level.INFO);
+    Logger.getRootLogger().setLevel(Level.INFO);
 
     // Logger logger = Logger.getLogger(APrintApplicationBootStrap.class);
     // if (logger.isInfoEnabled()) {

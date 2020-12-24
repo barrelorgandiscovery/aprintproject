@@ -34,7 +34,7 @@ public class XOptimParameters implements Serializable {
 	private double taillePagePourPliure = 160.0;
 
 	private boolean exportTrous = true;
-	
+
 	private boolean exportPliures = false;
 
 	private double startBookAdjustementFromBeginning = 80; // 80mm by default
@@ -42,16 +42,27 @@ public class XOptimParameters implements Serializable {
 	private int nombreDePlisAAjouterAuDebut = 0;
 
 	private TypePliure typePliure = TypePliure.CONTINUE;
-	
-	private double powerFractionPass1 = 1.0; // be default, 100%
+
+	private double powerFractionPass1 = 1.0; // by default, 100%
+
+	private double halfCutPower = 0.5; // by default 50%
 
 	public boolean isExportTrous() {
 		return exportTrous;
 	}
+
 	public void setExportTrous(boolean exportTrous) {
 		this.exportTrous = exportTrous;
 	}
-	
+
+	public void setHalfCutPower(double halfCutPower) {
+		this.halfCutPower = halfCutPower;
+	}
+
+	public double getHalfCutPower() {
+		return halfCutPower;
+	}
+
 	public double getPowerFractionPass1() {
 		return powerFractionPass1;
 	}
@@ -93,23 +104,23 @@ public class XOptimParameters implements Serializable {
 	}
 
 	private double speedFractionPass1 = 1.0;
-	
+
 	private boolean has2pass = false;
-	
+
 	private double powerFractionPass2 = 1.0; // be default, 100%
 
 	private double speedFractionPass2 = 1.0;
-	
+
 	private double optimPageSize = 5.0; // 5 cm par défaut
-	
+
 	public void setOptimPageSize(double optimPageSize) {
 		this.optimPageSize = optimPageSize;
 	}
-	
+
 	public double getOptimPageSize() {
 		return optimPageSize;
 	}
-	
+
 	public void setNombreDePlisAAjouterAuDebut(int nombreDePlisAAjouterAuDebut) {
 		this.nombreDePlisAAjouterAuDebut = nombreDePlisAAjouterAuDebut;
 	}
@@ -190,7 +201,6 @@ public class XOptimParameters implements Serializable {
 		this.typePliure = typePliure;
 	}
 
-
 	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
 
 		typeTrous = TrouType.valueOf(in.readUTF());
@@ -203,17 +213,23 @@ public class XOptimParameters implements Serializable {
 		typePliure = TypePliure.valueOf(in.readUTF());
 		startBookAdjustementFromBeginning = in.readDouble();
 		nombreDePlisAAjouterAuDebut = in.readInt();
-		
+
 		powerFractionPass1 = in.readDouble();
 		speedFractionPass1 = in.readDouble();
-		
+
 		has2pass = in.readBoolean();
 		powerFractionPass2 = in.readDouble();
 		speedFractionPass2 = in.readDouble();
-		
+
 		optimPageSize = in.readDouble();
-		
+
 		exportTrous = in.readBoolean();
+
+		try {
+			halfCutPower = in.readDouble();
+		} catch (Exception ex) {
+			// cannot read the half cut power
+		}
 	}
 
 	public void writeExternal(ObjectOutput out) throws IOException {
@@ -235,6 +251,7 @@ public class XOptimParameters implements Serializable {
 		out.writeDouble(speedFractionPass2);
 		out.writeDouble(optimPageSize);
 		out.writeBoolean(exportTrous);
+		out.writeDouble(halfCutPower);
 	}
-	
+
 }

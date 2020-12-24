@@ -46,6 +46,12 @@ dependencies {
 	testCompile name:'junit', group:'junit', version:'3.8'
 	compile name: 'Gray_Morphology-2.3.2'
     compile name: 'Trainable_Segmentation', group:'sc.fiji', version:'3.2.34' 
+    // https://mvnrepository.com/artifact/sc.fiji/imagescience
+compile group: 'sc.fiji', name: 'imagescience', version: '3.0.0'
+    
+    
+    
+    
 }
 
 task fatJar(type: Jar, dependsOn: jar) {
