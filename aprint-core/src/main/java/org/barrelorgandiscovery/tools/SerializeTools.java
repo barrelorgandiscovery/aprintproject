@@ -11,9 +11,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.util.Base64;
-import java.util.Base64.Decoder;
-import java.util.Base64.Encoder;
 
 public class SerializeTools {
 
@@ -133,6 +130,7 @@ public class SerializeTools {
 
 	/**
 	 * load object from input stream
+	 * 
 	 * @param inputstream
 	 * @return
 	 * @throws Exception
@@ -149,8 +147,8 @@ public class SerializeTools {
 		if (base64Stream == null)
 			return null;
 
-		Decoder dec = Base64.getDecoder();
-		ByteArrayInputStream bais = new ByteArrayInputStream(dec.decode(base64Stream));
+		byte[] b = Base64Tools.decode(base64Stream);
+		ByteArrayInputStream bais = new ByteArrayInputStream(b);
 		try {
 			return readObject(bais);
 		} finally {
@@ -172,9 +170,7 @@ public class SerializeTools {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		writeObject(o, baos);
 
-		Encoder enc = Base64.getEncoder();
-		return enc.encodeToString(baos.toByteArray());
-
+		return Base64Tools.encode(baos.toByteArray());
 	}
 
 }

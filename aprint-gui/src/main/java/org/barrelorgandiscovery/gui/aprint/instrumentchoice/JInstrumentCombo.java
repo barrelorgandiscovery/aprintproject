@@ -79,13 +79,15 @@ public class JInstrumentCombo extends JPanel {
 	 */
 	private JComboBox cb;
 
+	private JLabel text;
+
 	/**
 	 * init the internal components
 	 */
 	protected void initComponents() {
 		setLayout(new BorderLayout());
 
-		JLabel text = new JLabel("Select Instrument :");
+		text = new JLabel("Select Instrument :");
 		add(text, BorderLayout.WEST);
 
 		cb = new JComboBox();
@@ -93,6 +95,10 @@ public class JInstrumentCombo extends JPanel {
 		updateContent();
 
 		add(cb, BorderLayout.CENTER);
+	}
+	
+	public void setLabel(String label) {
+		text.setText(label);
 	}
 
 	/**

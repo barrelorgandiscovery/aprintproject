@@ -23,6 +23,7 @@ import javax.swing.SwingUtilities;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.lf5.LF5Appender;
+import org.barrelorgandiscovery.extensionsng.scanner.Messages;
 import org.barrelorgandiscovery.tools.Disposable;
 import org.barrelorgandiscovery.tools.ImageTools;
 
@@ -83,10 +84,10 @@ public class JChooseWebCam extends JPanel implements Disposable {
 		FormPanel fp = new FormPanel(is);
 
 		previewPanel = fp.getLabel("preview");//$NON-NLS-1$
-		previewPanel.setText("");
+		previewPanel.setText(""); //$NON-NLS-1$
 
 		JLabel lblchooseWebCam = fp.getLabel("lblchoosewebcam");//$NON-NLS-1$
-		lblchooseWebCam.setText("Choose Webcam ..");
+		lblchooseWebCam.setText(Messages.getString("JChooseWebCam.1")); //$NON-NLS-1$
 
 		combo = fp.getComboBox("cbwebcam");//$NON-NLS-1$
 
@@ -94,7 +95,7 @@ public class JChooseWebCam extends JPanel implements Disposable {
 		logger.debug("cams :" + webcams);//$NON-NLS-1$
 
 		ArrayList<WebCamConfig> webcamdisplay = new ArrayList<>();
-		webcamdisplay.add(new WebCamConfig(null, null, "<Not Selected>"));
+		webcamdisplay.add(new WebCamConfig(null, null, Messages.getString("JChooseWebCam.2"))); //$NON-NLS-1$
 		webcams.forEach((w) -> {
 			// for each webcam, add the view sizes
 			Dimension[] sizes = w.getViewSizes();
@@ -163,7 +164,7 @@ public class JChooseWebCam extends JPanel implements Disposable {
 		assert this.current != null;
 		assert this.current.isOpen();
 		WebCamPictureTake wt = new WebCamPictureTake(current, (i, t) -> {
-			logger.debug("image size :" + i.getWidth() + "x" + i.getHeight());
+			logger.debug("image size :" + i.getWidth() + "x" + i.getHeight()); //$NON-NLS-1$ //$NON-NLS-2$
 			// thumbnail
 			final BufferedImage transformed = ImageTools.crop(300, 300, i);
 

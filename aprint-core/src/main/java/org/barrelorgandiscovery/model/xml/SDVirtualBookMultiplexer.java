@@ -2,14 +2,13 @@ package org.barrelorgandiscovery.model.xml;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.Base64;
-import java.util.Base64.Decoder;
-import java.util.Base64.Encoder;
 
+import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.model.ModelValuedParameter;
 import org.barrelorgandiscovery.model.steps.book.VirtualBookMultiplexer;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.scale.io.ScaleIO;
+import org.barrelorgandiscovery.tools.Base64Tools;
 import org.w3c.dom.Element;
 
 /**
@@ -19,6 +18,8 @@ import org.w3c.dom.Element;
  * 
  */
 public class SDVirtualBookMultiplexer extends BaseSerDeserHelper<VirtualBookMultiplexer> {
+
+	private static Logger logger = Logger.getLogger(SDVirtualBookMultiplexer.class);
 
 	public Class getHelpedClass() {
 		return VirtualBookMultiplexer.class;
@@ -32,8 +33,7 @@ public class SDVirtualBookMultiplexer extends BaseSerDeserHelper<VirtualBookMult
 		if (v != null) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			ScaleIO.writeGamme(v, baos);
-			Encoder encoder = Base64.getEncoder();
-			String stringV = new String(encoder.encode(baos.toByteArray()));
+			String stringV = Base64Tools.encode(baos.toByteArray());
 			addElementValue(element, "scale", stringV);
 		}
 
@@ -46,17 +46,22 @@ public class SDVirtualBookMultiplexer extends BaseSerDeserHelper<VirtualBookMult
 		VirtualBookMultiplexer vbc = new VirtualBookMultiplexer();
 		ModelValuedParameter modelValuedParameter = vbc.getConfigureParametersByRef()[0];
 
+		vbc.setId(getAttribute(object, "id"));
 		Element escale = getSubElement(object, "scale");
+
 		if (escale != null) {
 			String v = escale.getTextContent();
-			Decoder decoder = Base64.getDecoder();
-			ByteArrayInputStream bais = new ByteArrayInputStream(decoder.decode(v));
+			
+			try {
+				byte[] decodedTextContent = Base64Tools.decode(v);
+				ByteArrayInputStream bais = new ByteArrayInputStream(decodedTextContent);
 
-			modelValuedParameter.setValue(ScaleIO.readGamme(bais));
-			vbc.applyConfig(); // adjust parameters
+				modelValuedParameter.setValue(ScaleIO.readGamme(bais));
+				vbc.applyConfig(); // adjust parameters
+			} catch (Exception ex) {
+				logger.error("error on reading scale definition, " + ex.getMessage() + " for " + object, ex);
+			}
 		}
-
-		vbc.setId(getAttribute(object, "id"));
 
 		// adjust the parameters
 		vbc.applyConfig();

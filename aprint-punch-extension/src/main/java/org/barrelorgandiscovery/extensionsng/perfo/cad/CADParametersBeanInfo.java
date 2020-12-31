@@ -39,7 +39,7 @@ public class CADParametersBeanInfo extends BaseBeanInfo {
 		ExtendedPropertyDescriptor taillTrous = addProperty("tailleTrous");
 		taillTrous.setShortDescription(
 				"Taille Maximum des trous créés, si le trou est plus grand, un pont est créé.\nSi vous ne souhaitez pas de ponts, mettez un grand nombre ici");
-		taillTrous.setDisplayName("Taille Maximum des trous (mm)");
+		taillTrous.setDisplayName("Taille Maximum des découpes (mm)");
 		taillTrous.setPropertyEditorClass(DoublePropertyEditor.class);
 		taillTrous.setCategory("Trous");
 

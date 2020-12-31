@@ -4,12 +4,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.Base64;
 import java.util.Base64.Decoder;
-import java.util.Base64.Encoder;
 
 import org.barrelorgandiscovery.model.ModelValuedParameter;
 import org.barrelorgandiscovery.model.steps.book.VirtualBookDemultiplexer;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.scale.io.ScaleIO;
+import org.barrelorgandiscovery.tools.Base64Tools;
 import org.w3c.dom.Element;
 
 /**
@@ -18,15 +18,13 @@ import org.w3c.dom.Element;
  * @author pfreydiere
  * 
  */
-public class SDVirtualBookDemultiplexer extends
-		BaseSerDeserHelper<VirtualBookDemultiplexer> {
+public class SDVirtualBookDemultiplexer extends BaseSerDeserHelper<VirtualBookDemultiplexer> {
 
 	public Class getHelpedClass() {
 		return VirtualBookDemultiplexer.class;
 	}
 
-	public void toXml(VirtualBookDemultiplexer object, XmlSerContext ctx,
-			Element element) throws Exception {
+	public void toXml(VirtualBookDemultiplexer object, XmlSerContext ctx, Element element) throws Exception {
 
 		ModelValuedParameter cfParameter = object.getConfigureParametersByRef()[0];
 
@@ -34,39 +32,33 @@ public class SDVirtualBookDemultiplexer extends
 		if (v != null) {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			ScaleIO.writeGamme(v, baos);
-			Encoder encoder = Base64.getEncoder();
-			String stringV = new String(encoder.encode(baos.toByteArray()));
+			
+			String stringV = Base64Tools.encode(baos.toByteArray());
 			addElementValue(element, "scale", stringV);
 		}
-		
+
 		addAttributeValue(element, "id", object.getId());
 
 	}
 
-	public VirtualBookDemultiplexer fromXml(XmlSerContext ctx, Element object)
-			throws Exception {
+	public VirtualBookDemultiplexer fromXml(XmlSerContext ctx, Element object) throws Exception {
 
 		VirtualBookDemultiplexer vbc = new VirtualBookDemultiplexer();
-		ModelValuedParameter modelValuedParameter = vbc
-				.getConfigureParametersByRef()[0];
+		ModelValuedParameter modelValuedParameter = vbc.getConfigureParametersByRef()[0];
 
 		Element escale = getSubElement(object, "scale");
 		if (escale != null) {
 			String v = escale.getTextContent();
-			Decoder decoder = Base64.getDecoder();
-			
-			ByteArrayInputStream bais = new ByteArrayInputStream(
-					decoder.decode(v));
-
+			ByteArrayInputStream bais = new ByteArrayInputStream(Base64Tools.decode(v));
 			modelValuedParameter.setValue(ScaleIO.readGamme(bais));
 			vbc.applyConfig(); // adjust parameters
 		}
 
 		vbc.setId(getAttribute(object, "id"));
-		
+
 		// adjust the parameters
 		vbc.applyConfig();
-		
+
 		return vbc;
 	}
 

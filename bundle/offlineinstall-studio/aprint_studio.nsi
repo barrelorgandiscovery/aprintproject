@@ -3,17 +3,17 @@
 !include "x64.nsh"
 !include "logiclib.nsh"
 
-
-
 Name "APrint Studio"
 
 Icon "aprinticon.ico"
 OutFile "APrintStudioInstall.exe"
 
 CRCCheck on
-
 XPStyle on
+
 BrandingText "APrint Studio - Barrel Organ Discovery"
+
+Var APPNAME
 
 Function .onInit
         # the plugins dir is automatically deleted when the installer exits
@@ -40,8 +40,10 @@ Function .onInit
 		
 		!insertmacro MUI_LANGDLL_DISPLAY
 	    !insertmacro INSTALLOPTIONS_EXTRACT "customfolder.ini"
+	    !insertmacro INSTALLOPTIONS_EXTRACT "customappname.ini"
         !insertmacro INSTALLOPTIONS_WRITE "customfolder.ini" "Field 1" "State" "$DOCUMENTS\.." 
-	
+        !insertmacro INSTALLOPTIONS_WRITE "customappname.ini" "Field 1" "State" "APrint Studio" 
+        StrCpy $APPNAME "APrint Studio"	
 FunctionEnd
 
 ;Function LaunchLink
@@ -96,7 +98,6 @@ Function CheckFolder
    IfFileExists $R0 +4 +3
       MessageBox  MB_ICONEXCLAMATION|MB_OK "Le repertoire n'existe pas"
       Abort
-
    ; create folder
    CreateDirectory $R0
 
@@ -105,7 +106,18 @@ Function CheckFolder
 
 FunctionEnd
 
+Page custom AskAppName CheckAppName
+Function AskAppName
+  !insertmacro MUI_HEADER_TEXT "Application Name" "Nom utilisé pour la création des raccourcis du menu demarrer"
+  !insertmacro MUI_INSTALLOPTIONS_DISPLAY "customappname.ini"
+FunctionEnd
 
+Function CheckAppName
+   !insertmacro INSTALLOPTIONS_READ $R0 "customappname.ini" "Field 1" "State" 
+   StrCpy $APPNAME $R0
+FunctionEnd
+
+ 
 !insertmacro MUI_PAGE_INSTFILES
 
 ;  !define MUI_FINISHPAGE_NOAUTOCLOSE
@@ -125,7 +137,8 @@ FunctionEnd
 
 ;--------------------------------
 ReserveFile "customfolder.ini"
-ReserveFile /plugin InstallOptions.dll
+ReserveFile "customappname.ini"
+!insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
 
 
 ;--------------------------------
@@ -139,17 +152,13 @@ Section "!APrint Studio"
   ; Put file there
   File "..\build\aprint.jar"
   File /r "C:\Java\jdk1.8.0_25_x64\jre"
-  ;File /r "C:\Java\jdk1.7.0_01\jre"
   File "aprinticon.ico"
   
-  ; 
-  
-  
-  CreateDirectory "$SMPROGRAMS\APrint Studio"
-  CreateShortCut "$SMPROGRAMS\APrint Studio\APrint Studio.lnk" "$INSTDIR\jre\bin\javaw.exe" \
+  CreateDirectory "$SMPROGRAMS\$APPNAME"
+  CreateShortCut "$SMPROGRAMS\$APPNAME\$APPNAME.lnk" "$INSTDIR\jre\bin\javaw.exe" \
   '-Xmx4g -server -Dmainfolder="$APRINTDATAS" -cp aprint.jar org.barrelorgandiscovery.gui.aprintng.APrintApplicationBootStrap' "$INSTDIR\aprinticon.ico" 0 SW_SHOWMAXIMIZED
-  CreateDirectory "$SMPROGRAMS\APrint Studio\uninstall"
-   CreateShortCut "$SMPROGRAMS\APrint Studio\uninstall\Uninstall.lnk" "$INSTDIR\ap-uninst.exe" ; use defaults for parameters, icon, etc.
+  CreateDirectory "$SMPROGRAMS\$APPNAME\uninstall"
+   CreateShortCut "$SMPROGRAMS\$APPNAME\uninstall\Uninstall.lnk" "$INSTDIR\ap-uninst.exe" ; use defaults for parameters, icon, etc.
   ; this one will use notepad's icon, start it minimized, and give it a hotkey (of Ctrl+Shift+Q)
   WriteUninstaller "ap-uninst.exe"
   
@@ -223,8 +232,8 @@ Section "Uninstall"
   RMDir /r "$INSTDIR"
  
  
-  Delete "$SMPROGRAMS\APrint Studio\*.*"
-  RMDir /r "$SMPROGRAMS\APrint Studio"
+  Delete "$SMPROGRAMS\$APPNAME\*.*"
+  RMDir /r "$SMPROGRAMS\$APPNAME"
 
 SectionEnd
 

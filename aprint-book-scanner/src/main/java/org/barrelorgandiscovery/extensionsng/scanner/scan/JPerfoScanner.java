@@ -30,6 +30,7 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLPun
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLPunchMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.DisplacementCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.HomingCommand;
+import org.barrelorgandiscovery.extensionsng.scanner.Messages;
 import org.barrelorgandiscovery.gui.CancelTracker;
 import org.barrelorgandiscovery.gui.ICancelTracker;
 import org.barrelorgandiscovery.tools.Disposable;
@@ -146,23 +147,23 @@ public class JPerfoScanner extends JPanel implements Disposable {
     add(labelImage, BorderLayout.CENTER);
 
     JToggleButton tb = new JToggleButton();
-    tb.setText("Record");
+    tb.setText(Messages.getString("JPerfoScanner.0")); //$NON-NLS-1$
     tb.addChangeListener(
         new ChangeListener() {
           @Override
           public void stateChanged(ChangeEvent e) {
             JToggleButton t = (JToggleButton) e.getSource();
             if (t.getModel().isSelected()) {
-              tb.setText("Record");
+              tb.setText(Messages.getString("JPerfoScanner.1")); //$NON-NLS-1$
               onlyWebCam.set(false);
             } else {
-              tb.setText("Stop Record");
+              tb.setText(Messages.getString("JPerfoScanner.2")); //$NON-NLS-1$
               onlyWebCam.set(true);
             }
           }
         });
 
-    final JButton btn = new JButton("Start");
+    final JButton btn = new JButton(Messages.getString("JPerfoScanner.3")); //$NON-NLS-1$
     btn.addActionListener(
         new ActionListener() {
           @Override
@@ -171,12 +172,12 @@ public class JPerfoScanner extends JPanel implements Disposable {
 
               if (!cancelTracker.isCanceled()) {
                 cancelTracker.cancel();
-                btn.setText("Start");
+                btn.setText(Messages.getString("JPerfoScanner.4")); //$NON-NLS-1$
                 defaultWebCam = null;
                 return;
               }
 
-              btn.setText("Stop");
+              btn.setText(Messages.getString("JPerfoScanner.5")); //$NON-NLS-1$
               logger.debug("open web cam");//$NON-NLS-1$
               defaultWebCam = openWebCam();
 

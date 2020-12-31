@@ -362,6 +362,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 	private JButton lengthButton = new JButton();
 
 	private JSlider tempoFactorSlider = new JSlider();
+	
 	private float crossThreadTempoSlider = 1.0f;
 
 	public APrintNGVirtualBookInternalFrame(VirtualBook vb, AbstractFileObject virtualBookFile, IssueCollection ic,
@@ -557,6 +558,8 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		pianoroll.fitToScreen();
 
 		aSyncPreparePlayin = new ASyncPreparePlayin();
+		
+		tempoFactorSlider.setToolTipText("Play Tempo Change");
 
 		clearVirtualBookState();
 		clearDirty();
@@ -761,7 +764,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		exportAsOgg.setToolTipText(Messages.getString("APrint.220")); //$NON-NLS-1$
 
 		exportAsMidi.setIcon(new ImageIcon(getClass().getResource("kdat.png"))); //$NON-NLS-1$
-		exportAsMidi.setToolTipText("Enregistre l'ï¿½coute du carton dans un nouveau fichier midi"); //$NON-NLS-1$
+		exportAsMidi.setToolTipText("Enregistre l'écoute du carton dans un nouveau fichier midi"); //$NON-NLS-1$
 		exportAsMidi.setActionCommand("EXPORTTOMID"); //$NON-NLS-1$
 		exportAsMidi.addActionListener(this);
 
@@ -2947,6 +2950,11 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		}
 	}
 
+	/**
+	 * quick script element
+	 * @author pfreydiere
+	 *
+	 */
 	public static class QuickScriptElement {
 		private File f;
 
@@ -2990,7 +2998,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 
 						logger.debug(Messages.getString("APrintNGVirtualBookInternalFrame.2009") + scriptToRun); // $NON-NLS-1$
 
-						JDialog groovyFrame = new JDialog((Frame) APrintNGVirtualBookInternalFrame.this,
+						final JDialog groovyFrame = new JDialog((Frame) APrintNGVirtualBookInternalFrame.this,
 								Messages.getString("APrintNGVirtualBookInternalFrame.17") //$NON-NLS-1$
 										+ pianoroll.getVirtualBook().getName());
 						groovyFrame.setModal(false);
@@ -3070,6 +3078,8 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 
 									asyncJobsManager.submitAlreadyExecutedJobToTrack(f, new JobEvent() {
 										public void jobAborted() {
+											groovyFrame.setVisible(false);
+											groovyFrame.dispose();
 										}
 
 										public void jobError(Throwable t) {
@@ -3079,6 +3089,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 														+ t.getMessage(), t);
 												p.appendOutput(t);
 
+												// keep the dialog opened
 											} catch (Exception x) {
 												logger.debug(x);
 											}
@@ -3091,6 +3102,10 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 
 												pianoroll.touchBook();
 												pianoroll.repaint();
+
+												groovyFrame.setVisible(false);
+												groovyFrame.dispose();
+
 
 											} catch (Exception ex) {
 												logger.error("error in executing script :" //$NON-NLS-1$

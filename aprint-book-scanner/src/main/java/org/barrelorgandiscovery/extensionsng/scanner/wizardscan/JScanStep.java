@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.Serializable;
 
 import org.barrelorgandiscovery.bookimage.PerfoScanFolder;
+import org.barrelorgandiscovery.extensionsng.scanner.Messages;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.JScanPanel;
 import org.barrelorgandiscovery.extensionsng.scanner.wizard.JOutputFolderChooserStep;
 import org.barrelorgandiscovery.gui.wizard.BasePanelStep;
@@ -22,7 +23,7 @@ public class JScanStep extends BasePanelStep {
 	private JOutputFolderChooserStep folderChooserStep;
 
 	public JScanStep(Step parent, JOutputFolderChooserStep folderChooserStep) throws Exception {
-		super("scan", parent);
+		super("scan", parent); //$NON-NLS-1$
 		assert parent instanceof JScanParameterStep;
 		this.previousScanParameterStep = (JScanParameterStep) parent;
 		assert folderChooserStep != null;
@@ -36,7 +37,7 @@ public class JScanStep extends BasePanelStep {
 
 	@Override
 	public String getLabel() {
-		return "Launch Scan";
+		return Messages.getString("JScanStep.1"); //$NON-NLS-1$
 	}
 
 	@Override

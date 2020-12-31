@@ -11,6 +11,7 @@ import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.model.ModelType;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.scale.io.ScaleIO;
+import org.barrelorgandiscovery.tools.Base64Tools;
 
 /**
  * Scale of a specific organ Permit to parametrize a scale for a given organ or
@@ -26,12 +27,8 @@ public class ScaleType implements ModelType, Serializable {
 	private JavaType inner = new JavaType(Scale.class);
 
 	public ScaleType(String serializedForm) throws Exception {
-
 		// read the Scale
-		Decoder base64Decoder = Base64.getDecoder();
-
-		scale = ScaleIO.readGamme(new ByteArrayInputStream(base64Decoder.decode(serializedForm.getBytes())));
-
+		scale = ScaleIO.readGamme(new ByteArrayInputStream(Base64Tools.decode(serializedForm)));
 	}
 
 	public String serializedForm() throws Exception {
@@ -39,10 +36,7 @@ public class ScaleType implements ModelType, Serializable {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ScaleIO.writeGamme(scale, baos);
 
-		Encoder base64Encoder = Base64.getEncoder();
-		// BASE64Encoder base64Encoder = new BASE64Encoder();
-
-		return new String(base64Encoder.encode(baos.toByteArray()));
+		return new String(Base64Tools.encode(baos.toByteArray()));
 	}
 
 	public ScaleType(Scale scale) {

@@ -10,6 +10,7 @@ import org.apache.commons.vfs2.FileObject;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.lf5.LF5Appender;
+import org.barrelorgandiscovery.extensionsng.scanner.Messages;
 import org.barrelorgandiscovery.gui.tools.BookmarkPanel;
 import org.barrelorgandiscovery.gui.wizard.BasePanelStep;
 import org.barrelorgandiscovery.gui.wizard.Step;
@@ -36,13 +37,13 @@ public class JVideoInput extends BasePanelStep {
 	private static final Logger logger = Logger.getLogger(JVideoInput.class);
 
 	public JVideoInput(Step parent) {
-		super("VideoInput", parent);
+		super("VideoInput", parent); //$NON-NLS-1$
 		initComponents();
 	}
 
 	@Override
 	public String getLabel() {
-		return "Video Input";
+		return Messages.getString("JVideoInput.1"); //$NON-NLS-1$
 	}
 
 	private VFSJFileChooser fileChooser;
@@ -122,7 +123,7 @@ public class JVideoInput extends BasePanelStep {
 
 		BasicConfigurator.configure(new LF5Appender());
 
-		File f = new File("C:\\projets\\APrint\\contributions\\patrice\\2018_josephine_90degres\\perfo");
+		File f = new File("C:\\projets\\APrint\\contributions\\patrice\\2018_josephine_90degres\\perfo"); //$NON-NLS-1$
 
 		JFrame frame = new JFrame();
 		frame.setSize(800, 600);

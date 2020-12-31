@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.extensionsng.scanner.Messages;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.IChooseWebCamListener;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.JChooseWebCam;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.JChooseWebCam.WebCamConfig;
@@ -33,13 +34,13 @@ public class JScanParameterStep extends BasePanelStep {
 	private JTriggerComponent jTriggerComponent;
 
 	public JScanParameterStep(Step parent, IPrefsStorage preferences) throws Exception {
-		super("scanparameter", parent);
+		super("scanparameter", parent); //$NON-NLS-1$
 		this.preferences = preferences;
 		initComponents();
 	}
 
 	protected void initComponents() throws Exception {
-		InputStream isform = getClass().getResourceAsStream("parameterpanel.jfrm");
+		InputStream isform = getClass().getResourceAsStream("parameterpanel.jfrm"); //$NON-NLS-1$
 		assert isform != null;
 		FormPanel fp = new FormPanel(isform);
 
@@ -55,8 +56,8 @@ public class JScanParameterStep extends BasePanelStep {
 
 		jTriggerComponent = new JTriggerComponent(preferences);
 
-		fp.getFormAccessor().replaceBean("lblwebcam", webcamChooser);
-		fp.getFormAccessor().replaceBean("lbltrigger", jTriggerComponent);
+		fp.getFormAccessor().replaceBean("lblwebcam", webcamChooser); //$NON-NLS-1$
+		fp.getFormAccessor().replaceBean("lbltrigger", jTriggerComponent); //$NON-NLS-1$
 
 		setLayout(new BorderLayout());
 		add(fp, BorderLayout.CENTER);
@@ -64,7 +65,7 @@ public class JScanParameterStep extends BasePanelStep {
 
 	@Override
 	public String getLabel() {
-		return "Choose scan parameters";
+		return Messages.getString("JScanParameterStep.4"); //$NON-NLS-1$
 	}
 
 	public ITriggerFactory getTriggerFactory() throws Exception {
@@ -99,7 +100,7 @@ public class JScanParameterStep extends BasePanelStep {
 
 	@Override
 	public Serializable unActivateAndGetSavedState() throws Exception {
-		logger.debug("stop the preview");
+		logger.debug("stop the preview"); //$NON-NLS-1$
 		webcamChooser.stopPreview();
 		return null;
 	}

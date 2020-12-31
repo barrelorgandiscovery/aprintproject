@@ -7,6 +7,7 @@ import java.io.Serializable;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.bookimage.IFamilyImageSeeker;
 import org.barrelorgandiscovery.bookimage.PerfoScanFolder;
+import org.barrelorgandiscovery.extensionsng.scanner.Messages;
 import org.barrelorgandiscovery.extensionsng.scanner.OpenCVVideoFamilyImageSeeker;
 import org.barrelorgandiscovery.extensionsng.scanner.merge.JScannerMergePanel;
 import org.barrelorgandiscovery.gui.wizard.BasePanelStep;
@@ -31,7 +32,7 @@ public class JMergeImagesStep extends BasePanelStep {
 	private Repository2 repository;
 
 	public JMergeImagesStep(Step parent, IPrefsStorage prefsStorage, Repository2 repository2) throws Exception {
-		super("mergeimagestep", parent);
+		super("mergeimagestep", parent); //$NON-NLS-1$
 		this.ps = prefsStorage;
 		this.repository = repository2;
 		initComponents();
@@ -78,7 +79,7 @@ public class JMergeImagesStep extends BasePanelStep {
 		if (imageScan instanceof PerfoScanFolder) {
 			int firstIndex = ((PerfoScanFolder) imageScan).getFirstImageIndex();
 			if (firstIndex != -1) {
-				logger.warn("no images in the folder");
+				logger.warn("no images in the folder"); //$NON-NLS-1$
 				mergePanel.setCurrentImage(firstIndex);
 			}
 		}
@@ -88,7 +89,7 @@ public class JMergeImagesStep extends BasePanelStep {
 
 	@Override
 	public String getLabel() {
-		return "Construct Image from acquisition";
+		return Messages.getString("JMergeImagesStep.2"); //$NON-NLS-1$
 	}
 
 	@Override

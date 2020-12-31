@@ -10,6 +10,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 
+import org.barrelorgandiscovery.extensionsng.scanner.Messages;
 import org.barrelorgandiscovery.gui.wizard.BasePanelStep;
 import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener;
@@ -39,7 +40,7 @@ public class JScanOrMergeStep extends BasePanelStep {
 
 	public JScanOrMergeStep(Step parent, List<Step> mergeSteps, List<Step> scanSteps, List<Step> videoScanSteps,
 			IPrefsStorage preferences) throws Exception {
-		super("scanparameter", parent);
+		super("scanparameter", parent); //$NON-NLS-1$
 		this.preferences = preferences;
 		this.scanSteps = scanSteps;
 		this.mergeSteps = mergeSteps;
@@ -63,27 +64,28 @@ public class JScanOrMergeStep extends BasePanelStep {
 
 		setLayout(new BorderLayout());
 
-		FormPanel fp = new FormPanel(JScanOrMergeStep.class.getResourceAsStream("scanormergepanel.jfrm"));
+		FormPanel fp = new FormPanel(JScanOrMergeStep.class.getResourceAsStream("scanormergepanel.jfrm")); //$NON-NLS-1$
 
-		rbconstruct = fp.getRadioButton("rbconstruct");
-		rbconstruct.setText("Merge images to create a full book image");
+		rbconstruct = fp.getRadioButton("rbconstruct"); //$NON-NLS-1$
+		rbconstruct.setText(Messages.getString("JScanOrMergeStep.3")); //$NON-NLS-1$
 
-		JLabel lblmerge = fp.getLabel("lblmerge");
-		lblmerge.setText("");
-		lblmerge.setIcon(new ImageIcon(getClass().getResource("images.png")));
+		JLabel lblmerge = fp.getLabel("lblmerge"); //$NON-NLS-1$
+		lblmerge.setText(""); //$NON-NLS-1$
+		lblmerge.setIcon(new ImageIcon(getClass().getResource("images.png"))); //$NON-NLS-1$
 
-		JLabel lblscan = fp.getLabel("lblscan");
-		lblscan.setIcon(new ImageIcon(getClass().getResource("webcam.jpg")));
-		lblscan.setText("");
+		JLabel lblscan = fp.getLabel("lblscan"); //$NON-NLS-1$
+		lblscan.setIcon(new ImageIcon(getClass().getResource("webcam.jpg"))); //$NON-NLS-1$
+		lblscan.setText(""); //$NON-NLS-1$
 
-		JLabel lblvideo = fp.getLabel("lblvideo");
-		lblvideo.setText("");
+		JLabel lblvideo = fp.getLabel("lblvideo"); //$NON-NLS-1$
+		lblvideo.setText(""); //$NON-NLS-1$
+		lblvideo.setIcon(new ImageIcon(getClass().getResource("video_image.png"))); //$NON-NLS-1$
 
-		rbscan = fp.getRadioButton("rbscan");
-		rbscan.setText("use camera to scan a book");
+		rbscan = fp.getRadioButton("rbscan"); //$NON-NLS-1$
+		rbscan.setText(Messages.getString("JScanOrMergeStep.14")); //$NON-NLS-1$
 
-		rbvideo = fp.getRadioButton("rbvideo");
-		rbvideo.setText("use video file to construct book image");
+		rbvideo = fp.getRadioButton("rbvideo"); //$NON-NLS-1$
+		rbvideo.setText(Messages.getString("JScanOrMergeStep.16")); //$NON-NLS-1$
 
 		buttonGroup = new ButtonGroup();
 		buttonGroup.add(rbconstruct);
@@ -114,7 +116,7 @@ public class JScanOrMergeStep extends BasePanelStep {
 
 	@Override
 	public String getLabel() {
-		return "Choose Scan activity";
+		return Messages.getString("JScanOrMergeStep.17"); //$NON-NLS-1$
 	}
 
 	StepStatusChangedListener stepListener;

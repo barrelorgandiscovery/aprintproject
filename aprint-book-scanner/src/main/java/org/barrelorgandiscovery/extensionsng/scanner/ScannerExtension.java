@@ -36,13 +36,13 @@ public class ScannerExtension extends BaseExtension {
 
 	public ScannerExtension() throws Exception {
 		super();
-		this.defaultAboutAuthor = "Patrice Freydiere";
+		this.defaultAboutAuthor = "Patrice Freydiere"; //$NON-NLS-1$
 		this.defaultAboutVersion = VersionTools.getVersion();
 	}
 
 	@Override
 	public String getName() {
-		return "Scanner Extension";
+		return "Scanner Extension"; //$NON-NLS-1$
 	}
 
 	@Override
@@ -67,17 +67,17 @@ public class ScannerExtension extends BaseExtension {
 						} else if (repository instanceof Repository2) {
 							ScannerExtension.this.repository = (Repository2) repository;
 						} else {
-							logger.error("repository2 is not accessible, extension will not work");
-							throw new RuntimeException("repository2 is not accessible, extension will not work");
+							logger.error("repository2 is not accessible, extension will not work"); //$NON-NLS-1$
+							throw new RuntimeException("repository2 is not accessible, extension will not work"); //$NON-NLS-1$
 						}
 					}
 				}));
 	}
 
 	private JButton createNewProjectButton() {
-		JButton btn = new JButton("Scan Extension ...");
+		JButton btn = new JButton(Messages.getString("ScannerExtension.4")); //$NON-NLS-1$
 		try {
-			btn.setIcon(ImageTools.loadIcon(ScannerExtension.class, "scanner.png"));
+			btn.setIcon(ImageTools.loadIcon(ScannerExtension.class, "scanner.png")); //$NON-NLS-1$
 		} catch (Throwable t) {
 			logger.error(t.getMessage(), t);
 		}
@@ -87,7 +87,7 @@ public class ScannerExtension extends BaseExtension {
 				try {
 					newProject();
 				} catch (Throwable t) {
-					logger.error("error creating new project :" + t.getMessage(), t);
+					logger.error("error creating new project :" + t.getMessage(), t); //$NON-NLS-1$
 					BugReporter.sendBugReport();
 					JMessageBox.showError(ScannerExtension.this.application.getOwnerForDialog(), t);
 				}
@@ -102,7 +102,7 @@ public class ScannerExtension extends BaseExtension {
 
 		assert repository != null;
 		if (repository == null) {
-			throw new Exception("repository is not defined, waiting for Repository2 object type");
+			throw new Exception("repository is not defined, waiting for Repository2 object type"); //$NON-NLS-1$
 		}
 
 		JScanOrMergeWizard jScanOrMergeWizard = new JScanOrMergeWizard(this.extensionPreferences, repository);

@@ -24,6 +24,7 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.lf5.LF5Appender;
 import org.barrelorgandiscovery.bookimage.PerfoScanFolder;
+import org.barrelorgandiscovery.extensionsng.scanner.Messages;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.ITriggerFactory;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.TimeTrigger;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.Trigger;
@@ -101,12 +102,12 @@ public class JScanPanel extends JPanel implements Disposable {
 
 		JLabel lblfolderLabel = fp.getLabel("lblfolderlabel");//$NON-NLS-1$
 		assert lblfolderLabel != null;
-		lblfolderLabel.setText("Folder in which the images will be saved");
+		lblfolderLabel.setText(Messages.getString("JScanPanel.0")); //$NON-NLS-1$
 
 		btnStart = fp.getButton("btnstart");//$NON-NLS-1$
 		assert btnStart != null;
-		btnStart.setText("Start Record");
-		btnStart.setToolTipText("Start record the images in the folder");
+		btnStart.setText(Messages.getString("JScanPanel.1")); //$NON-NLS-1$
+		btnStart.setToolTipText(Messages.getString("JScanPanel.2")); //$NON-NLS-1$
 		btnStart.setIcon(new ImageIcon(ImageTools.loadImage(JScanPanel.class, "krec_record.png")));//$NON-NLS-1$
 
 		btnStart.addActionListener((e) -> {
@@ -119,9 +120,9 @@ public class JScanPanel extends JPanel implements Disposable {
 		});
 
 		btneraseimagefiles = fp.getButton("eraseimagefiles");//$NON-NLS-1$
-		btneraseimagefiles.setText("Erase all imagefiles");
+		btneraseimagefiles.setText(Messages.getString("JScanPanel.3")); //$NON-NLS-1$
 		btneraseimagefiles.setIcon(new ImageIcon(ImageTools.loadImage(JScanPanel.class, "stop.png")));//$NON-NLS-1$
-		btneraseimagefiles.setToolTipText("Erase all images in the folder to restart the record");
+		btneraseimagefiles.setToolTipText(Messages.getString("JScanPanel.4")); //$NON-NLS-1$
 
 		btneraseimagefiles.addActionListener((e) -> {
 
@@ -135,8 +136,8 @@ public class JScanPanel extends JPanel implements Disposable {
 
 		btnStop = fp.getButton("btnstop");//$NON-NLS-1$
 		assert btnStop != null;
-		btnStop.setText("Stop");
-		btnStop.setToolTipText("End record images");
+		btnStop.setText(Messages.getString("JScanPanel.5")); //$NON-NLS-1$
+		btnStop.setToolTipText(Messages.getString("JScanPanel.6")); //$NON-NLS-1$
 
 		btnStop.setIcon(new ImageIcon(ImageTools.loadImage(JScanPanel.class, "player_stop.png")));//$NON-NLS-1$
 
@@ -176,7 +177,7 @@ public class JScanPanel extends JPanel implements Disposable {
 
 	private void triggerLivePreview() {
 		if (scheduleWithFixedDelay == null) {
-			logger.debug("start live trigger");
+			logger.debug("start live trigger"); //$NON-NLS-1$
 			scheduleWithFixedDelay = scheduledExecutorWebCam.scheduleWithFixedDelay(previewWebCamPictureTake, 0, 100,
 					TimeUnit.MILLISECONDS);
 		}
@@ -218,7 +219,7 @@ public class JScanPanel extends JPanel implements Disposable {
 			public void imageReceived(BufferedImage image, long timestamp) {
 				
 				try {
-					logger.debug("add image");
+					logger.debug("add image"); //$NON-NLS-1$
 					SwingUtilities.invokeAndWait(() -> {
 						imageStack.addImage(image);
 							

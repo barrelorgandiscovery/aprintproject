@@ -51,9 +51,12 @@ public class JPanelWaitableInJFrameWaitable extends JPanel implements IAPrintWai
 		if (old == null) {
 			return null;
 		}
+		
+		Component rootPaneParent = old.getParent();
+		
 		this.oldGlassPane = old.getGlassPane();
-		old.invalidate();
 		old.setGlassPane(infiniteprogresspanel);
+		old.invalidate();
 		old.revalidate();
 		return infiniteprogresspanel;
 	}
@@ -80,7 +83,7 @@ public class JPanelWaitableInJFrameWaitable extends JPanel implements IAPrintWai
 			public void run() {
 				getOrSetGlassPane();
 				infiniteprogresspanel.start(finalText);
-
+				infiniteprogresspanel.revalidate();
 				infiniteprogresspanel.repaint();
 			}
 		};

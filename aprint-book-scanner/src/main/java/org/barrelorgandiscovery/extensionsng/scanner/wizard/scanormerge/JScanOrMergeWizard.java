@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.lf5.LF5Appender;
+import org.barrelorgandiscovery.extensionsng.scanner.Messages;
 import org.barrelorgandiscovery.extensionsng.scanner.wizard.JChooseFolderStep;
 import org.barrelorgandiscovery.extensionsng.scanner.wizard.JMergeImagesStep;
 import org.barrelorgandiscovery.extensionsng.scanner.wizard.JOutputFolderChooserStep;
@@ -46,7 +47,7 @@ public class JScanOrMergeWizard extends JPanel {
 
 		// scan steps
 		JOutputFolderChooserStep s = new JOutputFolderChooserStep(null, ps);
-		s.setLabelOutputFolder("Choose Written Output Folder for images ...");
+		s.setLabelOutputFolder(Messages.getString("JScanOrMergeWizard.0")); //$NON-NLS-1$
 		JScanParameterStep p = new JScanParameterStep(s, ps);
 		JScanStep scanStep = new JScanStep(p, s);
 		
@@ -82,7 +83,7 @@ public class JScanOrMergeWizard extends JPanel {
 		APrintProperties aPrintProperties = new APrintProperties(false);
 		Repository2 rep = Repository2Factory.create(new Properties(), aPrintProperties);
 
-		FilePrefsStorage p = new FilePrefsStorage(new File("c:\\temp\\wizardscan.properties"));
+		FilePrefsStorage p = new FilePrefsStorage(new File("c:\\temp\\wizardscan.properties")); //$NON-NLS-1$
 		p.load();
 
 		JFrame f = new JFrame();
