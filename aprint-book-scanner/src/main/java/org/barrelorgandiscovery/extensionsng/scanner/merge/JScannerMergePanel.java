@@ -29,6 +29,7 @@ import java.util.zip.ZipOutputStream;
 import javax.imageio.ImageIO;
 import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
+import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -56,6 +57,7 @@ import org.barrelorgandiscovery.gui.ProgressIndicator;
 import org.barrelorgandiscovery.gui.aedit.ImageAndHolesVisualizationLayer;
 import org.barrelorgandiscovery.gui.aedit.JEditableVirtualBookComponent;
 import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
+import org.barrelorgandiscovery.gui.aedit.PipeSetGroupLayer;
 import org.barrelorgandiscovery.gui.aedit.toolbar.JVBToolingToolbar;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
 import org.barrelorgandiscovery.gui.aprint.instrumentchoice.JInstrumentCombo;
@@ -165,23 +167,20 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 
 		overlappixelsspinner = new JSpinner(new SpinnerNumberModel(52.0, 5.0, 300.0, 0.1));
 
-		
-		GridView imageSlider = (GridView)fp.getFormAccessor().getComponentByName("displacementgrid"); //$NON-NLS-1$
-		TitledBorder border = (TitledBorder)imageSlider.getBorder();
+		GridView imageSlider = (GridView) fp.getFormAccessor().getComponentByName("displacementgrid"); //$NON-NLS-1$
+		TitledBorder border = (TitledBorder) imageSlider.getBorder();
 		border.setTitle(Messages.getString("JScannerMergePanel.1")); //$NON-NLS-1$
-		
+
 		FormAccessor formAccessorParameters = fp.getFormAccessor("parameters"); //$NON-NLS-1$
 
-		GridView parametersGridView = (GridView)fp.getComponentByName("parameters"); //$NON-NLS-1$
-		TitledBorder borderParameters = (TitledBorder)parametersGridView.getBorder();
+		GridView parametersGridView = (GridView) fp.getComponentByName("parameters"); //$NON-NLS-1$
+		TitledBorder borderParameters = (TitledBorder) parametersGridView.getBorder();
 		borderParameters.setTitle(Messages.getString("JScannerMergePanel.8")); //$NON-NLS-1$
-		
-		
+
 		JLabel overlapppixelslabel = formAccessorParameters.getLabel("overlappixelslabel"); //$NON-NLS-1$
 		overlapppixelslabel.setText(Messages.getString("JScannerMergePanel.7")); //$NON-NLS-1$
 
 		formAccessorParameters.replaceBean("overlappixels", overlappixelsspinner); //$NON-NLS-1$
-
 
 		// load and save parameters
 		AbstractButton saveparameters = formAccessorParameters.getButton("saveparameters"); //$NON-NLS-1$
@@ -230,30 +229,23 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 
 		AbstractButton btnautoparameters = formAccessorParameters.getButton("btnautoparameters"); //$NON-NLS-1$
 
-		
 		btnautoparameters.setAction(new AutomaticDetectionComputing(this));
 		btnautoparameters.setText(Messages.getString("JScannerMergePanel.16")); //$NON-NLS-1$
 		btnautoparameters.setIcon(new ImageIcon(getClass().getResource("editshred.png")));//$NON-NLS-1$
-		
+
 		btnautoparameters.setToolTipText(Messages.getString("JScannerMergePanel.0")); //$NON-NLS-1$
-		
+
 		JLabel lblsave = formAccessorParameters.getLabel("lblsave"); //$NON-NLS-1$
 		lblsave.setText(Messages.getString("JScannerMergePanel.3")); //$NON-NLS-1$
-		
-		
-		
-		
-		
+
 		// construct result
 		JEditableVirtualBookComponent evbc = new JEditableVirtualBookComponent();
 		resultPreview = evbc;
 		resultPreview.setVirtualBook(new VirtualBook(Scale.getGammeMidiInstance()));
 
-		
 		JVBToolingToolbar toolsResultVB = new JVBToolingToolbar(evbc, null, null);
 		fp.getFormAccessor().replaceBean(fp.getComponentByName("lblpostoolbar"), toolsResultVB);//$NON-NLS-1$
-		
-		
+
 		bookPreview = new ImageAndHolesVisualizationLayer();
 		resultPreview.addLayer(bookPreview);
 		bookPreview.setVisible(true);
@@ -262,6 +254,19 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 		resultPreview.addLayer(workingLayer);
 		workingLayer.setBackgroundimage(ImageTools.loadImage(getClass().getResource("cd.png"))); //$NON-NLS-1$
 		workingLayer.setDisableRescale(true);
+
+		PipeSetGroupLayer pipesetgroupLayer = new PipeSetGroupLayer();
+		resultPreview.addLayer(pipesetgroupLayer);
+		final JCheckBox jCheckBox = new JCheckBox("Display colors");
+		
+		jCheckBox.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				pipesetgroupLayer.setVisible(jCheckBox.isSelected());
+				resultPreview.repaint();
+			}
+		});
+		toolsResultVB.add(jCheckBox);
 
 		workImageDisplay = new JDisplay();
 
@@ -277,7 +282,7 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 		FormAccessor resultfunctions = fp.getFormAccessor("resultfunctions"); //$NON-NLS-1$
 
 		currentResultImageSlider = (JSlider) resultfunctions.getComponentByName("currentresultimage"); //$NON-NLS-1$
-		
+
 		currentResultImageSlider.setMaximum(folderimagecount);
 		currentResultImageSlider.setMajorTickSpacing(150);
 		currentResultImageSlider.setMinorTickSpacing(50);
@@ -417,10 +422,9 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 
 		fp.getFormAccessor().replaceBean("displayresult", resultPreview); //$NON-NLS-1$
 
-	
 		JInstrumentCombo jInstrumentCombo = new JInstrumentCombo(repository);
 		jInstrumentCombo.setLabel(Messages.getString("JScannerMergePanel.5")); //$NON-NLS-1$
-		
+
 		fp.getFormAccessor().replaceBean("toolbarResults", jInstrumentCombo); //$NON-NLS-1$
 		jInstrumentCombo.setChoiceListener((instrument) -> {
 			if (instrument != null) {
@@ -453,7 +457,7 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 							savedFile = new File(savedFile.getParentFile(),
 									savedFile.getName() + BookImage.BOOKIMAGE_EXTENSION);
 						}
-						
+
 						final File finalSavedFile = savedFile;
 
 						CancelTracker cancelTracker = new CancelTracker();
@@ -461,17 +465,19 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 
 							@Override
 							public void progress(double progress, String message) {
-								infiniteChangeText(Messages.getString("JScannerMergePanel.31") + (int)(progress * 100) + " %"); //$NON-NLS-1$ //$NON-NLS-2$
+								infiniteChangeText(
+										Messages.getString("JScannerMergePanel.31") + (int) (progress * 100) + " %"); //$NON-NLS-1$ //$NON-NLS-2$
 							}
 						};
 						executor.submit(() -> {
-							
+
 							infiniteStartWait(Messages.getString("JScannerMergePanel.33"), cancelTracker); //$NON-NLS-1$
 							try {
 								saveImage(finalSavedFile, cancelTracker, p);
 								preferences.setFileProperty("mergescannerfolder", finalSavedFile); //$NON-NLS-1$
 							} catch (Exception ex) {
 								logger.error(ex.getMessage(), ex);
+								JMessageBox.showError(this, ex);
 							} finally {
 								infiniteEndWait();
 							}
@@ -558,15 +564,15 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 
 		// draw to angle point
 		p.lineTo(anglePoint.x, anglePoint.y);
-		
-		// 
+
+		//
 		boolean positive = distanceVect.vectorielZ(angleVect) > 0;
 
 		MathVect topVect = angleVect.rotate(-Math.PI / 2).orthoNorme().scale(distanceVect.norme());
 		if (!positive) {
 			topVect = topVect.scale(-1.0);
 		}
-		
+
 		MathVect topPos = topVect.plus(angleVect).plus(originVect);
 		p.lineTo(topPos.getX(), topPos.getY());
 
@@ -730,6 +736,10 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 			int output_imageheight, Number overlapPixels, int startImage, int lastImage, int offsetForFirstImage,
 			ICancelTracker cancelTracker) throws Exception {
 
+		if (cancelTracker != null && cancelTracker.isCanceled()) {
+			return null;
+		}
+
 		// clone the model
 		final ImageBookMergeModel innerModel = (ImageBookMergeModel) org.barrelorgandiscovery.extensionsng.scanner.wizard.scanormerge.SerializeTools
 				.deepClone(model);
@@ -745,6 +755,10 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 				}
 				nbpixels[x][y] = 0;
 			}
+		}
+
+		if (cancelTracker != null && cancelTracker.isCanceled()) {
+			return null;
 		}
 
 		int imageCount = perfoScanFolder.getImageCount();
@@ -881,7 +895,12 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 
 					BufferedImage img = constructMergeImage(sliceWidth, height, height, overlappDistance,
 							indexFirstImage, lastIndexImage,
-							(int) ((indexFirstImage) * overlappDistance - initialPixelOfGeneratedImage), null);
+							(int) ((indexFirstImage) * overlappDistance - initialPixelOfGeneratedImage), cancelTracker);
+
+					if (cancelTracker != null && cancelTracker.isCanceled()) {
+						logger.info("save canceled by the user"); //$NON-NLS-1$
+						return;
+					}
 
 					ZipEntry ze = new ZipEntry(ZipBookImage.constructEntryName(currentimageindex));
 					zipOutputStream.putNextEntry(ze);
@@ -893,7 +912,8 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 					int imageCount = perfoScanFolder.getImageCount();
 					try {
 						if (progress != null)
-							progress.progress(1.0 * currentimageindex / imageCount, Messages.getString("JScannerMergePanel.46") + currentimageindex); //$NON-NLS-1$
+							progress.progress(1.0 * currentimageindex / imageCount,
+									Messages.getString("JScannerMergePanel.46") + currentimageindex); //$NON-NLS-1$
 					} catch (Throwable t) {
 						logger.error(t.getMessage(), t);
 					}
@@ -1041,7 +1061,8 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
-		Loader.load(opencv_java.class);
-		testWithVideo();
+		// Loader.load(opencv_java.class);
+		// testWithVideo();
+		testWithImageFolder();
 	}
 }

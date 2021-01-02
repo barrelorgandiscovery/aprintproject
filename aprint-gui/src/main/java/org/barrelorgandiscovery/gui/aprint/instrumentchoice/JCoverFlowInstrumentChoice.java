@@ -134,6 +134,24 @@ public class JCoverFlowInstrumentChoice extends JPanel implements
 		return false;
 	}
 	
+	/**
+	 * get the first existing instrument, or null if none
+	 * @return
+	 */
+	public Instrument getFirstInstrument() {
+		List<ImageFlowItem> items = imageFlow.getItems();
+		if (items != null && items.size() > 0) {
+			InstrumentItemFlow iflow = (InstrumentItemFlow) items.get(0);
+			if (iflow != null) {
+				return iflow.instrument;
+			}
+		}
+		
+		return null;
+	}
+	
+	
+	
 	public void reloadInstruments() {
 
 		Instrument lastInstrumentBeforeReload = getCurrentInstrument();

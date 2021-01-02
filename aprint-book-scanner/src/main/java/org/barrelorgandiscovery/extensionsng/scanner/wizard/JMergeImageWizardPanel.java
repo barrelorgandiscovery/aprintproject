@@ -19,50 +19,49 @@ import org.barrelorgandiscovery.repository.Repository2Factory;
 
 public class JMergeImageWizardPanel extends JPanel {
 
-  private IPrefsStorage ps;
+	private IPrefsStorage ps;
 
-  private Wizard wizard;
-  
-  private Repository2 repository;
+	private Wizard wizard;
 
-  public JMergeImageWizardPanel(IPrefsStorage ps, Repository2 repository) throws Exception {
-    this.ps = ps;
-    this.repository = repository;
-    initComponents();
-  }
+	private Repository2 repository;
 
-  protected void initComponents() throws Exception {
+	public JMergeImageWizardPanel(IPrefsStorage ps, Repository2 repository) throws Exception {
+		this.ps = ps;
+		this.repository = repository;
+		initComponents();
+	}
 
-	// folder step for choosing folder
-    JChooseFolderStep s = new JChooseFolderStep(ps);
+	protected void initComponents() throws Exception {
 
-    JMergeImagesStep m = new JMergeImagesStep(s, ps, repository);
+		// folder step for choosing folder
+		JChooseFolderStep s = new JChooseFolderStep(ps);
 
-    wizard = new Wizard(Arrays.asList(s, m), null);
+		JMergeImagesStep m = new JMergeImagesStep(s, ps, repository);
 
-    setLayout(new BorderLayout());
-    add(wizard, BorderLayout.CENTER);
+		wizard = new Wizard(Arrays.asList(s, m), null);
 
-    wizard.toFirst();
-  }
+		setLayout(new BorderLayout());
+		add(wizard, BorderLayout.CENTER);
 
-  public static void main(String[] args) throws Exception {
+		wizard.toFirst();
+	}
 
-	  BasicConfigurator.configure(new LF5Appender());
-	  
-	  
-	  FilePrefsStorage p = new FilePrefsStorage(new File("c:\\temp\\preferencesStorage.properties"));
-	    p.load();
+	public static void main(String[] args) throws Exception {
+
+		BasicConfigurator.configure(new LF5Appender());
+
+		FilePrefsStorage p = new FilePrefsStorage(new File("c:\\temp\\preferencesStorage.properties"));
+		p.load();
 
 		APrintProperties aPrintProperties = new APrintProperties(false);
 		Repository2 repository = Repository2Factory.create(new Properties(), aPrintProperties);
-	    
-    JFrame f = new JFrame();
-    f.getContentPane().setLayout(new BorderLayout());
-    f.getContentPane().add(new JMergeImageWizardPanel(p, repository), BorderLayout.CENTER);
 
-    f.setSize(800, 600);
-    f.setVisible(true);
-    f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-  }
+		JFrame f = new JFrame();
+		f.getContentPane().setLayout(new BorderLayout());
+		f.getContentPane().add(new JMergeImageWizardPanel(p, repository), BorderLayout.CENTER);
+
+		f.setSize(800, 600);
+		f.setVisible(true);
+		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+	}
 }

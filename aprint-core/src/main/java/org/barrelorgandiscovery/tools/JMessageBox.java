@@ -90,8 +90,17 @@ public class JMessageBox extends JDialog implements ActionListener {
 
 	}
 
+	/**
+	 * display error message
+	 * @param parent
+	 * @param t
+	 */
 	public static void showError(Object parent, Throwable t) {
-		showMessage(parent, "An error has been raised :" + t.getMessage()
+		String message = t.getMessage();
+		if (message == null) {
+			message = "";
+		}
+		showMessage(parent, "An error has been raised :" + message
 				+ "\n" + "Please see logs");
 	}
 

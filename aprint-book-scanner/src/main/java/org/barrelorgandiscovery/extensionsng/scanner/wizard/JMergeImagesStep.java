@@ -26,8 +26,6 @@ public class JMergeImagesStep extends BasePanelStep {
 	
 	private JScannerMergePanel mergePanel;
 
-	private IFamilyImageSeeker perfoScanFolder;
-
 	private IPrefsStorage ps;
 	private Repository2 repository;
 

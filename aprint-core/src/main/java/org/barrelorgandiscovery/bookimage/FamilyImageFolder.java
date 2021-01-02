@@ -35,7 +35,7 @@ public class FamilyImageFolder implements IFamilyImageSeeker {
 		this.filePatternMatching = filePatternMatching;
 		
 		refreshListFiles(folder);		
-		this.count = this.allFiles.length;
+		
 		
 	}
 
@@ -64,6 +64,7 @@ public class FamilyImageFolder implements IFamilyImageSeeker {
 			}
 		});
 		this.allFiles = allFiles;
+		this.count = this.allFiles.length;
 	}
 
 	/**

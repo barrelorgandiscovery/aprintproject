@@ -67,12 +67,12 @@ public class StepChooseFilesAndInstrument extends BasePanelStep {
 	 * ImageDisplayer
 	 */
 	private JImageDisplayLayer imagelayer;
-	
+
 	/**
 	 * tiled imagelayer
 	 */
 	private JTiledImageDisplayLayer tiledImageLayer;
-	
+
 	/**
 	 * initial image file
 	 */
@@ -158,7 +158,7 @@ public class StepChooseFilesAndInstrument extends BasePanelStep {
 
 		this.imagelayer = new JImageDisplayLayer();
 		display.addLayer(imagelayer);
-		
+
 		this.tiledImageLayer = new JTiledImageDisplayLayer(display);
 		display.addLayer(tiledImageLayer);
 
@@ -213,8 +213,18 @@ public class StepChooseFilesAndInstrument extends BasePanelStep {
 
 		display.fit();
 
-		internalChangeInstrumentName(currentState.instrumentName);
+		if (currentState.instrumentName == null) {
+			// select first instrument
 
+			Instrument firstOne = instrumentChooser.getFirstInstrument();
+			if (firstOne != null) {
+				currentState.instrumentName = firstOne.getName();
+			}
+		}
+
+		if (currentState.instrumentName != null) {
+			internalChangeInstrumentName(currentState.instrumentName);
+		}
 		this.stepChangedListener = stepChangedListener;
 
 	}
@@ -266,12 +276,12 @@ public class StepChooseFilesAndInstrument extends BasePanelStep {
 		if (selectedFile != null) {
 
 			if (selectedFile.getName().endsWith(BookImage.BOOKIMAGE_EXTENSION)) {
-				
+
 				ZipBookImage bookImage = new ZipBookImage(selectedFile);
 				tiledImageLayer.setImageToDisplay(bookImage);
 				tiledImageLayer.setVisible(true);
 				imagelayer.setVisible(false);
-				
+
 			} else {
 
 				try {
@@ -282,12 +292,10 @@ public class StepChooseFilesAndInstrument extends BasePanelStep {
 				} catch (Exception ex) {
 					logger.error("error while loading the image :" + ex.getMessage(), ex); //$NON-NLS-1$
 				}
-				
+
 			}
 
 		}
-		
-		
 
 		imageFile = selectedFile;
 		display.fit();
