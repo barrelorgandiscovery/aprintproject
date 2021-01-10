@@ -41,6 +41,8 @@ import org.barrelorgandiscovery.gui.wizard.WizardStates;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.tools.JMessageBox;
+import org.barrelorgandiscovery.tools.SerializeTools;
+import org.barrelorgandiscovery.tools.StreamsTools;
 import org.barrelorgandiscovery.ui.tools.VFSTools;
 import org.barrelorgandiscovery.virtualbook.Hole;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
@@ -243,8 +245,10 @@ public class StepResume extends JPanel implements Step {
 			super(prefsStorage, Messages.getString("StepResume.3")); //$NON-NLS-1$
 
 			getContentPane().setLayout(new BorderLayout());
-
-			PunchBookAndPlan reverseToHaveTheReferenceUp = reverseToHaveTheReferenceUp(vb, currentPlan);
+			
+			VirtualBook vbClone = SerializeTools.deepClone(vb);
+			
+			PunchBookAndPlan reverseToHaveTheReferenceUp = reverseToHaveTheReferenceUp(vbClone, currentPlan);
 			assert reverseToHaveTheReferenceUp != null;
 			assert reverseToHaveTheReferenceUp.punchplan != null;
 			assert reverseToHaveTheReferenceUp.virtualBook != null;

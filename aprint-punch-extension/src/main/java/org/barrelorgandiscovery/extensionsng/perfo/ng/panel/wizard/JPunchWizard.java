@@ -34,7 +34,7 @@ public class JPunchWizard extends JPanel implements Disposable {
 
 	private Wizard wizard;
 
-	public JPunchWizard(PunchLayer pl, IssueLayer il, AsyncJobsManager jobManager, IPrefsStorage ps,
+	public JPunchWizard(PunchLayer punchlayer, IssueLayer il, AsyncJobsManager jobManager, IPrefsStorage ps,
 			JVirtualBookScrollableComponent pianoroll) throws Exception {
 
 		assert ps != null;
@@ -42,7 +42,7 @@ public class JPunchWizard extends JPanel implements Disposable {
 
 		OptimizersRepository oRepository = new OptimizersRepository();
 
-		engine = new ProcessingOptimizerEngine(null, pl, il, null, oRepository);
+		engine = new ProcessingOptimizerEngine(null, punchlayer, il, null, oRepository);
 
 		engine.setAsyncManager(jobManager);
 
@@ -136,8 +136,6 @@ public class JPunchWizard extends JPanel implements Disposable {
 		splanning.setParentStep(stepChooseMachine);
 		StepResume sresume = new StepResume(stepChooseMachine, vb.virtualBook, prefsStorage);
 		sresume.setParentStep(splanning);
-		
-		
 		
 
 		List<Step> steps = new ArrayList<Step>();

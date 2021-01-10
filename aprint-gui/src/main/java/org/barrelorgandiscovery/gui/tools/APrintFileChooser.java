@@ -21,7 +21,7 @@ import com.googlecode.vfsjfilechooser2.VFSJFileChooser.SELECTION_MODE;
  *
  */
 public class APrintFileChooser {
-	
+
 	private static Logger logger = Logger.getLogger(APrintFileChooser.class);
 
 	/** Instruction to display only files. */
@@ -82,7 +82,11 @@ public class APrintFileChooser {
 	}
 
 	public APrintFileChooser(File currentDir) {
-		this.fileChooser = new VFSJFileChooser(currentDir);
+		if (currentDir != null) {
+			this.fileChooser = new VFSJFileChooser(currentDir);
+		} else {
+			this.fileChooser = new VFSJFileChooser();
+		}
 		customizeFileView();
 	}
 
@@ -101,6 +105,11 @@ public class APrintFileChooser {
 	}
 
 	public static AbstractFileObject convertToFileObject(File selectedFile) throws FileSystemException {
+		
+		if (selectedFile == null) {
+			return null;
+		}
+		
 		FileSystemManager fsManager = VFS.getManager();
 		AbstractFileObject fileObject = (AbstractFileObject) fsManager.resolveFile(selectedFile.getParentFile(),
 				selectedFile.getName());
@@ -108,6 +117,7 @@ public class APrintFileChooser {
 	}
 
 	public void setSelectedFile(AbstractFileObject selectedFile) {
+		// tolerant to null
 		this.fileChooser.setSelectedFile(selectedFile);
 	}
 
@@ -149,6 +159,10 @@ public class APrintFileChooser {
 	}
 
 	public void addFileFilter(VFSFileNameExtensionFilter fileFilter) {
+		if (fileFilter == null) {
+			logger.warn("add FileFilter called with null");
+			return;
+		}
 		fileChooser.addChoosableFileFilter(fileFilter);
 	}
 
@@ -169,7 +183,7 @@ public class APrintFileChooser {
 	}
 
 	public int showOpenDialog(Component parentComponent) {
-
+		// tolerant to null
 		RETURN_TYPE ret = fileChooser.showOpenDialog(parentComponent);
 		return convertToFileChooserOption(ret);
 	}
@@ -179,7 +193,6 @@ public class APrintFileChooser {
 			switch (ret) {
 			case APPROVE:
 				return this.APPROVE_OPTION;
-
 			case CANCEL:
 				return this.CANCEL_OPTION;
 			case ERROR:
