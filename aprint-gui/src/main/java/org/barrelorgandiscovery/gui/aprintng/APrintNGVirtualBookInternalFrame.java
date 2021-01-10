@@ -231,7 +231,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 						if (f.getName().toLowerCase().endsWith(BookImage.BOOKIMAGE_EXTENSION)) {
 
 							ZipBookImage zbook = new ZipBookImage(f);
-							
+
 							imageBackGroundLayer.setTiledBackgroundimage(zbook);
 						} else if (f.isDirectory()) {
 
@@ -362,7 +362,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 	private JButton lengthButton = new JButton();
 
 	private JSlider tempoFactorSlider = new JSlider();
-	
+
 	private float crossThreadTempoSlider = 1.0f;
 
 	public APrintNGVirtualBookInternalFrame(VirtualBook vb, AbstractFileObject virtualBookFile, IssueCollection ic,
@@ -558,7 +558,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		pianoroll.fitToScreen();
 
 		aSyncPreparePlayin = new ASyncPreparePlayin();
-		
+
 		tempoFactorSlider.setToolTipText("Play Tempo Change");
 
 		clearVirtualBookState();
@@ -658,6 +658,8 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		});
 		editMenu.add(undo);
 
+		editMenu.addSeparator();
+
 		JMenuItem copy = new JMenuItem(Messages.getString("APrintNGVirtualBookInternalFrame.2013")); //$NON-NLS-1$
 		copy.setMnemonic('c');
 		copy.setAccelerator(KeyStroke.getKeyStroke("control C")); //$NON-NLS-1$
@@ -694,6 +696,48 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		});
 		editMenu.add(paste);
 
+		editMenu.addSeparator();
+		JMenuItem selectAll = new JMenuItem("Selected All");
+		selectAll.setMnemonic('a');
+		selectAll.setAccelerator(KeyStroke.getKeyStroke("control a"));//$NON-NLS-1$
+		selectAll.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+
+					selectAll();
+
+					pianoroll.repaint();
+
+				} catch (Exception ex) {
+					logger.error(ex.getMessage(), ex);
+					BugReporter.sendBugReport();
+				}
+
+			}
+		});
+		editMenu.add(selectAll);
+		
+		JMenuItem selectNone = new JMenuItem("Selected None");
+		selectNone.setAccelerator(KeyStroke.getKeyStroke("control shift a"));//$NON-NLS-1$
+		selectNone.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+
+					selectNone();
+
+					pianoroll.repaint();
+
+				} catch (Exception ex) {
+					logger.error(ex.getMessage(), ex);
+					BugReporter.sendBugReport();
+				}
+
+			}
+		});
+		editMenu.add(selectNone);
+		
 		editMenu.addSeparator();
 
 		editMenu.add(new SetBackGroundAction("Définir l'image de fond du carton .."));
@@ -2952,6 +2996,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 
 	/**
 	 * quick script element
+	 * 
 	 * @author pfreydiere
 	 *
 	 */
@@ -3105,7 +3150,6 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 
 												groovyFrame.setVisible(false);
 												groovyFrame.dispose();
-
 
 											} catch (Exception ex) {
 												logger.error("error in executing script :" //$NON-NLS-1$
@@ -3283,5 +3327,14 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 				JMessageBox.showError(this, ex);
 			}
 		}
+	}
+
+	public void selectAll() throws Exception {
+		VirtualBook currentBook = pianoroll.getVirtualBook();
+		currentBook.getOrderedHolesCopy().stream().forEach((h) -> pianoroll.addToSelection(h));
+	}
+	
+	public void selectNone() throws Exception {
+		pianoroll.clearSelection();
 	}
 }
