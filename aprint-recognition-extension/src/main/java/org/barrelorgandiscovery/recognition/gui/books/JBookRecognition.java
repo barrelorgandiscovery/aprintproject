@@ -34,6 +34,8 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.lf5.LF5Appender;
 import org.barrelorgandiscovery.bookimage.BookImage;
+import org.barrelorgandiscovery.bookimage.ZipBookImage;
+import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
 import org.barrelorgandiscovery.gui.aprintng.APrintNGGeneralServices;
 import org.barrelorgandiscovery.gui.aprintng.APrintNGVirtualBookFrame;
@@ -45,10 +47,15 @@ import org.barrelorgandiscovery.gui.wizard.StepBeforeChanged;
 import org.barrelorgandiscovery.gui.wizard.StepChanged;
 import org.barrelorgandiscovery.gui.wizard.Wizard;
 import org.barrelorgandiscovery.gui.wizard.WizardStates;
+import org.barrelorgandiscovery.images.books.tools.BookImageRecognitionTiledImage;
+import org.barrelorgandiscovery.images.books.tools.IFileFamilyTiledImage;
+import org.barrelorgandiscovery.images.books.tools.RecognitionTiledImage;
 import org.barrelorgandiscovery.images.books.tools.TiledImage;
 import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
+import org.barrelorgandiscovery.recognition.gui.books.states.EdgesStates;
+import org.barrelorgandiscovery.recognition.gui.books.steps.ProcessEdges;
 import org.barrelorgandiscovery.recognition.gui.books.steps.StepChooseEdges;
 import org.barrelorgandiscovery.recognition.gui.books.steps.StepModelChooseChoice;
 import org.barrelorgandiscovery.recognition.gui.books.steps.StepViewAndEditBook;
@@ -83,9 +90,10 @@ public class JBookRecognition extends JPanel {
 	private static Logger logger = Logger.getLogger(JBookRecognition.class);
 
 	public static final String STEP_INSTRUMENTS_AND_IMAGE = "instrumentsAndImage"; //$NON-NLS-1$
-	public static final String STEP_VIEW_AND_EDIT = "view_and_edit"; //$NON-NLS-1$
+	// public static final String STEP_VIEW_AND_EDIT = "view_and_edit";
+	// //$NON-NLS-1$
 	public static final String STEP_EDGES_RECOGNITION = "edges_recognition"; //$NON-NLS-1$
-	public static final String STEP_CHOOSE_MODEL = "choose_model"; //$NON-NLS-1$
+	// public static final String STEP_CHOOSE_MODEL = "choose_model"; //$NON-NLS-1$
 
 	// public static final int MAX_HEIGHT_WIDTH = 800;
 
@@ -107,7 +115,7 @@ public class JBookRecognition extends JPanel {
 
 	private StepChooseEdges stepEdges;
 
-	private StepModelChooseChoice chooseModelStep;
+	// private StepModelChooseChoice chooseModelStep;
 
 	public JBookRecognition(Repository2 repository, IPrefsStorage prefsStorage, APrintNGGeneralServices services,
 			IAPrintWait waitFrame) throws Exception {
@@ -159,7 +167,7 @@ public class JBookRecognition extends JPanel {
 							try {
 								Serializable s = (Serializable) SerializeTools.load(is);
 								// loaded
-								wizard.reloadStatesIfPossible(s, new Step[] { chooseModelStep, stepEdges, stepEdit });
+								wizard.reloadStatesIfPossible(s, new Step[] { stepEdges });
 							} finally {
 								is.close();
 							}
@@ -168,9 +176,9 @@ public class JBookRecognition extends JPanel {
 						}
 
 						if (!imageFile.getName().endsWith(BookImage.BOOKIMAGE_EXTENSION)) {
-							
+
 							// this is an image file
-							
+
 							try (InputStream fis = new FileInputStream(imageFile)) {
 								Dimension d = TiledImage.readImageSize(fis);
 								if (d.getHeight() > 800) {
@@ -203,8 +211,7 @@ public class JBookRecognition extends JPanel {
 							}
 						} else {
 							assert imageFile.getName().endsWith(BookImage.BOOKIMAGE_EXTENSION);
-							
-							
+
 						}
 					}
 				}
@@ -250,14 +257,14 @@ public class JBookRecognition extends JPanel {
 		steps.add(stepChooseFilesAndInstrument);
 		stepChooseFilesAndInstrument.setDetails(Messages.getString("JDiskRecognition.0")); //$NON-NLS-1$
 
-		chooseModelStep = new StepModelChooseChoice(STEP_CHOOSE_MODEL, stepChooseFilesAndInstrument);
-		steps.add(chooseModelStep);
+//		chooseModelStep = new StepModelChooseChoice(STEP_CHOOSE_MODEL, stepChooseFilesAndInstrument);
+//		steps.add(chooseModelStep);
 
-		stepEdges = new StepChooseEdges(STEP_EDGES_RECOGNITION, chooseModelStep, repository);
+		stepEdges = new StepChooseEdges(STEP_EDGES_RECOGNITION, stepChooseFilesAndInstrument, repository);
 		steps.add(stepEdges);
 
-		stepEdit = new StepViewAndEditBook(STEP_VIEW_AND_EDIT, stepEdges, repository, waitFrame, services);
-		steps.add(stepEdit);
+//		stepEdit = new StepViewAndEditBook(STEP_VIEW_AND_EDIT, stepEdges, repository, waitFrame, services);
+//		steps.add(stepEdit);
 
 		// create wizard
 		wizard = new Wizard(steps, null);
@@ -273,17 +280,43 @@ public class JBookRecognition extends JPanel {
 					ImageFileAndInstrument dins = (ImageFileAndInstrument) ser.getState(STEP_INSTRUMENTS_AND_IMAGE);
 					Instrument ins = repository.getInstrument(dins.getInstrumentName());
 
-					Book b = (Book) ser.getState(STEP_VIEW_AND_EDIT);
+					File imageFile = dins.diskFile;
+					assert imageFile != null;
+
+					IFileFamilyTiledImage origin = null;
+					IFileFamilyTiledImage tiView = null;
+
+					if (imageFile.getName().endsWith(BookImage.BOOKIMAGE_EXTENSION)) {
+						origin = new BookImageRecognitionTiledImage(new ZipBookImage(imageFile));
+						tiView = new BookImageRecognitionTiledImage(new ZipBookImage(imageFile));
+					} else {
+						origin = new RecognitionTiledImage(imageFile);
+						tiView = new RecognitionTiledImage(imageFile);
+					}
+
+					// view the renormalized model
+
+					tiView.setCurrentImageFamilyDisplay("renormed");
 
 					// adjust virtualbook
-					VirtualBook vb = b.virtualbook;
+					VirtualBook vb = new VirtualBook(ins.getScale());
 
 					APrintNGVirtualBookFrame newframe = services.newVirtualBook(vb, ins);
 
 					APrintNGVirtualBookInternalFrame i = (APrintNGVirtualBookInternalFrame) newframe;
 					i.toggleDirty();
 
-					JMessageBox.showMessage(waitFrame, "the book is ready to play and edit"); //$NON-NLS-1$
+					EdgesStates edgesState = (EdgesStates) ser.getState(stepEdges);
+
+					ProcessEdges processEdges = new ProcessEdges();
+					JVirtualBookScrollableComponent pianoRoll = i.getPianoRoll();
+
+					processEdges.processImageEdges(origin, edgesState, vb.getScale(), tiView);
+					
+					i.setBackGroundImage(tiView);
+
+					// JMessageBox.showMessage(waitFrame, "the book is ready to play and edit");
+					// //$NON-NLS-1$
 
 				} catch (Exception ex) {
 					logger.error("error in finishing the wizard :" + ex.getMessage(), //$NON-NLS-1$

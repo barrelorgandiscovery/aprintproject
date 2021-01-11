@@ -8,6 +8,11 @@ import org.barrelorgandiscovery.bookimage.IFamilyImageSeeker;
 import org.barrelorgandiscovery.bookimage.ZipBookImage;
 import org.barrelorgandiscovery.tools.ImageTools;
 
+/**
+ * Book image object to handle long book scans
+ * @author pfreydiere
+ *
+ */
 public class BookImageRecognitionTiledImage implements ITiledImage, IFileFamilyTiledImage, IFamilyImageSeeker {
 
 	private ZipBookImage zipBookImage;

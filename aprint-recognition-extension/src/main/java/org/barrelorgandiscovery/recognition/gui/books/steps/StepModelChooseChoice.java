@@ -70,8 +70,11 @@ public class StepModelChooseChoice extends BasePanelStep implements Step, Dispos
 	private static Logger logger = Logger.getLogger(StepModelChooseChoice.class);
 
 	private JDisplay display;
+	
 	private JTiledImageDisplayLayer imageDisplayLayer;
 	private JTiledImageDisplayLayer modelpreviewImage;
+	
+	RecognitionTiledImage modelAndElements;
 
 	private Model currentmodel;
 
@@ -232,10 +235,8 @@ public class StepModelChooseChoice extends BasePanelStep implements Step, Dispos
 					@Override
 					public Void process(int index, BufferedImage tile) throws Exception {
 
-						
-						
-						File outputModelTile = ti.constructImagePath(index, selectedModel.getName());
-
+						assert modelAndElements != null;
+						File outputModelTile = modelAndElements.constructImagePath(index, selectedModel.getName());
 						if (!outputModelTile.exists()) // already computed ?
 						{
 							// compute
@@ -287,11 +288,9 @@ public class StepModelChooseChoice extends BasePanelStep implements Step, Dispos
 
 				progressBar.setValue((int) (Math.ceil(c.currentProgress() * 100)));
 
-				IFileFamilyTiledImage mo = (IFileFamilyTiledImage) imageDisplayLayer.getImageToDisplay();
+				modelAndElements.setCurrentImageFamilyDisplay(selectedModel.getName());
 
-				mo.setCurrentImageFamilyDisplay(selectedModel.getName());
-
-				modelpreviewImage.setImageToDisplay(mo);
+				modelpreviewImage.setImageToDisplay(modelAndElements);
 
 			} else {
 
@@ -430,6 +429,9 @@ public class StepModelChooseChoice extends BasePanelStep implements Step, Dispos
 		// get image
 		ImageFileAndInstrument d = allStepsStates.getPreviousStateImplementing(this, ImageFileAndInstrument.class);
 		if (d != null) {
+			
+			assert d.diskFile != null;
+			
 			File imageFile = d.diskFile;
 
 			if (imageFile.getName().endsWith(BookImage.BOOKIMAGE_EXTENSION)) {
@@ -447,6 +449,9 @@ public class StepModelChooseChoice extends BasePanelStep implements Step, Dispos
 				imageDisplayLayer.setImageToDisplay(ti);
 
 			}
+			
+			// write tiled image
+			this.modelAndElements = new RecognitionTiledImage(imageFile);
 
 		}
 

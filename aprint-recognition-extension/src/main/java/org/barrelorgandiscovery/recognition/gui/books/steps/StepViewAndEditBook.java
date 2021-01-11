@@ -140,11 +140,9 @@ public class StepViewAndEditBook extends BasePanelStep implements Disposable {
 
 		toolbarPanel.add(toolbar);
 		toolbarPanel.add(recognitionToolbar);
-
 		add(toolbarPanel, BorderLayout.NORTH);
 
 		// add save image informations button
-
 		JButton autoRecognition = new JButton(Messages.getString("StepViewAndEditDisk.1")); //$NON-NLS-1$
 		autoRecognition.setIcon(ImageTools.loadIcon(StepViewAndEditBook.class, "auto.png")); //$NON-NLS-1$
 		autoRecognition.setToolTipText(Messages.getString("StepViewAndEditDisk.3")); //$NON-NLS-1$

@@ -3,6 +3,12 @@ package org.barrelorgandiscovery.images.books.tools;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 
+/**
+ * interface for getting tiled images
+ * 
+ * @author pfreydiere
+ *
+ */
 public interface ITiledImage {
 
 	/**
@@ -25,8 +31,6 @@ public interface ITiledImage {
 	 * @return
 	 */
 	int getImageCount();
-
-
 
 	/**
 	 * grab the tile extend

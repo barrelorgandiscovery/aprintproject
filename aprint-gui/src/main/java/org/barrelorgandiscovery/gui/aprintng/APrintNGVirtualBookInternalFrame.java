@@ -132,6 +132,7 @@ import org.barrelorgandiscovery.gui.issues.JIssuePresenter;
 import org.barrelorgandiscovery.gui.script.groovy.APrintGroovyConsolePanel;
 import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
 import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
+import org.barrelorgandiscovery.images.books.tools.ITiledImage;
 import org.barrelorgandiscovery.images.books.tools.RecognitionTiledImage;
 import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.issues.IssueCollection;
@@ -601,6 +602,10 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 	public void setCurrentSavedFile(File currentSavedFile) throws Exception {
 		this.currentSavedFile = APrintFileChooser.convertToFileObject(currentSavedFile);
 		updateTitle();
+	}
+	
+	public void setBackGroundImage(ITiledImage tiledImage) {
+		imageBackGroundLayer.setTiledBackgroundimage(tiledImage);
 	}
 
 	/**
