@@ -13,7 +13,7 @@ import org.barrelorgandiscovery.tools.ImageTools;
  * @author pfreydiere
  *
  */
-public class BookImageRecognitionTiledImage implements ITiledImage, IFileFamilyTiledImage, IFamilyImageSeeker {
+public class BookImageRecognitionTiledImage implements ITiledImage, IFileFamilyTiledImage, IFamilyImageSeeker, IFamilyImageSeekerTiledImage {
 
 	private ZipBookImage zipBookImage;
 

@@ -9,8 +9,10 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +30,7 @@ import javax.swing.SwingUtilities;
 import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.bookimage.BookImage;
+import org.barrelorgandiscovery.bookimage.IFamilyImageSeeker;
 import org.barrelorgandiscovery.bookimage.ZipBookImage;
 import org.barrelorgandiscovery.gui.aedit.CreationTool;
 import org.barrelorgandiscovery.gui.aedit.CurrentToolChanged;
@@ -37,9 +40,15 @@ import org.barrelorgandiscovery.gui.aedit.JEditableVirtualBookComponent;
 import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
 import org.barrelorgandiscovery.gui.aedit.Tool;
 import org.barrelorgandiscovery.gui.aedit.UndoStack;
+import org.barrelorgandiscovery.gui.aedit.VirtualBookComponentLayer;
+import org.barrelorgandiscovery.gui.aprintng.APrintNGVirtualBookInternalFrame;
 import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
 import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.images.books.tools.BookImageRecognitionTiledImage;
+import org.barrelorgandiscovery.images.books.tools.IFamilyImageSeekerTiledImage;
+import org.barrelorgandiscovery.images.books.tools.IFileFamilyTiledImage;
+import org.barrelorgandiscovery.images.books.tools.ITiledImage;
+import org.barrelorgandiscovery.images.books.tools.RecognitionTiledImage;
 import org.barrelorgandiscovery.recognition.gui.books.BackgroundTileImageProcessingThread;
 import org.barrelorgandiscovery.recognition.gui.books.BackgroundTileImageProcessingThread.TileProcessing;
 import org.barrelorgandiscovery.recognition.gui.books.BackgroundTileImageProcessingThread.TiledProcessedListener;
@@ -61,13 +70,8 @@ import ij.ImagePlus;
 import ij.gui.ShapeRoi;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
-import trainableSegmentation.FeatureStack;
 import trainableSegmentation.WekaSegmentation;
-import weka.classifiers.functions.LinearRegression;
-import weka.classifiers.functions.Logistic;
-import weka.classifiers.meta.MultiClassClassifier;
 import weka.core.Instances;
-import weka.core.SelectedTag;
 
 public class JRecognitionVirtualBookPanel extends JPanel implements Disposable {
 
@@ -148,8 +152,8 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable {
 			try {
 
 				APrintFileChooser aPrintFileChooser = new APrintFileChooser();
-				aPrintFileChooser.addFileFilter(
-						new VFSFileNameExtensionFilter(Messages.getString("JRecognitionVirtualBookPanel.1"), new String[] { "png", "jpg", "jpeg" })); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+				aPrintFileChooser.addFileFilter(new VFSFileNameExtensionFilter(
+						Messages.getString("JRecognitionVirtualBookPanel.1"), new String[] { "png", "jpg", "jpeg" })); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
 
 				aPrintFileChooser.addFileFilter(new VFSFileNameExtensionFilter("Book image", //$NON-NLS-1$
 						new String[] { BookImage.BOOKIMAGE_EXTENSION_WITHOUT_DOT }));
@@ -183,9 +187,17 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable {
 		}
 	}
 
+	/**
+	 * visual layer for holes definition in training set
+	 */
 	LayerHoleAdd holeTool;
+	
+	/**
+	 * visual layer for book surface definition in training set
+	 */
 	LayerHoleAdd bookTool;
 
+	
 	protected void initComponents() throws Exception {
 
 		// init layers
@@ -320,7 +332,8 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable {
 
 				UndoStack us = virtualBookComponent.getUndoStack();
 				if (us != null) {
-					us.push(new GlobalVirtualBookUndoOperation(vb, Messages.getString("JRecognitionVirtualBookPanel.36"), virtualBookComponent)); //$NON-NLS-1$
+					us.push(new GlobalVirtualBookUndoOperation(vb,
+							Messages.getString("JRecognitionVirtualBookPanel.36"), virtualBookComponent)); //$NON-NLS-1$
 				}
 
 				vb.clear();
@@ -395,10 +408,20 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable {
 		ArrayList<Hole> holesHoles = holeRegionDisplay.getHoles();
 
 		// classify holes into training set
-		assert backgroundBook.getTiledBackgroundimage() instanceof ZipBookImage;
-		ZipBookImage zi = (ZipBookImage) backgroundBook.getTiledBackgroundimage();
+		IFamilyImageSeekerTiledImage imageToRecognize = (IFamilyImageSeekerTiledImage) getBackgroundImage();
 
-		BookImageRecognitionTiledImage tiledImage = new BookImageRecognitionTiledImage(zi);
+		IFileFamilyTiledImage ti = null;
+
+		if (imageToRecognize instanceof BookImage) {
+			ti = new BookImageRecognitionTiledImage((ZipBookImage)imageToRecognize);
+		} else if (imageToRecognize instanceof RecognitionTiledImage) {
+			ti = new RecognitionTiledImage((RecognitionTiledImage)imageToRecognize);
+		} else {
+			throw new Exception("unsupported image object format");
+		}
+		
+		final IFileFamilyTiledImage tiledImage = ti;
+
 		tiledImage.setCurrentImageFamilyDisplay(REC_INLINE_FAMILY);
 
 		recognitionDisplay.setTiledBackgroundimage(tiledImage);
@@ -426,7 +449,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable {
 		ws.setLoadedTrainingData(instances);
 
 		ws.doClassBalance();
-		//ws.selectAttributes();
+		// ws.selectAttributes();
 
 		ws.trainClassifier();
 
@@ -450,7 +473,6 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable {
 				int d2 = Math.abs(o2 - center);
 				return Integer.compare(d1, d2);
 			}
-
 		}
 
 		backGroundThread = new BackgroundTileImageProcessingThread<>(tiledImage, new TiledProcessedListener() {
@@ -485,7 +507,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable {
 			public Void process(int index, BufferedImage image) throws Exception {
 				ClassLoader old = Thread.currentThread().getContextClassLoader();
 
-				BufferedImage bi = zi.loadImage(index);
+				BufferedImage bi = imageToRecognize.loadImage(index);
 
 				ImagePlus ip = new ImagePlus();
 				ip.setImage(bi);
@@ -504,7 +526,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable {
 
 				Scale scale = virtualBookComponent.getVirtualBook().getScale();
 				ReadResultBag readResult = BookReadProcessor.readResult2(binary.getBufferedImage(),
-						index * zi.getWidth(), scale.mmToTime(scale.getWidth() / zi.getHeight()), scale, null, false,
+						index * imageToRecognize.getWidth(), scale.mmToTime(scale.getWidth() / imageToRecognize.getHeight()), scale, null, false,
 						150);
 
 				ArrayList<Hole> holes = recognitionDisplay.getHoles();
@@ -537,35 +559,61 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable {
 //		
 //		ws.setClassifier(mcc);
 //		
-		
+
 		// ws.updateClassifier(200, 6, 10);
 
 		boolean[] enabledFeatures = ws.getEnabledFeatures();
 //		for (int i = 0 ; i < enabledFeatures.length ; i ++) {
 //			enabledFeatures[i] = true;
 //		}
-/*
-		enabledFeatures[FeatureStack.DERIVATIVES] = false;
-
-		enabledFeatures[FeatureStack.GABOR] = true;
-		enabledFeatures[FeatureStack.LIPSCHITZ] = true;
-		// enabledFeatures[FeatureStack.HESSIAN] = true;
-		enabledFeatures[FeatureStack.NEIGHBORS] = true;
-		enabledFeatures[FeatureStack.GAUSSIAN] = true;
+		/*
+		 * enabledFeatures[FeatureStack.DERIVATIVES] = false;
+		 * 
+		 * enabledFeatures[FeatureStack.GABOR] = true;
+		 * enabledFeatures[FeatureStack.LIPSCHITZ] = true; //
+		 * enabledFeatures[FeatureStack.HESSIAN] = true;
+		 * enabledFeatures[FeatureStack.NEIGHBORS] = true;
+		 * enabledFeatures[FeatureStack.GAUSSIAN] = true;
+		 * 
+		 * enabledFeatures[FeatureStack.VARIANCE] = true;
+		 * enabledFeatures[FeatureStack.STRUCTURE] = true;
+		 * 
+		 * ws.setEnabledFeatures(enabledFeatures);
+		 */
+	}
+	
+	IFamilyImageSeekerTiledImage getBackgroundImage() {
+		ITiledImage t = backgroundBook.getTiledBackgroundimage();
+		if (t == null) {
+			
+			Optional<VirtualBookComponentLayer> ol = Arrays.stream( virtualBookComponent.getLayers()).filter( l -> (l instanceof ImageAndHolesVisualizationLayer) 
+					&& APrintNGVirtualBookInternalFrame.BACKGROUNDLAYER_INTERNALNAME.equals(((ImageAndHolesVisualizationLayer)l).getLayerInternalName() ))
+			
+			.findFirst();
+			;
+			
+			if (ol.isPresent()) {
+				t = ((ImageAndHolesVisualizationLayer)ol.get()).getTiledBackgroundimage();
+			}
+			
+		}
 		
-		enabledFeatures[FeatureStack.VARIANCE] = true;
-		enabledFeatures[FeatureStack.STRUCTURE] = true;
-
-		ws.setEnabledFeatures(enabledFeatures);
-		*/
+		if (t == null) {
+			return null;
+		}
+		
+		assert t instanceof IFamilyImageSeekerTiledImage;
+		return (IFamilyImageSeekerTiledImage)t;
 	}
 
 	private Instances constructTrainingSet(Instances instances, Hole hole, int classNo) throws Exception {
 		Scale scale = virtualBookComponent.getVirtualBook().getScale();
 
-		assert backgroundBook.getTiledBackgroundimage() instanceof ZipBookImage;
-		ZipBookImage zi = (ZipBookImage) backgroundBook.getTiledBackgroundimage();
+//		assert backgroundBook.getTiledBackgroundimage() instanceof ZipBookImage;
+//		ZipBookImage zi = (ZipBookImage) backgroundBook.getTiledBackgroundimage();
 
+		IFamilyImageSeekerTiledImage zi = getBackgroundImage();
+		
 		int height = zi.getHeight();
 
 		double mm = scale.timeToMM(hole.getTimestamp());

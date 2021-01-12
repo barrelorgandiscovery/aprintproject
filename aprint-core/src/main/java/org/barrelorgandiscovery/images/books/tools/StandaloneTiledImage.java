@@ -6,6 +6,12 @@ import java.io.File;
 
 import org.barrelorgandiscovery.bookimage.IFamilyImageSeeker;
 
+/**
+ * wrapper for standlone image into tiled images
+ * 
+ * @author pfreydiere
+ *
+ */
 public class StandaloneTiledImage implements ITiledImage, IFileBasedTiledImage, IFamilyImageSeeker {
 
 	BufferedImage image;

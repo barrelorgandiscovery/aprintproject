@@ -2,6 +2,7 @@ package org.barrelorgandiscovery.bookimage;
 
 import java.awt.image.BufferedImage;
 
+import org.barrelorgandiscovery.images.books.tools.IFamilyImageSeekerTiledImage;
 import org.barrelorgandiscovery.images.books.tools.ITiledImage;
 import org.barrelorgandiscovery.scale.Scale;
 
@@ -11,7 +12,7 @@ import org.barrelorgandiscovery.scale.Scale;
  * @author pfreydiere
  * 
  */
-public abstract class BookImage implements IFamilyImageSeeker, ITiledImage {
+public abstract class BookImage implements IFamilyImageSeekerTiledImage {
 
 	public static final String BOOKIMAGE_EXTENSION_WITHOUT_DOT = "bookimage";
 	public static final String BOOKIMAGE_EXTENSION = "." + BOOKIMAGE_EXTENSION_WITHOUT_DOT;

@@ -12,7 +12,7 @@ import org.barrelorgandiscovery.tools.ImageTools;
  * @author pfreydiere
  *
  */
-public class RecognitionTiledImage extends TiledImage implements IFileFamilyTiledImage, IFamilyImageSeeker {
+public class RecognitionTiledImage extends TiledImage implements IFileFamilyTiledImage, IFamilyImageSeeker,IFamilyImageSeekerTiledImage {
 
 	private String currentImageFamilyDisplay;
 

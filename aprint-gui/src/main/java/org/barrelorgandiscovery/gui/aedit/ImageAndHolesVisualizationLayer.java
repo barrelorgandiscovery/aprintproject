@@ -73,7 +73,17 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 	 * specific holes drawing color, red by default
 	 */
 	private Color holesColor = Color.red;
-
+	
+	private String layerInternalName = null;
+	
+	public void setLayerInternalName(String layerInternalName) {
+		this.layerInternalName = layerInternalName;
+	}
+	
+	public String getLayerInternalName() {
+		return layerInternalName;
+	}
+	
 	public void setHolesColor(Color holesColor) {
 		if (holesColor != null)
 			this.holesColor = holesColor;

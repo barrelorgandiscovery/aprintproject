@@ -21,6 +21,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.awt.image.BufferedImage;
 import java.awt.print.PageFormat;
 import java.awt.print.PrinterJob;
 import java.beans.PropertyChangeEvent;
@@ -193,6 +194,8 @@ import groovy.ui.GroovyMain;
  */
 public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		implements ActionListener, APrintNGVirtualBookFrame, ClipboardOwner {
+
+	public static final String BACKGROUNDLAYER_INTERNALNAME = "BACKGROUNDLAYER";
 
 	private static final String QUICK_SCRIPT_EXECUTE = Messages.getString("APrintNGVirtualBookInternalFrame.2001"); //$NON-NLS-1$
 
@@ -603,10 +606,16 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		this.currentSavedFile = APrintFileChooser.convertToFileObject(currentSavedFile);
 		updateTitle();
 	}
-	
+
+	/**
+	 * define the background image using a tiled image
+	 * 
+	 * @param tiledImage
+	 */
 	public void setBackGroundImage(ITiledImage tiledImage) {
 		imageBackGroundLayer.setTiledBackgroundimage(tiledImage);
 	}
+
 
 	/**
 	 * init the visual components
@@ -722,7 +731,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 			}
 		});
 		editMenu.add(selectAll);
-		
+
 		JMenuItem selectNone = new JMenuItem("Selected None");
 		selectNone.setAccelerator(KeyStroke.getKeyStroke("control shift a"));//$NON-NLS-1$
 		selectNone.addActionListener(new ActionListener() {
@@ -742,7 +751,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 			}
 		});
 		editMenu.add(selectNone);
-		
+
 		editMenu.addSeparator();
 
 		editMenu.add(new SetBackGroundAction("Définir l'image de fond du carton .."));
@@ -866,6 +875,8 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		pianoroll.addLayer(tcl);
 		pianoroll.addLayer(markerLayer);
 		pianoroll.addLayer(imageBackGroundLayer);
+		
+		imageBackGroundLayer.setLayerInternalName(BACKGROUNDLAYER_INTERNALNAME);
 
 		logger.debug("add layers from extensions"); //$NON-NLS-1$
 		LayersExtensionPoint[] allLayersPoints = ExtensionPointProvider.getAllPoints(LayersExtensionPoint.class, exts);
@@ -3338,7 +3349,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		VirtualBook currentBook = pianoroll.getVirtualBook();
 		currentBook.getOrderedHolesCopy().stream().forEach((h) -> pianoroll.addToSelection(h));
 	}
-	
+
 	public void selectNone() throws Exception {
 		pianoroll.clearSelection();
 	}

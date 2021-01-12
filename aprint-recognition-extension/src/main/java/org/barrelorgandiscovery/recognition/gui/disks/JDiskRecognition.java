@@ -2,10 +2,10 @@ package org.barrelorgandiscovery.recognition.gui.disks;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.Serializable;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Properties;
 
@@ -28,25 +28,31 @@ import org.barrelorgandiscovery.gui.wizard.StepBeforeChanged;
 import org.barrelorgandiscovery.gui.wizard.StepChanged;
 import org.barrelorgandiscovery.gui.wizard.Wizard;
 import org.barrelorgandiscovery.gui.wizard.WizardStates;
+import org.barrelorgandiscovery.images.books.tools.StandaloneTiledImage;
 import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.prefs.DummyPrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.JDiskTracksCorrectedLayer;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.StepChooseFilesAndInstrument;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.StepChooseOrientationAndBeginning;
+import org.barrelorgandiscovery.recognition.gui.disks.steps.StepChooseOrientationAndBeginning.AngleAndOrientation;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.StepMatchCenter;
-import org.barrelorgandiscovery.recognition.gui.disks.steps.StepViewAndEditDisk;
-import org.barrelorgandiscovery.recognition.gui.disks.steps.states.Book;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.states.INumericImage;
+import org.barrelorgandiscovery.recognition.gui.disks.steps.states.ImageFileAndInstrument;
+import org.barrelorgandiscovery.recognition.gui.disks.steps.states.PointsAndEllipseParameters;
 import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JEllipticLayer;
+import org.barrelorgandiscovery.recognition.math.EllipseParameters;
+import org.barrelorgandiscovery.recognition.math.MathVect;
 import org.barrelorgandiscovery.recognition.messages.Messages;
 import org.barrelorgandiscovery.repository.Repository2;
 import org.barrelorgandiscovery.repository.Repository2Factory;
+import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.tools.Disposable;
 import org.barrelorgandiscovery.tools.ImageTools;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.SerializeTools;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
+import org.barrelorgandiscovery.virtualbook.VirtualBook;
 import org.barrelorgandiscovery.virtualbook.VirtualBookMetadata;
 
 /**
@@ -57,7 +63,7 @@ import org.barrelorgandiscovery.virtualbook.VirtualBookMetadata;
  */
 public class JDiskRecognition extends JPanel implements Disposable {
 
-	private static final String STEP_VIEW_AND_EDIT = "view_and_edit"; //$NON-NLS-1$
+// 	private static final String STEP_VIEW_AND_EDIT = "view_and_edit"; //$NON-NLS-1$
 
 	public static final String STEP_SELECT_DISK_CONTOUR = "selectDiskContour"; //$NON-NLS-1$
 
@@ -87,7 +93,7 @@ public class JDiskRecognition extends JPanel implements Disposable {
 
 	private APrintNGGeneralServices services;
 
-	private StepViewAndEditDisk viewAndEditStep;
+// 	private StepViewAndEditDisk viewAndEditStep;
 
 	private IAPrintWait waitFrame;
 
@@ -108,6 +114,7 @@ public class JDiskRecognition extends JPanel implements Disposable {
 
 		initComponent();
 
+		assert wizard != null;
 		wizard.setStepChanged(new StepChanged() {
 
 			public void currentStepChanged(int stepNo, Serializable state) {
@@ -140,8 +147,8 @@ public class JDiskRecognition extends JPanel implements Disposable {
 								Serializable s = (Serializable) SerializeTools.load(serializeFile);
 								// loaded
 
-								wizard.reloadStatesIfPossible(s, new Step[] { chooseCenterStep, chooseContourStep,
-										chooseOrientationStep, viewAndEditStep });
+								wizard.reloadStatesIfPossible(s,
+										new Step[] { chooseCenterStep, chooseContourStep, chooseOrientationStep });
 
 							} catch (Exception ex) {
 								logger.error("error reading the saved state :" + ex.getMessage(), ex); //$NON-NLS-1$
@@ -155,6 +162,80 @@ public class JDiskRecognition extends JPanel implements Disposable {
 		});
 
 		// wizard.reinit(s);
+
+		wizard.setFinishedListener(new FinishedListener() {
+
+			@Override
+			public void finished(WizardStates ser) {
+				try {
+
+					ImageFileAndInstrument imageAndInstrument = ser.getInPreviousStates(chooseOrientationStep,
+							ImageFileAndInstrument.class);
+
+					BufferedImage source = ImageTools.loadImage(imageAndInstrument.diskFile);
+
+					BufferedImage croppedImage = ImageTools.crop(500, 500, source);
+
+					String currentInstrumentName = imageAndInstrument.instrumentName;
+					Instrument instrument = repository.getInstrument(currentInstrumentName);
+
+					// get the perimeter parameters
+
+					PointsAndEllipseParameters perimeterParameters = ser.getInPreviousStates(chooseOrientationStep,
+							PointsAndEllipseParameters.class);
+
+					PointsAndEllipseParameters centerParameters = ser.getInPreviousStates(chooseOrientationStep,
+							PointsAndEllipseParameters.class);
+
+					EllipseParameters ep = perimeterParameters.ellipseParameters;
+
+					double mean_radius = (ep.a + ep.b) / 2;
+					Scale scale = instrument.getScale();
+
+					// compute angle for start
+
+					AngleAndOrientation angleAndOrientation = ser.getInPreviousStates(chooseOrientationStep,
+							AngleAndOrientation.class);
+
+					// vector centre -> point
+					MathVect v = new MathVect(
+							new Point2D.Double(centerParameters.ellipseParameters.centre.x,
+									centerParameters.ellipseParameters.centre.y),
+							new Point2D.Double(angleAndOrientation.pointForAngle.getCenterX(),
+									angleAndOrientation.pointForAngle.getCenterY()));
+
+					double angleOrigine = v.angleOrigine();
+
+					double resolution_factor = 0.6; // ???? @@@
+
+					logger.debug("origin angle :" + angleOrigine); //$NON-NLS-1$
+					BufferedImage correctedImage = DiskImageTools.createCorrectedImage(source,
+							centerParameters.ellipseParameters.centre, ep, angleOrigine,
+							(int) (2 * Math.PI * mean_radius * resolution_factor),
+							(int) (mean_radius * resolution_factor));
+
+					VirtualBook virtualBook = new VirtualBook(instrument.getScale());
+					// adjust virtualbook
+					VirtualBookMetadata metadata = virtualBook.getMetadata();
+					if (metadata == null)
+						metadata = new VirtualBookMetadata();
+
+					metadata.setCover(croppedImage);
+					virtualBook.setMetadata(metadata);
+
+					APrintNGVirtualBookFrame newframe = services.newVirtualBook(virtualBook, instrument);
+
+					APrintNGVirtualBookInternalFrame i = (APrintNGVirtualBookInternalFrame) newframe;
+					i.toggleDirty();
+
+					i.setBackGroundImage(new StandaloneTiledImage(correctedImage));
+
+				} catch (Exception ex) {
+
+				}
+
+			}
+		});
 
 	}
 
@@ -197,61 +278,10 @@ public class JDiskRecognition extends JPanel implements Disposable {
 		chooseOrientationStep.setDetails(Messages.getString("JDiskRecognition.4")); //$NON-NLS-1$
 		steps.add(chooseOrientationStep);
 
-		viewAndEditStep = new StepViewAndEditDisk(STEP_VIEW_AND_EDIT, chooseOrientationStep, repository, waitFrame,
-				services);
-		viewAndEditStep.setDetails(Messages.getString("JDiskRecognition.5")); //$NON-NLS-1$
-		steps.add(viewAndEditStep);
-
 		wizard = new Wizard(steps, null);
 		setLayout(new BorderLayout());
 		add(wizard, BorderLayout.CENTER);
 
-		wizard.setFinishedListener(new FinishedListener() {
-
-			public void finished(WizardStates ser) {
-				try {
-
-					Serializable image = ser.getState(STEP_INSTRUMENTS_AND_IMAGE);
-					INumericImage numericImage = (INumericImage) image;
-					File imageFile = numericImage.getImageFile();
-
-					BufferedImage loadImage = ImageTools.loadImage(imageFile.toURL());
-					BufferedImage croppedImage = ImageTools.crop(500, 500, loadImage);
-
-					Serializable s = ser.getState(STEP_VIEW_AND_EDIT);
-					assert s != null;
-
-					Book b = (Book) s;
-					Instrument instrument = repository.getInstrument(b.instrumentName);
-					if (instrument == null) {
-						JMessageBox.showMessage(waitFrame,
-								Messages.getString("JDiskRecognition.10") + b.instrumentName); //$NON-NLS-1$
-						return;
-					}
-
-					// adjust virtualbook
-					VirtualBookMetadata metadata = b.virtualbook.getMetadata();
-					if (metadata == null)
-						metadata = new VirtualBookMetadata();
-					metadata.setCover(croppedImage);
-					b.virtualbook.setMetadata(metadata);
-
-					APrintNGVirtualBookFrame newframe = services.newVirtualBook(b.virtualbook, instrument);
-
-					APrintNGVirtualBookInternalFrame i = (APrintNGVirtualBookInternalFrame) newframe;
-					i.toggleDirty();
-
-					JMessageBox.showMessage(waitFrame, Messages.getString("JDiskRecognition.11")); //$NON-NLS-1$
-
-				} catch (Exception ex) {
-					logger.error("error in finishing the wizard :" + ex.getMessage(), //$NON-NLS-1$
-							ex);
-					BugReporter.sendBugReport();
-					JMessageBox.showError(waitFrame, ex);
-				}
-
-			}
-		});
 	}
 
 	public void setImageFile(File imageFile) throws Exception {
