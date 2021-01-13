@@ -32,6 +32,7 @@ import org.barrelorgandiscovery.images.books.tools.StandaloneTiledImage;
 import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.prefs.DummyPrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
+import org.barrelorgandiscovery.recognition.gui.bookext.IRecognitionToolWindowCommands;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.JDiskTracksCorrectedLayer;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.StepChooseFilesAndInstrument;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.StepChooseOrientationAndBeginning;
@@ -226,12 +227,22 @@ public class JDiskRecognition extends JPanel implements Disposable {
 					APrintNGVirtualBookFrame newframe = services.newVirtualBook(virtualBook, instrument);
 
 					APrintNGVirtualBookInternalFrame i = (APrintNGVirtualBookInternalFrame) newframe;
+					
+					IRecognitionToolWindowCommands[] extensionPointRecognition = i.getExtensionPoints(IRecognitionToolWindowCommands.class);
+					if (extensionPointRecognition == null || extensionPointRecognition.length != 1) {
+						throw new Exception("no toolwindoww found");
+					}
+						
 					i.toggleDirty();
 
-					i.setBackGroundImage(new StandaloneTiledImage(correctedImage));
+					extensionPointRecognition[0].setTiledImage(new StandaloneTiledImage(correctedImage));
 
 				} catch (Exception ex) {
-
+					logger.error("error in finishing the wizard :" + ex.getMessage(), //$NON-NLS-1$
+							ex);
+					BugReporter.sendBugReport();
+					JMessageBox.showError(waitFrame, ex);
+					
 				}
 
 			}

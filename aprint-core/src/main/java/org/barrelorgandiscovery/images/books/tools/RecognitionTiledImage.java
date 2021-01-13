@@ -18,6 +18,11 @@ public class RecognitionTiledImage extends TiledImage implements IFileFamilyTile
 
 	public static final String TILED_EXTENSION = ".tiled";
 
+	/**
+	 * copy constructor for creating a separate image family
+	 * @param ti
+	 * @throws Exception
+	 */
 	public RecognitionTiledImage(RecognitionTiledImage ti) throws Exception {
 		this(ti.getImagePath(), ti.getHeight());
 	}
@@ -88,11 +93,19 @@ public class RecognitionTiledImage extends TiledImage implements IFileFamilyTile
 		return currentImageFamilyDisplay;
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.barrelorgandiscovery.bookimage.IFamilyImageSeeker#loadImage(int)
+	 */
 	@Override
 	public BufferedImage loadImage(int imageNumber) throws Exception {
 		return loadImage(imageNumber, currentImageFamilyDisplay);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.barrelorgandiscovery.images.books.tools.IFileFamilyTiledImage#loadImage(int, java.lang.String)
+	 */
 	@Override
 	public BufferedImage loadImage(int index, String suffix) throws Exception {
 		File f = constructImagePath(index, suffix);

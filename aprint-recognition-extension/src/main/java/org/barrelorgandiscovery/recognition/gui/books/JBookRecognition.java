@@ -50,10 +50,12 @@ import org.barrelorgandiscovery.gui.wizard.WizardStates;
 import org.barrelorgandiscovery.images.books.tools.BookImageRecognitionTiledImage;
 import org.barrelorgandiscovery.images.books.tools.IFileFamilyTiledImage;
 import org.barrelorgandiscovery.images.books.tools.RecognitionTiledImage;
+import org.barrelorgandiscovery.images.books.tools.StandaloneTiledImage;
 import org.barrelorgandiscovery.images.books.tools.TiledImage;
 import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
+import org.barrelorgandiscovery.recognition.gui.bookext.IRecognitionToolWindowCommands;
 import org.barrelorgandiscovery.recognition.gui.books.states.EdgesStates;
 import org.barrelorgandiscovery.recognition.gui.books.steps.ProcessEdges;
 import org.barrelorgandiscovery.recognition.gui.books.steps.StepChooseEdges;
@@ -313,7 +315,12 @@ public class JBookRecognition extends JPanel {
 
 					processEdges.processImageEdges(origin, edgesState, vb.getScale(), tiView);
 					
-					i.setBackGroundImage(tiView);
+					IRecognitionToolWindowCommands[] extensionPointRecognition = i.getExtensionPoints(IRecognitionToolWindowCommands.class);
+					if (extensionPointRecognition == null || extensionPointRecognition.length != 1) {
+						throw new Exception("no toolwindoww found");
+					}
+					
+					extensionPointRecognition[0].setTiledImage(tiView);
 
 					// JMessageBox.showMessage(waitFrame, "the book is ready to play and edit");
 					// //$NON-NLS-1$

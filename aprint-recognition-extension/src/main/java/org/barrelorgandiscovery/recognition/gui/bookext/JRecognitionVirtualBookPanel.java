@@ -30,7 +30,6 @@ import javax.swing.SwingUtilities;
 import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.bookimage.BookImage;
-import org.barrelorgandiscovery.bookimage.IFamilyImageSeeker;
 import org.barrelorgandiscovery.bookimage.ZipBookImage;
 import org.barrelorgandiscovery.gui.aedit.CreationTool;
 import org.barrelorgandiscovery.gui.aedit.CurrentToolChanged;
@@ -49,6 +48,9 @@ import org.barrelorgandiscovery.images.books.tools.IFamilyImageSeekerTiledImage;
 import org.barrelorgandiscovery.images.books.tools.IFileFamilyTiledImage;
 import org.barrelorgandiscovery.images.books.tools.ITiledImage;
 import org.barrelorgandiscovery.images.books.tools.RecognitionTiledImage;
+import org.barrelorgandiscovery.images.books.tools.StandaloneRecognitionTiledImage;
+import org.barrelorgandiscovery.images.books.tools.StandaloneTiledImage;
+import org.barrelorgandiscovery.images.books.tools.TiledImage;
 import org.barrelorgandiscovery.recognition.gui.books.BackgroundTileImageProcessingThread;
 import org.barrelorgandiscovery.recognition.gui.books.BackgroundTileImageProcessingThread.TileProcessing;
 import org.barrelorgandiscovery.recognition.gui.books.BackgroundTileImageProcessingThread.TiledProcessedListener;
@@ -73,7 +75,7 @@ import ij.process.ImageProcessor;
 import trainableSegmentation.WekaSegmentation;
 import weka.core.Instances;
 
-public class JRecognitionVirtualBookPanel extends JPanel implements Disposable {
+public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, IRecognitionToolWindowCommands {
 
 	/**
 	 * 
@@ -136,6 +138,45 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable {
 		}
 	}
 
+	@Override
+	public void setTiledImage(ITiledImage tiledImage) {
+
+		try {
+			if (tiledImage instanceof ZipBookImage) {
+				ZipBookImage zbi = (ZipBookImage) tiledImage;
+				backgroundBook.setTiledBackgroundimage(zbi);
+
+				BookImageRecognitionTiledImage b = new BookImageRecognitionTiledImage(zbi);
+				b.setCurrentImageFamilyDisplay(REC_INLINE_FAMILY);
+
+				recognitionDisplay.setTiledBackgroundimage(b);
+
+			} else if (tiledImage instanceof StandaloneTiledImage) {
+
+				backgroundBook.setTiledBackgroundimage(tiledImage);
+
+				StandaloneRecognitionTiledImage b = new StandaloneRecognitionTiledImage(
+						(StandaloneTiledImage) tiledImage);
+				b.setCurrentImageFamilyDisplay(REC_INLINE_FAMILY);
+				recognitionDisplay.setTiledBackgroundimage(b);
+
+			} else if (tiledImage instanceof RecognitionTiledImage) {
+
+				backgroundBook.setTiledBackgroundimage(tiledImage);
+
+				RecognitionTiledImage b = new RecognitionTiledImage((RecognitionTiledImage) tiledImage);
+				b.setCurrentImageFamilyDisplay(REC_INLINE_FAMILY);
+				recognitionDisplay.setTiledBackgroundimage(b);
+
+			} else {
+				throw new RuntimeException("unsupported tiledImage format :" + tiledImage);
+			}
+
+		} catch (Exception ex) {
+			throw new RuntimeException(ex.getMessage(), ex);
+		}
+	}
+
 	private class SetBackGroundAction extends AbstractAction {
 
 		/**
@@ -167,13 +208,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable {
 						if (f.getName().toLowerCase().endsWith(BookImage.BOOKIMAGE_EXTENSION)) {
 
 							ZipBookImage zbook = new ZipBookImage(f);
-
-							backgroundBook.setTiledBackgroundimage(zbook);
-
-							BookImageRecognitionTiledImage b = new BookImageRecognitionTiledImage(zbook);
-							b.setCurrentImageFamilyDisplay(REC_INLINE_FAMILY);
-
-							recognitionDisplay.setTiledBackgroundimage(b);
+							setTiledImage(zbook);
 
 						} else {
 							logger.error("cannot display image " + f); //$NON-NLS-1$
@@ -191,13 +226,12 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable {
 	 * visual layer for holes definition in training set
 	 */
 	LayerHoleAdd holeTool;
-	
+
 	/**
 	 * visual layer for book surface definition in training set
 	 */
 	LayerHoleAdd bookTool;
 
-	
 	protected void initComponents() throws Exception {
 
 		// init layers
@@ -413,13 +447,15 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable {
 		IFileFamilyTiledImage ti = null;
 
 		if (imageToRecognize instanceof BookImage) {
-			ti = new BookImageRecognitionTiledImage((ZipBookImage)imageToRecognize);
+			ti = new BookImageRecognitionTiledImage((ZipBookImage) imageToRecognize);
 		} else if (imageToRecognize instanceof RecognitionTiledImage) {
-			ti = new RecognitionTiledImage((RecognitionTiledImage)imageToRecognize);
+			ti = new RecognitionTiledImage((RecognitionTiledImage) imageToRecognize);
+		} else if (imageToRecognize instanceof StandaloneTiledImage) {
+			ti = new StandaloneRecognitionTiledImage((StandaloneTiledImage)imageToRecognize);
 		} else {
 			throw new Exception("unsupported image object format");
 		}
-		
+
 		final IFileFamilyTiledImage tiledImage = ti;
 
 		tiledImage.setCurrentImageFamilyDisplay(REC_INLINE_FAMILY);
@@ -526,8 +562,8 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable {
 
 				Scale scale = virtualBookComponent.getVirtualBook().getScale();
 				ReadResultBag readResult = BookReadProcessor.readResult2(binary.getBufferedImage(),
-						index * imageToRecognize.getWidth(), scale.mmToTime(scale.getWidth() / imageToRecognize.getHeight()), scale, null, false,
-						150);
+						index * bi.getWidth(),
+						scale.mmToTime(scale.getWidth() / imageToRecognize.getHeight()), scale, null, false, 150);
 
 				ArrayList<Hole> holes = recognitionDisplay.getHoles();
 				if (holes == null) {
@@ -581,39 +617,25 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable {
 		 * ws.setEnabledFeatures(enabledFeatures);
 		 */
 	}
-	
+
 	IFamilyImageSeekerTiledImage getBackgroundImage() {
 		ITiledImage t = backgroundBook.getTiledBackgroundimage();
+
 		if (t == null) {
-			
-			Optional<VirtualBookComponentLayer> ol = Arrays.stream( virtualBookComponent.getLayers()).filter( l -> (l instanceof ImageAndHolesVisualizationLayer) 
-					&& APrintNGVirtualBookInternalFrame.BACKGROUNDLAYER_INTERNALNAME.equals(((ImageAndHolesVisualizationLayer)l).getLayerInternalName() ))
-			
-			.findFirst();
-			;
-			
-			if (ol.isPresent()) {
-				t = ((ImageAndHolesVisualizationLayer)ol.get()).getTiledBackgroundimage();
-			}
-			
-		}
-		
-		if (t == null) {
+			// reset
+			recognitionDisplay.setTiledBackgroundimage(null);
 			return null;
 		}
-		
+
 		assert t instanceof IFamilyImageSeekerTiledImage;
-		return (IFamilyImageSeekerTiledImage)t;
+		return (IFamilyImageSeekerTiledImage) t;
 	}
 
 	private Instances constructTrainingSet(Instances instances, Hole hole, int classNo) throws Exception {
 		Scale scale = virtualBookComponent.getVirtualBook().getScale();
 
-//		assert backgroundBook.getTiledBackgroundimage() instanceof ZipBookImage;
-//		ZipBookImage zi = (ZipBookImage) backgroundBook.getTiledBackgroundimage();
-
 		IFamilyImageSeekerTiledImage zi = getBackgroundImage();
-		
+
 		int height = zi.getHeight();
 
 		double mm = scale.timeToMM(hole.getTimestamp());
@@ -623,14 +645,30 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable {
 		double endPercent = (scale.getFirstTrackAxis() + hole.getTrack() * scale.getIntertrackHeight()
 				+ scale.getTrackWidth() / 2) / scale.getWidth();
 
+		// fix acquisition when the scale is revert
+		if (scale.isPreferredViewedInversed()) {
+			startPercent = 1.0 - startPercent;
+			endPercent = 1.0 - endPercent;
+		}
+		
+		if (startPercent > endPercent) {
+			double tmp = startPercent;
+			startPercent= endPercent;
+			endPercent = tmp;
+		}
+		
 		int startTrackPixel = (int) (startPercent * height);
 		int endTrackPixel = (int) (endPercent * height);
+		
+		
 
 		int startPixel = (int) (mm / scale.getWidth() * height);
 		int endPixel = (int) (scale.timeToMM(hole.getTimestamp() + hole.getTimeLength()) / scale.getWidth() * height);
 
-		int startImageIndex = startPixel / zi.getWidth();
-		int endImageIndex = endPixel / zi.getWidth();
+		int imageTileWidth = zi.getTileWidth();
+		
+		int startImageIndex = startPixel / imageTileWidth;
+		int endImageIndex = endPixel / imageTileWidth;
 		assert startImageIndex <= endImageIndex;
 
 		Instances trainingInstances = instances;
@@ -638,8 +676,8 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable {
 			logger.debug("loading image :" + i); //$NON-NLS-1$
 			BufferedImage bi = zi.loadImage(startImageIndex);
 
-			int offsetStart = startPixel - (i * zi.getWidth());
-			int offsetEnd = endPixel - (i * zi.getWidth());
+			int offsetStart = startPixel - (i * imageTileWidth);
+			int offsetEnd = endPixel - (i * imageTileWidth);
 
 			Rectangle r = new Rectangle(offsetStart, startTrackPixel, offsetEnd - offsetStart,
 					endTrackPixel - startTrackPixel);

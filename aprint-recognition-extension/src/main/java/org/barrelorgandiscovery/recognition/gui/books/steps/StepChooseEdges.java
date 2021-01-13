@@ -196,7 +196,10 @@ public class StepChooseEdges extends BasePanelStep implements Step {
 			
 		} else {
 
-			tileImage = new RecognitionTiledImage(imageFile);
+			RecognitionTiledImage recTiledImage = new RecognitionTiledImage(imageFile);
+			recTiledImage.constructTiles();
+			tileImage = recTiledImage;
+			
 
 		}
 		

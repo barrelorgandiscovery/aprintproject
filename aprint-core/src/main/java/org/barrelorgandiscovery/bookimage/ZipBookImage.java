@@ -112,6 +112,12 @@ public class ZipBookImage extends BookImage implements Disposable {
 	}
 
 	@Override
+	public int getTileWidth() {
+		populateWidthAndHeightFromFirst();
+		return this.width;
+	}
+	
+	@Override
 	public int getHeight() {
 		populateWidthAndHeightFromFirst();
 		return this.height;
@@ -119,13 +125,13 @@ public class ZipBookImage extends BookImage implements Disposable {
 
 	@Override
 	public Double subTileDimension(int index) {
-		return new Double(index * getWidth(), 0, (index + 1) * getWidth(), getHeight());
+		return new Double(index * getTileWidth(), 0, (index + 1) * getTileWidth(), getHeight());
 	}
 
 	@Override
 	public int[] subTiles(Double viewport) {
-		int startx = (int) Math.floor(viewport.x / (getWidth() * 1.0));
-		int endx = (int) Math.ceil((viewport.x + viewport.width) / (getWidth() * 1.0));
+		int startx = (int) Math.floor(viewport.x / (getTileWidth() * 1.0));
+		int endx = (int) Math.ceil((viewport.x + viewport.width) / (getTileWidth() * 1.0));
 		int[] result = new int[endx - startx + 1];
 		for (int i = startx; i <= endx; i++) {
 			result[i - startx] = i;

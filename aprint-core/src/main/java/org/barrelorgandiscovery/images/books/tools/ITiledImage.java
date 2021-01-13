@@ -12,11 +12,17 @@ import java.io.File;
 public interface ITiledImage {
 
 	/**
-	 * get single image width
+	 * get image width
 	 * 
 	 * @return
 	 */
 	int getWidth();
+	
+	/**
+	 * get a single tile width
+	 * @return
+	 */
+	int getTileWidth();
 
 	/**
 	 * get single image height

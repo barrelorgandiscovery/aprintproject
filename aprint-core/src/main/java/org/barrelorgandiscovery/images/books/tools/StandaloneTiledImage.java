@@ -12,17 +12,22 @@ import org.barrelorgandiscovery.bookimage.IFamilyImageSeeker;
  * @author pfreydiere
  *
  */
-public class StandaloneTiledImage implements ITiledImage, IFileBasedTiledImage, IFamilyImageSeeker {
+public class StandaloneTiledImage
+		implements ITiledImage, IFileBasedTiledImage, IFamilyImageSeeker, IFamilyImageSeekerTiledImage {
 
 	BufferedImage image;
-	
-	
+
 	public StandaloneTiledImage(BufferedImage image) {
 		this.image = image;
 	}
 
 	@Override
 	public int getWidth() {
+		return image.getWidth();
+	}
+
+	@Override
+	public int getTileWidth() {
 		return image.getWidth();
 	}
 
@@ -57,8 +62,7 @@ public class StandaloneTiledImage implements ITiledImage, IFileBasedTiledImage, 
 
 	@Override
 	public BufferedImage loadImage(int imageNumber) throws Exception {
-		if (imageNumber == 0) 
-		{
+		if (imageNumber == 0) {
 			return getImage();
 		}
 		return null;

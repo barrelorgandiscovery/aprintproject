@@ -30,6 +30,12 @@ public class TiledImage implements ITiledImage, IFileBasedTiledImage {
 	private File imagePath;
 	private File outputRecognitionProject;
 	private int maxHeight;
+	
+	private double whratio;
+
+	private int imagecount;
+
+	private Dimension fullImageDimension;
 
 	public TiledImage(File imagePath, File outputRecognitionProject) throws Exception {
 		this(imagePath, outputRecognitionProject, (int) readImageSize(new FileInputStream(imagePath)).getHeight());
@@ -57,11 +63,6 @@ public class TiledImage implements ITiledImage, IFileBasedTiledImage {
 		this.outputRecognitionProject = tileImageDirectory;
 	}
 
-	private double whratio;
-
-	private int imagecount;
-
-	private Dimension fullImageDimension;
 
 	protected File getImagePath() {
 		return imagePath;
@@ -76,6 +77,15 @@ public class TiledImage implements ITiledImage, IFileBasedTiledImage {
 	@Override
 	public int getWidth() {
 		return imagecount * maxHeight;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 * @see org.barrelorgandiscovery.images.books.tools.ITiledImage#getTileWidth()
+	 */
+	@Override
+	public int getTileWidth() {
+		return maxHeight;
 	}
 
 	/*
@@ -171,6 +181,12 @@ public class TiledImage implements ITiledImage, IFileBasedTiledImage {
 		return constructImagePath(i, null);
 	}
 
+	/**
+	 * utility function to grab the image size
+	 * @param is
+	 * @return
+	 * @throws Exception
+	 */
 	public static Dimension readImageSize(InputStream is) throws Exception {
 		try (ImageInputStream in = ImageIO.createImageInputStream(is)) {
 			final Iterator<ImageReader> readers = ImageIO.getImageReaders(in);

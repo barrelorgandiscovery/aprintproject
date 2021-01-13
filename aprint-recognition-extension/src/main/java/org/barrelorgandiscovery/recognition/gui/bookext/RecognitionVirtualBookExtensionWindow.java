@@ -10,11 +10,12 @@ import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
 import org.barrelorgandiscovery.gui.aprintng.APrintNGVirtualBookFrame;
 import org.barrelorgandiscovery.gui.aprintng.extensionspoints.VirtualBookFrameToolRegister;
 import org.barrelorgandiscovery.gui.aprintng.helper.BaseVirtualBookExtension;
+import org.barrelorgandiscovery.images.books.tools.ITiledImage;
 import org.noos.xing.mydoggy.ToolWindowAnchor;
 import org.noos.xing.mydoggy.plaf.MyDoggyToolWindowManager;
 
 public class RecognitionVirtualBookExtensionWindow extends BaseVirtualBookExtension
-		implements VirtualBookFrameToolRegister {
+		implements VirtualBookFrameToolRegister, IRecognitionToolWindowCommands {
 
 	JRecognitionVirtualBookPanel recognitionPanel;
 
@@ -27,6 +28,7 @@ public class RecognitionVirtualBookExtensionWindow extends BaseVirtualBookExtens
 	protected void setupExtensionPoint(List<ExtensionPoint> initExtensionPoints) throws Exception {
 		super.setupExtensionPoint(initExtensionPoints);
 		initExtensionPoints.add(new SimpleExtensionPoint(VirtualBookFrameToolRegister.class, this));
+		initExtensionPoints.add(new SimpleExtensionPoint(IRecognitionToolWindowCommands.class, this));
 	}
 
 	@Override
@@ -36,6 +38,12 @@ public class RecognitionVirtualBookExtensionWindow extends BaseVirtualBookExtens
 		recognitionPanel.setVirtualBookComponent(pianoroll);
 	}
 
+	@Override
+	public void setTiledImage(ITiledImage tiledImage) {
+		// forward
+		recognitionPanel.setTiledImage(tiledImage);
+	}
+	
 	@Override
 	public void addLayers(JVirtualBookScrollableComponent c) {
 		c.addLayer(recognitionPanel.backgroundBook);

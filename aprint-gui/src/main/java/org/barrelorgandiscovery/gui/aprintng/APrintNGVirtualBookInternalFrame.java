@@ -616,7 +616,6 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		imageBackGroundLayer.setTiledBackgroundimage(tiledImage);
 	}
 
-
 	/**
 	 * init the visual components
 	 *
@@ -875,7 +874,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		pianoroll.addLayer(tcl);
 		pianoroll.addLayer(markerLayer);
 		pianoroll.addLayer(imageBackGroundLayer);
-		
+
 		imageBackGroundLayer.setLayerInternalName(BACKGROUNDLAYER_INTERNALNAME);
 
 		logger.debug("add layers from extensions"); //$NON-NLS-1$
@@ -3353,4 +3352,18 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 	public void selectNone() throws Exception {
 		pianoroll.clearSelection();
 	}
+
+	/**
+	 * this method permit to find extension points (used to transmit context in the
+	 * frame, when an external element is working with this)
+	 * 
+	 * @param clazz
+	 * @return
+	 */
+	public <T> T[] getExtensionPoints(Class<T> clazz) {
+		// calling extensions for toolbars
+		T[] allPoints = ExtensionPointProvider.getAllPoints(clazz, exts);
+		return allPoints;
+	}
+
 }

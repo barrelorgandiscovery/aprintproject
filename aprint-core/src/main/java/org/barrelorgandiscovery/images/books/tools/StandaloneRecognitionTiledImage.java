@@ -5,27 +5,23 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 
 import org.barrelorgandiscovery.bookimage.IFamilyImageSeeker;
-import org.barrelorgandiscovery.bookimage.ZipBookImage;
 import org.barrelorgandiscovery.tools.ImageTools;
 
-/**
- * Book image object to handle long book scans
- * 
- * @author pfreydiere
- *
- */
-public class BookImageRecognitionTiledImage
-		implements ITiledImage, IFileFamilyTiledImage, IFamilyImageSeeker, IFamilyImageSeekerTiledImage {
+public class StandaloneRecognitionTiledImage implements ITiledImage, IFileFamilyTiledImage, IFamilyImageSeeker, IFamilyImageSeekerTiledImage {
 
-	private ZipBookImage zipBookImage;
+
+	private StandaloneTiledImage standaloneImage;
 
 	private File outputRecognitionProject;
 
-	public BookImageRecognitionTiledImage(ZipBookImage bookImage) {
+	public StandaloneRecognitionTiledImage(StandaloneTiledImage bookImage) throws Exception {
 		assert bookImage != null;
-		this.zipBookImage = bookImage;
+		this.standaloneImage = bookImage;
 
-		File originFile = bookImage.getBookImageFile();
+		// standalone is a in memory buffer, 
+		// so we use a temporary folder
+		File originFile = File.createTempFile("standalone_recognitionimage", "");
+		
 		File od = new File(originFile.getParentFile(), originFile.getName() + RecognitionTiledImage.TILED_EXTENSION);
 		od.mkdirs();
 
@@ -49,7 +45,7 @@ public class BookImageRecognitionTiledImage
 	@Override
 	public BufferedImage loadImage(int index, String suffix) throws Exception {
 		if (suffix == null) {
-			return zipBookImage.loadImage(index);
+			return standaloneImage.loadImage(index);
 		}
 
 		File f = constructImagePath(index, suffix);
@@ -92,33 +88,32 @@ public class BookImageRecognitionTiledImage
 
 	@Override
 	public int getWidth() {
-		return zipBookImage.getWidth();
+		return standaloneImage.getWidth();
 	}
-
+	
 	@Override
 	public int getTileWidth() {
-		return zipBookImage.getTileWidth();
+		return standaloneImage.getWidth();
 	}
 
 	@Override
 	public int getHeight() {
-		return zipBookImage.getHeight();
+		return standaloneImage.getHeight();
 	}
 
 	@Override
 	public int getImageCount() {
-		return zipBookImage.getImageCount();
+		return standaloneImage.getImageCount();
 
 	}
 
 	@Override
 	public Double subTileDimension(int index) {
-		return zipBookImage.subTileDimension(index);
+		return standaloneImage.subTileDimension(index);
 	}
 
 	@Override
 	public int[] subTiles(Double viewport) {
-		return zipBookImage.subTiles(viewport);
+		return standaloneImage.subTiles(viewport);
 	}
-
 }

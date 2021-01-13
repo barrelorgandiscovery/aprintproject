@@ -161,6 +161,18 @@ public class BookReadProcessor {
 				double end = (1.0d * instrumentScale.getFirstTrackAxis() + k * instrumentScale.getIntertrackHeight()
 						+ instrumentScale.getIntertrackHeight() / 2) / instrumentScale.getWidth();
 
+				if (instrumentScale.isPreferredViewedInversed()) {
+					start= 1.0 - start;
+					end = 1.0 - end;
+				}
+				
+				if (start > end) {
+					double tmp = start;
+					start = end;
+					end = tmp;
+				}
+				
+				
 				// read the track
 
 				double h = bi.getHeight();
