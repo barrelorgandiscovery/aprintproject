@@ -90,24 +90,31 @@ public class XOptimParametersBeanInfo extends BaseBeanInfo {
 		percentSpeed.setDisplayName("Fraction Vitesse Passe 1");
 		percentSpeed.setCategory("Passe 1");
 
-		ExtendedPropertyDescriptor has2Pass = addProperty("has2pass");
-		has2Pass.setShortDescription("Doit on faire le tracé en 2 passes");
-		has2Pass.setDisplayName("Deux passes ?");
-		has2Pass.setCategory("Passe 2");
+		ExtendedPropertyDescriptor hasMultiplePass = addProperty("hasMultiplePass");
+		hasMultiplePass.setShortDescription("Doit on faire le tracé avec des passes additionnelles");
+		hasMultiplePass.setDisplayName("Passes additionnelles ?");
+		hasMultiplePass.setCategory("Passe Additionnelles");
 
+		ExtendedPropertyDescriptor multiplePass = addProperty("multiplePass");
+		multiplePass.setShortDescription("Combien de passes additionnelles");
+		multiplePass.setDisplayName("Nombre de passes additionnelles ?");
+		multiplePass.setCategory("Passes Additionnelles");
+
+		
 		// pass 2 parameters
-		ExtendedPropertyDescriptor percentMaxPower2 = addProperty("powerFractionPass2");
-		percentMaxPower2.setShortDescription("Pourcentage de la puissance pour la passe 2");
+		ExtendedPropertyDescriptor percentMaxPower2 = addProperty("powerFractionMultiplePass");
+		percentMaxPower2.setShortDescription("Pourcentage de la puissance pour les passes additionnelles");
 		percentMaxPower2.setPropertyEditorClass(DoublePropertyEditor.class);
-		percentMaxPower2.setDisplayName("Fraction Puissance Passe 2");
-		percentMaxPower2.setCategory("Passe 2");
+		percentMaxPower2.setDisplayName("Fraction Puissance passes Additionnelles");
+		percentMaxPower2.setCategory("Passes Additionnelles");
 
-		ExtendedPropertyDescriptor percentSpeed2 = addProperty("speedFractionPass2");
-		percentSpeed2.setShortDescription("Pourcentage de la vitesse pour la passe 2");
+		ExtendedPropertyDescriptor percentSpeed2 = addProperty("speedFractionMultiplePass");
+		percentSpeed2.setShortDescription("Pourcentage de la vitesse pour les passes additionnelles");
 		percentSpeed2.setPropertyEditorClass(DoublePropertyEditor.class);
-		percentSpeed2.setDisplayName("Fraction Vitesse Passe 2");
-		percentSpeed2.setCategory("Passe 2");
+		percentSpeed2.setDisplayName("Fraction Vitesse passes Additionnelles");
+		percentSpeed2.setCategory("Passes Additionnelles");
 
+		
 		// pass 1 parameters
 		ExtendedPropertyDescriptor halfCutPowerProperty = addProperty("halfCutPower");
 		halfCutPowerProperty.setShortDescription("Pourcentage de puissance pour couper à mi chaire");

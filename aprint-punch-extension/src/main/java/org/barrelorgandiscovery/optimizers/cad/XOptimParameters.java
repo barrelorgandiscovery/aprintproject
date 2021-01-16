@@ -79,37 +79,50 @@ public class XOptimParameters implements Serializable {
 		this.speedFractionPass1 = speedFractionPass1;
 	}
 
-	public boolean isHas2pass() {
-		return has2pass;
+	///////////////////////////////////////////////////////////////////
+	// multiple pass
+	
+	int multiplePass = 1;
+	
+	public int getMultiplePass() {
+		return multiplePass;
+	}
+	
+	public void setMultiplePass(int multiplePass) {
+		this.multiplePass = multiplePass;
+	}
+	
+	public boolean isHasMultiplePass() {
+		return hasMultiplePass;
 	}
 
-	public void setHas2pass(boolean has2pass) {
-		this.has2pass = has2pass;
+	public void setHasMultiplePass(boolean hasmultiplepass) {
+		this.hasMultiplePass = hasmultiplepass;
 	}
 
-	public double getPowerFractionPass2() {
-		return powerFractionPass2;
+	public double getPowerFractionMultiplePass() {
+		return powerFractionMultiplePass;
 	}
 
-	public void setPowerFractionPass2(double powerFractionPass2) {
-		this.powerFractionPass2 = powerFractionPass2;
+	public void setPowerFractionMultiplePass(double powerFractionmultiplePass) {
+		this.powerFractionMultiplePass = powerFractionmultiplePass;
 	}
 
-	public double getSpeedFractionPass2() {
-		return speedFractionPass2;
+	public double getSpeedFractionMultiplePass() {
+		return speedFractionMultiplePass;
 	}
 
-	public void setSpeedFractionPass2(double speedFractionPass2) {
-		this.speedFractionPass2 = speedFractionPass2;
+	public void setSpeedFractionMultiplePass(double speedFractionMultiplePass) {
+		this.speedFractionMultiplePass = speedFractionMultiplePass;
 	}
 
 	private double speedFractionPass1 = 1.0;
 
-	private boolean has2pass = false;
+	private boolean hasMultiplePass = false;
 
-	private double powerFractionPass2 = 1.0; // be default, 100%
+	private double powerFractionMultiplePass = 1.0; // be default, 100%
 
-	private double speedFractionPass2 = 1.0;
+	private double speedFractionMultiplePass = 1.0;
 
 	private double optimPageSize = 5.0; // 5 cm par défaut
 
@@ -217,9 +230,9 @@ public class XOptimParameters implements Serializable {
 		powerFractionPass1 = in.readDouble();
 		speedFractionPass1 = in.readDouble();
 
-		has2pass = in.readBoolean();
-		powerFractionPass2 = in.readDouble();
-		speedFractionPass2 = in.readDouble();
+		hasMultiplePass = in.readBoolean();
+		powerFractionMultiplePass = in.readDouble();
+		speedFractionMultiplePass = in.readDouble();
 
 		optimPageSize = in.readDouble();
 
@@ -246,9 +259,9 @@ public class XOptimParameters implements Serializable {
 		out.writeInt(nombreDePlisAAjouterAuDebut);
 		out.writeDouble(powerFractionPass1);
 		out.writeDouble(speedFractionPass1);
-		out.writeBoolean(has2pass);
-		out.writeDouble(powerFractionPass2);
-		out.writeDouble(speedFractionPass2);
+		out.writeBoolean(hasMultiplePass);
+		out.writeDouble(powerFractionMultiplePass);
+		out.writeDouble(speedFractionMultiplePass);
 		out.writeDouble(optimPageSize);
 		out.writeBoolean(exportTrous);
 		out.writeDouble(halfCutPower);

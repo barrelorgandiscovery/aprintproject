@@ -118,7 +118,7 @@ public class XOptim implements Optimizer<OptimizedObject> {
 				GroupedCutLine gcl = (GroupedCutLine) o;
 				resultlist.add(gcl);
 
-				if (parameters.isHas2pass()) {
+				if (parameters.isHasMultiplePass() && parameters.getMultiplePass() >= 1) {
 
 					// as we are not in the same classloader
 					// serialization tool must be instanciated in this class loader
@@ -126,17 +126,21 @@ public class XOptim implements Optimizer<OptimizedObject> {
 					GroupedCutLine pass2group = serializeTools.deepClone(gcl);
 					List<CutLine> innerLines = gcl.getLinesByRefs();
 
-					// change power for the duplicate, and only for cut layers
-					assert innerLines != null;
-					for (CutLine c : innerLines) {
-						if (gcl.userInformation == null || !(gcl.userInformation.equals(CADVirtualBookExporter.LAYER_PLIURES_VERSO_NON_CUT)
-								|| gcl.userInformation.equals(CADVirtualBookExporter.LAYER_PLIURES_NON_CUT))) {
-							c.powerFraction = parameters.getPowerFractionPass2();
-							c.speedFraction = parameters.getSpeedFractionPass2();
-						}
-					}
-					resultlist.add(pass2group);
+					for (int i = 0; i < parameters.getMultiplePass(); i++) {
 
+						// change power for the duplicate, and only for cut layers
+						assert innerLines != null;
+						for (CutLine c : innerLines) {
+							if (gcl.userInformation == null || !(gcl.userInformation
+									.equals(CADVirtualBookExporter.LAYER_PLIURES_VERSO_NON_CUT)
+									|| gcl.userInformation.equals(CADVirtualBookExporter.LAYER_PLIURES_NON_CUT))) {
+								c.powerFraction = parameters.getPowerFractionMultiplePass();
+								c.speedFraction = parameters.getSpeedFractionMultiplePass();
+							}
+						}
+						resultlist.add(pass2group);
+
+					}
 				}
 			}
 		}
