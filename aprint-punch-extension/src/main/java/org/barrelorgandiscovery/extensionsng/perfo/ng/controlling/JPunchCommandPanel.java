@@ -104,24 +104,30 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 
 	private JEditableVirtualBookComponent virtualBookComponent;
 
+	// display the distance on the book
 	private DistanceLayer distanceLayer;
 
 	private JConsole console;
-	
+
 	private JPauseTimerPanel timerPanel = new JPauseTimerPanel();
 
 	// /////////////////////////////////////
 	// offset for home delta
 
+	// this is the x/y offset handled at the aprint software level
+	// in the machine coordinate system
 	private double xMachineOffset = 0.0;
-
-	private double yShift = 0.0;
-
 	private double yMachineOffset = 0.0;
 
+	// this is an offset of machine settings,
+	// when the user is selecting a hole to continue, we don't want to
+	// move the book for checking the machine head position
+	private double yShift = 0.0;
+
+	// in machine coordinates
 	private double lastpositionMachineY = Double.NaN;
 
-	// machine control
+	// machine control interface
 	private MachineControl machineControl;
 
 	/**
@@ -134,6 +140,15 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 	 */
 	private IPrefsStorage ps;
 
+	/**
+	 * constructor, take a punch plan, virtual book for display and preference
+	 * storage
+	 * 
+	 * @param pp
+	 * @param vb
+	 * @param ps
+	 * @throws Exception
+	 */
 	public JPunchCommandPanel(PunchPlan pp, VirtualBook vb, IPrefsStorage ps) throws Exception {
 
 		assert ps != null;
@@ -147,25 +162,36 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 		initComponents();
 	}
 
+	/**
+	 * inner check for machine access definition, raise an exception, that will displayed to the user
+	 * 
+	 * @throws Exception
+	 */
 	private void checkMachineControl() throws Exception {
 		if (machineControl == null)
 			throw new Exception("no connected machine"); //$NON-NLS-1$
 	}
 
+	/**
+	 * define the machine control element
+	 * 
+	 * @param mc
+	 * @throws Exception
+	 */
 	public void setMachineControl(final MachineControl mc) throws Exception {
 
 		if (this.machineControl != null) {
 			logger.debug("unregister events"); //$NON-NLS-1$
-			
+
 		}
 
-		MachineControl withOffsetMachineControl = new MachineControl() {
-
+		// adapter pattern to introduce the software offsets
+		MachineControl adapterWithOffsetMachineControl = new MachineControl() {
 			final MachineControl innerMc = mc;
-
 			@Override
 			public void setMachineControlListener(final MachineControlListener listener) {
 
+				// when defining the listener, we add the adapter to update the informations
 				innerMc.setMachineControlListener(new MachineControlListener() {
 
 					@Override
@@ -180,8 +206,8 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 
 					@Override
 					public void currentMachinePosition(String status, double mx, double my) {
-						listener.currentMachinePosition(status, mx + xMachineOffset, 
-								my + yMachineOffset + yShift);
+						// the machine return it's position
+						listener.currentMachinePosition(status, mx - xMachineOffset, my - yMachineOffset - yShift);
 					}
 
 					@Override
@@ -193,7 +219,7 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 					public void rawElementReceived(String commandReceived) {
 						listener.rawElementReceived(commandReceived);
 					}
-					
+
 					@Override
 					public void informationReceived(String commands) {
 						listener.informationReceived(commands);
@@ -210,8 +236,9 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 
 					if (command instanceof DisplacementCommand) {
 						DisplacementCommand pc = (DisplacementCommand) command;
-						innerMc.sendCommand(new DisplacementCommand(pc.getX() + yMachineOffset + yShift,
-								pc.getY() + xMachineOffset));
+						DisplacementCommand displacementCommand = new DisplacementCommand(pc.getX() + yMachineOffset + yShift,
+								pc.getY() + xMachineOffset);
+						innerMc.sendCommand(displacementCommand);
 
 					} else if (command instanceof PunchCommand) {
 						PunchCommand pc = (PunchCommand) command;
@@ -265,16 +292,19 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 
 		};
 
-		this.machineControl = withOffsetMachineControl;
+		this.machineControl = adapterWithOffsetMachineControl;
 
-		
 		machineControl.setMachineControlListener(listenerGuiMachineControl);
 
 		controller.setMachineControl(machineControl);
 
-		defineCurrentCommandIndexAndUpdatePanel(0); // place on the origin
+		defineCurrentCommandIndexAndUpdatePanel(0); // place on the origin of punch plan
 	}
 
+	/**
+	 * define the inner components
+	 * @throws Exception
+	 */
 	protected void initComponents() throws Exception {
 
 		virtualBookComponent = new JEditableVirtualBookComponent();
@@ -325,7 +355,6 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 
 					if (nearest != null) {
 						clickOnPunchCommand(nearest);
-
 					}
 
 				} catch (Exception ex) {
@@ -396,10 +425,9 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 		JLabel usepunchposition = settingsPanel.getLabel("lblusepunchposition"); //$NON-NLS-1$
 		usepunchposition.setText(Messages.getString("PunchCommandPanel.123")); //$NON-NLS-1$
 
-		
 		settingsPanel.getFormAccessor().replaceBean("timerpanel", this.timerPanel); //$NON-NLS-1$
 		this.controller.setPauseTimerGetter(this.timerPanel);
-		
+
 		punchStep.setParentStep(settingsStep);
 		wizardPunch = new Wizard(Arrays.asList(new Step[] { settingsStep, punchStep }), null);
 
@@ -468,6 +496,7 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					machineControl.reset();
+					yShift=0;
 				} catch (Exception ex) {
 					logger.error("error resetting the machine :" + ex.getMessage(), ex); //$NON-NLS-1$
 					JMessageBox.showError(this, ex);
@@ -608,11 +637,17 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 
 					if (dontmovey.isSelected()) {
 						// get the current y, to not move the punch
-						yShift = -xycommand.getX() + lastpositionMachineY;
+						// this computation is linked to the grab of the 
+						yShift = -xycommand.getX(); // + lastpositionMachineY;
 					} else {
+						// do nothing on yshift
 						// yshift = 0;
 					}
 
+					// displacement take into account the shift, 
+					// because there is a machine control mock that put the
+					// yShift parameters Before sending the event
+					//
 					DisplacementCommand pos = new DisplacementCommand(xycommand.getX(), xycommand.getY());
 
 					checkMachineControl();
@@ -647,7 +682,7 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 
 						machineControl.sendCommand(pos);
 						// machineControl.flushCommands();
-						
+
 					} catch (Exception ex) {
 						logger.error("error in machine displacement :" //$NON-NLS-1$
 								+ ex.getMessage(), ex);
@@ -735,9 +770,9 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 
 		@Override
 		public void rawElementReceived(String commandReceived) {
-			
+
 		}
-		
+
 		@Override
 		public void informationReceived(String commands) {
 			SwingUtilities.invokeLater(() -> {
@@ -751,8 +786,6 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 				}
 			});
 		}
-		
-		
 
 		long lastDisplayedFeedBack = System.currentTimeMillis();
 
@@ -770,9 +803,9 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 							updateStatus(status, mx // $NON-NLS-1$
 							, my); // $NON-NLS-1$
 							lastpositionMachineY = my;
-
-							machinePositionLayer.setMachinePosition(mx - xMachineOffset,
-									my - yMachineOffset - yShift);
+							
+							// we don't display the yshift
+							machinePositionLayer.setMachinePosition(mx, my);
 
 							// if machine position is outside the current
 							// view
@@ -780,15 +813,17 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 							if (moveBookDuringPunch.isSelected()) {
 
 								boolean isIn = true;
-								double machinex = machinePositionLayer.getY();
+								
+								// machine x is in screen coordinate system
+								double screenCoordinateSystemMachinex = machinePositionLayer.getY();
 
 								double xmax = virtualBookComponent
 										.convertScreenXToCarton(virtualBookComponent.getWidth());
 
-								if (machinex > xmax)
+								if (screenCoordinateSystemMachinex > xmax)
 									isIn = false;
 
-								if (machinex < virtualBookComponent.convertScreenXToCarton(0))
+								if (screenCoordinateSystemMachinex < virtualBookComponent.convertScreenXToCarton(0))
 									isIn = false;
 
 								double widthInMM = virtualBookComponent.pixelToMM(virtualBookComponent.getWidth());
@@ -796,7 +831,7 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 								if (!isIn) {
 									if (controller.isRunning()) {
 										// align the punch on left, 1/5
-										virtualBookComponent.setXoffset(machinex - 1.0 / 5 * widthInMM);
+										virtualBookComponent.setXoffset(screenCoordinateSystemMachinex - 1.0 / 5 * widthInMM);
 
 									}
 								}
@@ -815,7 +850,6 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 			}
 		}
 
-		
 	};
 
 	/**
@@ -923,10 +957,8 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 //		GRBLPunchMachine grblMachine = new GRBLPunchMachine();
 //		MachineControl machineControl = grblMachine.open(grblMachineParameters);
 
-		
-		
 		GRBLLazerMachineParameters grblMachineParameters = new GRBLLazerMachineParameters();
-		grblMachineParameters.setComPort("COM4");
+		grblMachineParameters.setComPort("COM3");
 
 		GRBLLazerMachine grblMachine = new GRBLLazerMachine();
 		OptimizersRepository optRepository = new OptimizersRepository();

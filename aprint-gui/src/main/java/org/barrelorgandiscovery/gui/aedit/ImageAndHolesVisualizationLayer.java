@@ -204,16 +204,23 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 					Scale s = vb.getScale();
 					double width = s.getWidth();
 					double f = 1.0 * width / tileImage.getHeight() * component.MmToPixel(1000) / 1000;
+					
+					// f is the scale factor between the pixels and the book's width
+					
 					AffineTransform scaling = AffineTransform.getScaleInstance(f, f);
 					AffineTransform xoff = AffineTransform.getTranslateInstance(
 							component.MmToPixel(-component.getXoffset() + component.getMargin()),
 							component.MmToPixel(-component.getYoffset() + component.getMargin()));
 
-					// scaling.concatenate(t);
+					
 					if (!disableRescale) {
 						xoff.concatenate(scaling);
 					}
+					
+					// xoff is the transform from pixel to the screen display coordsys
+					// it first transform the scale, then the translation
 
+					// get the visible bounds
 					Rectangle bounds = g2d.getClipBounds();
 					Rectangle2D.Double r = new Rectangle2D.Double(bounds.getX(), bounds.getY(), bounds.getWidth(),
 							bounds.getHeight());
@@ -221,6 +228,7 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 					AffineTransform inverse = xoff.createInverse();
 					Shape invertedBox = inverse.createTransformedShape(r);
 
+					// search the tiles associated to the inverted bounds
 					int[] images = tileImage.subTiles((Rectangle2D.Double) invertedBox.getBounds2D());
 
 					if (images != null) {
@@ -261,6 +269,8 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 								scaling2.concatenate(t);
 								xoff2.concatenate(scaling2);
 
+								// xoff2 is the transform between the pixel to screen
+								
 								g2d.drawImage(loadImage, xoff2, null);
 							}
 

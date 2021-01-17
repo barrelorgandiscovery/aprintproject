@@ -135,6 +135,10 @@ public class OptimizersRepository {
 		recurseAddCutLines(optimizedObjects, lines);
 
 		PunchPlan pp = new PunchPlan();
+		
+		// add move to 0/0
+		pp.getCommandsByRef().add(new DisplacementCommand(0,0));
+		
 		for (CutLine p : lines) {
 			if (p == null)
 				continue;
