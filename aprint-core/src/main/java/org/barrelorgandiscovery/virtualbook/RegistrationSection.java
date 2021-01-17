@@ -11,7 +11,7 @@ import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.tools.SerializeTools;
 
 /**
- * Classe interne dÃ©finissant une registration sur une pÃ©riode de temps
+ * Classe interne définissant une registration sur une période de temps
  * (instrument sur une plage de registres)
  * 
  * pour chaque Jeu de registre, on mÃ©morise les jeux actifs

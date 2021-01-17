@@ -1,6 +1,8 @@
 package org.barrelorgandiscovery.extensionsng.perfo.ng.controlling;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -15,13 +17,18 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.messages.Messages;
 
 import com.jeta.forms.components.panel.FormPanel;
 
-public class PositionPanel extends JPanel {
-	
-	private static Logger logger = Logger.getLogger(PositionPanel.class);
+public class JPositionPanel extends JPanel {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4958632271661834368L;
+
+	private static Logger logger = Logger.getLogger(JPositionPanel.class);
 
 	private PositionPanelListener listener;
 
-	public PositionPanel() throws Exception {
+	public JPositionPanel() throws Exception {
 		initComponents();
 	}
 
@@ -37,11 +44,11 @@ public class PositionPanel extends JPanel {
 	private JLabel displacementmetersleft;
 	private JLabel bookDisplacementLeft;
 	private JLabel bookMetersDone;
+	private JLabel statusLabel;
 
 	protected void initComponents() throws Exception {
 
-		FormPanel panel = new FormPanel(getClass().getResourceAsStream(
-				"positioncontrol.jfrm")); //$NON-NLS-1$
+		FormPanel panel = new FormPanel(getClass().getResourceAsStream("positioncontrol.jfrm")); //$NON-NLS-1$
 
 		previous = (JButton) panel.getButton("previous"); //$NON-NLS-1$
 		assert previous != null;
@@ -67,8 +74,7 @@ public class PositionPanel extends JPanel {
 		});
 		next.setIcon(new ImageIcon(getClass().getResource("1rightarrow.png"))); //$NON-NLS-1$
 		next.setText(Messages.getString("PositionPanel.6")); //$NON-NLS-1$
-		
-		
+
 		playPause = (JButton) panel.getButton("pause"); //$NON-NLS-1$
 		assert playPause != null;
 		playPause.addActionListener(new ActionListener() {
@@ -79,8 +85,7 @@ public class PositionPanel extends JPanel {
 						listener.pausePlay();
 					}
 				} catch (Exception ex) {
-					logger.error(
-							"error launching the stream :" + ex.getMessage(), //$NON-NLS-1$
+					logger.error("error launching the stream :" + ex.getMessage(), //$NON-NLS-1$
 							ex);
 				}
 			}
@@ -93,18 +98,22 @@ public class PositionPanel extends JPanel {
 		displacementmetersleft = panel.getLabel("metersleft"); //$NON-NLS-1$
 
 		bookDisplacementLeft = panel.getLabel("bookmetersleft"); //$NON-NLS-1$
-		
+
 		bookMetersDone = panel.getLabel("bookmetersdone"); //$NON-NLS-1$
-		
-		
+
+		statusLabel = panel.getLabel("lblstatusmessage"); //$NON-NLS-1$
+		statusLabel.setText("");//$NON-NLS-1$
+
 		panel.getLabel("lbltimeleft").setText(Messages.getString("PositionPanel.302")); //$NON-NLS-1$ //$NON-NLS-2$
 		panel.getLabel("lblbookleft").setText(Messages.getString("PositionPanel.304")); //$NON-NLS-1$ //$NON-NLS-2$
 		panel.getLabel("lbldisplacementleft").setText(Messages.getString("PositionPanel.307")); //$NON-NLS-1$ //$NON-NLS-2$
 		panel.getLabel("lblbookmeterdone").setText(Messages.getString("PositionPanel.308")); //$NON-NLS-1$ //$NON-NLS-2$
+
+		panel.getLabel("lblstatus").setText("Status"); //$NON-NLS-1$
 		
-		
+
 		setPlayState(false);
-		
+
 		setLayout(new BorderLayout());
 		add(panel, BorderLayout.CENTER);
 	}
@@ -118,10 +127,8 @@ public class PositionPanel extends JPanel {
 	 * @param timeLeft
 	 * @param displacementmetersleft
 	 */
-	public void updateState(int position, int nbcommands, 
-			boolean enablePrevious, boolean enableNext,
-			String timeLeft, String displacementmetersleft, 
-			String bookMetersLeft, String bookMetersDone) {
+	public void updateState(int position, int nbcommands, boolean enablePrevious, boolean enableNext, String timeLeft,
+			String displacementmetersleft, String bookMetersLeft, String bookMetersDone) {
 
 		this.position.setText(Integer.toString(position) + "/" + nbcommands); //$NON-NLS-1$
 		this.previous.setEnabled(enablePrevious);
@@ -134,21 +141,34 @@ public class PositionPanel extends JPanel {
 	}
 
 	/**
+	 * 
+	 * @param statusMessage
+	 * @param statusColor
+	 */
+	public void updateStatus(String statusMessage, Color statusColor) {
+		Font f = statusLabel.getFont();
+		statusLabel.setText(statusMessage);
+		if (statusColor != null) {
+			statusLabel.setBackground(statusColor);
+		}
+	}
+
+	/**
 	 * define the punch play state
+	 * 
 	 * @param playstate
 	 */
 	public void setPlayState(boolean playstate) {
-	
+
 		String label = Messages.getString("PositionPanel.12"); //$NON-NLS-1$
 		Icon buttonImage = new ImageIcon(getClass().getResource("noatunplay.png")); //$NON-NLS-1$
 		if (playstate) {
 			label = Messages.getString("PositionPanel.14"); //$NON-NLS-1$
 			buttonImage = new ImageIcon(getClass().getResource("noatunpause.png")); //$NON-NLS-1$
 		}
-		
+
 		playPause.setIcon(buttonImage);
 		playPause.setText(label);
 	}
-	
-	
+
 }

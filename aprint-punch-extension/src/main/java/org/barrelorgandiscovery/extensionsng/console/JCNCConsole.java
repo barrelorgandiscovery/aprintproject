@@ -22,14 +22,19 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineDirec
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineStatus;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLLazerMachineParameters;
 
-public class JGRBLConsole extends JPanel {
+/**
+ * this panel show the grbl commands passed to machine
+ * @author pfreydiere
+ *
+ */
+public class JCNCConsole extends JPanel {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = -8200126114946678782L;
 
-	private static Logger logger = Logger.getLogger(JGRBLConsole.class);
+	private static Logger logger = Logger.getLogger(JCNCConsole.class);
 
 	private MachineControl machine;
 
@@ -77,7 +82,7 @@ public class JGRBLConsole extends JPanel {
 		}
 	};
 
-	public JGRBLConsole(MachineDirectControl machine) throws Exception {
+	public JCNCConsole(MachineDirectControl machine) throws Exception {
 		assert machine != null;
 		this.machine = machine;
 
@@ -147,7 +152,7 @@ public class JGRBLConsole extends JPanel {
 		AbstractMachine machine = p.createAssociatedMachineInstance();
 		MachineControl mc = machine.open(p);
 
-		JGRBLConsole jgrblConsole = new JGRBLConsole((MachineDirectControl)mc);
+		JCNCConsole jgrblConsole = new JCNCConsole((MachineDirectControl)mc);
 		f.getContentPane().add(jgrblConsole, BorderLayout.CENTER);
 
 		f.setSize(800, 600);

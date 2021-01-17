@@ -41,12 +41,12 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 	private boolean visible = true;
 
 	/**
-	 * background recognition image
+	 * background recognition image (standalone)
 	 */
 	private BufferedImage backgroundimage = null;
 
 	/**
-	 * 
+	 * tiledimage
 	 */
 	private ITiledImage tileImage = null;
 
@@ -236,16 +236,12 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 
 							if (tileImage instanceof StandaloneTiledImage) {
 								loadImage = ((StandaloneTiledImage) tileImage).getImage();
-
 							} else if (tileImage instanceof IFamilyImageSeeker) {
 								loadImage = ((IFamilyImageSeeker) tileImage).loadImage(images[i]);
-
 							} else if (tileImage instanceof IFileBasedTiledImage) {
-
 								File filePath = ((IFileBasedTiledImage) tileImage).getImagePath(images[i]);
 								if (filePath != null && filePath.exists()) {
 									loadImage = ImageTools.loadImage(filePath.toURL());
-
 								}
 							} else if (tileImage instanceof BookImage) {
 								loadImage = ((BookImage) tileImage).loadImage(images[i]);

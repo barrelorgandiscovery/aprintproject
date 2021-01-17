@@ -128,6 +128,7 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 	private IPrefsStorage preferences;
 
 	private ExecutorService executor = Executors.newFixedThreadPool(3);
+	
 	private AtomicReference<ICancelTracker> currentProcessing = new AtomicReference<ICancelTracker>(null);
 
 	private Repository2 repository;
@@ -978,6 +979,7 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 		logger.debug("save to storage " + storage); //$NON-NLS-1$
 		model.saveTo(storage);
 	}
+	
 
 	private static void testWithImageFolder() throws Exception {
 		// File scanfolder = new File("C:\\temp\\perfo20180721");

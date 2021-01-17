@@ -19,7 +19,7 @@ import javax.swing.JPanel;
 
 import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.controlling.PunchCommandPanel;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.controlling.JPunchCommandPanel;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.messages.Messages;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachine;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachineParameters;
@@ -88,7 +88,7 @@ public class StepResume extends JPanel implements Step {
 		punch = (JButton) p.getButton("punch"); //$NON-NLS-1$
 		punch.setText(Messages.getString("StepResume.4")); //$NON-NLS-1$
 		punch.setAction(new PunchAction());
-		punch.setIcon(new ImageIcon(PunchCommandPanel.class.getResource("smallpunch.png"))); //$NON-NLS-1$
+		punch.setIcon(new ImageIcon(JPunchCommandPanel.class.getResource("smallpunch.png"))); //$NON-NLS-1$
 
 		JLabel lblexport = (JLabel) p.getLabel("lblexport");//$NON-NLS-1$
 		lblexport.setText(Messages.getString("StepResume.0")); //$NON-NLS-1$
@@ -238,7 +238,7 @@ public class StepResume extends JPanel implements Step {
 		/**
 		 * punch command panel
 		 */
-		private PunchCommandPanel punchCommandPanel;
+		private JPunchCommandPanel punchCommandPanel;
 
 		public PunchFrameInternalFrame(IPrefsStorage prefsStorage, MachineControl machineControl, VirtualBook vb)
 				throws Exception {
@@ -287,7 +287,7 @@ public class StepResume extends JPanel implements Step {
 			
 			
 			
-			PunchCommandPanel punchCommandPanel = new PunchCommandPanel(planCopy,
+			JPunchCommandPanel punchCommandPanel = new JPunchCommandPanel(planCopy,
 					reverseToHaveTheReferenceUp.virtualBook, ps);
 
 			punchCommandPanel.setMachineControl(machineControl);

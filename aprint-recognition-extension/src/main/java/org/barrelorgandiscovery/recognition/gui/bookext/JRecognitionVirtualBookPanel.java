@@ -9,10 +9,8 @@ import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -39,8 +37,6 @@ import org.barrelorgandiscovery.gui.aedit.JEditableVirtualBookComponent;
 import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
 import org.barrelorgandiscovery.gui.aedit.Tool;
 import org.barrelorgandiscovery.gui.aedit.UndoStack;
-import org.barrelorgandiscovery.gui.aedit.VirtualBookComponentLayer;
-import org.barrelorgandiscovery.gui.aprintng.APrintNGVirtualBookInternalFrame;
 import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
 import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.images.books.tools.BookImageRecognitionTiledImage;
@@ -50,7 +46,6 @@ import org.barrelorgandiscovery.images.books.tools.ITiledImage;
 import org.barrelorgandiscovery.images.books.tools.RecognitionTiledImage;
 import org.barrelorgandiscovery.images.books.tools.StandaloneRecognitionTiledImage;
 import org.barrelorgandiscovery.images.books.tools.StandaloneTiledImage;
-import org.barrelorgandiscovery.images.books.tools.TiledImage;
 import org.barrelorgandiscovery.recognition.gui.books.BackgroundTileImageProcessingThread;
 import org.barrelorgandiscovery.recognition.gui.books.BackgroundTileImageProcessingThread.TileProcessing;
 import org.barrelorgandiscovery.recognition.gui.books.BackgroundTileImageProcessingThread.TiledProcessedListener;
@@ -142,13 +137,22 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 	public void setTiledImage(ITiledImage tiledImage) {
 
 		try {
-			if (tiledImage instanceof ZipBookImage) {
+
+			if (tiledImage instanceof BookImageRecognitionTiledImage) {
+
+				BookImageRecognitionTiledImage bri = (BookImageRecognitionTiledImage) tiledImage;
+				backgroundBook.setTiledBackgroundimage(tiledImage);
+
+				BookImageRecognitionTiledImage b = new BookImageRecognitionTiledImage(bri.getUnderlyingZipBookImage());
+				b.setCurrentImageFamilyDisplay(REC_INLINE_FAMILY);
+				recognitionDisplay.setTiledBackgroundimage(b);
+
+			} else if (tiledImage instanceof ZipBookImage) {
 				ZipBookImage zbi = (ZipBookImage) tiledImage;
 				backgroundBook.setTiledBackgroundimage(zbi);
 
 				BookImageRecognitionTiledImage b = new BookImageRecognitionTiledImage(zbi);
 				b.setCurrentImageFamilyDisplay(REC_INLINE_FAMILY);
-
 				recognitionDisplay.setTiledBackgroundimage(b);
 
 			} else if (tiledImage instanceof StandaloneTiledImage) {
@@ -292,7 +296,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		bookCreationToolbtn.setText(""); //$NON-NLS-1$
 		bookCreationToolbtn.setIcon(
 				new ImageIcon(ImageTools.loadImage(JRecognitionVirtualBookPanel.class.getResource("pencil.png"))));// $NON-NLS-1$ //$NON-NLS-1$
-		bookCreationToolbtn.setToolTipText(Messages.getString("JRecognitionVirtualBookPanel.20")); //$NON-NLS-1$
+		bookCreationToolbtn.setToolTipText(Messages.getString("JRecognitionVirtualBookPanel.20")); // $NON-NL)S-1$
 
 		sldtransparencytraining = (JSlider) fa.getComponentByName("sldtransparencytraining");// $NON-NLS-1$ //$NON-NLS-1$
 		sldtransparencytraining.setToolTipText(Messages.getString("JRecognitionVirtualBookPanel.22")); //$NON-NLS-1$
@@ -446,13 +450,20 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 
 		IFileFamilyTiledImage ti = null;
 
+		// create output tiled image
+
 		if (imageToRecognize instanceof BookImage) {
 			ti = new BookImageRecognitionTiledImage((ZipBookImage) imageToRecognize);
 		} else if (imageToRecognize instanceof RecognitionTiledImage) {
 			ti = new RecognitionTiledImage((RecognitionTiledImage) imageToRecognize);
 		} else if (imageToRecognize instanceof StandaloneTiledImage) {
-			ti = new StandaloneRecognitionTiledImage((StandaloneTiledImage)imageToRecognize);
-		} else {
+			ti = new StandaloneRecognitionTiledImage((StandaloneTiledImage) imageToRecognize);
+		} else if (imageToRecognize instanceof BookImageRecognitionTiledImage) {
+			ti = new BookImageRecognitionTiledImage(
+					((BookImageRecognitionTiledImage) imageToRecognize).getUnderlyingZipBookImage());
+		}
+
+		else {
 			throw new Exception("unsupported image object format");
 		}
 
@@ -562,8 +573,8 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 
 				Scale scale = virtualBookComponent.getVirtualBook().getScale();
 				ReadResultBag readResult = BookReadProcessor.readResult2(binary.getBufferedImage(),
-						index * bi.getWidth(),
-						scale.mmToTime(scale.getWidth() / imageToRecognize.getHeight()), scale, null, false, 150);
+						index * bi.getWidth(), scale.mmToTime(scale.getWidth() / imageToRecognize.getHeight()), scale,
+						null, false, 150);
 
 				ArrayList<Hole> holes = recognitionDisplay.getHoles();
 				if (holes == null) {
@@ -650,23 +661,21 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 			startPercent = 1.0 - startPercent;
 			endPercent = 1.0 - endPercent;
 		}
-		
+
 		if (startPercent > endPercent) {
 			double tmp = startPercent;
-			startPercent= endPercent;
+			startPercent = endPercent;
 			endPercent = tmp;
 		}
-		
+
 		int startTrackPixel = (int) (startPercent * height);
 		int endTrackPixel = (int) (endPercent * height);
-		
-		
 
 		int startPixel = (int) (mm / scale.getWidth() * height);
 		int endPixel = (int) (scale.timeToMM(hole.getTimestamp() + hole.getTimeLength()) / scale.getWidth() * height);
 
 		int imageTileWidth = zi.getTileWidth();
-		
+
 		int startImageIndex = startPixel / imageTileWidth;
 		int endImageIndex = endPixel / imageTileWidth;
 		assert startImageIndex <= endImageIndex;

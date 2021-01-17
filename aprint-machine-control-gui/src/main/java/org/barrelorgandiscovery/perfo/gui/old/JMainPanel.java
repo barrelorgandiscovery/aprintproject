@@ -16,6 +16,11 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.DisplacementCom
 
 public class JMainPanel extends JPanel {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8295159284272310433L;
+	
 	private JLabel connectedStatus = new JLabel();
 
 	public JMainPanel() throws Exception {

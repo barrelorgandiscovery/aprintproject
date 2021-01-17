@@ -30,9 +30,17 @@ public class BookImageRecognitionTiledImage
 		od.mkdirs();
 
 		setTiledImageDirectory(od);
-
 	}
-
+	
+	public ZipBookImage getUnderlyingZipBookImage() {
+		return this.zipBookImage;
+	}
+	
+	public File getOutputRecognitionDirectory() {
+		return outputRecognitionProject;
+	}
+	
+	
 	protected void setTiledImageDirectory(File tileImageDirectory) {
 		assert tileImageDirectory != null;
 		assert tileImageDirectory.exists();

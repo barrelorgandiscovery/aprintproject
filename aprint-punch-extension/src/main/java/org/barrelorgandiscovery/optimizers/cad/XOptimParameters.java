@@ -47,6 +47,17 @@ public class XOptimParameters implements Serializable {
 
 	private double halfCutPower = 0.5; // by default 50%
 
+	private double speedFractionPass1 = 1.0;
+
+	private boolean hasMultiplePass = false;
+
+	private double powerFractionMultiplePass = 1.0; // be default, 100%
+
+	private double speedFractionMultiplePass = 1.0;
+
+	private double optimPageSize = 5.0; // 5 cm par défaut
+
+	
 	public boolean isExportTrous() {
 		return exportTrous;
 	}
@@ -116,15 +127,6 @@ public class XOptimParameters implements Serializable {
 		this.speedFractionMultiplePass = speedFractionMultiplePass;
 	}
 
-	private double speedFractionPass1 = 1.0;
-
-	private boolean hasMultiplePass = false;
-
-	private double powerFractionMultiplePass = 1.0; // be default, 100%
-
-	private double speedFractionMultiplePass = 1.0;
-
-	private double optimPageSize = 5.0; // 5 cm par défaut
 
 	public void setOptimPageSize(double optimPageSize) {
 		this.optimPageSize = optimPageSize;
@@ -231,6 +233,10 @@ public class XOptimParameters implements Serializable {
 		speedFractionPass1 = in.readDouble();
 
 		hasMultiplePass = in.readBoolean();
+		multiplePass = in.readInt();
+		if (multiplePass < 0) {
+			multiplePass = 0;
+		}
 		powerFractionMultiplePass = in.readDouble();
 		speedFractionMultiplePass = in.readDouble();
 
@@ -260,6 +266,7 @@ public class XOptimParameters implements Serializable {
 		out.writeDouble(powerFractionPass1);
 		out.writeDouble(speedFractionPass1);
 		out.writeBoolean(hasMultiplePass);
+		out.writeInt(multiplePass);
 		out.writeDouble(powerFractionMultiplePass);
 		out.writeDouble(speedFractionMultiplePass);
 		out.writeDouble(optimPageSize);

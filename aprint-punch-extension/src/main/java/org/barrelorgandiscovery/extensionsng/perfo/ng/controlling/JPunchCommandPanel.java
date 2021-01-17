@@ -31,6 +31,7 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.messages.Messages;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControl;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControlListener;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineStatus;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.PauseTimerState;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.gcode.GCodeCompiler;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLLazerMachine;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLLazerMachineParameters;
@@ -78,14 +79,14 @@ import com.jeta.forms.gui.form.GridView;
  * @author pfreydiere
  * 
  */
-public class PunchCommandPanel extends JPanel implements Disposable {
+public class JPunchCommandPanel extends JPanel implements Disposable {
 
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 3591301386606927045L;
 
-	private static Logger logger = Logger.getLogger(PunchCommandPanel.class);
+	private static Logger logger = Logger.getLogger(JPunchCommandPanel.class);
 
 	private PunchPlan punchPlan;
 
@@ -97,7 +98,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 
 	private FormPanel settingsPanel;
 
-	private PositionPanel positionPanel;
+	private JPositionPanel positionPanel;
 
 	private PunchCommandLayer punchLayer;
 
@@ -106,6 +107,8 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 	private DistanceLayer distanceLayer;
 
 	private JConsole console;
+	
+	private JPauseTimerPanel timerPanel = new JPauseTimerPanel();
 
 	// /////////////////////////////////////
 	// offset for home delta
@@ -131,7 +134,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 	 */
 	private IPrefsStorage ps;
 
-	public PunchCommandPanel(PunchPlan pp, VirtualBook vb, IPrefsStorage ps) throws Exception {
+	public JPunchCommandPanel(PunchPlan pp, VirtualBook vb, IPrefsStorage ps) throws Exception {
 
 		assert ps != null;
 		assert pp != null;
@@ -177,8 +180,8 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 
 					@Override
 					public void currentMachinePosition(String status, double mx, double my) {
-
-						listener.currentMachinePosition(status, mx + xMachineOffset, my + yMachineOffset + yShift);
+						listener.currentMachinePosition(status, mx + xMachineOffset, 
+								my + yMachineOffset + yShift);
 					}
 
 					@Override
@@ -270,7 +273,6 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 		controller.setMachineControl(machineControl);
 
 		defineCurrentCommandIndexAndUpdatePanel(0); // place on the origin
-
 	}
 
 	protected void initComponents() throws Exception {
@@ -310,7 +312,6 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 		add(pvb, BorderLayout.CENTER);
 
 		positionMachineTool = new Tool() {
-
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				try {
@@ -370,7 +371,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 
 		// //////////////////////////////////////////////////////////
 
-		positionPanel = new PositionPanel();
+		positionPanel = new JPositionPanel();
 
 		controller = new PunchController(punchLayer, positionPanel);
 		positionPanel.setListener(controller);
@@ -395,6 +396,10 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 		JLabel usepunchposition = settingsPanel.getLabel("lblusepunchposition"); //$NON-NLS-1$
 		usepunchposition.setText(Messages.getString("PunchCommandPanel.123")); //$NON-NLS-1$
 
+		
+		settingsPanel.getFormAccessor().replaceBean("timerpanel", this.timerPanel); //$NON-NLS-1$
+		this.controller.setPauseTimerGetter(this.timerPanel);
+		
 		punchStep.setParentStep(settingsStep);
 		wizardPunch = new Wizard(Arrays.asList(new Step[] { settingsStep, punchStep }), null);
 
@@ -405,7 +410,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 		add(wizardPunch, BorderLayout.WEST);
 
 		// /////////////////////////////////////////////////////////
-		// status component
+		// bottom status component
 
 		JPanel pStatus = new JPanel();
 		TitledBorder titleBorder = new TitledBorder("Status");
@@ -642,6 +647,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 
 						machineControl.sendCommand(pos);
 						// machineControl.flushCommands();
+						
 					} catch (Exception ex) {
 						logger.error("error in machine displacement :" //$NON-NLS-1$
 								+ ex.getMessage(), ex);
@@ -934,7 +940,7 @@ public class PunchCommandPanel extends JPanel implements Disposable {
 		IPrefsStorage dps = new FilePrefsStorage(new File("c:\\temp\\prefsperfo"));
 		dps.load();
 
-		PunchCommandPanel p = new PunchCommandPanel(pp, r.virtualBook, dps);
+		JPunchCommandPanel p = new JPunchCommandPanel(pp, r.virtualBook, dps);
 
 		p.setMachineControl(machineControl);
 

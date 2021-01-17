@@ -15,6 +15,7 @@ import javax.swing.event.ChangeListener;
 import jssc.SerialPortList;
 
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.messages.Messages;
 
 import com.jeta.forms.components.panel.FormPanel;
 
@@ -25,6 +26,11 @@ import com.jeta.forms.components.panel.FormPanel;
  * 
  */
 public class GRBLLazerMachineParametersPanel extends JPanel {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4410438588377866867L;
 
 	private static Logger logger = Logger
 			.getLogger(GRBLLazerMachineParametersPanel.class);
@@ -48,7 +54,13 @@ public class GRBLLazerMachineParametersPanel extends JPanel {
 
 		FormPanel f = new FormPanel(getClass().getResourceAsStream(
 				"grblserialandparameters.jfrm")); //$NON-NLS-1$
-
+		
+		f.getLabel("lblmaxSpeedValue") //$NON-NLS-1$
+			.setText(Messages.getString("GRBLLazerMachineParametersPanel.0")); //$NON-NLS-1$
+		f.getLabel("lblMaxPower") //$NON-NLS-1$
+			.setText(Messages.getString("GRBLLazerMachineParametersPanel.1")); //$NON-NLS-1$
+		
+		
 		JComboBox<String> cb = (JComboBox<String>) f
 				.getComponentByName("cbportserie"); //$NON-NLS-1$
 		cb.setModel(new DefaultComboBoxModel<>(portNames));
@@ -107,6 +119,9 @@ public class GRBLLazerMachineParametersPanel extends JPanel {
 				
 			}
 		});
+		
+		// label translation
+		
 		
 		setLayout(new BorderLayout());
 		add(f, BorderLayout.CENTER);

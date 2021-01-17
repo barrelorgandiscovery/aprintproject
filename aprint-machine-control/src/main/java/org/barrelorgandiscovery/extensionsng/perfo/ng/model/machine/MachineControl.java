@@ -12,7 +12,7 @@ public interface MachineControl {
 	public void setMachineControlListener(MachineControlListener listener);
 
 	/**
-	 * send a command
+	 * send a command to machine, this method is a blocking one
 	 * 
 	 * @param command
 	 * @throws Exception

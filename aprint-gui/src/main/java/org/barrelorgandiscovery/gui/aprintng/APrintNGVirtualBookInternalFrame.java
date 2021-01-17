@@ -1460,7 +1460,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 			try {
 				aSyncPreparePlayin.signalVirtualBookChanged((IPreparedCapableSubSystem) pss, virtualBook);
 			} catch (Exception ex) {
-				logger.error("error in prepared play'in"); //$NON-NLS-1$
+				logger.error("error in prepared play'in " + ex.getMessage(), ex); //$NON-NLS-1$
 			}
 		}
 	}

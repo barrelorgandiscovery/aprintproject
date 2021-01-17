@@ -76,7 +76,6 @@ public class OpenCVVideoFamilyImageSeeker implements IFamilyImageSeeker, Disposa
 			}
 
 			final BufferedImage b = OpenCVJavaConverter.convertOpenCVToJava(m, resizeFactor);
-
 			return b;
 		}
 	}

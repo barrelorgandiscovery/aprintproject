@@ -93,7 +93,7 @@ public class XOptimParametersBeanInfo extends BaseBeanInfo {
 		ExtendedPropertyDescriptor hasMultiplePass = addProperty("hasMultiplePass");
 		hasMultiplePass.setShortDescription("Doit on faire le tracé avec des passes additionnelles");
 		hasMultiplePass.setDisplayName("Passes additionnelles ?");
-		hasMultiplePass.setCategory("Passe Additionnelles");
+		hasMultiplePass.setCategory("Passes Additionnelles");
 
 		ExtendedPropertyDescriptor multiplePass = addProperty("multiplePass");
 		multiplePass.setShortDescription("Combien de passes additionnelles");

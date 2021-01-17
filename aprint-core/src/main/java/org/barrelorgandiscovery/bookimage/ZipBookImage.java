@@ -108,7 +108,7 @@ public class ZipBookImage extends BookImage implements Disposable {
 	@Override
 	public int getWidth() {
 		populateWidthAndHeightFromFirst();
-		return this.width;
+		return this.width * imageCount;
 	}
 
 	@Override
