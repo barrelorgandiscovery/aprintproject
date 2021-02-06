@@ -30,23 +30,23 @@ public class Hole implements Comparable<Hole>, Serializable, ITimedStamped, ITim
 	private long length;
 
 	/**
-	 * piste
+	 * 0 based track
 	 */
-	private int piste;
+	private int track;
 
 	/**
 	 * Constructor of hole, given the track no, the timestamp and length (time are in microseconds)
 	 * 
-	 * @param piste
+	 * @param track
 	 *            hole track
 	 * @param timestamp
 	 *            timestamp in microsecond
 	 * @param length
 	 *            length of the hole in microsecond
 	 */
-	public Hole(int piste, long timestamp, long length) {
+	public Hole(int track, long timestamp, long length) {
 		super();
-		this.piste = piste;
+		this.track = track;
 		this.timestamp = timestamp;
 		// assert length >= 0;
 		this.length = length;
@@ -60,7 +60,7 @@ public class Hole implements Comparable<Hole>, Serializable, ITimedStamped, ITim
 	 */
 	public Hole(Hole n) {
 		super();
-		this.piste = n.piste;
+		this.track = n.track;
 		this.timestamp = n.timestamp;
 		this.length = n.length;
 	}
@@ -80,7 +80,7 @@ public class Hole implements Comparable<Hole>, Serializable, ITimedStamped, ITim
 	 * @return
 	 */
 	public int getTrack() {
-		return piste;
+		return track;
 	}
 
 	/**
@@ -100,9 +100,9 @@ public class Hole implements Comparable<Hole>, Serializable, ITimedStamped, ITim
 	 * @return
 	 */
 	public boolean intersect(Region r) {
-		if (piste < r.beginningtrack)
+		if (track < r.beginningtrack)
 			return false;
-		if (piste > r.endtrack)
+		if (track > r.endtrack)
 			return false;
 
 		if (timestamp > r.end)
@@ -122,7 +122,7 @@ public class Hole implements Comparable<Hole>, Serializable, ITimedStamped, ITim
 			return false;
 
 		Hole n = (Hole) obj;
-		return timestamp == n.timestamp && piste == n.piste
+		return timestamp == n.timestamp && track == n.track
 				&& length == n.length;
 	}
 
@@ -135,7 +135,7 @@ public class Hole implements Comparable<Hole>, Serializable, ITimedStamped, ITim
 	public int hashCode() {
 		int hash = HashCodeUtils.SEED;
 		hash = HashCodeUtils.hash(hash, timestamp);
-		hash = HashCodeUtils.hash(hash, piste);
+		hash = HashCodeUtils.hash(hash, track);
 		hash = HashCodeUtils.hash(hash, length);
 		return hash;
 	}
@@ -149,7 +149,7 @@ public class Hole implements Comparable<Hole>, Serializable, ITimedStamped, ITim
 	public String toString() {
 		StringBuffer sb = new StringBuffer();
 		sb.append(" ").append(timestamp).append(" ")
-				.append(Messages.getString("Hole.0")).append(" ").append(piste) //$NON-NLS-1$
+				.append(Messages.getString("Hole.0")).append(" ").append(track) //$NON-NLS-1$
 				.append(" ").append(Messages.getString("Hole.1")).append(" ")
 				.append(length)
 				.append(" ").append(Messages.getString("Hole.2")); //$NON-NLS-1$ //$NON-NLS-2$
@@ -171,10 +171,10 @@ public class Hole implements Comparable<Hole>, Serializable, ITimedStamped, ITim
 
 		// Invariant : o1.getTimestamp = o2.getTimestamp
 
-		if (piste < o.piste)
+		if (track < o.track)
 			return -1;
 
-		if (piste > o.piste)
+		if (track > o.track)
 			return 1;
 
 		if (length < o.length)
@@ -321,9 +321,9 @@ public class Hole implements Comparable<Hole>, Serializable, ITimedStamped, ITim
 
 				// on coupe la note en deux
 				return new Hole[] {
-						new Hole(a.piste, a.timestamp, b.timestamp
+						new Hole(a.track, a.timestamp, b.timestamp
 								- a.timestamp),
-						new Hole(a.piste, b.timestamp + b.length, a.timestamp
+						new Hole(a.track, b.timestamp + b.length, a.timestamp
 								+ a.length - (b.timestamp + b.length))
 
 				};
@@ -333,11 +333,11 @@ public class Hole implements Comparable<Hole>, Serializable, ITimedStamped, ITim
 				// on rapetisse la note, il faut savoir dans quel sens on est
 
 				if (a.timestamp < b.timestamp) {
-					return new Hole[] { new Hole(a.piste, a.timestamp,
+					return new Hole[] { new Hole(a.track, a.timestamp,
 							b.timestamp - a.timestamp) };
 				} else // a.getTimestamp() > b.getTimestamp()
 				{
-					return new Hole[] { new Hole(a.piste, b.timestamp
+					return new Hole[] { new Hole(a.track, b.timestamp
 							+ b.length, a.timestamp + a.length
 							- (b.timestamp + b.length)) };
 				}
@@ -358,7 +358,7 @@ public class Hole implements Comparable<Hole>, Serializable, ITimedStamped, ITim
 	 * @return
 	 */
 	public Hole newHoleWithOffset(long timestamp) {
-		return new Hole(this.piste, this.timestamp + timestamp, this.length);
+		return new Hole(this.track, this.timestamp + timestamp, this.length);
 	}
 
 	/**
@@ -367,7 +367,7 @@ public class Hole implements Comparable<Hole>, Serializable, ITimedStamped, ITim
 	 * @return
 	 */
 	public Hole newHoleWithMinimumLength(long minimumLength) {
-		return new Hole(this.piste, this.timestamp , Math.max(this.length, minimumLength));
+		return new Hole(this.track, this.timestamp , Math.max(this.length, minimumLength));
 	}
 	
 }

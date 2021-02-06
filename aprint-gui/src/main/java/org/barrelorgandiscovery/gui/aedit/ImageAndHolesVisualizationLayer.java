@@ -2,6 +2,7 @@ package org.barrelorgandiscovery.gui.aedit;
 
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics;
@@ -17,8 +18,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.swing.JFrame;
+
 import org.barrelorgandiscovery.bookimage.BookImage;
 import org.barrelorgandiscovery.bookimage.IFamilyImageSeeker;
+import org.barrelorgandiscovery.bookimage.ZipBookImage;
 import org.barrelorgandiscovery.images.books.tools.IFileBasedTiledImage;
 import org.barrelorgandiscovery.images.books.tools.ITiledImage;
 import org.barrelorgandiscovery.images.books.tools.StandaloneTiledImage;
@@ -73,17 +77,17 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 	 * specific holes drawing color, red by default
 	 */
 	private Color holesColor = Color.red;
-	
+
 	private String layerInternalName = null;
-	
+
 	public void setLayerInternalName(String layerInternalName) {
 		this.layerInternalName = layerInternalName;
 	}
-	
+
 	public String getLayerInternalName() {
 		return layerInternalName;
 	}
-	
+
 	public void setHolesColor(Color holesColor) {
 		if (holesColor != null)
 			this.holesColor = holesColor;
@@ -177,21 +181,44 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 				double width = s.getWidth();
 
 				BufferedImage imageToDisplay = backgroundimage;
+
+				AffineTransform t = AffineTransform.getScaleInstance(1, 1);
+				
 				if (flipHorizontallyTheImage) {
-					imageToDisplay = reverseImage(backgroundimage);
+					// invert the image
+					AffineTransform scaleTransform = AffineTransform.getScaleInstance(1, -1);
+					AffineTransform translateInstance = AffineTransform.getTranslateInstance(0,
+							imageToDisplay.getHeight());
+					
+					translateInstance.concatenate(scaleTransform);
+					// imageToDisplay = reverseImage(backgroundimage);
+					t.concatenate(translateInstance);
 				}
 
-				int iwidth = (int) ((1.0 * component.MmToPixel(width) / imageToDisplay.getHeight())
-						* imageToDisplay.getWidth());
-				int iheight = component.MmToPixel(width);
+				
+				double factor = (1.0 * component.MmToPixel(width) / imageToDisplay.getHeight());
+//				int iwidth = (int) (factor
+//						* imageToDisplay.getWidth());
+//				int iheight = component.MmToPixel(width);
 
 				if (disableRescale) {
-					iwidth = imageToDisplay.getWidth();
-					iheight = imageToDisplay.getHeight();
+//					iwidth = imageToDisplay.getWidth();
+//					iheight = imageToDisplay.getHeight();
+					factor=1.0;
 				}
 
-				g.drawImage(imageToDisplay, component.convertCartonToScreenX(xoffset),
-						component.convertCartonToScreenY(0), iwidth, iheight, component);
+				
+				AffineTransform display = AffineTransform.getScaleInstance(factor, factor);
+				display.concatenate(t);
+				
+				AffineTransform shift = AffineTransform.getTranslateInstance(component.convertCartonToScreenX(xoffset),component.convertCartonToScreenY(0));
+				shift.concatenate(display);
+					g2d.drawImage(imageToDisplay, shift, component);
+//					
+//					g.drawImage(imageToDisplay, ,
+//							, iwidth, iheight, component);
+
+				
 			}
 
 			if (tileImage != null) {
@@ -204,19 +231,18 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 					Scale s = vb.getScale();
 					double width = s.getWidth();
 					double f = 1.0 * width / tileImage.getHeight() * component.MmToPixel(1000) / 1000;
-					
+
 					// f is the scale factor between the pixels and the book's width
-					
+
 					AffineTransform scaling = AffineTransform.getScaleInstance(f, f);
 					AffineTransform xoff = AffineTransform.getTranslateInstance(
 							component.MmToPixel(-component.getXoffset() + component.getMargin()),
 							component.MmToPixel(-component.getYoffset() + component.getMargin()));
 
-					
 					if (!disableRescale) {
 						xoff.concatenate(scaling);
 					}
-					
+
 					// xoff is the transform from pixel to the screen display coordsys
 					// it first transform the scale, then the translation
 
@@ -238,6 +264,7 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 						try {
 							Double d = tileImage.subTileDimension(images[i]);
 
+							
 							AffineTransform t = AffineTransform.getTranslateInstance(d.getX(), 0);
 
 							BufferedImage loadImage = null;
@@ -256,12 +283,25 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 							}
 
 							if (loadImage != null) {
+								
+								AffineTransform m = AffineTransform.getTranslateInstance(1, 1);
 
 								if (flipHorizontallyTheImage) {
-									loadImage = reverseImage(loadImage);
+									// loadImage = reverseImage(loadImage);
+									
+									// invert the image
+									AffineTransform scaleTransform = AffineTransform.getScaleInstance(1, -1);
+									AffineTransform translateInstance = AffineTransform.getTranslateInstance(0,
+											loadImage.getHeight());
+									
+									translateInstance.concatenate(scaleTransform);
+									// imageToDisplay = reverseImage(backgroundimage);
+									m.concatenate(translateInstance);
 								}
 
 								AffineTransform scaling2 = AffineTransform.getScaleInstance(f, f);
+								scaling2.concatenate(m);
+								
 								AffineTransform xoff2 = AffineTransform.getTranslateInstance(
 										component.MmToPixel(-component.getXoffset() + component.getMargin()),
 										component.MmToPixel(-component.getYoffset() + component.getMargin()));
@@ -270,7 +310,7 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 								xoff2.concatenate(scaling2);
 
 								// xoff2 is the transform between the pixel to screen
-								
+
 								g2d.drawImage(loadImage, xoff2, null);
 							}
 
@@ -386,6 +426,37 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 		int[] c = currentVisibleTiles.get();
 		assert c != null;
 		return c;
+	}
+
+	public static void main(String[] args) throws Exception {
+
+		JFrame f = new JFrame();
+		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		f.setSize(600, 800);
+
+		f.getContentPane().setLayout(new BorderLayout());
+
+		JVirtualBookScrollableComponent s = new JVirtualBookScrollableComponent();
+		f.getContentPane().add(s, BorderLayout.CENTER);
+
+		VirtualBook vb = new VirtualBook(Scale.getGammeMidiInstance());
+		s.setVirtualBook(vb);
+
+		ImageAndHolesVisualizationLayer l = new ImageAndHolesVisualizationLayer();
+		l.setFlipHorizontallyTheImage(false);
+//		BufferedImage i = ImageTools.loadImage(new File(
+//				"C:\\projets\\APrint\\contributions\\plf\\2020-11-29_poncif_35\\1ereversion.bookimage.tiled\\14_recognized_inline.jpg"));
+//		l.setBackgroundimage(i);
+		
+		ZipBookImage zbi = new ZipBookImage(new File("C:\\projets\\APrint\\contributions\\plf\\2020-12-12_test_videos_image\\testpfr_constantinople.bookimage"));
+		l.setTiledBackgroundimage(zbi);
+		
+		s.addLayer(l);
+
+		f.setVisible(true);
+
+		s.fitToScreen();
+
 	}
 
 }

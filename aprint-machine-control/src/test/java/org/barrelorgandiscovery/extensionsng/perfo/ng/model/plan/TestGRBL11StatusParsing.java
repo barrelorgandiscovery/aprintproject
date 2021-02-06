@@ -35,4 +35,16 @@ public class TestGRBL11StatusParsing {
 		
 	}
 	
+	
+	@Test
+	public void testSmoothie() throws Exception {
+		
+		
+//		String s ="Idle|MPos:0.0000,0.0000,470.7656,85.1522|WPos:0.0000,0.0000,470.5656|F:15000.0,279.0|T:22.2,0.0|B:22.2,0.0";
+//		GRBLStatus status = GRBLStatus.parse11(s);
+//		
+//		System.out.println(status);
+		
+	}
+	
 }

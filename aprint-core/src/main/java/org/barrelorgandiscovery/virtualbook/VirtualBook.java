@@ -167,14 +167,15 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 		if (hole == null)
 			return;
 
-		// VÃ©rification de la note associÃ©e au carton ..
+		if (hole.getTrack() >= trackIndex.length) {
+			throw new RuntimeException("for hole " + hole + " track number " + hole.getTrack() + " is out of scope (" + trackIndex.length + ") for the scale :" + bookscale);
+		}
+		
+		// Vérification de la note associée au carton ..
 		notes.add(hole);
 		// notesorderedbyend.add(n);
 		si.add(hole);
 
-		if (hole.getTrack() >= trackIndex.length) {
-			throw new RuntimeException("for hole " + hole + " track number is out of scope for the scale :" + bookscale);
-		}
 		
 		trackIndex[hole.getTrack()].add(hole);
 
@@ -833,50 +834,13 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 		events.remove(event);
 	}
 
-	// private void writeObject(java.io.ObjectOutputStream out) throws
-	// IOException {
-	// // Version
-	// out.writeInt(1);
-	// // Gamme
-	// out.writeObject(gamme);
-	//
-	// // notes
-	// out.writeLong(notes.size());
-	//
-	// for (Iterator iter = notes.iterator(); iter.hasNext();) {
-	// Note element = (Note) iter.next();
-	// out.writeObject(element);
-	// }
-	//
-	// }
-	//
-	// private void readObject(java.io.ObjectInputStream in) throws IOException,
-	// ClassNotFoundException {
-	//
-	// int version = in.readInt();
-	// if (version == 1)
-	// {
-	// Gamme g = (Gamme)in.readObject();
-	// long nbnotes = in.readLong();
-	// TreeSet<Note> notes = new TreeSet<Note>();
-	// for (long i = 0 ; i < nbnotes; i ++)
-	// {
-	// notes.add((Note)in.readObject());
-	// }
-	//
-	// // tout s'est bien dÃ©roulÃ©
-	// gamme = g;
-	// this.notes = notes;
-	//
-	// }
-	//
-	// }
+
 
 	// ///////////////////////////////////////////////////////////////////////////
-	// methodes associÃ©es Ã  la registration
+	// methodes associées à la registration
 
 	/**
-	 * PropriÃ©tÃ© mÃ©morisant la liste des sections associÃ©es
+	 * Propriété mémorisant la liste des sections associées
 	 */
 	private RegistrationSection[] rsections = null;
 
