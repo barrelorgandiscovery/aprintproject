@@ -37,7 +37,7 @@ public class GRBLPunchMachine extends BaseAbstractPunchMachine {
 
 		GRBLPunchMachineParameters p = (GRBLPunchMachineParameters) parameters;
 
-		GRBLMachineControl gmc = new GRBLMachineControl(p.getPort(), new GRBLPunchCompilerVisitor());
+		GRBLMachineControl gmc = new GRBLMachineControl(p.getPort(), createNewGCodeCompiler(parameters));
 		return gmc;
 	}
 

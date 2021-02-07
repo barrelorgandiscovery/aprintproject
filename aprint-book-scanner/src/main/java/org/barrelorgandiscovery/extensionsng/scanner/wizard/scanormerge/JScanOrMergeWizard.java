@@ -10,6 +10,8 @@ import javax.swing.JPanel;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.lf5.LF5Appender;
+import org.barrelorgandiscovery.extensions.IExtension;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.extension.MachineExtension;
 import org.barrelorgandiscovery.extensionsng.scanner.Messages;
 import org.barrelorgandiscovery.extensionsng.scanner.wizard.JChooseFolderStep;
 import org.barrelorgandiscovery.extensionsng.scanner.wizard.JMergeImagesStep;
@@ -37,9 +39,12 @@ public class JScanOrMergeWizard extends JPanel {
 
 	private Repository2 repository;
 
-	public JScanOrMergeWizard(IPrefsStorage ps, Repository2 repository) throws Exception {
+	private IExtension[] extensions;
+
+	public JScanOrMergeWizard(IPrefsStorage ps, Repository2 repository, IExtension[] extensions) throws Exception {
 		this.ps = ps;
 		this.repository = repository;
+		this.extensions = extensions;
 		initComponents();
 	}
 
@@ -48,13 +53,12 @@ public class JScanOrMergeWizard extends JPanel {
 		// scan steps
 		JOutputFolderChooserStep s = new JOutputFolderChooserStep(null, ps);
 		s.setLabelOutputFolder(Messages.getString("JScanOrMergeWizard.0")); //$NON-NLS-1$
-		JScanParameterStep p = new JScanParameterStep(s, ps);
+		JScanParameterStep p = new JScanParameterStep(s, ps, extensions);
 		JScanStep scanStep = new JScanStep(p, s);
-		
+
 		JVideoInput videoFileInputStep = new JVideoInput(null);
 		JMergeImagesStep mergeVideoStep = new JMergeImagesStep(videoFileInputStep, ps, repository);
 
-		
 		// merge steps
 
 		// folder step for choosing folder
@@ -88,7 +92,8 @@ public class JScanOrMergeWizard extends JPanel {
 
 		JFrame f = new JFrame();
 		f.getContentPane().setLayout(new BorderLayout());
-		f.getContentPane().add(new JScanOrMergeWizard(p, rep), BorderLayout.CENTER);
+		f.getContentPane().add(new JScanOrMergeWizard(p, rep, new IExtension[] { new MachineExtension() }),
+				BorderLayout.CENTER);
 
 		f.setSize(800, 600);
 		f.setVisible(true);

@@ -99,13 +99,13 @@ public class ScannerExtension extends BaseExtension {
 	private void newProject() throws Exception {
 
 		// ask for the folder + instrument
-
 		assert repository != null;
 		if (repository == null) {
 			throw new Exception("repository is not defined, waiting for Repository2 object type"); //$NON-NLS-1$
 		}
 
-		JScanOrMergeWizard jScanOrMergeWizard = new JScanOrMergeWizard(this.extensionPreferences, repository);
+		JScanOrMergeWizard jScanOrMergeWizard = new JScanOrMergeWizard(this.extensionPreferences, repository,
+				application.getCurrentExtensions());
 		APrintNGInternalFrame frame = new APrintNGInternalFrame(this.extensionPreferences);
 		frame.getContentPane().setLayout(new BorderLayout());
 		frame.getContentPane().add(jScanOrMergeWizard, BorderLayout.CENTER);

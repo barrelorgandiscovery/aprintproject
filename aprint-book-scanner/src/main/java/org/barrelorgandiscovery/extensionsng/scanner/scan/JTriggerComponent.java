@@ -11,6 +11,8 @@ import javax.swing.JRadioButton;
 import javax.swing.JTextField;
 
 import org.barrelorgandiscovery.bookimage.PerfoScanFolder;
+import org.barrelorgandiscovery.extensions.IExtension;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.extension.MachineExtension;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.panel.wizard.JMachineWithParametersChooser;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.ITriggerFactory;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.MachineTrigger;
@@ -34,9 +36,12 @@ public class JTriggerComponent extends JPanel {
   private JRadioButton rdMachine;
   private JMachineWithParametersChooser chooser;
   private JTextField txtseconds;
+  
+  private IExtension[] extension;
 
-  public JTriggerComponent(IPrefsStorage ps) throws Exception {
+  public JTriggerComponent(IPrefsStorage ps, IExtension[] extensions) throws Exception {
     this.ps = ps;
+    this.extension = extensions;
     initComponents();
   }
 
@@ -51,7 +56,7 @@ public class JTriggerComponent extends JPanel {
     assert formIs != null;
     FormPanel fp = new FormPanel(formIs);
 
-    chooser = new JMachineWithParametersChooser(ps);
+    chooser = new JMachineWithParametersChooser(ps, extension);
     fp.getFormAccessor().replaceBean("lblmachinechoose", chooser);//$NON-NLS-1$
 
     rdTime = fp.getRadioButton("rdtime");//$NON-NLS-1$
@@ -132,7 +137,7 @@ public class JTriggerComponent extends JPanel {
     FilePrefsStorage p =
         new FilePrefsStorage(new File("c:\\temp\\testTriggerComponents.properties")); //$NON-NLS-1$
     p.load();
-    f.getContentPane().add(new JTriggerComponent(p), BorderLayout.CENTER);
+    f.getContentPane().add(new JTriggerComponent(p, new IExtension[] {new MachineExtension()}), BorderLayout.CENTER);
     f.setVisible(true);
   }
 }

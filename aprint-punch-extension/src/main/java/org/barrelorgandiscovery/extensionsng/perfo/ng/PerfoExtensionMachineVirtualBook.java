@@ -31,7 +31,6 @@ import org.noos.xing.mydoggy.ToolWindowAnchor;
 import org.noos.xing.mydoggy.ToolWindowType;
 import org.noos.xing.mydoggy.plaf.MyDoggyToolWindowManager;
 
-
 /**
  * Extension de perçage pour la machine à percer de gérard
  * 
@@ -84,7 +83,7 @@ public class PerfoExtensionMachineVirtualBook
 	}
 
 	public String getName() {
-		return Messages.getString("PerfoExtensionMachineVirtualBook.2");  //$NON-NLS-1$
+		return Messages.getString("PerfoExtensionMachineVirtualBook.2"); //$NON-NLS-1$
 	}
 
 	// cycle de vie
@@ -171,8 +170,9 @@ public class PerfoExtensionMachineVirtualBook
 	public void informVirtualBookFrame(APrintNGVirtualBookFrame frame) {
 		this.frame = frame;
 		try {
+
 			punchPanel = new JPunchWizard(resultPunchLayer, issuesPunchLayer, aprintref.getAsyncJobs(),
-					aprintref.getPrefsStorage(getName()), frame.getPianoRoll());
+					aprintref.getPrefsStorage(getName()), frame.getPianoRoll(), aprintref.getCurrentExtensions());
 
 			// register for changes on virtual book changes
 			JEditableVirtualBookComponent pianoRoll = (JEditableVirtualBookComponent) frame.getPianoRoll();
@@ -206,7 +206,7 @@ public class PerfoExtensionMachineVirtualBook
 
 		ToolWindowTools.defineProperties(tw);
 		// change width
-		DockedTypeDescriptor desc = (DockedTypeDescriptor)tw.getTypeDescriptor(ToolWindowType.DOCKED);
+		DockedTypeDescriptor desc = (DockedTypeDescriptor) tw.getTypeDescriptor(ToolWindowType.DOCKED);
 		desc.setDockLength(550);
 	}
 

@@ -2670,4 +2670,8 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		vb.setName(loadedVirtualBook.getName());
 		return vb;
 	}
+	
+	public IExtension[] getCurrentExtensions() {
+		return this.exts;
+	}
 }

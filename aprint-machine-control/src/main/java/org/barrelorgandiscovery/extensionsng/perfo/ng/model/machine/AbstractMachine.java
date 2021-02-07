@@ -4,7 +4,6 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.gcode.GCodeC
 
 /**
  * abstract machine command, interpreting the punch plan
- * this class is serializable
  * @author pfreydiere
  * 
  */

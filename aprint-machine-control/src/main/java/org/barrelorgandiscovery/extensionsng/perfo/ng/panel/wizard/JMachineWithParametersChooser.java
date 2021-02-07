@@ -6,6 +6,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -16,6 +18,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.extensions.ExtensionManager;
+import org.barrelorgandiscovery.extensions.IExtension;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachine;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.GUIMachineParametersRepository;
@@ -46,8 +50,14 @@ public class JMachineWithParametersChooser extends JPanel {
 	// by default
 	private AbstractMachineParameters selectedMachineParameters = new GRBLPunchMachineParameters();
 
-	public JMachineWithParametersChooser(IPrefsStorage ps) throws Exception {
+	private IExtension[] extensions;
+
+	public JMachineWithParametersChooser(IPrefsStorage ps, IExtension[] extensions) throws Exception {
 		this.preferences = ps;
+
+		assert extensions != null;
+		this.extensions = extensions;
+
 		setLayout(new BorderLayout());
 		initComponents();
 	}
@@ -69,9 +79,9 @@ public class JMachineWithParametersChooser extends JPanel {
 	}
 
 	public PrefixedNamePrefsStorage constructMachinePreferenceStorage(AbstractMachineParameters gp) {
-		
+
 		String machineLabelDomain = StringTools.toHex(gp.getLabelName());
-		
+
 		PrefixedNamePrefsStorage pps = new PrefixedNamePrefsStorage(
 				STORAGE_MACHINE_PROPERTIES_DOMAIN + machineLabelDomain, preferences);
 		return pps;
@@ -95,17 +105,14 @@ public class JMachineWithParametersChooser extends JPanel {
 
 		// default selected
 		selectedMachineParameters = grblpunchpachineparameters;
-
-		GRBLLazerMachineParameters grblLazerMachineParameters = new GRBLLazerMachineParameters();
 		
-		MockMachineParameters mockMachine = new MockMachineParameters();
-		MockLazerMachineParameters mockMachineLazer = new MockLazerMachineParameters();
+		MachineParameterFactory factory = new MachineParameterFactory(extensions);
 
-		MachineParameterDisplayer[] displayers = new MachineParameterDisplayer[] { 
-				new MachineParameterDisplayer(grblpunchpachineparameters),
-				new MachineParameterDisplayer(grblLazerMachineParameters),
-				new MachineParameterDisplayer(mockMachine),
-				new MachineParameterDisplayer(mockMachineLazer)};
+		AbstractMachineParameters[] allDiscoveredParameters = factory.createAllMachineParameters();
+		
+		MachineParameterDisplayer[] displayers = Arrays.stream(allDiscoveredParameters)
+				.map( (p) -> new MachineParameterDisplayer(p))
+				.collect(Collectors.toList()).toArray(new MachineParameterDisplayer[0]);
 
 		machineCombo = fp.getComboBox("cbmachine"); //$NON-NLS-1$
 		machineCombo.setModel(new DefaultComboBoxModel<MachineParameterDisplayer>(displayers));
@@ -176,7 +183,7 @@ public class JMachineWithParametersChooser extends JPanel {
 		FilePrefsStorage p = new FilePrefsStorage(new File("c:\\temp\\testmachinechoose.properties"));
 		p.load();
 
-		f.getContentPane().add(new JMachineWithParametersChooser(p), BorderLayout.CENTER);
+		f.getContentPane().add(new JMachineWithParametersChooser(p, new IExtension[0]), BorderLayout.CENTER);
 		f.setVisible(true);
 	}
 }

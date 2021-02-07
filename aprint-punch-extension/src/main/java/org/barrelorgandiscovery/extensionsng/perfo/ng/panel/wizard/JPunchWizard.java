@@ -11,14 +11,15 @@ import javax.swing.JPanel;
 
 import org.apache.log4j.BasicConfigurator;
 import org.barrelorgandiscovery.AsyncJobsManager;
+import org.barrelorgandiscovery.extensions.IExtension;
 import org.barrelorgandiscovery.extensionsng.perfo.gui.PunchLayer;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.extension.MachineExtension;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.optimizers.OptimizersRepository;
 import org.barrelorgandiscovery.gui.aedit.JEditableVirtualBookComponent;
 import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
 import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.Wizard;
 import org.barrelorgandiscovery.issues.IssueLayer;
-import org.barrelorgandiscovery.prefs.DummyPrefsStorage;
 import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.tools.Disposable;
@@ -35,7 +36,7 @@ public class JPunchWizard extends JPanel implements Disposable {
 	private Wizard wizard;
 
 	public JPunchWizard(PunchLayer punchlayer, IssueLayer il, AsyncJobsManager jobManager, IPrefsStorage ps,
-			JVirtualBookScrollableComponent pianoroll) throws Exception {
+			JVirtualBookScrollableComponent pianoroll, IExtension[] extensions) throws Exception {
 
 		assert ps != null;
 		this.ps = ps;
@@ -46,7 +47,7 @@ public class JPunchWizard extends JPanel implements Disposable {
 
 		engine.setAsyncManager(jobManager);
 
-		StepChooseMachine stepChooseMachine = new StepChooseMachine(ps);
+		StepChooseMachine stepChooseMachine = new StepChooseMachine(ps, extensions);
 		StepPlanning splanning = new StepPlanning(oRepository, stepChooseMachine, engine, pianoroll, ps);
 		splanning.setParentStep(stepChooseMachine);
 		StepResume sresume = new StepResume(stepChooseMachine, pianoroll.getVirtualBook(), ps);
@@ -66,7 +67,6 @@ public class JPunchWizard extends JPanel implements Disposable {
 
 	}
 
-	
 	@Override
 	public Dimension getPreferredSize() {
 		Dimension size = super.getPreferredSize();
@@ -75,7 +75,7 @@ public class JPunchWizard extends JPanel implements Disposable {
 		}
 		return size;
 	}
-	
+
 	public void setVirtualBook(VirtualBook vb) throws Exception {
 		engine.changeVirtualBook(vb);
 	}
@@ -84,9 +84,9 @@ public class JPunchWizard extends JPanel implements Disposable {
 		engine.setScrollableVirtualBook(sc);
 	}
 
-	
 	/**
 	 * Test method f
+	 * 
 	 * @param args
 	 * @throws Exception
 	 */
@@ -97,11 +97,13 @@ public class JPunchWizard extends JPanel implements Disposable {
 		JEditableVirtualBookComponent vbv = new JEditableVirtualBookComponent();
 		vbv.activatePanOnMiddleButton();
 
-		final VirtualBookResult vb = VirtualBookXmlIO.read(new File("C:\\Users\\use\\Dropbox\\APrint\\Books\\49\\carton_jerome.book")); //$NON-NLS-1$
+		final VirtualBookResult vb = VirtualBookXmlIO
+				.read(new File("C:\\Users\\use\\Dropbox\\APrint\\Books\\49\\carton_jerome.book")); //$NON-NLS-1$
 
-		// final VirtualBookResult vb = VirtualBookXmlIO.read(new File("C:\\Users\\use\\Dropbox\\APrint\\Books\\52\\Folies Bergere.book")); //$NON-NLS-1$
+		// final VirtualBookResult vb = VirtualBookXmlIO.read(new
+		// File("C:\\Users\\use\\Dropbox\\APrint\\Books\\52\\Folies Bergere.book"));
+		// //$NON-NLS-1$
 
-		
 		vbv.setPreferredSize(new Dimension(300, 300));
 		vbv.setVirtualBook(vb.virtualBook);
 
@@ -126,17 +128,16 @@ public class JPunchWizard extends JPanel implements Disposable {
 
 		// define a virtualbook
 		engine.changeVirtualBook(vb.virtualBook);
-		
-		
+
 		FilePrefsStorage prefsStorage = new FilePrefsStorage(new File("c:\\tmp\\testperfsstorage.properties"));
 		prefsStorage.load();
 
-		StepChooseMachine stepChooseMachine = new StepChooseMachine(prefsStorage);
+		StepChooseMachine stepChooseMachine = new StepChooseMachine(prefsStorage,
+				new IExtension[] { new MachineExtension() });
 		StepPlanning splanning = new StepPlanning(oRepository, stepChooseMachine, engine, vbv, prefsStorage);
 		splanning.setParentStep(stepChooseMachine);
 		StepResume sresume = new StepResume(stepChooseMachine, vb.virtualBook, prefsStorage);
 		sresume.setParentStep(splanning);
-		
 
 		List<Step> steps = new ArrayList<Step>();
 		steps.add(stepChooseMachine);

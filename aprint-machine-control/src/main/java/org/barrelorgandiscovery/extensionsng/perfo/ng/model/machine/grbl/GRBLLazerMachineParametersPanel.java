@@ -89,7 +89,7 @@ public class GRBLLazerMachineParametersPanel extends JPanel {
 		
 		
 		JSpinner maxpower = (JSpinner)f.getComponentByName("maxPowerValue");//$NON-NLS-1$
-		maxpower.setModel(new SpinnerNumberModel((int)parameters.getMaxPower(), 100, 10_000, 10));
+		maxpower.setModel(new SpinnerNumberModel((int)parameters.getMaxPower(), 5, 100, 5));
 		maxpower.getModel().setValue(parameters.getMaxPower());
 		maxpower.addChangeListener(new ChangeListener() {
 			@Override

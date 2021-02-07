@@ -16,6 +16,7 @@ import javax.swing.JScrollPane;
 import javax.swing.text.StringContent;
 
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.extensions.IExtension;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.messages.Messages;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachine;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachineParameters;
@@ -35,9 +36,11 @@ public class StepChooseMachine extends JPanel implements Step {
 	private IPrefsStorage ps;
 
 	private JMachineWithParametersChooser machineChoose;
+	private IExtension[] extensions;
 
-	public StepChooseMachine(IPrefsStorage ps) throws Exception {
+	public StepChooseMachine(IPrefsStorage ps, IExtension[] extensions) throws Exception {
 		this.ps = ps;
+		this.extensions = extensions;
 		initComponents();
 	}
 
@@ -106,7 +109,7 @@ public class StepChooseMachine extends JPanel implements Step {
 
 		// choose the machine configuration
 
-		machineChoose = new JMachineWithParametersChooser(ps);
+		machineChoose = new JMachineWithParametersChooser(ps, extensions);
 		panel.getFormAccessor().replaceBean("lblmachinechoose", machineChoose);
 
 		assert ps != null;

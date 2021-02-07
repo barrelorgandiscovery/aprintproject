@@ -18,7 +18,7 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchCommand;
  */
 public class GRBLPunchCompilerVisitor extends GCodeCompiler {
 
-	private ArrayList<String> grblCommands = new ArrayList<>();
+	protected ArrayList<String> grblCommands = new ArrayList<>();
 
 	public GRBLPunchCompilerVisitor() {
 

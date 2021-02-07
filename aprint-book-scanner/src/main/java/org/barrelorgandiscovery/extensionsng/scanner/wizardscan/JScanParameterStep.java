@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.Serializable;
 
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.extensions.IExtension;
 import org.barrelorgandiscovery.extensionsng.scanner.Messages;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.IChooseWebCamListener;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.JChooseWebCam;
@@ -24,7 +25,7 @@ public class JScanParameterStep extends BasePanelStep {
 
 	/** */
 	private static final long serialVersionUID = -7296047711004950598L;
-	
+
 	private static Logger logger = Logger.getLogger(JScanParameterStep.class);
 
 	private IPrefsStorage preferences;
@@ -33,9 +34,12 @@ public class JScanParameterStep extends BasePanelStep {
 
 	private JTriggerComponent jTriggerComponent;
 
-	public JScanParameterStep(Step parent, IPrefsStorage preferences) throws Exception {
+	private IExtension[] extensions;
+
+	public JScanParameterStep(Step parent, IPrefsStorage preferences, IExtension[] extensions) throws Exception {
 		super("scanparameter", parent); //$NON-NLS-1$
 		this.preferences = preferences;
+		this.extensions = extensions;
 		initComponents();
 	}
 
@@ -54,7 +58,7 @@ public class JScanParameterStep extends BasePanelStep {
 			}
 		});
 
-		jTriggerComponent = new JTriggerComponent(preferences);
+		jTriggerComponent = new JTriggerComponent(preferences, extensions);
 
 		fp.getFormAccessor().replaceBean("lblwebcam", webcamChooser); //$NON-NLS-1$
 		fp.getFormAccessor().replaceBean("lbltrigger", jTriggerComponent); //$NON-NLS-1$
