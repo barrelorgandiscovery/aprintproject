@@ -18,15 +18,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
-import org.barrelorgandiscovery.extensions.ExtensionManager;
 import org.barrelorgandiscovery.extensions.IExtension;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachine;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.GUIMachineParametersRepository;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLLazerMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLPunchMachineParameters;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.lazer.mock.MockLazerMachineParameters;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.mock.MockMachineParameters;
 import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.prefs.PrefixedNamePrefsStorage;
@@ -50,13 +46,13 @@ public class JMachineWithParametersChooser extends JPanel {
 	// by default
 	private AbstractMachineParameters selectedMachineParameters = new GRBLPunchMachineParameters();
 
-	private IExtension[] extensions;
+	private MachineParameterFactory machineFactory;
 
-	public JMachineWithParametersChooser(IPrefsStorage ps, IExtension[] extensions) throws Exception {
+	public JMachineWithParametersChooser(IPrefsStorage ps, MachineParameterFactory factory) throws Exception {
 		this.preferences = ps;
 
-		assert extensions != null;
-		this.extensions = extensions;
+		assert factory != null;
+		this.machineFactory = factory;
 
 		setLayout(new BorderLayout());
 		initComponents();
@@ -94,21 +90,23 @@ public class JMachineWithParametersChooser extends JPanel {
 		FormPanel fp = new FormPanel(is);
 		add(fp, BorderLayout.CENTER);
 
-		GRBLPunchMachineParameters grblpunchpachineparameters = new GRBLPunchMachineParameters();
-		try {
-			PrefixedNamePrefsStorage pps = constructMachinePreferenceStorage(grblpunchpachineparameters);
-			grblpunchpachineparameters.loadParameters(pps);
-		} catch (Exception ex) {
-			logger.error("error while loading the preference storage for machine :" //$NON-NLS-1$
-					+ ex.getMessage(), ex);
-		}
+//		GRBLPunchMachineParameters grblpunchpachineparameters = new GRBLPunchMachineParameters();
+//		try {
+//			PrefixedNamePrefsStorage pps = constructMachinePreferenceStorage(grblpunchpachineparameters);
+//			grblpunchpachineparameters.loadParameters(pps);
+//		} catch (Exception ex) {
+//			logger.error("error while loading the preference storage for machine :" //$NON-NLS-1$
+//					+ ex.getMessage(), ex);
+//		}
 
 		// default selected
-		selectedMachineParameters = grblpunchpachineparameters;
+		//selectedMachineParameters = grblpunchpachineparameters;
 		
-		MachineParameterFactory factory = new MachineParameterFactory(extensions);
-
-		AbstractMachineParameters[] allDiscoveredParameters = factory.createAllMachineParameters();
+		AbstractMachineParameters[] allDiscoveredParameters = machineFactory.createAllMachineParameters();
+		
+		if (allDiscoveredParameters.length > 0) {
+			selectedMachineParameters = allDiscoveredParameters[0];
+		}
 		
 		MachineParameterDisplayer[] displayers = Arrays.stream(allDiscoveredParameters)
 				.map( (p) -> new MachineParameterDisplayer(p))
@@ -183,7 +181,7 @@ public class JMachineWithParametersChooser extends JPanel {
 		FilePrefsStorage p = new FilePrefsStorage(new File("c:\\temp\\testmachinechoose.properties"));
 		p.load();
 
-		f.getContentPane().add(new JMachineWithParametersChooser(p, new IExtension[0]), BorderLayout.CENTER);
+		f.getContentPane().add(new JMachineWithParametersChooser(p, new MachineParameterFactory(new IExtension[0])), BorderLayout.CENTER);
 		f.setVisible(true);
 	}
 }

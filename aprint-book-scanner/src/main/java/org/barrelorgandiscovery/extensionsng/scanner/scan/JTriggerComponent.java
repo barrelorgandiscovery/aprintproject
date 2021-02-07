@@ -14,6 +14,7 @@ import org.barrelorgandiscovery.bookimage.PerfoScanFolder;
 import org.barrelorgandiscovery.extensions.IExtension;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.extension.MachineExtension;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.panel.wizard.JMachineWithParametersChooser;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.panel.wizard.MachineParameterFactory;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.ITriggerFactory;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.MachineTrigger;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.TimeTrigger;
@@ -56,7 +57,9 @@ public class JTriggerComponent extends JPanel {
     assert formIs != null;
     FormPanel fp = new FormPanel(formIs);
 
-    chooser = new JMachineWithParametersChooser(ps, extension);
+    // rework, only base extensions are defined
+    MachineParameterFactory factory = new MachineParameterFactory(extension);
+	chooser = new JMachineWithParametersChooser(ps, factory);
     fp.getFormAccessor().replaceBean("lblmachinechoose", chooser);//$NON-NLS-1$
 
     rdTime = fp.getRadioButton("rdtime");//$NON-NLS-1$

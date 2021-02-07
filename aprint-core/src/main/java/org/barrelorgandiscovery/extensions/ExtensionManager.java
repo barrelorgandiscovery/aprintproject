@@ -79,17 +79,29 @@ public class ExtensionManager implements ExtensionFactory {
 	}
 
 	public ExtensionManager(File extensionfolder) throws Exception {
-		this(extensionfolder, DEFAULT_EXTENSION_PROPERTYFILE);
+		this(extensionfolder, DEFAULT_EXTENSION_PROPERTYFILE, DEFAULT_EXTENSION_SUFFIX);
 	}
 
 	private final static String DEFAULT_EXTENSION_PROPERTYFILE = "extensions.properties";
+
 	private String extensionpropertyname = null;
 
-	public ExtensionManager(File extensionfolder, String extensionpropertyname)
-			throws Exception {
+	private String extension_suffix = DEFAULT_EXTENSION_SUFFIX;
+
+	public ExtensionManager(File extensionfolder, String extensionpropertyname) throws Exception {
+		this(extensionfolder, extensionpropertyname, DEFAULT_EXTENSION_SUFFIX);
+	}
+
+	public ExtensionManager(File extensionfolder, String extensionpropertyname, String jarExtension) throws Exception {
+
+		assert jarExtension != null;
+		assert !jarExtension.isEmpty();
+		assert jarExtension.startsWith(".");
+
+		this.extension_suffix = jarExtension;
 
 		this.extensionpropertyname = extensionpropertyname;
-		logger.debug("ExtensionManager init with extensionsuffixe " + DEFAULT_EXTENSION_SUFFIX); //$NON-NLS-1$
+		logger.debug("ExtensionManager init with extensionsuffixe " + extension_suffix); //$NON-NLS-1$
 
 		if (!extensionfolder.exists() && !extensionfolder.isDirectory())
 			throw new Exception("bad extension folder"); //$NON-NLS-1$
@@ -107,10 +119,10 @@ public class ExtensionManager implements ExtensionFactory {
 			if (s == null)
 				continue;
 
-			if (!s.endsWith(DEFAULT_EXTENSION_SUFFIX)) //$NON-NLS-1$
+			if (!s.endsWith(extension_suffix)) // $NON-NLS-1$
 				continue;
 
-			s = s.substring(0, s.length() - DEFAULT_EXTENSION_SUFFIX.length()); //$NON-NLS-1$
+			s = s.substring(0, s.length() - extension_suffix.length()); // $NON-NLS-1$
 
 			String[] token = s.split("\\_"); //$NON-NLS-1$
 
@@ -176,10 +188,8 @@ public class ExtensionManager implements ExtensionFactory {
 	/**
 	 * Download or read the extension from the URL
 	 * 
-	 * @param url
-	 *            the url of the extension
-	 * @throws Exception
-	 *             if the read failed or an invalid url is specified
+	 * @param url the url of the extension
+	 * @throws Exception if the read failed or an invalid url is specified
 	 */
 	public void downloadExtension(String url) throws Exception {
 
@@ -202,8 +212,7 @@ public class ExtensionManager implements ExtensionFactory {
 		}
 
 		if (extensionname.toLowerCase().endsWith(".jar")) { //$NON-NLS-1$
-			extensionname = extensionname.substring(0,
-					extensionname.length() - 4);
+			extensionname = extensionname.substring(0, extensionname.length() - 4);
 		}
 
 		String name = null;
@@ -259,7 +268,7 @@ public class ExtensionManager implements ExtensionFactory {
 
 		String localName = basename + ".tmp"; //$NON-NLS-1$
 
-		String localFinalName = basename + DEFAULT_EXTENSION_SUFFIX; //$NON-NLS-1$
+		String localFinalName = basename + extension_suffix; // $NON-NLS-1$
 
 		logger.debug("local Extension file name " + localName); //$NON-NLS-1$
 
@@ -292,8 +301,7 @@ public class ExtensionManager implements ExtensionFactory {
 		// ok
 
 		// ecriture de l'url dans le fichier .url ...
-		FileWriter fw = new FileWriter(new File(extensionfolder, localFinalName
-				+ ".url")); //$NON-NLS-1$
+		FileWriter fw = new FileWriter(new File(extensionfolder, localFinalName + ".url")); //$NON-NLS-1$
 		fw.write(url.toString());
 		fw.close();
 
@@ -306,8 +314,7 @@ public class ExtensionManager implements ExtensionFactory {
 		}
 
 		// add the new extension ...
-		extensions.add(new ExtensionName(name, version, new File(
-				extensionfolder, localFinalName), url));
+		extensions.add(new ExtensionName(name, version, new File(extensionfolder, localFinalName), url));
 
 	}
 
@@ -363,8 +370,7 @@ public class ExtensionManager implements ExtensionFactory {
 		ExtensionName n = (ExtensionName) name;
 		File jar = n.getJar();
 
-		File rejectedjarname = new File(jar.getParent(), jar.getName()
-				+ ".reject"); //$NON-NLS-1$
+		File rejectedjarname = new File(jar.getParent(), jar.getName() + ".reject"); //$NON-NLS-1$
 		FileOutputStream fs = new FileOutputStream(rejectedjarname);
 		fs.close();
 
@@ -413,9 +419,8 @@ public class ExtensionManager implements ExtensionFactory {
 		}
 	}
 
-	@SuppressWarnings("unchecked")//$NON-NLS-1$
-	public IExtension[] getExtensions() {
-
+	@SuppressWarnings("unchecked") //$NON-NLS-1$
+	public IExtension[] getExtensions(ClassLoader classLoader) {
 		IExtensionName[] listJarExtensions;
 		try {
 			listJarExtensions = listJarExtensions();
@@ -444,9 +449,7 @@ public class ExtensionManager implements ExtensionFactory {
 
 				// jcl does not implement resource loading ...
 
-				URLClassLoader cl = new URLClassLoader(
-						new URL[] { currentjar.toURL() }, getClass()
-								.getClassLoader());
+				URLClassLoader cl = new URLClassLoader(new URL[] { currentjar.toURL() }, classLoader);
 
 				tryLoadExtension(cl, currentjar, exts);
 
@@ -466,21 +469,23 @@ public class ExtensionManager implements ExtensionFactory {
 		logger.debug("done"); //$NON-NLS-1$
 		IExtension[] retvalue = exts.toArray(new IExtension[0]);
 		return retvalue;
-
 	}
 
-	protected void tryLoadExtension(ClassLoader cl, File currentjar,
-			List<IExtension> exts) throws Exception {
+	@SuppressWarnings("unchecked") //$NON-NLS-1$
+	public IExtension[] getExtensions() {
+		return getExtensions(getClass().getClassLoader());
+	}
+
+	protected void tryLoadExtension(ClassLoader cl, File currentjar, List<IExtension> exts) throws Exception {
 
 		InputStream is = null;
 
 		if (currentjar == null) {
-			is = cl.getResourceAsStream(extensionpropertyname); //$NON-NLS-1$
+			is = cl.getResourceAsStream(extensionpropertyname); // $NON-NLS-1$
 		} else {
 			// read the file at the beginning of the jat file
 
-			JarInputStream jis = new JarInputStream(new FileInputStream(
-					currentjar));
+			JarInputStream jis = new JarInputStream(new FileInputStream(currentjar));
 
 			JarEntry je;
 			while ((je = jis.getNextJarEntry()) != null) {
@@ -526,15 +531,12 @@ public class ExtensionManager implements ExtensionFactory {
 			try {
 
 				Class toLoad = cl.loadClass(classname);
-
 				IExtension e = (IExtension) toLoad.newInstance();
-
 				logger.debug("loaded"); //$NON-NLS-1$
-
 				exts.add(e);
 
 			} catch (ClassNotFoundException cnfe) {
-				logger.error("class " + classname + " not found", cnfe); //$NON-NLS-1$ //$NON-NLS-2$
+				logger.error("class not found while instanciating " + classname, cnfe); //$NON-NLS-1$ //$NON-NLS-2$
 			} catch (InstantiationException ie) {
 				logger.error("cannot instanciate " + classname, ie); //$NON-NLS-1$
 			} catch (IllegalAccessException ie) {
@@ -544,7 +546,7 @@ public class ExtensionManager implements ExtensionFactory {
 						cce);
 			} catch (Throwable t) {
 				t.printStackTrace(System.err);
-				logger.error("error in creating extension", t); //$NON-NLS-1$
+				logger.error("error in creating extension " + classname, t); //$NON-NLS-1$
 			}
 		}
 

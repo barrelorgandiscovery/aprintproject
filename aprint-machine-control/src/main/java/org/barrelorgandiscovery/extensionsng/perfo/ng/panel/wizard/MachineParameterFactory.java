@@ -1,10 +1,12 @@
 package org.barrelorgandiscovery.extensionsng.perfo.ng.panel.wizard;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensions.ExtensionPointProvider;
 import org.barrelorgandiscovery.extensions.IExtension;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.extension.MachineExtension;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachineParameters;
 
 /**
@@ -21,7 +23,13 @@ public class MachineParameterFactory {
 	private IExtension[] extensionManager;
 
 	public MachineParameterFactory(IExtension[] extensions) {
-		this.extensionManager = extensions;
+		
+		// add this extension 
+		MachineExtension me = new MachineExtension();
+		this.extensionManager = Arrays.copyOf(extensions, extensions.length + 1);
+		this.extensionManager[extensions.length] = me;
+		
+		
 	}
 
 	public AbstractMachineParameters[] createAllMachineParameters() {

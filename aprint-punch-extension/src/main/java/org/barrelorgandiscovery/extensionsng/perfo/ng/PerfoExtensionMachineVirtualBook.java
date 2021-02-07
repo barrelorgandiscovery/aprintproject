@@ -3,12 +3,14 @@ package org.barrelorgandiscovery.extensionsng.perfo.ng;
 import java.io.File;
 
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.extensions.ExtensionManager;
 import org.barrelorgandiscovery.extensions.ExtensionPoint;
 import org.barrelorgandiscovery.extensions.IExtension;
 import org.barrelorgandiscovery.extensions.SimpleExtensionPoint;
 import org.barrelorgandiscovery.extensionsng.perfo.gui.PunchLayer;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.messages.Messages;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.panel.wizard.JPunchWizard;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.panel.wizard.MachineParameterFactory;
 import org.barrelorgandiscovery.gui.aedit.IVirtualBookChangedListener;
 import org.barrelorgandiscovery.gui.aedit.JEditableVirtualBookComponent;
 import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
@@ -171,8 +173,14 @@ public class PerfoExtensionMachineVirtualBook
 		this.frame = frame;
 		try {
 
+			ExtensionManager extensionManager = new ExtensionManager(aprintref.getProperties().getAprintFolder(),
+					"extensionsng.properties" , ".machine");
+
+			MachineParameterFactory machineParameterFactory = new MachineParameterFactory(
+					extensionManager.getExtensions(getClass().getClassLoader()));
+
 			punchPanel = new JPunchWizard(resultPunchLayer, issuesPunchLayer, aprintref.getAsyncJobs(),
-					aprintref.getPrefsStorage(getName()), frame.getPianoRoll(), aprintref.getCurrentExtensions());
+					aprintref.getPrefsStorage(getName()), frame.getPianoRoll(), machineParameterFactory);
 
 			// register for changes on virtual book changes
 			JEditableVirtualBookComponent pianoRoll = (JEditableVirtualBookComponent) frame.getPianoRoll();

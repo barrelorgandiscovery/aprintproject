@@ -36,7 +36,7 @@ public class JPunchWizard extends JPanel implements Disposable {
 	private Wizard wizard;
 
 	public JPunchWizard(PunchLayer punchlayer, IssueLayer il, AsyncJobsManager jobManager, IPrefsStorage ps,
-			JVirtualBookScrollableComponent pianoroll, IExtension[] extensions) throws Exception {
+			JVirtualBookScrollableComponent pianoroll,  MachineParameterFactory machineParameterFactory) throws Exception {
 
 		assert ps != null;
 		this.ps = ps;
@@ -47,7 +47,7 @@ public class JPunchWizard extends JPanel implements Disposable {
 
 		engine.setAsyncManager(jobManager);
 
-		StepChooseMachine stepChooseMachine = new StepChooseMachine(ps, extensions);
+		StepChooseMachine stepChooseMachine = new StepChooseMachine(ps, machineParameterFactory);
 		StepPlanning splanning = new StepPlanning(oRepository, stepChooseMachine, engine, pianoroll, ps);
 		splanning.setParentStep(stepChooseMachine);
 		StepResume sresume = new StepResume(stepChooseMachine, pianoroll.getVirtualBook(), ps);
@@ -133,7 +133,8 @@ public class JPunchWizard extends JPanel implements Disposable {
 		prefsStorage.load();
 
 		StepChooseMachine stepChooseMachine = new StepChooseMachine(prefsStorage,
-				new IExtension[] { new MachineExtension() });
+				new MachineParameterFactory(
+				new IExtension[] { new MachineExtension() }));
 		StepPlanning splanning = new StepPlanning(oRepository, stepChooseMachine, engine, vbv, prefsStorage);
 		splanning.setParentStep(stepChooseMachine);
 		StepResume sresume = new StepResume(stepChooseMachine, vb.virtualBook, prefsStorage);

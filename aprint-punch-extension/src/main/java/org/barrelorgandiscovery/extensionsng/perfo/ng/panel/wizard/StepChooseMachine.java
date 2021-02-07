@@ -36,11 +36,11 @@ public class StepChooseMachine extends JPanel implements Step {
 	private IPrefsStorage ps;
 
 	private JMachineWithParametersChooser machineChoose;
-	private IExtension[] extensions;
+	private  MachineParameterFactory machineParameterFactory;
 
-	public StepChooseMachine(IPrefsStorage ps, IExtension[] extensions) throws Exception {
+	public StepChooseMachine(IPrefsStorage ps, MachineParameterFactory machineParameterFactory) throws Exception {
 		this.ps = ps;
-		this.extensions = extensions;
+		this.machineParameterFactory = machineParameterFactory;
 		initComponents();
 	}
 
@@ -109,7 +109,7 @@ public class StepChooseMachine extends JPanel implements Step {
 
 		// choose the machine configuration
 
-		machineChoose = new JMachineWithParametersChooser(ps, extensions);
+		machineChoose = new JMachineWithParametersChooser(ps, machineParameterFactory);
 		panel.getFormAccessor().replaceBean("lblmachinechoose", machineChoose);
 
 		assert ps != null;
