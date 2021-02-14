@@ -14,6 +14,10 @@ This repository contains the **full source** of APrint Studio, more informations
 
 APrint Studio is composed of a constellation of **tools** for creating **mechanical books** , for **street organs**, **fair organs**, **musicbox** .. 
 
+### Discussions / Forum
+
+for issues, improvements, this github repository is the right place. 
+for discussions use freddy's forum, [https://orguedebarbarie.vraiforum.com/](https://orguedebarbarie.vraiforum.com/)
 
 
 ### How to Build main project
