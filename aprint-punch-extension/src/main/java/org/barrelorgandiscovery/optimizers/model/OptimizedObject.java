@@ -2,6 +2,8 @@ package org.barrelorgandiscovery.optimizers.model;
 
 import java.io.Serializable;
 
+import org.barrelorgandiscovery.optimizers.model.visitor.OptimizedObjectVisitor;
+
 /**
  * these are objects used in optimization
  * 
@@ -25,5 +27,7 @@ public abstract class OptimizedObject implements Serializable {
 	 * typically add the layer, or object belonging
 	 */
 	public String userInformation;
+	
+	public abstract void accept(OptimizedObjectVisitor visitor);
 
 }

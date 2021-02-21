@@ -4,6 +4,8 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Arrays;
@@ -100,17 +102,31 @@ public class JMachineWithParametersChooser extends JPanel {
 //		}
 
 		// default selected
-		//selectedMachineParameters = grblpunchpachineparameters;
-		
+		// selectedMachineParameters = grblpunchpachineparameters;
+
 		AbstractMachineParameters[] allDiscoveredParameters = machineFactory.createAllMachineParameters();
-		
+
+		if (allDiscoveredParameters != null) {
+			for (AbstractMachineParameters parameters : allDiscoveredParameters) {
+				// try load from storage, the parameters
+				try {
+					parameters.loadParameters(constructMachinePreferenceStorage(parameters));
+				} catch (Throwable t) {
+					logger.error(
+							"fail to load parameters for machine parameters : " + parameters + " : " + t.getMessage(),
+							t);
+				}
+
+			}
+		}
+
 		if (allDiscoveredParameters.length > 0) {
 			selectedMachineParameters = allDiscoveredParameters[0];
 		}
-		
+
 		MachineParameterDisplayer[] displayers = Arrays.stream(allDiscoveredParameters)
-				.map( (p) -> new MachineParameterDisplayer(p))
-				.collect(Collectors.toList()).toArray(new MachineParameterDisplayer[0]);
+				.map((p) -> new MachineParameterDisplayer(p)).collect(Collectors.toList())
+				.toArray(new MachineParameterDisplayer[0]);
 
 		machineCombo = fp.getComboBox("cbmachine"); //$NON-NLS-1$
 		machineCombo.setModel(new DefaultComboBoxModel<MachineParameterDisplayer>(displayers));
@@ -131,9 +147,10 @@ public class JMachineWithParametersChooser extends JPanel {
 
 					JPanel panelParameter = guiMachineParametersGUIRepository
 							.createMachineParameters(selectedMachineParameters);
-					
+
 					if (panelParameter == null) {
-						JOptionPane.showMessageDialog(JMachineWithParametersChooser.this,"No Parameters for this machine");
+						JOptionPane.showMessageDialog(JMachineWithParametersChooser.this,
+								"No Parameters for this machine");
 						return;
 					}
 
@@ -143,6 +160,20 @@ public class JMachineWithParametersChooser extends JPanel {
 					cp.add(panelParameter, BorderLayout.CENTER);
 					dialog.setSize(500, 300);
 					SwingUtils.center(dialog);
+
+					dialog.addWindowListener(new WindowAdapter() {
+						public void windowClosing(WindowEvent e) {
+							try {
+								// save parameters
+								selectedMachineParameters
+										.saveParameters(constructMachinePreferenceStorage(selectedMachineParameters));
+								logger.info("machine parameters saved ..");
+							} catch (Throwable t) {
+								logger.error("error in saving parameters :" + t.getMessage(), t);
+							}
+						};
+
+					});
 
 					dialog.setVisible(true);
 
@@ -181,7 +212,8 @@ public class JMachineWithParametersChooser extends JPanel {
 		FilePrefsStorage p = new FilePrefsStorage(new File("c:\\temp\\testmachinechoose.properties"));
 		p.load();
 
-		f.getContentPane().add(new JMachineWithParametersChooser(p, new MachineParameterFactory(new IExtension[0])), BorderLayout.CENTER);
+		f.getContentPane().add(new JMachineWithParametersChooser(p, new MachineParameterFactory(new IExtension[0])),
+				BorderLayout.CENTER);
 		f.setVisible(true);
 	}
 }

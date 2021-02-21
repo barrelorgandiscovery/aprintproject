@@ -15,8 +15,8 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
-import javax.swing.JTextPane;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
 import javax.swing.border.TitledBorder;
@@ -28,13 +28,11 @@ import org.barrelorgandiscovery.extensionsng.console.JConsole;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.controlling.XYPanel.XYListener;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.controlling.wizard.PanelStep;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.messages.Messages;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachine;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControl;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControlListener;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineStatus;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.PauseTimerState;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.gcode.GCodeCompiler;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLLazerMachine;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLLazerMachineParameters;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.mock.MockMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.Command;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.CutToCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.DisplacementCommand;
@@ -49,8 +47,6 @@ import org.barrelorgandiscovery.gui.aedit.JEditableVirtualBookComponent;
 import org.barrelorgandiscovery.gui.aedit.Tool;
 import org.barrelorgandiscovery.gui.aedit.UndoStack;
 import org.barrelorgandiscovery.gui.aedit.toolbar.JVBToolingToolbar;
-import org.barrelorgandiscovery.gui.script.groovy.ASyncConsoleOutput;
-import org.barrelorgandiscovery.gui.script.groovy.IScriptConsole;
 import org.barrelorgandiscovery.gui.tools.CursorTools;
 import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.StepChanged;
@@ -58,6 +54,7 @@ import org.barrelorgandiscovery.gui.wizard.Wizard;
 import org.barrelorgandiscovery.optimizers.Optimizer;
 import org.barrelorgandiscovery.optimizers.OptimizerResult;
 import org.barrelorgandiscovery.optimizers.cad.XOptim;
+import org.barrelorgandiscovery.optimizers.punch.NoReturnPunchConverterOptimizerParameters;
 import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.tools.Disposable;
@@ -74,7 +71,7 @@ import com.jeta.forms.components.panel.FormPanel;
 import com.jeta.forms.gui.form.GridView;
 
 /**
- * Punch Panel
+ * Punch Panel, this window is controlling the punch with the machine
  * 
  * @author pfreydiere
  * 
@@ -407,9 +404,13 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 
 		XYPanel xypanel = new XYPanel();
 		xypanel.setOffsets(xMachineOffset, yMachineOffset);
+		
+		
 
 		settingsPanel = new FormPanel(getClass().getResourceAsStream("settings.jfrm")); //$NON-NLS-1$
 
+		
+		
 		TitledBorderLabel labelsettingposition = (TitledBorderLabel) settingsPanel.getComponentByName("lblposition"); //$NON-NLS-1$
 		labelsettingposition.setText(Messages.getString("PunchCommandPanel.15")); //$NON-NLS-1$
 
@@ -434,8 +435,9 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 		wizardPunch.setBorder(new TitledBorder(Messages.getString("PunchCommandPanel.25"))); //$NON-NLS-1$
 
 		wizardPunch.setShowLastButton(false);
-
-		add(wizardPunch, BorderLayout.WEST);
+		JScrollPane scrollPaneWizard = new JScrollPane(wizardPunch);
+		scrollPaneWizard.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		add(scrollPaneWizard, BorderLayout.WEST);
 
 		// /////////////////////////////////////////////////////////
 		// bottom status component
@@ -946,10 +948,10 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 //		PunchPlan pp = PunchDefaultConverter.createDefaultPunchPlan(punches.result);
 //		pp.getCommandsByRef().add(0, new DisplacementCommand(0, 0));
 
-//		MockMachineParameters mockMachineParameters = new MockMachineParameters();
-//		AbstractMachine machine = mockMachineParameters.createAssociatedMachineInstance();
-//		MachineControl machineControl = machine.open(mockMachineParameters);
-//		
+		MockMachineParameters mockMachineParameters = new MockMachineParameters();
+		AbstractMachine machine = mockMachineParameters.createAssociatedMachineInstance();
+		MachineControl machineControl = machine.open(mockMachineParameters);
+		
 
 //		GRBLPunchMachineParameters grblMachineParameters = new GRBLPunchMachineParameters();
 //		grblMachineParameters.setComPort("COM4");
@@ -957,17 +959,24 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 //		GRBLPunchMachine grblMachine = new GRBLPunchMachine();
 //		MachineControl machineControl = grblMachine.open(grblMachineParameters);
 
-		GRBLLazerMachineParameters grblMachineParameters = new GRBLLazerMachineParameters();
-		grblMachineParameters.setComPort("COM3");
-
-		GRBLLazerMachine grblMachine = new GRBLLazerMachine();
+//		GRBLLazerMachineParameters grblMachineParameters = new GRBLLazerMachineParameters();
+//		grblMachineParameters.setComPort("COM3");
+//
+//		GRBLLazerMachine grblMachine = new GRBLLazerMachine();
+		
 		OptimizersRepository optRepository = new OptimizersRepository();
+		
+		NoReturnPunchConverterOptimizerParameters optParameters = new NoReturnPunchConverterOptimizerParameters();
+		
 		Optimizer opt = optRepository
-				.newOptimizerWithParameters(optRepository.instanciateParametersForOptimizer(XOptim.class));
+				.newOptimizerWithParameters(optParameters);
+		
+		
 		OptimizerResult optimize = opt.optimize(r.virtualBook);
-		PunchPlan pp = optRepository.createDefaultPunchPlanForLazerMachine(grblMachineParameters, optimize.result);
+		
+		PunchPlan pp = optRepository.createDefaultPunchPlanFromOptimizeResult(machine, mockMachineParameters, optimize.result);
 
-		MachineControl machineControl = grblMachine.open(grblMachineParameters);
+	//	MachineControl machineControl = grblMachine.open(grblMachineParameters);
 
 		IPrefsStorage dps = new FilePrefsStorage(new File("c:\\temp\\prefsperfo"));
 		dps.load();

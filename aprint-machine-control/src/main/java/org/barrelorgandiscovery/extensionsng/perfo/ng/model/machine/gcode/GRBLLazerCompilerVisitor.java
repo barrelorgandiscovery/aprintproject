@@ -19,7 +19,9 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.XYCommand;
  */
 public class GRBLLazerCompilerVisitor extends GCodeCompiler {
 
-	private static final String STARTCMD = "M4";
+	//private static final String STARTCMD = "M4";
+	private static final String STARTCMD = "M3";
+	
 	
 	private ArrayList<String> grblCommands = new ArrayList<>();
 

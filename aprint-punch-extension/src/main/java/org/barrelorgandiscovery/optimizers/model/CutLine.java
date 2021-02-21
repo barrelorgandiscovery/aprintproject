@@ -1,5 +1,6 @@
 package org.barrelorgandiscovery.optimizers.model;
 
+import org.barrelorgandiscovery.optimizers.model.visitor.OptimizedObjectVisitor;
 import org.barrelorgandiscovery.tools.HashCodeUtils;
 
 /**
@@ -85,6 +86,11 @@ public class CutLine extends OptimizedObject {
 	@Override
 	public double lastY() {
 		return y2;
+	}
+	
+	@Override
+	public void accept(OptimizedObjectVisitor visitor) {
+		visitor.visit(this);
 	}
 
 }

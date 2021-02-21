@@ -1,8 +1,8 @@
 package org.barrelorgandiscovery.extensionsng.scanner;
 
-import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -11,11 +11,11 @@ import javax.swing.JPanel;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensions.ExtensionPoint;
 import org.barrelorgandiscovery.extensionsng.scanner.tools.VersionTools;
-import org.barrelorgandiscovery.extensionsng.scanner.wizard.scanormerge.JScanOrMergeWizard;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.InformRepositoryExtensionPoint;
-import org.barrelorgandiscovery.gui.aprintng.APrintNGInternalFrame;
+import org.barrelorgandiscovery.gui.aprintng.APrintNG;
 import org.barrelorgandiscovery.gui.aprintng.extensionspoints.WelcomeExtensionExtensionPoint;
 import org.barrelorgandiscovery.gui.aprintng.helper.BaseExtension;
+import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.repository.Repository;
 import org.barrelorgandiscovery.repository.Repository2;
 import org.barrelorgandiscovery.repository.RepositoryAdapter;
@@ -104,11 +104,12 @@ public class ScannerExtension extends BaseExtension {
 			throw new Exception("repository is not defined, waiting for Repository2 object type"); //$NON-NLS-1$
 		}
 
-		JScanOrMergeWizard jScanOrMergeWizard = new JScanOrMergeWizard(this.extensionPreferences, repository,
-				application.getCurrentExtensions());
-		APrintNGInternalFrame frame = new APrintNGInternalFrame(this.extensionPreferences);
-		frame.getContentPane().setLayout(new BorderLayout());
-		frame.getContentPane().add(jScanOrMergeWizard, BorderLayout.CENTER);
-		frame.setVisible(true);
+		Class<?> clazz = Class.forName(getClass().getPackage().getName() + ".ScannerLazyLoad");
+		// IPrefsStorage extensionPreferences, Repository2 repository, APrintNG
+		// application
+		Method m = clazz.getMethod("lazyLoadScanner",
+				new Class[] { IPrefsStorage.class, Repository2.class, APrintNG.class });
+		m.invoke(null, new Object[] { extensionPreferences, repository, application });
+
 	}
 }

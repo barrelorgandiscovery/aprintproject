@@ -68,10 +68,18 @@ public class OptimizersRepository {
 		return (Serializable) parametersClass.newInstance();
 	}
 
+	/**
+	 * this method create the Optimizer class using the parameters instance, 
+	 * it take the class name and create the associated optimizer class, stripping the "Parameters" suffix
+	 * @param parameters
+	 * @return
+	 * @throws Exception
+	 */
 	public Optimizer newOptimizerWithParameters(Serializable parameters) throws Exception {
 
 		String parametersClassName = parameters.getClass().getName();
 		assert parametersClassName.endsWith(PARAMETERS_SUFFIX_CLASS);
+		
 		String optimizerClassName = parametersClassName.substring(0,
 				parametersClassName.length() - PARAMETERS_SUFFIX_CLASS.length());
 
@@ -95,7 +103,21 @@ public class OptimizersRepository {
 		//
 		if (machine instanceof BaseAbstractPunchMachine) {
 
-			PunchPlan pp = PunchDefaultConverter.createDefaultPunchPlan((Punch[]) optimizedObjects);
+			Punch[] punches = null;
+			if (optimizedObjects instanceof Punch[]) {
+				punches = (Punch[]) optimizedObjects;
+			} else if (optimizedObjects instanceof OptimizedObject[]) {
+				
+				punches = new Punch[optimizedObjects.length];
+				for (int i = 0 ; i < optimizedObjects.length ; i ++) {
+					punches[i] = (Punch)optimizedObjects[i];
+				}
+
+			} else {
+				throw new Exception("bad parameters :" + optimizedObjects);
+			}
+
+			PunchPlan pp = PunchDefaultConverter.createDefaultPunchPlan(punches);
 			return pp;
 
 		} else if (machine instanceof BaseAbstractLazerMachine) {
@@ -135,10 +157,10 @@ public class OptimizersRepository {
 		recurseAddCutLines(optimizedObjects, lines);
 
 		PunchPlan pp = new PunchPlan();
-		
+
 		// add move to 0/0
-		pp.getCommandsByRef().add(new DisplacementCommand(0,0));
-		
+		pp.getCommandsByRef().add(new DisplacementCommand(0, 0));
+
 		for (CutLine p : lines) {
 			if (p == null)
 				continue;

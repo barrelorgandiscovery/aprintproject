@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
@@ -17,13 +18,18 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import javax.swing.AbstractAction;
+import javax.swing.AbstractButton;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JToggleButton;
 import javax.swing.SwingUtilities;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
+import javax.swing.border.TitledBorder;
 
 import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
@@ -109,6 +115,8 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 
 	JButton btnloadbookimage;
 
+	JButton btncloseimage;
+
 	JButton btnvalidaterecognition;
 
 	JLabel lblprogress;
@@ -127,10 +135,26 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 					}
 					holes.add(n);
 					layer.setHoles(holes);
+					refreshTrainingLabels();
 					virtualBookComponent.repaint();
 				}
 			});
 		}
+	}
+
+	private void refreshTrainingLabels() {
+		Scale scale = virtualBookComponent.getVirtualBook().getScale();
+
+		int b = 0;
+		if (bookRegionDisplay.getHoles() != null) {
+			b = (int) bookRegionDisplay.getHoles().stream().mapToDouble((h) -> scale.timeToMM(h.getTimeLength())).sum();
+		}
+		int h = 0;
+		if (holeRegionDisplay.getHoles() != null) {
+			h = (int) holeRegionDisplay.getHoles().stream().mapToDouble((hole) -> scale.timeToMM(hole.getTimeLength()))
+					.sum();
+		}
+		changeTrainingExampleLabel(h, b);
 	}
 
 	@Override
@@ -173,12 +197,38 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 				recognitionDisplay.setTiledBackgroundimage(b);
 
 			} else {
-				throw new RuntimeException("unsupported tiledImage format :" + tiledImage);
+				throw new RuntimeException("unsupported tiledImage format :" + tiledImage); //$NON-NLS-1$
 			}
+
+			backgroundBook.setVisible(true);
 
 		} catch (Exception ex) {
 			throw new RuntimeException(ex.getMessage(), ex);
 		}
+	}
+
+	private class RemoveImageAction extends AbstractAction {
+
+		public RemoveImageAction(String name) {
+			super(name, new ImageIcon(JRecognitionVirtualBookPanel.class.getResource("fileclose.png")));//$NON-NLS-1$
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			try {
+				recognitionDisplay.setTiledBackgroundimage(null);
+				backgroundBook.setTiledBackgroundimage(null);
+				backgroundBook.setBackgroundimage(null);
+				holeRegionDisplay.setHoles(null);
+				bookRegionDisplay.setHoles(null);
+
+				virtualBookComponent.repaint();
+				
+			} catch (Throwable t) {
+				logger.error(t.getMessage(), t);
+			}
+		}
+
 	}
 
 	private class SetBackGroundAction extends AbstractAction {
@@ -189,7 +239,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		private static final long serialVersionUID = -6972644892906915997L;
 
 		public SetBackGroundAction(String name) {
-			super(name);
+			super(name, new ImageIcon(JRecognitionVirtualBookPanel.class.getResource("fileopen.png")));//$NON-NLS-1$
 		}
 
 		@Override
@@ -236,6 +286,11 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 	 */
 	LayerHoleAdd bookTool;
 
+	JLabel lblholecpt;
+	JLabel lblbookcpt;
+
+	JCheckBox chkdisplaylayer;
+
 	protected void initComponents() throws Exception {
 
 		// init layers
@@ -250,6 +305,10 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		FormAccessor fa = fp.getFormAccessor();
 
 		// labels
+		JLabel lblexecute = fa.getLabel("lblexecute");// $NON-NLS-1$ //$NON-NLS-1$
+		lblexecute.setText(Messages.getString("JRecognitionVirtualBookPanel.502")); //$NON-NLS-1$
+		JLabel lblprogresslabel = fa.getLabel("lblprogresslabel");// $NON-NLS-1$ //$NON-NLS-1$
+		lblprogresslabel.setText(Messages.getString("JRecognitionVirtualBookPanel.504")); //$NON-NLS-1$
 
 		JLabel lbltools = fa.getLabel("lbltools");// $NON-NLS-1$ //$NON-NLS-1$
 		assert lbltools != null;
@@ -259,6 +318,22 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		assert lblResultTransparency != null;
 
 		lblResultTransparency.setText(Messages.getString("JRecognitionVirtualBookPanel.11")); //$NON-NLS-1$
+
+		//
+		chkdisplaylayer = fa.getCheckBox("chkdisplaylayer"); //$NON-NLS-1$
+		chkdisplaylayer.getModel().setSelected(true);
+		chkdisplaylayer.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				boolean selected = chkdisplaylayer.getModel().isSelected();
+				bookRegionDisplay.setVisible(selected);
+				holeRegionDisplay.setVisible(selected);
+				recognitionDisplay.setVisible(selected);
+				backgroundBook.setVisible(selected);
+				virtualBookComponent.repaint();
+			}
+		});
+		chkdisplaylayer.setText(Messages.getString("JRecognitionVirtualBookPanel.505")); //$NON-NLS-1$
 
 		holeCreationToolbtn = (JToggleButton) fa.getButton("toolcreatehole"); // $NON-NLS-1$ //$NON-NLS-1$
 		assert holeCreationToolbtn != null;
@@ -275,11 +350,13 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 
 		holeCreationToolbtn.setText("");// $NON-NLS-1$ //$NON-NLS-1$
 		holeCreationToolbtn.setToolTipText(Messages.getString("JRecognitionVirtualBookPanel.14")); //$NON-NLS-1$
-		holeCreationToolbtn.setIcon(
-				new ImageIcon(ImageTools.loadImage(JRecognitionVirtualBookPanel.class.getResource("pencil.png"))));// $NON-NLS-1$ //$NON-NLS-1$
+		holeCreationToolbtn.setIcon(new ImageIcon(
+				ImageTools.loadImage(JRecognitionVirtualBookPanel.class.getResource("pencil_green.png"))));// $NON-NLS-1$ //$NON-NLS-1$
+
+		lblholecpt = fa.getLabel("lblholecpt");//$NON-NLS-1$
 
 		bookCreationToolbtn = (JToggleButton) fa.getButton("toolcreatebook");// $NON-NLS-1$ //$NON-NLS-1$
-		URL resource = JRecognitionVirtualBookPanel.class.getResource("pencil.png");// $NON-NLS-1$ //$NON-NLS-1$
+		URL resource = JRecognitionVirtualBookPanel.class.getResource("pencil_red.png");// $NON-NLS-1$ //$NON-NLS-1$
 		BufferedImage pencilImage = ImageTools.loadImage(resource);
 		bookCreationToolbtn.setIcon(new ImageIcon(pencilImage));// $NON-NLS-1$
 
@@ -294,9 +371,9 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 			}
 		});
 		bookCreationToolbtn.setText(""); //$NON-NLS-1$
-		bookCreationToolbtn.setIcon(
-				new ImageIcon(ImageTools.loadImage(JRecognitionVirtualBookPanel.class.getResource("pencil.png"))));// $NON-NLS-1$ //$NON-NLS-1$
-		bookCreationToolbtn.setToolTipText(Messages.getString("JRecognitionVirtualBookPanel.20")); // $NON-NL)S-1$
+		bookCreationToolbtn.setToolTipText(Messages.getString("JRecognitionVirtualBookPanel.20")); // $NON-NL)S-1$ //$NON-NLS-1$
+
+		lblbookcpt = fa.getLabel("lblbookcpt"); //$NON-NLS-1$
 
 		sldtransparencytraining = (JSlider) fa.getComponentByName("sldtransparencytraining");// $NON-NLS-1$ //$NON-NLS-1$
 		sldtransparencytraining.setToolTipText(Messages.getString("JRecognitionVirtualBookPanel.22")); //$NON-NLS-1$
@@ -327,6 +404,17 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 
 		});
 
+		AbstractButton lblstoprecognition = fa.getButton("lblstoprecognition");// $NON-NLS-1$ //$NON-NLS-1$
+		lblstoprecognition.setText(Messages.getString("JRecognitionVirtualBookPanel.507")); //$NON-NLS-1$
+		lblstoprecognition.setIcon(new ImageIcon(getClass().getResource("fileclose.png")));// $NON-NLS-1$ //$NON-NLS-1$
+		lblstoprecognition.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				closeBackGroundThread();
+			}
+
+		});
+
 		btnlaunchrecognition = (JButton) fa.getButton("btnlaunchrecognition");// $NON-NLS-1$ //$NON-NLS-1$
 		btnlaunchrecognition.setText("");// $NON-NLS-1$ //$NON-NLS-1$
 
@@ -344,13 +432,18 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		btnloadbookimage = (JButton) fa.getButton("btnloadbookimage");// $NON-NLS-1$ //$NON-NLS-1$
 		assert btnloadbookimage != null;
 		btnloadbookimage.setText(Messages.getString("JRecognitionVirtualBookPanel.30")); //$NON-NLS-1$
-		btnloadbookimage.setIcon(
-				new ImageIcon(ImageTools.loadImage(JRecognitionVirtualBookPanel.class.getResource("fileopen.png"))));// $NON-NLS-1$ //$NON-NLS-1$
 
 		btnloadbookimage.setAction(new SetBackGroundAction(Messages.getString("JRecognitionVirtualBookPanel.32"))); //$NON-NLS-1$
 
+		btncloseimage = (JButton) fa.getButton("btnremovelayer");//$NON-NLS-1$
+		btncloseimage.setAction(new RemoveImageAction(Messages.getString("JRecognitionVirtualBookPanel.509"))); //$NON-NLS-1$
+
 		btnvalidaterecognition = (JButton) fa.getButton("btnvalidaterecognition");// $NON-NLS-1$ //$NON-NLS-1$
 		btnvalidaterecognition.setText(Messages.getString("JRecognitionVirtualBookPanel.34")); //$NON-NLS-1$
+
+		Border btnBorderGetResult = btnvalidaterecognition.getBorder();
+		CompoundBorder tb = (CompoundBorder) btnBorderGetResult;
+		((TitledBorder) tb.getOutsideBorder()).setTitle(Messages.getString("JRecognitionVirtualBookPanel.10027")); //$NON-NLS-1$
 
 		btnvalidaterecognition.addActionListener((l) -> {
 
@@ -383,13 +476,22 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 
 		});
 
+		btnvalidaterecognition.setIcon(new ImageIcon(getClass().getResource("editcopy.png"))); //$NON-NLS-1$
+
 		lblprogress = fa.getLabel("lblprogress"); //$NON-NLS-1$
 		assert lblprogress != null;
 		lblprogress.setText(Messages.getString("JRecognitionVirtualBookPanel.38")); //$NON-NLS-1$
 
+		changeTrainingExampleLabel(0, 0);
+
 		setLayout(new BorderLayout());
 		add(fp, BorderLayout.CENTER);
 
+	}
+
+	private void changeTrainingExampleLabel(int hole, int book) {
+		lblholecpt.setText("" + hole); //$NON-NLS-1$
+		lblbookcpt.setText("" + book); //$NON-NLS-1$
 	}
 
 	private JEditableVirtualBookComponent virtualBookComponent;
@@ -464,7 +566,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		}
 
 		else {
-			throw new Exception("unsupported image object format");
+			throw new Exception("unsupported image object format"); //$NON-NLS-1$
 		}
 
 		final IFileFamilyTiledImage tiledImage = ti;
@@ -712,13 +814,19 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		return trainingInstances;
 	}
 
-	@Override
-	public void dispose() {
-		BackgroundTileImageProcessingThread<Void> b = this.backGroundThread;
+	private void closeBackGroundThread() {
+		// close background thread
+		BackgroundTileImageProcessingThread<Void> b = backGroundThread;
 		if (b != null) {
 			b.dispose();
 		}
-		this.backGroundThread = null;
+		backGroundThread = null;
+
+	}
+
+	@Override
+	public void dispose() {
+		closeBackGroundThread();
 
 		List<Runnable> sutdown = processingGuiLabel.shutdownNow();
 		this.processingGuiLabel = null;

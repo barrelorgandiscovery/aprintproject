@@ -106,7 +106,7 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 		assert pianoroll != null;
 		this.pianoroll = pianoroll;
 
-		this.rootPrefsStorage =  prefsStorage; 
+		this.rootPrefsStorage = prefsStorage;
 
 		ppt.setProcessingOptimizerEngineProgress(new ProcessingOptimizerEngineCallBack() {
 
@@ -142,16 +142,10 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 								logTextInformation(Messages.getString("StepPlanning.1")); //$NON-NLS-1$
 
-								OptimizedObject[] punches = result.result;
+								OptimizedObject[] optimizedObjects = result.result;
 
-								AbstractMachine machine = sm.getSelectedMachine();
-								assert machine != null;
-
-								OptimizersRepository o = new OptimizersRepository();
-								PunchPlan pp = o.createDefaultPunchPlanFromOptimizeResult(sm.getSelectedMachine(),
-										sm.getMachineParameters(), punches);
-
-								definePunchPlanning(pp);
+								
+								PunchPlan pp = definePunchPlanning(optimizedObjects);
 
 								logTextInformation(Messages.getString("StepPlanning.2")); //$NON-NLS-1$
 
@@ -244,7 +238,7 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 		ppPanel.setMinimumSize(new Dimension(100, 300));
 		ppPanel.setPreferredSize(new Dimension(200, 300));
 		ppPanel.setDescriptionVisible(true);
-		
+
 		panel.getFormAccessor().replaceBean("parameters", ppPanel); //$NON-NLS-1$
 
 		progress = new ProgressPanelWithText();
@@ -326,7 +320,6 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 			// informationConsole.clearScreen();
 			progress.reset();
-			
 
 		} catch (Exception ex) {
 
@@ -376,7 +369,7 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 		}
 
 	}
-	
+
 	private IPrefsStorage currentMachinePrefsStorage = null;
 
 	public void activate(Serializable state, WizardStates allStepsStates, StepStatusChangedListener stepListener)
@@ -387,7 +380,7 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 		AbstractMachine machine = sm.getSelectedMachine();
 		assert machine != null;
-		
+
 		// adjust the preference storage,
 		String prefsPrefix = "perfoextensionoptimizers";
 		AbstractMachine selectedMachine = sm.getSelectedMachine();
@@ -397,13 +390,13 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 		this.currentMachinePrefsStorage = new PrefixedNamePrefsStorage(prefsPrefix, rootPrefsStorage); // $NON-NLS-1$
 		try {
-		this.currentMachinePrefsStorage.load();
-		} catch(Exception ex) {
+			this.currentMachinePrefsStorage.load();
+		} catch (Exception ex) {
 			logger.debug("error in loading preferences " + ex.getMessage(), ex);
 		}
 		currentOptimizerParameters = null;
 		currentOptimizerClass = null;
-		definePunchPlanning(currentPunchPlan);
+		definePunchPlanning(optimisedObjects);
 
 		infiniteprogresspanel.stop();
 
@@ -416,7 +409,7 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 				// keep parameters
 				currentOptimizerParameters = s.parameters;
 				currentOptimizerClass = s.optimizerClass;
-				definePunchPlanning(s.punchPlan);
+				definePunchPlanning(s.optimizedObjects);
 			}
 		}
 
@@ -439,10 +432,10 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 			assert Optimizer.class.isAssignableFrom(c);
 			Optimizer o = (Optimizer) c.newInstance();
-			
+
 			JOptimizerRadioButton jRadioButton = new JOptimizerRadioButton(o.getTitle());
 
-			if (firstStrategyButton == null /* && c == NoReturnPunchConverterOptimizer.class*/) {
+			if (firstStrategyButton == null /* && c == NoReturnPunchConverterOptimizer.class */) {
 				firstStrategyButton = jRadioButton;
 			}
 
@@ -455,7 +448,8 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 				Serializable storedObject = ops.loadObjectProperties(c.getSimpleName());
 
-				if (storedObject != null && storedObject.getClass().getName().equals(instanciatedParametersForOptimizer.getClass().getName())) {
+				if (storedObject != null && storedObject.getClass().getName()
+						.equals(instanciatedParametersForOptimizer.getClass().getName())) {
 					instanciatedParametersForOptimizer = storedObject;
 				}
 			} catch (Exception ex) {
@@ -557,12 +551,12 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 
 		StepPlanningState sps = new StepPlanningState();
 		sps.parameters = (Serializable) currentOptimizerParameters;
-		sps.punchPlan = currentPunchPlan;
+		sps.optimizedObjects = optimisedObjects;
 		sps.optimizerClass = currentOptimizerClass;
 		sps.machine = sm.getSelectedMachine();
 
-		definePunchPlanning(currentPunchPlan);
-		
+		definePunchPlanning(optimisedObjects);
+
 		saveUserParameters(currentOptimizerClass, sps.parameters);
 
 		return sps;
@@ -584,8 +578,27 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 		// informationConsole.repaint();
 	}
 
-	private void definePunchPlanning(PunchPlan punchPlanning) {
-		this.currentPunchPlan = punchPlanning;
+	private OptimizedObject[] optimisedObjects;
+	
+	private PunchPlan definePunchPlanning( OptimizedObject[] optimisedObjects) throws Exception {
+		this.optimisedObjects = optimisedObjects;
+		
+		if (optimisedObjects == null) {
+			currentPunchPlan = null;
+			return null;
+		}
+		
+		
+		AbstractMachine machine = sm.getSelectedMachine();
+		assert machine != null;
+
+		OptimizersRepository o = new OptimizersRepository();
+		PunchPlan pp = o.createDefaultPunchPlanFromOptimizeResult(sm.getSelectedMachine(),
+				sm.getMachineParameters(), optimisedObjects);
+		
+		this.currentPunchPlan = pp;
+		
+		return pp;
 	}
 
 	public String getDetails() {

@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachine;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchPlan;
+import org.barrelorgandiscovery.optimizers.model.OptimizedObject;
 
 public class StepPlanningState implements Serializable {
 
@@ -12,14 +13,15 @@ public class StepPlanningState implements Serializable {
 	 */
 	private static final long serialVersionUID = 8135458331502058710L;
 	
-	public PunchPlan punchPlan;
+	public OptimizedObject[] optimizedObjects;
+	
 	public AbstractMachine machine;
 	public Serializable parameters;
 	public Class optimizerClass;
 	
 	@Override
 	public String toString() {
-		return "[Punch plan :" + punchPlan + ", machine :" + machine + " , parameters :" + parameters +", optimizer :" + optimizerClass;
+		return "[Punch plan :" + optimizedObjects + ", machine :" + machine + " , parameters :" + parameters +", optimizer :" + optimizerClass;
 	}
 	
 }

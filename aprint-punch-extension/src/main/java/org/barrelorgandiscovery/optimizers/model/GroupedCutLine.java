@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import org.barrelorgandiscovery.optimizers.model.visitor.OptimizedObjectVisitor;
+
 /**
  * grouped cut line are lines that are always groupped, with no optimization in between.
  * Why ? because we don't want to displace much the lazer head.
@@ -73,5 +75,13 @@ public class GroupedCutLine extends OptimizedObject {
 		assert lines.size() > 0;
 		return lines.get(lines.size() - 1).lastY();
 	}
+	
+	@Override
+	public void accept(OptimizedObjectVisitor visitor) {
+		visitor.enter(this);
+		visitor.visit(this);
+		visitor.exit(this);
+	}
+	
 }
 

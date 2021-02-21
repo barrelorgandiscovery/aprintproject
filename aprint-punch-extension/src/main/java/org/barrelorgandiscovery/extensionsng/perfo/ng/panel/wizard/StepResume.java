@@ -6,6 +6,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
@@ -32,17 +33,19 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchPlan;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchPlanIO;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.StatisticVisitor;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.XYCommand;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.optimizers.OptimizersRepository;
 import org.barrelorgandiscovery.gui.aprintng.APrintNGInternalFrame;
 import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
 import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener;
 import org.barrelorgandiscovery.gui.wizard.WizardStates;
+import org.barrelorgandiscovery.optimizers.model.OptimizedObject;
+import org.barrelorgandiscovery.optimizers.model.visitor.CoordinateTransformOptimizedObjects;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.SerializeTools;
-import org.barrelorgandiscovery.tools.StreamsTools;
 import org.barrelorgandiscovery.ui.tools.VFSTools;
 import org.barrelorgandiscovery.virtualbook.Hole;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
@@ -123,14 +126,20 @@ public class StepResume extends JPanel implements Step {
 		return Messages.getString("StepResume.9"); //$NON-NLS-1$
 	}
 
-	private PunchPlan currentPlan = null;
+	// private PunchPlan currentPlan = null;
+	private OptimizedObject[] optimisedObjects = null;
+	
+	private AbstractMachine machine = null;
+	
 
 	public void activate(Serializable state, WizardStates allStepsStates, StepStatusChangedListener stepListener)
 			throws Exception {
 
 		StepPlanningState s = allStepsStates.getPreviousStateImplementing(this, StepPlanningState.class);
 
-		currentPlan = s.punchPlan;
+		optimisedObjects = s.optimizedObjects;
+		machine = s.machine;
+		
 
 		updateResume();
 	}
@@ -140,9 +149,14 @@ public class StepResume extends JPanel implements Step {
 		StringBuilder sb = new StringBuilder();
 		sb.append(Messages.getString("StepResume.10") + Messages.getString("StepResume.11")); //$NON-NLS-1$ //$NON-NLS-2$
 
+		OptimizersRepository o = new OptimizersRepository();
+		
 		StatisticVisitor s = new StatisticVisitor(true);
+		PunchPlan pp = o.createDefaultPunchPlanFromOptimizeResult(sm.getSelectedMachine(),
+				sm.getMachineParameters(), optimisedObjects);
+	
 
-		s.visit(currentPlan);
+		s.visit(pp);
 
 		sb.append(s.getReport());
 
@@ -173,7 +187,7 @@ public class StepResume extends JPanel implements Step {
 		public void actionPerformed(ActionEvent e) {
 
 			try {
-				if (currentPlan == null) {
+				if (optimisedObjects == null) {
 					JMessageBox.showMessage(StepResume.this, Messages.getString("StepResume.14")); //$NON-NLS-1$
 					return;
 				}
@@ -190,11 +204,12 @@ public class StepResume extends JPanel implements Step {
 
 					// export plan
 
-					PunchBookAndPlan reversed = reverseToHaveTheReferenceUp(vb, currentPlan);
+					PunchBookAndPlan reversed = compileAndOptionnalyReverseToHaveTheReferenceUp(vb, optimisedObjects, sm);
 
 					// get the Maxx of the commands
 					Double maxX = reversed.punchplan.getCommandsByRef().stream().map((Command i) -> {
 						if (i instanceof XYCommand) {
+							// both displacement and cut
 							return ((XYCommand) i).getX();
 						}
 						return 0.0;
@@ -248,7 +263,7 @@ public class StepResume extends JPanel implements Step {
 			
 			VirtualBook vbClone = SerializeTools.deepClone(vb);
 			
-			PunchBookAndPlan reverseToHaveTheReferenceUp = reverseToHaveTheReferenceUp(vbClone, currentPlan);
+			PunchBookAndPlan reverseToHaveTheReferenceUp = compileAndOptionnalyReverseToHaveTheReferenceUp(vbClone, optimisedObjects, sm);
 			assert reverseToHaveTheReferenceUp != null;
 			assert reverseToHaveTheReferenceUp.punchplan != null;
 			assert reverseToHaveTheReferenceUp.virtualBook != null;
@@ -265,13 +280,10 @@ public class StepResume extends JPanel implements Step {
 
 			assert minX != Double.MAX_VALUE;
 					
-			// shift the book and also the punchplan
+			// shift the book and also the punchplan, to display it at the start of the book and punch
 			List<Command> shiftedCommands = applyTransformToPunchPlan((x) -> x - minX,reverseToHaveTheReferenceUp.punchplan.getCommandsByRef());
 			PunchPlan shiftedPunchPlan = new PunchPlan();
 			shiftedPunchPlan.getCommandsByRef().addAll(shiftedCommands);
-			
-			
-			
 			
 			// prepend the origin displacement (from homing)
 			DisplacementCommand origin = new DisplacementCommand(0, 0);
@@ -283,8 +295,6 @@ public class StepResume extends JPanel implements Step {
 			// shift the virtualbook
 			Scale scale = reverseToHaveTheReferenceUp.virtualBook.getScale();
 			reverseToHaveTheReferenceUp.virtualBook.shift(scale.mmToTime(-minX));
-			
-			
 			
 			
 			JPunchCommandPanel punchCommandPanel = new JPunchCommandPanel(planCopy,
@@ -353,17 +363,27 @@ public class StepResume extends JPanel implements Step {
 	 * @return
 	 * @throws Exception
 	 */
-	public static PunchBookAndPlan reverseToHaveTheReferenceUp(VirtualBook vb, PunchPlan punchplan) throws Exception {
+	public static PunchBookAndPlan compileAndOptionnalyReverseToHaveTheReferenceUp(VirtualBook vb, 
+			OptimizedObject[] optimizedObjects, StepChooseMachine sm) throws Exception {
 		Scale scale = vb.getScale();
 		assert scale != null;
 		PunchBookAndPlan retvalue = new PunchBookAndPlan();
+		
+		OptimizersRepository o = new OptimizersRepository();
+		
+		
 		if (!scale.isPreferredViewedInversed()) {
-			retvalue.punchplan = punchplan;
+			
+			PunchPlan pp = o.createDefaultPunchPlanFromOptimizeResult(sm.getSelectedMachine(),
+					sm.getMachineParameters(), optimizedObjects);
+			retvalue.punchplan = pp;
 			retvalue.virtualBook = vb;
 			retvalue.hasBeenChanged = false;
 			return retvalue;
 		}
 
+		// else
+		
 		logger.debug("reverse the elements");
 		assert scale.isPreferredViewedInversed();
 
@@ -373,42 +393,58 @@ public class StepResume extends JPanel implements Step {
 				scale.getPipeStopGroupList(), scale.getSpeed(), scale.getConstraints(), scale.getInformations(),
 				scale.getState(), scale.getContact(), scale.getRendering(), false, scale.isBookMovingRightToLeft(),
 				scale.getAllProperties());
+		
+		
+		// reverse and shift the optimized objects
+		
+		// use visitor to compute distance
+		// reverse the coordinates 
+		
+		
+		
+		Double maxX = Arrays.stream(optimizedObjects).map( (OptimizedObject opt) -> 
+			opt.getExtent().xmax
+		).reduce( (a,b) -> Math.max(a, b)).get();
+		
 
-		// get the Maxx on the punch objects,
-		Double maxX = punchplan.getCommandsByRef().stream().map((Command i) -> {
-			if (i instanceof XYCommand) {
-				return ((XYCommand) i).getX();
-			}
-			return 0.0;
-		}).reduce((a, b) -> Math.max(a, b)).get();
+//		// get the Maxx on the punch objects,
+//		Double maxX = punchplan.getCommandsByRef().stream().map((Command i) -> {
+//			if (i instanceof XYCommand) {
+//				return ((XYCommand) i).getX();
+//			}
+//			return 0.0;
+//		}).reduce((a, b) -> Math.max(a, b)).get();
 
 		// compute the reversed time
 		Long maxTimeStamp = modifiedScale.mmToTime(maxX);
+		
 
 		VirtualBook newReversed = new VirtualBook(modifiedScale);
-
+		
 		// long maxTimestamp =
 		for (Hole h : vb.getHolesCopy()) {
 			Hole nh = new Hole(h.getTrack(), maxTimeStamp - h.getTimestamp() - h.getTimeLength(), h.getTimeLength());
 			newReversed.addHole(nh);
 		}
 
-		// clone and reverse the punchplan
-		PunchPlan modifiedPunchPlan = new PunchPlan();
-
-		List<Command> originalCommands = punchplan.getCommandsByRef();
-
-		List<Command> reversedCommands = applyTransformToPunchPlan((x) -> maxX - x, originalCommands);
-
-		// reverse all commands
-		while (reversedCommands.size() > 0) {
-			Command c = reversedCommands.get(reversedCommands.size() - 1);
-			reversedCommands.remove(reversedCommands.size() - 1);
-			modifiedPunchPlan.getCommandsByRef().add(c);
+		
+		CoordinateTransformOptimizedObjects v = new CoordinateTransformOptimizedObjects( (x)-> maxX - x, (y) -> y);
+		Arrays.stream(optimizedObjects).forEach( (optimized) -> optimized.accept(v) );
+		
+		OptimizedObject[] transfoResult = v.result.toArray(new OptimizedObject[0]);
+		
+		// reverse the objects
+		OptimizedObject[] reversedArray = new OptimizedObject[transfoResult.length];
+		for (int i = 0 ; i < transfoResult.length ; i ++) {
+			reversedArray[i] = transfoResult[transfoResult.length - 1 - i];
 		}
-
+		
+		
+		PunchPlan pp = o.createDefaultPunchPlanFromOptimizeResult(sm.getSelectedMachine(),
+				sm.getMachineParameters(), reversedArray);
+	
 		retvalue.virtualBook = newReversed;
-		retvalue.punchplan = modifiedPunchPlan;
+		retvalue.punchplan = pp;
 		retvalue.hasBeenChanged = true;
 
 		return retvalue;

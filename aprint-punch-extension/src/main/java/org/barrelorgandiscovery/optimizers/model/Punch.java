@@ -1,14 +1,20 @@
 package org.barrelorgandiscovery.optimizers.model;
 
+import org.barrelorgandiscovery.optimizers.model.visitor.OptimizedObjectVisitor;
 import org.barrelorgandiscovery.tools.HashCodeUtils;
 
 /**
- * Classe reprÃ©sentant un accoup de la machine Ã  perforer
+ * Classe représentant un accoup de la machine à perforer
  * 
- * @author Freydiere Patrice
+ * @author pfreydiere
  */
 public class Punch extends OptimizedObject {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 2965791916758203973L;
+	
 	public double x;
 	public double y;
 
@@ -66,5 +72,9 @@ public class Punch extends OptimizedObject {
 		return y;
 	}
 
+	@Override
+	public void accept(OptimizedObjectVisitor visitor) {
+		visitor.visit(this);
+	}
 
 }

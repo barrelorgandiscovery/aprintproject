@@ -27,7 +27,7 @@ public class GRBLLazerMachineParameters extends AbstractMachineParameters {
 	String comPort = "COM3";
 
 	Integer maxspeed = 1000;
-	Integer maxPower = 100;
+	Integer maxPower = 1000;
 
 	public String getPort() {
 		return comPort;
