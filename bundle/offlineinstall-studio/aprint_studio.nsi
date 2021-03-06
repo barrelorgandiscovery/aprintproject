@@ -167,6 +167,7 @@ Section "!APrint Studio"
   
   ; remove old extensions
   Delete   "$APRINTDATAS\aprintstudio\*.extension"
+  Delete   "$APRINTDATAS\aprintstudio\*.extensionlazy"
   
   
 SectionEnd ; end the section
@@ -186,7 +187,7 @@ SectionEnd ; end the section
 ;SectionEnd ; end the section
 
 
-Section /o "Extension - Reconnaissance de disques cartons d'aristons"
+Section /o "Extension - Reconnaissance de disques et cartons"
     CreateDirectory "$APRINTDATAS\aprintstudio"
 	SetOutPath "$APRINTDATAS\aprintstudio"
 	File /r "..\offlineinstall-extensions\DiskAndBookRecognition\*.*"

@@ -87,9 +87,17 @@ task listJars() {
    }
 }
 
-task fatJar(type: Jar, dependsOn: jar) {
+
+task bootstrapJar(type: Jar, dependsOn: jar) {
   baseName = project.name + '-all'
   extension="extension"
+  with jar
+}
+
+
+task fatJar(type: Jar, dependsOn: [jar, bootstrapJar]) {
+  baseName = project.name + '-all'
+  extension="extensionlazy"
   def conf = configurations.runtime
   def l = conf.findAll { ! (it.name.toLowerCase().startsWith("aprint-core") || it.name.toLowerCase().startsWith("aprint-gui")) }
   def deps = l.collect { it.isDirectory() ? it : zipTree(it) }

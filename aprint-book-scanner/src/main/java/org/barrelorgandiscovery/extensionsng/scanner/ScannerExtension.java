@@ -2,16 +2,22 @@ package org.barrelorgandiscovery.extensionsng.scanner;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.extensions.ChildFirstClassLoader;
 import org.barrelorgandiscovery.extensions.ExtensionPoint;
 import org.barrelorgandiscovery.extensionsng.scanner.tools.VersionTools;
+import org.barrelorgandiscovery.gui.aprint.APrintProperties;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.InformRepositoryExtensionPoint;
+import org.barrelorgandiscovery.gui.aprintng.APrintApplicationBootStrap;
 import org.barrelorgandiscovery.gui.aprintng.APrintNG;
 import org.barrelorgandiscovery.gui.aprintng.extensionspoints.WelcomeExtensionExtensionPoint;
 import org.barrelorgandiscovery.gui.aprintng.helper.BaseExtension;
@@ -104,7 +110,17 @@ public class ScannerExtension extends BaseExtension {
 			throw new Exception("repository is not defined, waiting for Repository2 object type"); //$NON-NLS-1$
 		}
 
-		Class<?> clazz = Class.forName(getClass().getPackage().getName() + ".ScannerLazyLoad");
+		APrintProperties aprintproperties = application.getProperties();
+		File aprintFolder = aprintproperties.getAprintFolder();
+		File lazyExtension = new File(aprintFolder, "aprint-book-scanner-all.extensionlazy");
+		if (!lazyExtension.exists()) {
+			throw new Exception("cannot load extension, file " + lazyExtension + " does not exists");
+		}
+
+		URLClassLoader cl = new ChildFirstClassLoader(new URL[] { lazyExtension.toURL() },
+				getClass().getClassLoader());
+
+		Class<?> clazz = cl.loadClass(getClass().getPackage().getName() + ".ScannerLazyLoad");
 		// IPrefsStorage extensionPreferences, Repository2 repository, APrintNG
 		// application
 		Method m = clazz.getMethod("lazyLoadScanner",

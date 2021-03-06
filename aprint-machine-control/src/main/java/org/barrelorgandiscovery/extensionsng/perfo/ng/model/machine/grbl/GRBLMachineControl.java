@@ -138,8 +138,8 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 
 		logger.debug("schedule status watchdog");
 		status = Executors.newSingleThreadScheduledExecutor();
+		
 		status.scheduleAtFixedRate(new Runnable() {
-
 			@Override
 			public void run() {
 				try {
@@ -430,12 +430,11 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 	public void sendCommand(Command command) throws Exception {
 		checkState();
 
-		this.commandCompiler.reset();
-
 		command.accept(0, commandCompiler);
 
 		List<String> commands = commandCompiler.getGCODECommands();
 		while (commands.size() > 0) {
+			// pop commands, and send them
 			String s = commands.remove(0);
 			logger.debug("sending :" + s);
 			sendOneCommand(s);
@@ -449,6 +448,8 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 		logger.debug("reinit the machine state");
 		init(currentPortName);
 		logger.debug("done !");
+		
+		this.commandCompiler.reset();
 	}
 
 	/**

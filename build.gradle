@@ -94,6 +94,7 @@ project(':bundle') {
         into ('Scan') {
             from project(':aprint-book-scanner').fileTree('build/libs') {
                 include "*.extension"
+                include "*.extensionlazy"
             }
         }
         into ('Punch') {
