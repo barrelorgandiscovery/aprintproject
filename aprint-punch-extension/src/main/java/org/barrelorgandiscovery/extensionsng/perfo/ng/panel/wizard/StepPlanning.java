@@ -56,6 +56,7 @@ import org.barrelorgandiscovery.virtualbook.VirtualBook;
 
 import com.jeta.forms.components.panel.FormPanel;
 import com.l2fprod.common.demo.BeanBinder;
+import com.l2fprod.common.propertysheet.PropertySheet;
 import com.l2fprod.common.propertysheet.PropertySheetPanel;
 
 public class StepPlanning extends JPanel implements Step, Disposable {
@@ -238,6 +239,7 @@ public class StepPlanning extends JPanel implements Step, Disposable {
 		ppPanel.setMinimumSize(new Dimension(100, 300));
 		ppPanel.setPreferredSize(new Dimension(200, 300));
 		ppPanel.setDescriptionVisible(true);
+		ppPanel.setMode(PropertySheet.VIEW_AS_CATEGORIES);
 
 		panel.getFormAccessor().replaceBean("parameters", ppPanel); //$NON-NLS-1$
 

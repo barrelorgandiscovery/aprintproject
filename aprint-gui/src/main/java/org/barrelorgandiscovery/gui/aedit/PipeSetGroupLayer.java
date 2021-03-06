@@ -18,6 +18,11 @@ import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.virtualbook.Position;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 
+/**
+ * draw the colors depending on the register sets
+ * @author pfreydiere
+ *
+ */
 public class PipeSetGroupLayer implements VirtualBookComponentLayer {
 
 	private static Logger logger = Logger.getLogger(PipeSetGroupLayer.class);
@@ -103,8 +108,8 @@ public class PipeSetGroupLayer implements VirtualBookComponentLayer {
 			long e = Math.max(startPosition.position, endPosition.position);
 			e += 100;
 
-			for (int i = Math.min(startPosition.track, endPosition.track + 1); i < Math
-					.max(startPosition.track, endPosition.track + 1); i++) {
+			for (int i = Math.min(startPosition.track, endPosition.track); i <= Math
+					.max(startPosition.track, endPosition.track); i++) {
 
 				AbstractTrackDef[] tracksDefinition = scale
 						.getTracksDefinition();

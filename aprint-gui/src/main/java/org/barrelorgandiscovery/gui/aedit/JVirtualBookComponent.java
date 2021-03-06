@@ -493,10 +493,10 @@ public class JVirtualBookComponent extends JComponent {
 	// fonction de sï¿½lection
 
 	/**
-	 * dï¿½finit la sï¿½lection affichï¿½e
+	 * définit la sélection affichée
 	 * 
-	 * @param start  dï¿½but de la sï¿½lection (en microsecondes)
-	 * @param length longueur de la sï¿½lection (en microsecondes)
+	 * @param start  début de la sélection (en microsecondes)
+	 * @param length longueur de la slection (en microsecondes)
 	 */
 	public void setBlockSelection(long start, long length) {
 		selstart = start;
@@ -523,7 +523,7 @@ public class JVirtualBookComponent extends JComponent {
 	}
 
 	// ///////////////////////////////////////////////////////////
-	// gestion de l'ï¿½chelle de visualisation du carton
+	// gestion de l'échelle de visualisation du carton
 
 	/*
 	 * public double getXscale() { return xscale; }
@@ -1016,10 +1016,10 @@ public class JVirtualBookComponent extends JComponent {
 		g.setPaintMode();
 		Color lastcolor = g.getColor();
 
-		// rï¿½cupï¿½ration de la zone ï¿½ afficher
+		// récupération de la zone à afficher
 		Rectangle rect = g.getClipBounds(new Rectangle());
 
-		// Correction d'un bug de rï¿½affichage
+		// Correction d'un bug de réaffichage
 		rect.x -= 1;
 		rect.y -= 1;
 		rect.width += 2;
@@ -1057,7 +1057,7 @@ public class JVirtualBookComponent extends JComponent {
 
 		paintCover(g, partiecartonaffichee);
 
-		// Affichage des diffï¿½rentes couches supplï¿½mentaires (background)
+		// Affichage des différentes couches supplémentaires (background)
 
 		for (Iterator<VirtualBookComponentLayer> itl = layers.iterator(); itl.hasNext();) {
 			VirtualBookComponentLayer layer = null;
@@ -1185,7 +1185,7 @@ public class JVirtualBookComponent extends JComponent {
 				}
 			}
 
-			// Affichage des diffï¿½rentes couches supplï¿½mentaires
+			// Affichage des différentes couches supplémentaires
 
 			for (Iterator<VirtualBookComponentLayer> itl = layers.iterator(); itl.hasNext();) {
 				VirtualBookComponentLayer layer = null;
@@ -1199,18 +1199,8 @@ public class JVirtualBookComponent extends JComponent {
 				}
 			}
 
-			//
-			// // dessin des rï¿½gles
-			// g.setColor(Color.red);
-			//
-			// long s = ((long) r.start) / rules * rules;
-			// while (s < r.end) {
-			// g.drawLine((int) ((s - position) * xscale), rect.y,
-			// (int) ((s - position) * xscale), rect.y + rect.height);
-			// s += rules;
-			// }
-			//
-			// dessin de la sï¿½lection
+			
+			// dessin de la sélection
 
 			if (selstart > 0) {
 				g.setXORMode(new Color(128, 128, 128));

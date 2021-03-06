@@ -61,6 +61,21 @@ public class CADParametersBeanInfo extends BaseBeanInfo {
 		silreste.setPropertyEditorClass(DoublePropertyEditor.class);
 		silreste.setDisplayName("Pas de pont s'il reste (mm)");
 		silreste.setCategory("Trous");
+		
+
+		ExtendedPropertyDescriptor surchargeLargeurTrous = addProperty("surchargeLargeurTrous");
+		surchargeLargeurTrous.setShortDescription(
+				"Utiliser le paramètre Largeur Trous, ici au lieu de l'utilisation des métriques dans la gamme");
+		surchargeLargeurTrous.setDisplayName("Surcharge de largeur des trous (activation)");
+		surchargeLargeurTrous.setCategory("Trous");
+		
+		ExtendedPropertyDescriptor hauteurDesTrous = addProperty("largeurTrous");
+		hauteurDesTrous.setShortDescription(
+				"Largeur des trous spécifiée si la surcharge par rapport à la gamme est activée");
+		hauteurDesTrous.setDisplayName("Surcharge de largeur des trous (mm)");
+		hauteurDesTrous.setPropertyEditorClass(DoublePropertyEditor.class);
+		hauteurDesTrous.setCategory("Trous");
+		
 
 		ExtendedPropertyDescriptor exportPliures = addProperty("exportPliures");
 		exportPliures.setShortDescription("Export des traits de pliures dans le fichier DXF");

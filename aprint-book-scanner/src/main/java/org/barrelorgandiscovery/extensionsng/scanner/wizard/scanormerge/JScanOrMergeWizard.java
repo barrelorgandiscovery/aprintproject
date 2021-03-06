@@ -25,8 +25,9 @@ import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.repository.Repository2;
 import org.barrelorgandiscovery.repository.Repository2Factory;
+import org.barrelorgandiscovery.tools.Disposable;
 
-public class JScanOrMergeWizard extends JPanel {
+public class JScanOrMergeWizard extends JPanel implements Disposable {
 
 	/**
 	 * 
@@ -78,6 +79,11 @@ public class JScanOrMergeWizard extends JPanel {
 		add(wizard, BorderLayout.CENTER);
 
 		wizard.toFirst();
+	}
+	
+	@Override
+	public void dispose() {
+		wizard.dispose();
 	}
 
 	public static void main(String[] args) throws Exception {

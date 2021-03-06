@@ -37,6 +37,8 @@ public class CADParameters implements Serializable, Externalizable {
 	private boolean exportDecoupeDesBords = true;
 	
 	private boolean exportTrous = true;
+	
+	
 
 	public void setNombreDePlisAAjouterAuDebut(int nombreDePlisAAjouterAuDebut) {
 		this.nombreDePlisAAjouterAuDebut = nombreDePlisAAjouterAuDebut;
@@ -133,6 +135,29 @@ public class CADParameters implements Serializable, Externalizable {
 	public boolean isExportDecoupeDesBords() {
 		return exportDecoupeDesBords;
 	}
+	
+	
+	private double largeurTrous = 3.0;
+
+	private boolean surchargeLargeurTrous = false;
+	
+	public double getLargeurTrous() {
+		return largeurTrous;
+	}
+
+	public void setLargeurTrous(double largeurTrous) {
+		this.largeurTrous = largeurTrous;
+	}
+
+	public void setSurchargeLargeurTrous(boolean surchargeLargeurTrous) {
+		this.surchargeLargeurTrous = surchargeLargeurTrous;
+	}
+
+	public boolean isSurchargeLargeurTrous() {
+		return surchargeLargeurTrous;
+	}
+	
+	
 
 	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
 
@@ -156,6 +181,18 @@ public class CADParameters implements Serializable, Externalizable {
 		} catch(Exception ex) {
 			
 		}
+		
+
+		try {
+			surchargeLargeurTrous = in.readBoolean();
+		} catch (Exception ex) {
+		}
+
+		try {
+			largeurTrous = in.readDouble();
+		} catch (Exception ex) {
+		}
+
 	}
 
 	public void writeExternal(ObjectOutput out) throws IOException {
@@ -172,6 +209,8 @@ public class CADParameters implements Serializable, Externalizable {
 		out.writeInt(nombreDePlisAAjouterAuDebut);
 		out.writeBoolean(exportDecoupeDesBords);
 		out.writeBoolean(exportTrous);
+		out.writeBoolean(surchargeLargeurTrous);
+		out.writeDouble(largeurTrous);
 	}
 
 }

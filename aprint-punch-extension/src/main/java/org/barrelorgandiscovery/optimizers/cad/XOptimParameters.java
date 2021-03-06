@@ -16,7 +16,7 @@ public class XOptimParameters implements Serializable {
 	private static final long serialVersionUID = 7295413239681833891L;
 
 	/**
-	 * Formes de trous pour les trous gÃ©nÃ©raux
+	 * Formes de trous pour les trous généraux
 	 */
 	private TrouType typeTrous = TrouType.TROUS_RECTANGULAIRES;
 
@@ -57,7 +57,10 @@ public class XOptimParameters implements Serializable {
 
 	private double optimPageSize = 5.0; // 5 cm par défaut
 
-	
+	private double largeurTrous = 3.0;
+
+	private boolean surchargeLargeurTrous = false;
+
 	public boolean isExportTrous() {
 		return exportTrous;
 	}
@@ -92,17 +95,17 @@ public class XOptimParameters implements Serializable {
 
 	///////////////////////////////////////////////////////////////////
 	// multiple pass
-	
+
 	int multiplePass = 1;
-	
+
 	public int getMultiplePass() {
 		return multiplePass;
 	}
-	
+
 	public void setMultiplePass(int multiplePass) {
 		this.multiplePass = multiplePass;
 	}
-	
+
 	public boolean isHasMultiplePass() {
 		return hasMultiplePass;
 	}
@@ -126,7 +129,6 @@ public class XOptimParameters implements Serializable {
 	public void setSpeedFractionMultiplePass(double speedFractionMultiplePass) {
 		this.speedFractionMultiplePass = speedFractionMultiplePass;
 	}
-
 
 	public void setOptimPageSize(double optimPageSize) {
 		this.optimPageSize = optimPageSize;
@@ -216,6 +218,22 @@ public class XOptimParameters implements Serializable {
 		this.typePliure = typePliure;
 	}
 
+	public double getLargeurTrous() {
+		return largeurTrous;
+	}
+
+	public void setLargeurTrous(double largeurTrous) {
+		this.largeurTrous = largeurTrous;
+	}
+
+	public void setSurchargeLargeurTrous(boolean surchargeLargeurTrous) {
+		this.surchargeLargeurTrous = surchargeLargeurTrous;
+	}
+
+	public boolean isSurchargeLargeurTrous() {
+		return surchargeLargeurTrous;
+	}
+
 	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
 
 		typeTrous = TrouType.valueOf(in.readUTF());
@@ -249,6 +267,17 @@ public class XOptimParameters implements Serializable {
 		} catch (Exception ex) {
 			// cannot read the half cut power
 		}
+
+		try {
+			surchargeLargeurTrous = in.readBoolean();
+		} catch (Exception ex) {
+		}
+
+		try {
+			largeurTrous = in.readDouble();
+		} catch (Exception ex) {
+		}
+
 	}
 
 	public void writeExternal(ObjectOutput out) throws IOException {
@@ -272,6 +301,8 @@ public class XOptimParameters implements Serializable {
 		out.writeDouble(optimPageSize);
 		out.writeBoolean(exportTrous);
 		out.writeDouble(halfCutPower);
+		out.writeBoolean(surchargeLargeurTrous);
+		out.writeDouble(largeurTrous);
 	}
 
 }

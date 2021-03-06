@@ -96,6 +96,9 @@ public class CADVirtualBookExporter {
 
 		double xratio = 1.0 / 1_000_000.0 * scale.getSpeed();
 
+		
+		
+		
 		// adding the vb edges
 
 		long firstTimeStamp = vb.getFirstHoleStart();
@@ -278,6 +281,14 @@ public class CADVirtualBookExporter {
 			} else {
 				throw new Exception("unsupported type " + p.getTypeTrous().getType());
 			}
+			
+
+			// define holes height
+			double halfheight = scale.getTrackWidth() / 2.0;
+			if (p.isSurchargeLargeurTrous()) {
+				logger.debug("take the parameters width");
+				halfheight = p.getLargeurTrous() / 2.0;
+			}
 
 			for (Iterator<Hole> iterator = holesCopy.iterator(); iterator.hasNext();) {
 				Hole hole = iterator.next();
@@ -290,7 +301,7 @@ public class CADVirtualBookExporter {
 					ypiste = scale.getWidth() - ypiste;
 				}
 
-				double halfheight = scale.getTrackWidth() / 2;
+				
 
 				double x = hole.getTimestamp() * xratio;
 				double endx = (hole.getTimestamp() + hole.getTimeLength()) * xratio;

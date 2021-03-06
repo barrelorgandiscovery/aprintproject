@@ -112,14 +112,18 @@ public class ScannerExtension extends BaseExtension {
 
 		APrintProperties aprintproperties = application.getProperties();
 		File aprintFolder = aprintproperties.getAprintFolder();
-		File lazyExtension = new File(aprintFolder, "aprint-book-scanner-all.extensionlazy");
-		if (!lazyExtension.exists()) {
-			throw new Exception("cannot load extension, file " + lazyExtension + " does not exists");
+
+		ClassLoader cl = getClass().getClassLoader();
+		
+		String propertyNoLazy = System.getProperty("nolazy");
+		if (propertyNoLazy == null || propertyNoLazy.isEmpty()) {
+			File lazyExtension = new File(aprintFolder, "aprint-book-scanner-all.extensionlazy");
+			if (!lazyExtension.exists()) {
+				throw new Exception("cannot load extension, file " + lazyExtension + " does not exists");
+			}
+
+			cl = new ChildFirstClassLoader(new URL[] { lazyExtension.toURL() }, getClass().getClassLoader());
 		}
-
-		URLClassLoader cl = new ChildFirstClassLoader(new URL[] { lazyExtension.toURL() },
-				getClass().getClassLoader());
-
 		Class<?> clazz = cl.loadClass(getClass().getPackage().getName() + ".ScannerLazyLoad");
 		// IPrefsStorage extensionPreferences, Repository2 repository, APrintNG
 		// application

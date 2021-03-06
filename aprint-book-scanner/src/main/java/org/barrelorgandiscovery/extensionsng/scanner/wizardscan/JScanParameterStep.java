@@ -17,11 +17,12 @@ import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener;
 import org.barrelorgandiscovery.gui.wizard.WizardStates;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
+import org.barrelorgandiscovery.tools.Disposable;
 
 import com.github.sarxos.webcam.Webcam;
 import com.jeta.forms.components.panel.FormPanel;
 
-public class JScanParameterStep extends BasePanelStep {
+public class JScanParameterStep extends BasePanelStep implements Disposable {
 
 	/** */
 	private static final long serialVersionUID = -7296047711004950598L;
@@ -107,5 +108,21 @@ public class JScanParameterStep extends BasePanelStep {
 		logger.debug("stop the preview"); //$NON-NLS-1$
 		webcamChooser.stopPreview();
 		return null;
+	}
+
+	@Override
+	public void dispose() {
+		try {
+			webcamChooser.dispose();
+		} catch (Throwable t) {
+		}
+		
+		try {
+			webcamChooser.dispose();
+		} catch (Throwable t) {
+		}
+		
+		
+		
 	}
 }

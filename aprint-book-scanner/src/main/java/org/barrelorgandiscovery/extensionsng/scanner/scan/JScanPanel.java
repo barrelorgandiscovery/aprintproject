@@ -72,7 +72,7 @@ public class JScanPanel extends JPanel implements Disposable {
 		this.previewWebCamPictureTake = new WebCamPictureTake(webCam, (i, t) -> {
 			try {
 				asyncPreviewImage(i);
-			} catch(Exception ex) {
+			} catch (Exception ex) {
 				logger.error(ex.getMessage(), ex);
 			}
 		});
@@ -153,7 +153,7 @@ public class JScanPanel extends JPanel implements Disposable {
 
 		imageLabel = new JLabel();
 		fp.getFormAccessor("gridwebcam")//$NON-NLS-1$
-			.replaceBean("webcampreview", imageLabel);//$NON-NLS-1$
+				.replaceBean("webcampreview", imageLabel);//$NON-NLS-1$
 		imageLabel.setAlignmentX(0.5f);
 		imageLabel.setAlignmentY(0.5f);
 		imageLabel.setHorizontalAlignment(SwingConstants.CENTER);
@@ -161,7 +161,7 @@ public class JScanPanel extends JPanel implements Disposable {
 
 		imageStack = new JImagePreviewStack();
 		fp.getFormAccessor("gridpreview")//$NON-NLS-1$
-			.replaceBean("imagespreview", imageStack);//$NON-NLS-1$
+				.replaceBean("imagespreview", imageStack);//$NON-NLS-1$
 
 		setLayout(new BorderLayout());
 		add(fp, BorderLayout.CENTER);
@@ -210,29 +210,42 @@ public class JScanPanel extends JPanel implements Disposable {
 
 	public void start() throws Exception {
 
-		stopLivePreview();
-		Thread.sleep(1000);
-		logger.debug("start the record");//$NON-NLS-1$
-		trigger = triggerFactory.create(webcam, new IWebCamListener() {
+		try {
+			stopLivePreview();
+			Thread.sleep(1000);
+			logger.debug("start the record");//$NON-NLS-1$
 
-			@Override
-			public void imageReceived(BufferedImage image, long timestamp) {
-				
+			if (trigger != null) {
 				try {
-					logger.debug("add image"); //$NON-NLS-1$
-					SwingUtilities.invokeAndWait(() -> {
-						imageStack.addImage(image);
-							
-					});
-					asyncPreviewImage(image);
-				} catch(Exception ex) {
-					logger.error(ex.getMessage(), ex);
+					trigger.stop();
+				} catch (Throwable t) {
 				}
+				trigger = null;
 			}
-		}, perfoScanFolder);
 
-		trigger.start();
+			trigger = triggerFactory.create(webcam, new IWebCamListener() {
 
+				@Override
+				public void imageReceived(BufferedImage image, long timestamp) {
+
+					try {
+						logger.debug("add image"); //$NON-NLS-1$
+						SwingUtilities.invokeAndWait(() -> {
+							imageStack.addImage(image);
+
+						});
+						asyncPreviewImage(image);
+					} catch (Exception ex) {
+						logger.error(ex.getMessage(), ex);
+					}
+				}
+			}, perfoScanFolder);
+
+			trigger.start();
+
+		} catch (Throwable t) {
+			logger.error("error in starting trigger :" + t.getMessage(), t);
+		}
 	}
 
 	public boolean isStarted() {
@@ -274,20 +287,19 @@ public class JScanPanel extends JPanel implements Disposable {
 
 		List<Webcam> list = Webcam.getWebcams(10000);
 		System.out.println(list);
-		
+
 		Webcam w = list.get(2);
 		WebcamDevice dev = w.getDevice();
-		dev.setResolution(new Dimension(3672 , 2856));
+		dev.setResolution(new Dimension(3672, 2856));
 		System.out.println(Arrays.asList(dev.getResolutions()));
-		//dev.open();
-		
-		
+		// dev.open();
+
 		Dimension[] sizes = w.getCustomViewSizes();
 		System.out.println(Arrays.asList(sizes));
-	
+
 		w.open();
 
-		File t = File.createTempFile("testtrigger",//$NON-NLS-1$ 
+		File t = File.createTempFile("testtrigger", //$NON-NLS-1$
 				".folder");//$NON-NLS-1$
 		t.delete();
 		t.mkdirs();

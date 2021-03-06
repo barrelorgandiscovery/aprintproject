@@ -29,8 +29,8 @@ public class XOptimParametersBeanInfo extends BaseBeanInfo {
 		nombreDePlisAAjouterAuDebut.setCategory("Carton");
 
 		ExtendedPropertyDescriptor exportTrous = addProperty("exportTrous");
-		exportTrous.setShortDescription("Export des trous");
-		exportTrous.setDisplayName("Export des trous");
+		exportTrous.setShortDescription("Export des trous, cette case à cocher définit l'export des trous");
+		exportTrous.setDisplayName("Export des trous ?");
 		exportTrous.setCategory("Trous");
 
 		ExtendedPropertyDescriptor typeTrous = addProperty("typeTrous");
@@ -41,10 +41,26 @@ public class XOptimParametersBeanInfo extends BaseBeanInfo {
 
 		ExtendedPropertyDescriptor taillTrous = addProperty("tailleTrous");
 		taillTrous.setShortDescription(
-				"Taille Maximum des trous créés, si le trou est plus grand, un pont est créé.\nSi vous ne souhaitez pas de ponts, mettez un grand nombre ici");
-		taillTrous.setDisplayName("Taille Maximum des trous (mm)");
+				"Longueur Maximum des découpes pour les trous, si le trou est plus grand que cette longeur, un pont est créé.\nSi vous ne souhaitez pas de ponts (mécanique, ... ), \n mettez une dimension de pont à 0");
+		taillTrous.setDisplayName("Longueur Maximum des découpes (mm)");
 		taillTrous.setPropertyEditorClass(DoublePropertyEditor.class);
 		taillTrous.setCategory("Trous");
+		
+		
+		ExtendedPropertyDescriptor surchargeLargeurTrous = addProperty("surchargeLargeurTrous");
+		surchargeLargeurTrous.setShortDescription(
+				"Utiliser le paramètre Largeur Trous, ici au lieu de l'utilisation des métriques dans la gamme");
+		surchargeLargeurTrous.setDisplayName("Surcharge de largeur des trous (activation)");
+		surchargeLargeurTrous.setCategory("Trous");
+		
+		ExtendedPropertyDescriptor hauteurDesTrous = addProperty("largeurTrous");
+		hauteurDesTrous.setShortDescription(
+				"Largeur des trous spécifiée si la surcharge par rapport à la gamme est activée");
+		hauteurDesTrous.setDisplayName("Surcharge de largeur des trous (mm)");
+		hauteurDesTrous.setPropertyEditorClass(DoublePropertyEditor.class);
+		hauteurDesTrous.setCategory("Trous");
+		
+		
 
 		ExtendedPropertyDescriptor dimensionPonts = addProperty("pont");
 		dimensionPonts.setShortDescription("Dimension des ponts (mm)");
@@ -98,7 +114,7 @@ public class XOptimParametersBeanInfo extends BaseBeanInfo {
 		ExtendedPropertyDescriptor multiplePass = addProperty("multiplePass");
 		multiplePass.setShortDescription("Combien de passes additionnelles");
 		multiplePass.setDisplayName("Nombre de passes additionnelles ?");
-		multiplePass.setCategory("Passes Additionnelles");
+		multiplePass.setCategory("Ajout de passes Additionnelles");
 
 		
 		// pass 2 parameters
