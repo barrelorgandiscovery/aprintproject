@@ -1759,7 +1759,6 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 				if (preferredInstrumentName == null || preferredInstrumentName.isEmpty()) {
 
 					// try to get equivalent scale from existing instruments
-
 					throw new ApplicationInstrumentNotFoundException(
 							Messages.getString("APrintNG.8") + "(" + preferredInstrumentName + ")",
 							vbreadresult.virtualBook // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$

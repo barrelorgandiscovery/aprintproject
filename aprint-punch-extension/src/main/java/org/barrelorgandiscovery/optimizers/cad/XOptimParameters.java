@@ -25,6 +25,9 @@ public class XOptimParameters implements Serializable {
 	 */
 	private TrouType typePonts = TrouType.TROUS_RECTANGULAIRES;
 
+	/**
+	 * taille max des trous
+	 */
 	private double tailleTrous = 3.0;
 
 	private double pont = 1.0;
@@ -35,7 +38,6 @@ public class XOptimParameters implements Serializable {
 
 	private boolean exportTrous = true;
 
-	private boolean exportPliures = false;
 
 	private double startBookAdjustementFromBeginning = 80; // 80mm by default
 
@@ -60,6 +62,11 @@ public class XOptimParameters implements Serializable {
 	private double largeurTrous = 3.0;
 
 	private boolean surchargeLargeurTrous = false;
+	
+	
+	private boolean exportPliures = false;
+	
+	// puissance et vitesse pour les pliures
 
 	public boolean isExportTrous() {
 		return exportTrous;
@@ -233,6 +240,66 @@ public class XOptimParameters implements Serializable {
 	public boolean isSurchargeLargeurTrous() {
 		return surchargeLargeurTrous;
 	}
+	
+	
+	
+	
+	// reglage des passes pour les pliures
+	private double powerFractionPliures = 1.0;
+	private double speedFractionPliures = 1.0;
+	private boolean pliureMultipass = false;
+	private int pliuresMultipassPassNumber = 1;
+	private double pliuresMultipassPowerFraction = 1.0;
+	private double pliuresMultipassSpeedFraction = 1.0;
+	
+	
+	public int getPliuresMultipassPassNumber() {
+		return pliuresMultipassPassNumber;
+	}
+	
+	public void setPliuresMultipassPassNumber(int pliuresMultipassPassNumber) {
+		this.pliuresMultipassPassNumber = pliuresMultipassPassNumber;
+	}
+	
+	public double getPowerFractionPliures() {
+		return powerFractionPliures;
+	}
+
+	public void setPowerFractionPliures(double powerFractionPliures) {
+		this.powerFractionPliures = powerFractionPliures;
+	}
+
+	public double getSpeedFractionPliures() {
+		return speedFractionPliures;
+	}
+
+	public void setSpeedFractionPliures(double speedFractionPliures) {
+		this.speedFractionPliures = speedFractionPliures;
+	}
+
+	public boolean isPliureMultipass() {
+		return pliureMultipass;
+	}
+
+	public void setPliureMultipass(boolean pliureMultipass) {
+		this.pliureMultipass = pliureMultipass;
+	}
+
+	public double getPliuresMultipassPowerFraction() {
+		return pliuresMultipassPowerFraction;
+	}
+
+	public void setPliuresMultipassPowerFraction(double pliuresMultipassPowerFraction) {
+		this.pliuresMultipassPowerFraction = pliuresMultipassPowerFraction;
+	}
+
+	public double getPliuresMultipassSpeedFraction() {
+		return pliuresMultipassSpeedFraction;
+	}
+
+	public void setPliuresMultipassSpeedFraction(double pliuresMultipassSpeedFraction) {
+		this.pliuresMultipassSpeedFraction = pliuresMultipassSpeedFraction;
+	}
 
 	public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
 
@@ -277,6 +344,32 @@ public class XOptimParameters implements Serializable {
 			largeurTrous = in.readDouble();
 		} catch (Exception ex) {
 		}
+	
+		// additional properties for book page separation
+		try {
+			powerFractionPliures = in.readDouble();
+		} catch (Exception ex) {
+		}
+		
+		try {
+			speedFractionPliures = in.readDouble();
+		} catch (Exception ex) {
+		}
+		
+		try {
+			pliureMultipass = in.readBoolean();
+		} catch (Exception ex) {
+		}
+		
+		try {
+			pliuresMultipassPowerFraction = in.readDouble();
+		} catch (Exception ex) {
+		}
+		try {
+			pliuresMultipassSpeedFraction = in.readDouble();
+		} catch (Exception ex) {
+		}
+		
 
 	}
 
@@ -303,6 +396,17 @@ public class XOptimParameters implements Serializable {
 		out.writeDouble(halfCutPower);
 		out.writeBoolean(surchargeLargeurTrous);
 		out.writeDouble(largeurTrous);
+		
+		
+		out.writeDouble(powerFractionPliures);
+		out.writeDouble(speedFractionPliures);
+		out.writeBoolean(pliureMultipass);
+		out.writeDouble(pliuresMultipassPowerFraction);
+		out.writeDouble(pliuresMultipassSpeedFraction);
+		
+	
+		
+		
 	}
 
 }

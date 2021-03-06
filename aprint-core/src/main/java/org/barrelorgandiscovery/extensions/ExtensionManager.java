@@ -152,25 +152,27 @@ public class ExtensionManager implements ExtensionFactory {
 			File jarfile = new File(extensionfolder, list[i]);
 
 			File urlfile = new File(jarfile.getAbsolutePath() + ".url"); //$NON-NLS-1$
-			// read the url at the origin of the url ...
 
 			String url = null;
 
-			try {
-				FileReader fr = new FileReader(urlfile);
-				char[] buffer = new char[20];
-				StringBuffer sb = new StringBuffer();
-				int cpt;
-				while ((cpt = fr.read(buffer)) != -1) {
-					sb.append(buffer, 0, cpt);
+			// read the url at the origin of the url ...
+			if (urlfile.exists()) {
+
+				try {
+					FileReader fr = new FileReader(urlfile);
+					char[] buffer = new char[20];
+					StringBuffer sb = new StringBuffer();
+					int cpt;
+					while ((cpt = fr.read(buffer)) != -1) {
+						sb.append(buffer, 0, cpt);
+					}
+
+					url = sb.toString();
+
+				} catch (Exception ex) {
+					logger.warn("cannot read the url file associated to the extension ..."); //$NON-NLS-1$
 				}
-
-				url = sb.toString();
-
-			} catch (Exception ex) {
-				logger.error("cannot read the url file associated to the extension ..."); //$NON-NLS-1$
 			}
-
 			extensions.add(new ExtensionName(name, version, jarfile, url));
 
 		}

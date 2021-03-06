@@ -96,9 +96,6 @@ public class CADVirtualBookExporter {
 
 		double xratio = 1.0 / 1_000_000.0 * scale.getSpeed();
 
-		
-		
-		
 		// adding the vb edges
 
 		long firstTimeStamp = vb.getFirstHoleStart();
@@ -136,7 +133,7 @@ public class CADVirtualBookExporter {
 			} finally {
 				device.endGroup();
 			}
-			
+
 		}
 
 		device.setCurrentLayer(LAYER_REFERENCE);
@@ -220,9 +217,9 @@ public class CADVirtualBookExporter {
 
 			// fin d'écriture des pliures dans la layer concernée
 
-			device.setCurrentLayer(LAYER_PLIURES);
 			start = startBook + p.getTaillePagePourPliure();
 			while (start <= vbend + 1) {
+				device.setCurrentLayer(LAYER_PLIURES);
 				if (p.getTypePliure() == TypePliure.POINTILLEE) {
 					device.startGroup();
 					try {
@@ -233,29 +230,24 @@ public class CADVirtualBookExporter {
 				} else if (p.getTypePliure() == TypePliure.CONTINUE) {
 
 					device.setCurrentLayer(LAYER_PLIURES_NON_CUT);
+					device.startGroup();
 					try {
-						device.startGroup();
-						try {
-							device.drawLine(start, 0, start, scale.getWidth());
-						} finally {
-							device.endGroup();
-						}
+						device.drawLine(start, 0, start, scale.getWidth());
 					} finally {
-						device.setCurrentLayer(LAYER_PLIURES);
+						device.endGroup();
 					}
+
 				} else if (p.getTypePliure() == TypePliure.ALTERNE_CONTINU_POINTILLEE) {
 
 					device.setCurrentLayer(LAYER_PLIURES_NON_CUT);
+
+					device.startGroup();
 					try {
-						device.startGroup();
-						try {
-							device.drawLine(start, 0, start, scale.getWidth());
-						} finally {
-							device.endGroup();
-						}
+						device.drawLine(start, 0, start, scale.getWidth());
 					} finally {
-						device.setCurrentLayer(LAYER_PLIURES);
+						device.endGroup();
 					}
+
 				} else {
 					throw new Exception("type pliure " + p.getTypePliure() + " unknown");
 				}
@@ -281,7 +273,6 @@ public class CADVirtualBookExporter {
 			} else {
 				throw new Exception("unsupported type " + p.getTypeTrous().getType());
 			}
-			
 
 			// define holes height
 			double halfheight = scale.getTrackWidth() / 2.0;
@@ -300,8 +291,6 @@ public class CADVirtualBookExporter {
 				if (!device.ignoreReference() && !scale.isPreferredViewedInversed()) {
 					ypiste = scale.getWidth() - ypiste;
 				}
-
-				
 
 				double x = hole.getTimestamp() * xratio;
 				double endx = (hole.getTimestamp() + hole.getTimeLength()) * xratio;

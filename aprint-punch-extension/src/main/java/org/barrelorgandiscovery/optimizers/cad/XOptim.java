@@ -120,28 +120,50 @@ public class XOptim implements Optimizer<OptimizedObject> {
 				GroupedCutLine gcl = (GroupedCutLine) o;
 				resultlist.add(gcl);
 
-				if (parameters.isHasMultiplePass() && parameters.getMultiplePass() >= 1) {
-
-					// as we are not in the same classloader
-					// serialization tool must be instanciated in this class loader
-
+				// multiple pass for pliures
+				if (gcl.userInformation != null && gcl.userInformation.equals(CADVirtualBookExporter.LAYER_PLIURES)
+						&& parameters.isPliureMultipass() && parameters.getPliuresMultipassPassNumber() >= 1) {
+					// handling pliures
+					
 					GroupedCutLine pass2group = serializeTools.deepClone(gcl);
 					List<CutLine> innerLines = gcl.getLinesByRefs();
 
-					for (int i = 0; i < parameters.getMultiplePass(); i++) {
+					// multiple cut
+					for (int i = 0; i < parameters.getPliuresMultipassPassNumber(); i++) {
 
 						// change power for the duplicate, and only for cut layers
 						assert innerLines != null;
 						for (CutLine c : innerLines) {
-							if (gcl.userInformation == null || !(gcl.userInformation
-									.equals(CADVirtualBookExporter.LAYER_PLIURES_VERSO_NON_CUT)
-									|| gcl.userInformation.equals(CADVirtualBookExporter.LAYER_PLIURES_NON_CUT))) {
-								c.powerFraction = parameters.getPowerFractionMultiplePass();
-								c.speedFraction = parameters.getSpeedFractionMultiplePass();
-							}
+								c.powerFraction = parameters.getPliuresMultipassPowerFraction();
+								c.speedFraction = parameters.getPliuresMultipassSpeedFraction();
 						}
 						resultlist.add(pass2group);
 
+					}
+				} else {
+
+					if (parameters.isHasMultiplePass() && parameters.getMultiplePass() >= 1) {
+						logger.debug("multiple pass handling");
+						// as we are not in the same classloader
+						// serialization tool must be instanciated in this class loader
+
+						GroupedCutLine pass2group = serializeTools.deepClone(gcl);
+						List<CutLine> innerLines = gcl.getLinesByRefs();
+
+						// multiple cut
+						for (int i = 0; i < parameters.getMultiplePass(); i++) {
+
+							// change power for the duplicate, and only for cut layers
+							assert innerLines != null;
+							for (CutLine c : innerLines) {
+								if (gcl.userInformation == null) {
+									c.powerFraction = parameters.getPowerFractionMultiplePass();
+									c.speedFraction = parameters.getSpeedFractionMultiplePass();
+								}
+							}
+							resultlist.add(pass2group);
+
+						}
 					}
 				}
 			}
@@ -167,12 +189,22 @@ public class XOptim implements Optimizer<OptimizedObject> {
 				if (CADVirtualBookExporter.LAYER_PLIURES_NON_CUT.equals(layer)
 						|| CADVirtualBookExporter.LAYER_PLIURES_VERSO_NON_CUT.equals(layer)) {
 					return parameters.getHalfCutPower();
+				} else if (CADVirtualBookExporter.LAYER_PLIURES.equals(layer)) {
+					return parameters.getPowerFractionPliures();
 				}
 				return parameters.getPowerFractionPass1();
 			}
 
 			@Override
 			public double getSpeedForLayer(String layer) {
+				
+				if (CADVirtualBookExporter.LAYER_PLIURES_NON_CUT.equals(layer)
+						|| CADVirtualBookExporter.LAYER_PLIURES_VERSO_NON_CUT.equals(layer)) {
+					return parameters.getHalfCutPower();
+				} else if (CADVirtualBookExporter.LAYER_PLIURES.equals(layer)) {
+					return parameters.getSpeedFractionPliures();
+				}
+				
 				return parameters.getSpeedFractionPass1();
 			}
 		};

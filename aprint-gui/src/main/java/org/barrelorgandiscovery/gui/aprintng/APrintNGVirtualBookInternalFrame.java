@@ -389,7 +389,12 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		this.services = services;
 		this.scriptManager = scriptManager;
 		this.currentSavedFile = virtualBookFile;
+		this.asyncJobsManager = jobManager;
+		
 
+		aSyncPreparePlayin = new ASyncPreparePlayin();
+
+		
 		internalDefineInstrument(instrument);
 
 		bookPropertiesPropertySheetPanel = new PropertySheetPanel();
@@ -409,6 +414,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 				updateTitle();
 			}
 		});
+
 
 		// book properties panel must be defined before
 		internalChangeVirtualBook(vb);
@@ -438,7 +444,6 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 
 		playsubSystem.addPlaySubSystemManagerListener(psslistener);
 
-		this.asyncJobsManager = jobManager;
 
 		InitNGExtensionPoint[] extpoints = ExtensionPointProvider.getAllPoints(InitNGExtensionPoint.class, exts);
 		for (int i = 0; i < extpoints.length; i++) {
@@ -560,8 +565,6 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		});
 
 		pianoroll.fitToScreen();
-
-		aSyncPreparePlayin = new ASyncPreparePlayin();
 
 		tempoFactorSlider.setToolTipText("Play Tempo Change");
 

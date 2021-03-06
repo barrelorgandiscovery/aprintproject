@@ -31,6 +31,10 @@ public class ASyncPreparePlayin {
 
 		if (executor == null)
 			throw new Exception("object has been disposed");
+		
+		if (vb == null) {
+			return;
+		}
 
 		// reset
 		alreadyProcessedPreparedPlaying = null;
