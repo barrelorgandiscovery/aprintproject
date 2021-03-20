@@ -160,7 +160,8 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 	}
 
 	/**
-	 * inner check for machine access definition, raise an exception, that will displayed to the user
+	 * inner check for machine access definition, raise an exception, that will
+	 * displayed to the user
 	 * 
 	 * @throws Exception
 	 */
@@ -185,6 +186,7 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 		// adapter pattern to introduce the software offsets
 		MachineControl adapterWithOffsetMachineControl = new MachineControl() {
 			final MachineControl innerMc = mc;
+
 			@Override
 			public void setMachineControlListener(final MachineControlListener listener) {
 
@@ -233,8 +235,8 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 
 					if (command instanceof DisplacementCommand) {
 						DisplacementCommand pc = (DisplacementCommand) command;
-						DisplacementCommand displacementCommand = new DisplacementCommand(pc.getX() + yMachineOffset + yShift,
-								pc.getY() + xMachineOffset);
+						DisplacementCommand displacementCommand = new DisplacementCommand(
+								pc.getX() + yMachineOffset + yShift, pc.getY() + xMachineOffset);
 						innerMc.sendCommand(displacementCommand);
 
 					} else if (command instanceof PunchCommand) {
@@ -300,6 +302,7 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 
 	/**
 	 * define the inner components
+	 * 
 	 * @throws Exception
 	 */
 	protected void initComponents() throws Exception {
@@ -404,13 +407,9 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 
 		XYPanel xypanel = new XYPanel();
 		xypanel.setOffsets(xMachineOffset, yMachineOffset);
-		
-		
 
 		settingsPanel = new FormPanel(getClass().getResourceAsStream("settings.jfrm")); //$NON-NLS-1$
 
-		
-		
 		TitledBorderLabel labelsettingposition = (TitledBorderLabel) settingsPanel.getComponentByName("lblposition"); //$NON-NLS-1$
 		labelsettingposition.setText(Messages.getString("PunchCommandPanel.15")); //$NON-NLS-1$
 
@@ -449,10 +448,14 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 		statusLabel = new JLabel();
 
 		console = new JConsole();
-		console.setPreferredSize(new Dimension(200, 100));
+		console.setPreferredSize(new Dimension(200, 1000));
+
+		JScrollPane scrollConsole = new JScrollPane(console, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollConsole.setPreferredSize(new Dimension(200, 100));
 
 		pStatus.add(statusLabel);
-		pStatus.add(console);
+		pStatus.add(scrollConsole);
 
 		add(pStatus, BorderLayout.SOUTH);
 		updateStatus(Messages.getString("PunchCommandPanel.26"), Double.NaN, Double.NaN); //$NON-NLS-1$
@@ -498,7 +501,7 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					machineControl.reset();
-					yShift=0;
+					yShift = 0;
 				} catch (Exception ex) {
 					logger.error("error resetting the machine :" + ex.getMessage(), ex); //$NON-NLS-1$
 					JMessageBox.showError(this, ex);
@@ -639,14 +642,14 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 
 					if (dontmovey.isSelected()) {
 						// get the current y, to not move the punch
-						// this computation is linked to the grab of the 
+						// this computation is linked to the grab of the
 						yShift = -xycommand.getX(); // + lastpositionMachineY;
 					} else {
 						// do nothing on yshift
 						// yshift = 0;
 					}
 
-					// displacement take into account the shift, 
+					// displacement take into account the shift,
 					// because there is a machine control mock that put the
 					// yShift parameters Before sending the event
 					//
@@ -743,10 +746,9 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 			SwingUtilities.invokeLater(() -> {
 				try {
 
-					if (!"?".equals(message)) {
-						console.writeln(message);
-						console.repaint();
-					}
+					console.writeln(message);
+					console.repaint();
+
 				} catch (Exception ex) {
 
 				}
@@ -772,17 +774,18 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 
 		@Override
 		public void rawElementReceived(String commandReceived) {
-
+			
 		}
 
 		@Override
 		public void informationReceived(String commands) {
 			SwingUtilities.invokeLater(() -> {
 				try {
-					if (!"?".equals(commands)) {
+					if (commands != null && !commands.startsWith("<")) {
 						console.write(commands);
 						console.repaint();
 					}
+
 				} catch (Exception ex) {
 
 				}
@@ -805,7 +808,7 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 							updateStatus(status, mx // $NON-NLS-1$
 							, my); // $NON-NLS-1$
 							lastpositionMachineY = my;
-							
+
 							// we don't display the yshift
 							machinePositionLayer.setMachinePosition(mx, my);
 
@@ -815,7 +818,7 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 							if (moveBookDuringPunch.isSelected()) {
 
 								boolean isIn = true;
-								
+
 								// machine x is in screen coordinate system
 								double screenCoordinateSystemMachinex = machinePositionLayer.getY();
 
@@ -833,7 +836,8 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 								if (!isIn) {
 									if (controller.isRunning()) {
 										// align the punch on left, 1/5
-										virtualBookComponent.setXoffset(screenCoordinateSystemMachinex - 1.0 / 5 * widthInMM);
+										virtualBookComponent
+												.setXoffset(screenCoordinateSystemMachinex - 1.0 / 5 * widthInMM);
 
 									}
 								}
@@ -951,7 +955,6 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 		MockMachineParameters mockMachineParameters = new MockMachineParameters();
 		AbstractMachine machine = mockMachineParameters.createAssociatedMachineInstance();
 		MachineControl machineControl = machine.open(mockMachineParameters);
-		
 
 //		GRBLPunchMachineParameters grblMachineParameters = new GRBLPunchMachineParameters();
 //		grblMachineParameters.setComPort("COM4");
@@ -963,20 +966,19 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 //		grblMachineParameters.setComPort("COM3");
 //
 //		GRBLLazerMachine grblMachine = new GRBLLazerMachine();
-		
-		OptimizersRepository optRepository = new OptimizersRepository();
-		
-		NoReturnPunchConverterOptimizerParameters optParameters = new NoReturnPunchConverterOptimizerParameters();
-		
-		Optimizer opt = optRepository
-				.newOptimizerWithParameters(optParameters);
-		
-		
-		OptimizerResult optimize = opt.optimize(r.virtualBook);
-		
-		PunchPlan pp = optRepository.createDefaultPunchPlanFromOptimizeResult(machine, mockMachineParameters, optimize.result);
 
-	//	MachineControl machineControl = grblMachine.open(grblMachineParameters);
+		OptimizersRepository optRepository = new OptimizersRepository();
+
+		NoReturnPunchConverterOptimizerParameters optParameters = new NoReturnPunchConverterOptimizerParameters();
+
+		Optimizer opt = optRepository.newOptimizerWithParameters(optParameters);
+
+		OptimizerResult optimize = opt.optimize(r.virtualBook);
+
+		PunchPlan pp = optRepository.createDefaultPunchPlanFromOptimizeResult(machine, mockMachineParameters,
+				optimize.result);
+
+		// MachineControl machineControl = grblMachine.open(grblMachineParameters);
 
 		IPrefsStorage dps = new FilePrefsStorage(new File("c:\\temp\\prefsperfo"));
 		dps.load();

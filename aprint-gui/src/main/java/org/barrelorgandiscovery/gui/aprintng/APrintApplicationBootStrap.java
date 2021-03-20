@@ -41,7 +41,7 @@ public class APrintApplicationBootStrap {
 
     Properties sysprop = System.getProperties();
 
-    Logger.getRootLogger().setLevel(Level.INFO);
+    Logger.getRootLogger().setLevel(Level.DEBUG);
 
     // Logger logger = Logger.getLogger(APrintApplicationBootStrap.class);
     // if (logger.isInfoEnabled()) {

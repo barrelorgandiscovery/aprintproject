@@ -164,7 +164,7 @@ public class XOptimParametersBeanInfo extends BaseBeanInfo {
 
 		ExtendedPropertyDescriptor pliuresMultipassPowerFraction = addProperty("pliuresMultipassPowerFraction");
 		pliuresMultipassPowerFraction.setShortDescription("Fraction de puissance pour la passe multiple de pliures");
-		pliuresMultipassPowerFraction.setPropertyEditorClass(TypePliuresComboBoxPropertyEditor.class);
+		pliuresMultipassPowerFraction.setPropertyEditorClass(DoublePropertyEditor.class);
 		pliuresMultipassPowerFraction.setDisplayName("Fraction Puissance Passe Multiple Pliures");
 		pliuresMultipassPowerFraction.setCategory("Pliures");
 

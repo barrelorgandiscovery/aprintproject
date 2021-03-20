@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -53,8 +54,13 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 	 * sent at a time
 	 */
 	// private Semaphore commandSendLockSem;
+	
 
-	private static final int MAX_QUEUE = 4;
+    //private final LinkedBlockingDeque<String> commandBuffer;     // Manually specified commands
+    
+    //private final LinkedBlockingDeque<String> activeCommandList;  // Currently running commands
+
+	private static final int MAX_QUEUE = 2;
 
 	/**
 	 * semaphore for command in the pipeline queue, block if the grbl buffer is full
@@ -149,6 +155,7 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 						grblProtocolState.sendStatusRequest();
 					}
 
+					// transaction
 					MachineControlListener v = userMachineControlListener;
 					if (v != null) {
 						// pulling elements
@@ -193,29 +200,7 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 
 		lastMachineStatus = MachineStatus.UNKNOWN;
 
-		/**
-		 * start init
-		 */
-
-		// this trick is done for testing purpose
-		Constructor serialPortConstructor = serialPortClass.getConstructor(new Class[] { String.class });
-
-		serialPort = (ISerialPort) serialPortConstructor.newInstance(portName);
-
-		logger.debug("opening " + portName);
-
-		serialPort.openPort();
-
-		// open the port
-
-		logger.debug("port opened");
-
-		logger.debug("setting communication parameters");
-		serialPort.setParams(SerialPort.BAUDRATE_115200, SerialPort.DATABITS_8, SerialPort.STOPBITS_1,
-				SerialPort.PARITY_NONE);
-
-		serialPort.addEventListener(listener2, SerialPort.MASK_RXCHAR);
-
+		// define state
 		grblProtocolState =
 
 				new GRBLProtocolState(new SendString() {
@@ -242,19 +227,20 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 						if (line.startsWith(ALARM_RECEIVED_STATUS)) { // "ALARM: Hard
 																		// limit"
 							// must do a RESET to Restart
-							logger.error("ALARM RECEIVED FROM ARDUINO");
+							logger.error("ALARM RECEIVED FROM ARDUINO :" + line);
+
 						} else if (line.startsWith("error: Unsupported command")) {
 							logger.error("COMMAND IS NOT SUPPORTED");
 							logger.debug("release command queue");
 							commandQueue.release();
 						}
 
-						logger.debug("release command sent");
-						// commandSendLockSem.release();
-						logger.debug("command command sent released");
-
 						if (userMachineControlListener != null) {
-							userMachineControlListener.informationReceived(line);
+							try {
+								userMachineControlListener.informationReceived(line);
+							} catch (Throwable t) {
+								logger.error("error in user information received " + t.getMessage(), t);
+							}
 						}
 
 					}
@@ -274,8 +260,12 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 					public void statusReceived(GRBLStatus status) {
 
 						if (userMachineControlListener != null && status != null && status.workingPosition != null) {
-							userMachineControlListener.currentMachinePosition(status.status, status.workingPosition.x,
-									status.workingPosition.y);
+							try {
+								userMachineControlListener.currentMachinePosition(status.status,
+										status.workingPosition.x, status.workingPosition.y);
+							} catch (Throwable t) {
+								logger.error("error in currentMachinePosition handler " + t.getMessage(), t);
+							}
 						}
 
 						assert status != null;
@@ -284,48 +274,70 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 
 							grblHasBufferSizeStatus.set(true);
 
+							if (status.bufferSize == 0) {
+								logger.error("error buffer full");
+							}
+
 							// machine returned the buffer size
 							logger.debug("adjusting the queue authorization");
 
 							// slots available currently
 							int permits = commandQueue.availablePermits();
 
-							int delta = (MAX_QUEUE - status.bufferSize) - permits - COMMANDS_IN_BUFFER_OBJECTIVE; // used buffer
+							int delta = MAX_QUEUE - permits; // freeable slots in semaphores
 
-							if (delta != 0) {
-								if (delta > 0) {
+							if (delta > 0 && status.availableCommandsInPlannedBuffer
+									- COMMANDS_IN_BUFFER_OBJECTIVE > delta * 2) {
 
-									logger.debug("readjust command Queue from delta " + delta);
-									for (int i = 0; i < delta; i++) {
-										commandQueue.release();
-									}
-
-									logger.debug("available in command queue :" + commandQueue.availablePermits());
+								System.out.println(System.currentTimeMillis() + " - Release :" + delta + " elements");
+								logger.debug("readjust command Queue from delta " + delta);
+								for (int i = 0; i < delta; i++) {
+									commandQueue.release();
 								}
+
+								System.out.println("available in command queue :" + commandQueue.availablePermits());
 							}
 
-						} else if (status.availableCommandsInPlannedBuffer != null) {
+						}  else if (status.availableCommandsInPlannedBuffer != null) {
 
 							grblHasBufferSizeStatus.set(true);
 
-							int permits = commandQueue.availablePermits();
-							int delta = status.availableCommandsInPlannedBuffer - permits;
-							if (delta > COMMANDS_IN_BUFFER_OBJECTIVE) {
-								//
-								logger.debug(
-										"readjust command Queue from delta " + (delta - COMMANDS_IN_BUFFER_OBJECTIVE));
-								for (int i = 0; i < delta - COMMANDS_IN_BUFFER_OBJECTIVE; i++) {
-									commandQueue.release();
-									logger.debug("available in command queue :" + commandQueue.availablePermits());
-								}
+							if (status.availableCommandsInPlannedBuffer == 0) {
+								logger.error("error buffer full");
 							}
 
-						} else {
+							// System.out.println("available commands :" +
+							// status.availableCommandsInPlannedBuffer);
+
+							int permits = commandQueue.availablePermits();
+
+							int delta = MAX_QUEUE - permits; // freeable slots in semaphores
+
+							// System.out.println(delta);
+
+							if (delta > 0
+									&& status.availableCommandsInPlannedBuffer - COMMANDS_IN_BUFFER_OBJECTIVE > delta*2) {
+								//
+								logger.debug("readjust command Queue from delta " + delta);
+								// System.out.println(System.currentTimeMillis() + " - Release :" + delta + "
+								// elements");
+								for (int i = 0; i < delta; i++) {
+									commandQueue.release();
+								}
+
+								logger.debug("available in command queue after regulation :"
+										+ commandQueue.availablePermits());
+								// System.out.println("available in command queue :" +
+								// commandQueue.availablePermits());
+								// System.out.println("estimated new queue :" +
+								// (status.availableCommandsInPlannedBuffer - delta));
+							}
+
+						}  else {
 							assert status.bufferSize == null;
-							assert status.availableCommandsInPlannedBuffer == null;
+							// assert status.availableCommandsInPlannedBuffer == null;
 
 							grblHasBufferSizeStatus.set(false);
-
 						}
 
 						if (status != null) {
@@ -390,6 +402,28 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 					}
 				});
 
+		/**
+		 * start init
+		 */
+
+		// this trick is done for testing purpose
+		Constructor serialPortConstructor = serialPortClass.getConstructor(new Class[] { String.class });
+
+		serialPort = (ISerialPort) serialPortConstructor.newInstance(portName);
+
+		logger.debug("opening " + portName);
+
+		serialPort.openPort();
+
+		// open the port
+
+		logger.debug("port opened");
+
+		logger.debug("setting communication parameters");
+		serialPort.setParams(SerialPort.BAUDRATE_115200, SerialPort.DATABITS_8, SerialPort.STOPBITS_1,
+				SerialPort.PARITY_NONE);
+
+		serialPort.addEventListener(listener2, SerialPort.MASK_RXCHAR);
 	}
 
 	private MachineControlListener userMachineControlListener;
@@ -424,7 +458,14 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 
 	@Override
 	public void close() throws Exception {
-		serialPort.closePort();
+		if (serialPort != null) {
+			try {
+				serialPort.closePort();
+			} catch (Throwable t) {
+				logger.error(t.getMessage(), t);
+			}
+
+		}
 		serialPort = null;
 		grblProtocolState = null;
 	}
@@ -469,8 +510,6 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 
 		logger.debug("call send command");
 		grblProtocolState.sendCommand(cmd);
-
-		logger.debug("available in command queue, after sending :" + commandQueue.availablePermits());
 
 	}
 

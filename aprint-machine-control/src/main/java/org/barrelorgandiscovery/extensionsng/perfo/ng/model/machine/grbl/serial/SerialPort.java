@@ -37,8 +37,6 @@ public class SerialPort implements ISerialPort {
 			
 			innerSerialPort.closePort();
 			
-			
-			
 		} catch (jssc.SerialPortException ex) {
 			throw new org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.serial.SerialPortException(
 					ex.getMessage(), ex);

@@ -92,7 +92,7 @@ public class TestMachineDefectsBehaviour {
 
 	}
 
-	
+	@Test
 	public void testGRBLLazerCommunication() throws Exception {
 
 		BufferedImage bufferedImage = new BufferedImage(1000, 200, BufferedImage.TYPE_4BYTE_ABGR);

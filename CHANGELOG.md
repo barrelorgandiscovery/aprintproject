@@ -6,7 +6,7 @@ Functionnalities :
 
 * add lazer cad export
 * add new machine abstraction for different kind of punch
-* add GRBL 1.1 lazer suppport
+* add GRBL 1.1 lazer support
 
 
 Development :
