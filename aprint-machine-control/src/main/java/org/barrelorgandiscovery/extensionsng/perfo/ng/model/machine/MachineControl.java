@@ -39,7 +39,7 @@ public interface MachineControl {
 	public void close() throws Exception;
 
 	/**
-	 * wait for all commands executed
+	 * wait for all commands executed, this method is a blocking one
 	 * 
 	 * @throws Exception
 	 */

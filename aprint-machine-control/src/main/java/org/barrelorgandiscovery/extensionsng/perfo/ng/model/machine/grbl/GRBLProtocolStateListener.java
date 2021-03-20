@@ -15,5 +15,7 @@ public interface GRBLProtocolStateListener {
 	public void unknownReceived(String line);
 
 	public void resetted();
+	
+	public void welcome(String welcomeString);
 
 }

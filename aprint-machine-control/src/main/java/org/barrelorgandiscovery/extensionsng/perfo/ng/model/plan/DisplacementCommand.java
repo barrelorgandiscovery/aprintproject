@@ -14,6 +14,11 @@ public class DisplacementCommand extends Command implements XYCommand {
 	private double moveToX;
 	private double moveToY;
 
+	/**
+	 * software move to (screen coordinates)
+	 * @param moveToX
+	 * @param moveToY
+	 */
 	public DisplacementCommand(double moveToX, double moveToY) {
 		this.moveToX = moveToX;
 		this.moveToY = moveToY;

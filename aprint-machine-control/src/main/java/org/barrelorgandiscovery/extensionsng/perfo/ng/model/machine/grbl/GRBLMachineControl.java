@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControl;
@@ -29,8 +30,6 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 
 	private static final String ALARM_RECEIVED_STATUS = "Alarm:";
 
-	private static final int MAX_PERMIT_SEND = 4;
-
 	// beware the status is done every 500 ms
 	private static final int TRIGGERED_STATUS_TIMER = 500;
 
@@ -43,7 +42,8 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 	private ScheduledExecutorService status;
 
 	// don't go to zero, otherwise grbl strip commands
-	public static int COMMANDS_IN_BUFFER_OBJECTIVE = 3;
+	// in regulation mode
+	public static int COMMANDS_IN_BUFFER_OBJECTIVE = 2;
 
 	// used for debug
 	static Class serialPortClass = org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.serial.SerialPort.class;
@@ -52,9 +52,9 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 	 * semaphore for command sending a command, block if there is too much command
 	 * sent at a time
 	 */
-	private Semaphore commandSendLockSem;
+	// private Semaphore commandSendLockSem;
 
-	private static final int MAX_QUEUE = 10;
+	private static final int MAX_QUEUE = 4;
 
 	/**
 	 * semaphore for command in the pipeline queue, block if the grbl buffer is full
@@ -62,13 +62,15 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 	private Semaphore commandQueue;
 
 	private long lastMachineStatusTime = 0;
-	private MachineStatus lastMachineStatus = MachineStatus.UNKNOWN;
+	private volatile MachineStatus lastMachineStatus = MachineStatus.UNKNOWN;
 
 	PortReader listener2 = new PortReader();
 
 	enum MachineStatus {
 		UNKNOWN, ALARM, RUNNING, IDLE, ERROR
 	}
+
+	private AtomicBoolean grblHasBufferSizeStatus = new AtomicBoolean(false);
 
 	private String currentPortName;
 	private GCodeCompiler commandCompiler;
@@ -138,7 +140,7 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 
 		logger.debug("schedule status watchdog");
 		status = Executors.newSingleThreadScheduledExecutor();
-		
+
 		status.scheduleAtFixedRate(new Runnable() {
 			@Override
 			public void run() {
@@ -147,7 +149,7 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 						grblProtocolState.sendStatusRequest();
 					}
 
-					MachineControlListener v = listener;
+					MachineControlListener v = userMachineControlListener;
 					if (v != null) {
 						// pulling elements
 						try {
@@ -187,7 +189,6 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 			}
 		}
 
-		commandSendLockSem = new Semaphore(MAX_PERMIT_SEND, true);
 		commandQueue = new Semaphore(MAX_QUEUE, true);
 
 		lastMachineStatus = MachineStatus.UNKNOWN;
@@ -249,13 +250,13 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 						}
 
 						logger.debug("release command sent");
-						commandSendLockSem.release();
+						// commandSendLockSem.release();
 						logger.debug("command command sent released");
 
-						if (listener != null) {
-							listener.informationReceived(line);
+						if (userMachineControlListener != null) {
+							userMachineControlListener.informationReceived(line);
 						}
-						
+
 					}
 
 					@Override
@@ -263,9 +264,7 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 						// if resetted, unlock all sended commands
 						// there may still have pipelined commands
 
-						commandSendLockSem.release(100);
-						commandSendLockSem = new Semaphore(MAX_PERMIT_SEND);
-
+						// reinit
 						commandQueue.release(MAX_QUEUE);
 						commandQueue = new Semaphore(MAX_QUEUE, true);
 
@@ -274,62 +273,59 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 					@Override
 					public void statusReceived(GRBLStatus status) {
 
-						if (listener != null && status != null && status.workingPosition != null) {
-
-							// logger.debug("status received :" + status);
-							listener.currentMachinePosition(status.status, status.workingPosition.x,
+						if (userMachineControlListener != null && status != null && status.workingPosition != null) {
+							userMachineControlListener.currentMachinePosition(status.status, status.workingPosition.x,
 									status.workingPosition.y);
-
 						}
 
 						assert status != null;
 
 						if (status.bufferSize != null) {
 
+							grblHasBufferSizeStatus.set(true);
+
+							// machine returned the buffer size
+							logger.debug("adjusting the queue authorization");
+
+							// slots available currently
 							int permits = commandQueue.availablePermits();
-							int delta = (MAX_QUEUE - status.bufferSize) - permits; // used buffer
+
+							int delta = (MAX_QUEUE - status.bufferSize) - permits - COMMANDS_IN_BUFFER_OBJECTIVE; // used buffer
 
 							if (delta != 0) {
 								if (delta > 0) {
-									//
+
 									logger.debug("readjust command Queue from delta " + delta);
 									for (int i = 0; i < delta; i++) {
 										commandQueue.release();
 									}
-									logger.debug(
-											"available in command send lock :" + commandSendLockSem.availablePermits());
-									logger.debug("available in command queue :" + commandQueue.availablePermits());
 
+									logger.debug("available in command queue :" + commandQueue.availablePermits());
 								}
 							}
 
 						} else if (status.availableCommandsInPlannedBuffer != null) {
+
+							grblHasBufferSizeStatus.set(true);
+
 							int permits = commandQueue.availablePermits();
 							int delta = status.availableCommandsInPlannedBuffer - permits;
 							if (delta > COMMANDS_IN_BUFFER_OBJECTIVE) {
 								//
-								logger.debug("readjust command Queue from delta " + delta);
-								for (int i = 0; i < delta; i++) {
+								logger.debug(
+										"readjust command Queue from delta " + (delta - COMMANDS_IN_BUFFER_OBJECTIVE));
+								for (int i = 0; i < delta - COMMANDS_IN_BUFFER_OBJECTIVE; i++) {
 									commandQueue.release();
-									logger.debug(
-											"available in command send lock :" + commandSendLockSem.availablePermits());
 									logger.debug("available in command queue :" + commandQueue.availablePermits());
-
 								}
 							}
 
 						} else {
-							// status.bufferSize == null
+							assert status.bufferSize == null;
+							assert status.availableCommandsInPlannedBuffer == null;
 
-							// no status come from the device, so release depending on the status
-							if (commandQueue.availablePermits() < 1) {
-								logger.debug("no commands regulation");
-								commandQueue.release();
-								logger.debug(
-										"available in command send lock :" + commandSendLockSem.availablePermits());
-								logger.debug("available in command queue :" + commandQueue.availablePermits());
+							grblHasBufferSizeStatus.set(false);
 
-							}
 						}
 
 						if (status != null) {
@@ -368,28 +364,35 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 					@Override
 					public void commandAck() {
 						logger.debug("command ack received");
-						// notify
-						// synchronized (commandSendLockSem) {
-						// try {
-						// unblock one command
-						logger.debug("release send command ... ");
-						commandSendLockSem.release();
-						// commandQueue.release();
-						logger.debug("release send command .. done");
-						logger.debug("available in command send lock :" + commandSendLockSem.availablePermits());
-						logger.debug("available in command queue :" + commandQueue.availablePermits());
 
-						// } catch (Throwable t) {
-						// logger.error("" + t.getMessage(), t);
-						// }
-						// }
+						// depending if we are managed or not,
+						// release the command Queue
 
+						if (!grblHasBufferSizeStatus.get()) {
+							logger.debug("stream in not regulated, so release the commandQueue, current state :"
+									+ commandQueue.availablePermits());
+							commandQueue.release();
+							try {
+								// unmanaged way, be sure the sent is not too fast
+								Thread.sleep(100);
+							} catch (InterruptedException ex) {
+
+							}
+						}
+
+						logger.debug(
+								"available in command queue after command ack :" + commandQueue.availablePermits());
+					}
+
+					@Override
+					public void welcome(String welcomeString) {
+						logger.info("Welcome arrived :" + welcomeString);
 					}
 				});
 
 	}
 
-	private MachineControlListener listener;
+	private MachineControlListener userMachineControlListener;
 
 	public static class TimestampedMachineInteraction {
 		public final long timestamp;
@@ -411,7 +414,7 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 
 	@Override
 	public void setMachineControlListener(MachineControlListener listener) {
-		this.listener = listener;
+		this.userMachineControlListener = listener;
 	}
 
 	private void checkState() throws Exception {
@@ -448,31 +451,26 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 		logger.debug("reinit the machine state");
 		init(currentPortName);
 		logger.debug("done !");
-		
+
 		this.commandCompiler.reset();
 	}
 
 	/**
-	 * this method send a string command to the grbl
+	 * this method send a string command to the grbl, this is a blocking command
 	 * 
 	 * @param cmd
 	 * @throws Exception
 	 */
 	private void sendOneCommand(String cmd) throws Exception {
 
+		logger.debug("entered command lock");
+		commandQueue.acquire();
+		logger.debug("passed the command lock");
+
 		logger.debug("call send command");
 		grblProtocolState.sendCommand(cmd);
 
-		logger.debug("entered command lock");
-
-		commandSendLockSem.acquire();
-
-		commandQueue.acquire();
-
-		logger.debug("available in command send lock :" + commandSendLockSem.availablePermits());
-		logger.debug("available in command queue :" + commandQueue.availablePermits());
-
-		logger.debug("passed the command lock");
+		logger.debug("available in command queue, after sending :" + commandQueue.availablePermits());
 
 	}
 
@@ -510,7 +508,6 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 		}
 
 		while (lastMachineStatus == MachineStatus.RUNNING) {
-			// logger.debug("wait for machine is ready");
 			Thread.sleep(100);
 		}
 

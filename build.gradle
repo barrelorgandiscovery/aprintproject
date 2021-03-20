@@ -136,6 +136,8 @@ project(':bundle') {
            "${project.projectDir}/offlineinstall-studio/aprint_studio.nsi"
         workingDir = 'offlineinstall-studio'
     }
+
+    // create x64 installer
     task createInstaller(dependsOn: ['createBundles']) { 
         doLast {
             def f = file('offlineinstall-studio/APrintStudioInstall.exe')
@@ -169,7 +171,7 @@ project(':bundle') {
         }
     }
 
-    task createAllInstaller(dependsOn: ['createInstaller', 'createInstaller32', 'createMacOsAndLinuxBundle']) {
+    task createAllInstallers(dependsOn: ['createInstaller', 'createInstaller32', 'createMacOsAndLinuxBundle']) {
 
     }
 }
