@@ -29,11 +29,14 @@ public class HoleWithScale extends Hole {
 		super(piste, timestamp, length);
 		this.associatedScale = associatedScale;
 		assert associatedScale != null;
-
 	}
 
 	public AbstractTrackDef getTrackDefinition() {
 		return associatedScale.getTracksDefinition()[this.getTrack()];
+	}
+	
+	public Scale getScale() {
+		return this.associatedScale;
 	}
 
 }

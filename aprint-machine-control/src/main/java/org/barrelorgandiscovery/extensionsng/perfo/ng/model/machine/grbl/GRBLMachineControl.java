@@ -9,6 +9,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControl;
@@ -32,7 +33,7 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 	private static final String ALARM_RECEIVED_STATUS = "Alarm:";
 
 	// beware the status is done every 500 ms
-	private static final int TRIGGERED_STATUS_TIMER = 500;
+	private static final int TRIGGERED_STATUS_TIMER = 100;
 
 	private static Logger logger = Logger.getLogger(GRBLMachineControl.class);
 
@@ -44,9 +45,11 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 
 	// don't go to zero, otherwise grbl strip commands
 	// in regulation mode
-	public static int COMMANDS_IN_BUFFER_OBJECTIVE = 2;
+	public static int COMMANDS_IN_BUFFER_OBJECTIVE = 1;
 
-	public static int MAX_ACTIVE = 4;
+	public static int MAX_ACTIVE = 5;
+	
+	public static int MAX_BUFFER = 10;
 
 	// used for debug
 	static Class serialPortClass = org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.serial.SerialPort.class;
@@ -62,6 +65,8 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 	private final LinkedBlockingDeque<String> activeCommandList; // Currently running commands
 
 	private long lastMachineStatusTime = 0;
+	
+	private AtomicLong userFeedback = new AtomicLong();
 
 	private volatile MachineStatus lastMachineStatus = MachineStatus.UNKNOWN;
 
@@ -176,7 +181,7 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 					logger.error("error sending status command :" + ex.getMessage(), ex);
 				}
 			}
-		}, 5* TRIGGERED_STATUS_TIMER, TRIGGERED_STATUS_TIMER, TimeUnit.MILLISECONDS);
+		}, 50 * TRIGGERED_STATUS_TIMER, TRIGGERED_STATUS_TIMER, TimeUnit.MILLISECONDS);
 	}
 
 	private void init(String portName) throws Exception {
@@ -254,8 +259,12 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 
 					@Override
 					public void statusReceived(GRBLStatus status) {
+						
+						long feedbackcount = userFeedback.incrementAndGet();
 
-						if (userMachineControlListener != null && status != null && status.workingPosition != null) {
+						if (userMachineControlListener != null && status != null && status.workingPosition != null
+								&& (feedbackcount % 5 == 0)
+								) {
 							try {
 								userMachineControlListener.currentMachinePosition(status.status,
 										status.workingPosition.x, status.workingPosition.y);
@@ -302,7 +311,8 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 								logger.debug("active commands :" + activeCommandList.size());
 								logger.debug("command Buffer list :" + commandBuffer.size());
 								
-								while ((!commandBuffer.isEmpty()) && activeCommandList.size() < MAX_ACTIVE && status.availableCommandsInPlannedBuffer
+								while ((!commandBuffer.isEmpty()) && activeCommandList.size() < MAX_ACTIVE 
+										&& status.availableCommandsInPlannedBuffer
 										- COMMANDS_IN_BUFFER_OBJECTIVE - activeCommandList.size() > 0) {
 
 									// push commands from buffer
@@ -324,27 +334,8 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 							}
 
 						} else {
-							// assert status.bufferSize == null;
-							// assert status.availableCommandsInPlannedBuffer == null;
-							synchronized (activeCommandList) {
-								synchronized (commandBuffer) {
-									while (activeCommandList.size() < MAX_ACTIVE && !commandBuffer.isEmpty()) {
-										
-										String command = commandBuffer.peek();
-										try {
-
-											logger.debug("call send command");
-											grblProtocolState.sendCommand(command);
-											commandBuffer.pop();
-											activeCommandList.add(command);
-											commandBuffer.notify();
-
-										} catch (Exception ex) {
-											logger.error("error in sending the command " + ex.getMessage(), ex);
-										}
-									}
-								}
-							}
+							
+							pumpCommands();
 
 						}
 
@@ -391,6 +382,9 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 						if (!activeCommandList.isEmpty()) {
 							activeCommandList.pop();
 						}
+						
+					
+						
 
 						logger.debug("available in command queue after command ack :" + activeCommandList.size());
 					}
@@ -463,8 +457,8 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 			} catch (Throwable t) {
 				logger.error(t.getMessage(), t);
 			}
-
 		}
+		
 		serialPort = null;
 		grblProtocolState = null;
 	}
@@ -506,7 +500,7 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 		logger.debug("entered command lock");
 		synchronized (commandBuffer) {
 
-			if (commandBuffer.size() > MAX_ACTIVE) {
+			if (commandBuffer.size() > MAX_BUFFER) {
 				// block
 				logger.debug("blocking thread for sending command :" + commandBuffer.size());
 				commandBuffer.wait();
@@ -568,6 +562,29 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 		if (command != null && !command.isEmpty()) {
 			logger.debug("send command " + command);
 			this.sendOneCommand(command);
+		}
+	}
+
+	private void pumpCommands() {
+		// assert status.bufferSize == null;
+		// assert status.availableCommandsInPlannedBuffer == null;
+		synchronized (activeCommandList) {
+			synchronized (commandBuffer) {
+				while (activeCommandList.size() < MAX_ACTIVE && !commandBuffer.isEmpty()) {
+					
+					String command = commandBuffer.peek();
+					try {
+						logger.debug("call send command");
+						grblProtocolState.sendCommand(command);
+						commandBuffer.pop();
+						activeCommandList.add(command);
+						commandBuffer.notify();
+
+					} catch (Exception ex) {
+						logger.error("error in sending the command " + ex.getMessage(), ex);
+					}
+				}
+			}
 		}
 	}
 
