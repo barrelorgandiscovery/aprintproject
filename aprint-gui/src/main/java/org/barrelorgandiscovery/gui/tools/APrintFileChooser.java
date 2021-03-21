@@ -9,6 +9,7 @@ import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
 import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.ui.tools.VFSTools;
 
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser.RETURN_TYPE;
@@ -113,6 +114,7 @@ public class APrintFileChooser {
 		FileSystemManager fsManager = VFS.getManager();
 		AbstractFileObject fileObject = (AbstractFileObject) fsManager.resolveFile(selectedFile.getParentFile(),
 				selectedFile.getName());
+		
 		return fileObject;
 	}
 
@@ -127,10 +129,14 @@ public class APrintFileChooser {
 			return;
 		}
 		try {
-			FileSystemManager fsManager = VFS.getManager();
-			FileObject fileObject = fsManager.resolveFile(currentDirectory.getParentFile(), currentDirectory.getName());
 
-			this.fileChooser.setCurrentDirectory(fileObject);
+			if (currentDirectory != null && currentDirectory.getParentFile() == null) {
+				return;
+			}
+			
+			FileObject fo = VFSTools.fromRegularFile(currentDirectory);
+			
+			this.fileChooser.setCurrentDirectory(fo);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex.getMessage(), ex);
 		}

@@ -46,6 +46,8 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 	// in regulation mode
 	public static int COMMANDS_IN_BUFFER_OBJECTIVE = 2;
 
+	public static int MAX_ACTIVE = 4;
+
 	// used for debug
 	static Class serialPortClass = org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.serial.SerialPort.class;
 
@@ -54,20 +56,13 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 	 * sent at a time
 	 */
 	// private Semaphore commandSendLockSem;
-	
 
-    //private final LinkedBlockingDeque<String> commandBuffer;     // Manually specified commands
-    
-    //private final LinkedBlockingDeque<String> activeCommandList;  // Currently running commands
+	private final LinkedBlockingDeque<String> commandBuffer; // Manually specified commands
 
-	private static final int MAX_QUEUE = 2;
-
-	/**
-	 * semaphore for command in the pipeline queue, block if the grbl buffer is full
-	 */
-	private Semaphore commandQueue;
+	private final LinkedBlockingDeque<String> activeCommandList; // Currently running commands
 
 	private long lastMachineStatusTime = 0;
+
 	private volatile MachineStatus lastMachineStatus = MachineStatus.UNKNOWN;
 
 	PortReader listener2 = new PortReader();
@@ -75,8 +70,6 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 	enum MachineStatus {
 		UNKNOWN, ALARM, RUNNING, IDLE, ERROR
 	}
-
-	private AtomicBoolean grblHasBufferSizeStatus = new AtomicBoolean(false);
 
 	private String currentPortName;
 	private GCodeCompiler commandCompiler;
@@ -139,6 +132,9 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 	 */
 	public GRBLMachineControl(String portName, GCodeCompiler commandCompiler) throws Exception {
 
+		commandBuffer = new LinkedBlockingDeque<>();
+		activeCommandList = new LinkedBlockingDeque<>();
+
 		init(portName); // raise exception in case of issue
 		currentPortName = portName;
 		assert commandCompiler != null;
@@ -180,7 +176,7 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 					logger.error("error sending status command :" + ex.getMessage(), ex);
 				}
 			}
-		}, TRIGGERED_STATUS_TIMER, TRIGGERED_STATUS_TIMER, TimeUnit.MILLISECONDS);
+		}, 5* TRIGGERED_STATUS_TIMER, TRIGGERED_STATUS_TIMER, TimeUnit.MILLISECONDS);
 	}
 
 	private void init(String portName) throws Exception {
@@ -196,7 +192,8 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 			}
 		}
 
-		commandQueue = new Semaphore(MAX_QUEUE, true);
+		commandBuffer.clear();
+		activeCommandList.clear();
 
 		lastMachineStatus = MachineStatus.UNKNOWN;
 
@@ -232,7 +229,7 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 						} else if (line.startsWith("error: Unsupported command")) {
 							logger.error("COMMAND IS NOT SUPPORTED");
 							logger.debug("release command queue");
-							commandQueue.release();
+							activeCommandList.pop();
 						}
 
 						if (userMachineControlListener != null) {
@@ -251,9 +248,8 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 						// there may still have pipelined commands
 
 						// reinit
-						commandQueue.release(MAX_QUEUE);
-						commandQueue = new Semaphore(MAX_QUEUE, true);
-
+						commandBuffer.clear();
+						activeCommandList.clear();
 					}
 
 					@Override
@@ -271,73 +267,85 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 						assert status != null;
 
 						if (status.bufferSize != null) {
+							// buffer size is the occupied slots
 
-							grblHasBufferSizeStatus.set(true);
+							synchronized (activeCommandList) {
+								while ((!commandBuffer.isEmpty())  && activeCommandList.size() < MAX_ACTIVE 
+										&& (MAX_ACTIVE - status.bufferSize) 
+										- activeCommandList.size() > 0) {
 
-							if (status.bufferSize == 0) {
-								logger.error("error buffer full");
-							}
+									// push commands from buffer
+									synchronized (commandBuffer) {
+										String command = commandBuffer.peek();
+										try {
 
-							// machine returned the buffer size
-							logger.debug("adjusting the queue authorization");
+											logger.debug("call send command");
+											grblProtocolState.sendCommand(command);
+											commandBuffer.pop();
+											activeCommandList.add(command);
+											commandBuffer.notify();
 
-							// slots available currently
-							int permits = commandQueue.availablePermits();
-
-							int delta = MAX_QUEUE - permits; // freeable slots in semaphores
-
-							if (delta > 0 && status.availableCommandsInPlannedBuffer
-									- COMMANDS_IN_BUFFER_OBJECTIVE > delta * 2) {
-
-								System.out.println(System.currentTimeMillis() + " - Release :" + delta + " elements");
-								logger.debug("readjust command Queue from delta " + delta);
-								for (int i = 0; i < delta; i++) {
-									commandQueue.release();
+										} catch (Exception ex) {
+											logger.error("error in sending the command " + ex.getMessage(), ex);
+										}
+									}
 								}
-
-								System.out.println("available in command queue :" + commandQueue.availablePermits());
 							}
 
-						}  else if (status.availableCommandsInPlannedBuffer != null) {
-
-							grblHasBufferSizeStatus.set(true);
+						} else if (status.availableCommandsInPlannedBuffer != null) {
 
 							if (status.availableCommandsInPlannedBuffer == 0) {
 								logger.error("error buffer full");
 							}
 
-							// System.out.println("available commands :" +
-							// status.availableCommandsInPlannedBuffer);
+							synchronized (activeCommandList) {
+								logger.debug("active commands :" + activeCommandList.size());
+								logger.debug("command Buffer list :" + commandBuffer.size());
+								
+								while ((!commandBuffer.isEmpty()) && activeCommandList.size() < MAX_ACTIVE && status.availableCommandsInPlannedBuffer
+										- COMMANDS_IN_BUFFER_OBJECTIVE - activeCommandList.size() > 0) {
 
-							int permits = commandQueue.availablePermits();
+									// push commands from buffer
+									synchronized (commandBuffer) {
+										String command = commandBuffer.peek();
+										try {
 
-							int delta = MAX_QUEUE - permits; // freeable slots in semaphores
+											logger.debug("call send command " + command);
+											grblProtocolState.sendCommand(command);
+											commandBuffer.pop();
+											activeCommandList.add(command);
+											commandBuffer.notify();
 
-							// System.out.println(delta);
-
-							if (delta > 0
-									&& status.availableCommandsInPlannedBuffer - COMMANDS_IN_BUFFER_OBJECTIVE > delta*2) {
-								//
-								logger.debug("readjust command Queue from delta " + delta);
-								// System.out.println(System.currentTimeMillis() + " - Release :" + delta + "
-								// elements");
-								for (int i = 0; i < delta; i++) {
-									commandQueue.release();
+										} catch (Exception ex) {
+											logger.error("error in sending the command " + ex.getMessage(), ex);
+										}
+									}
 								}
-
-								logger.debug("available in command queue after regulation :"
-										+ commandQueue.availablePermits());
-								// System.out.println("available in command queue :" +
-								// commandQueue.availablePermits());
-								// System.out.println("estimated new queue :" +
-								// (status.availableCommandsInPlannedBuffer - delta));
 							}
 
-						}  else {
-							assert status.bufferSize == null;
+						} else {
+							// assert status.bufferSize == null;
 							// assert status.availableCommandsInPlannedBuffer == null;
+							synchronized (activeCommandList) {
+								synchronized (commandBuffer) {
+									while (activeCommandList.size() < MAX_ACTIVE && !commandBuffer.isEmpty()) {
+										
+										String command = commandBuffer.peek();
+										try {
 
-							grblHasBufferSizeStatus.set(false);
+											logger.debug("call send command");
+											grblProtocolState.sendCommand(command);
+											commandBuffer.pop();
+											activeCommandList.add(command);
+											commandBuffer.notify();
+
+										} catch (Exception ex) {
+											logger.error("error in sending the command " + ex.getMessage(), ex);
+										}
+									}
+								}
+							}
+
 						}
 
 						if (status != null) {
@@ -380,20 +388,11 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 						// depending if we are managed or not,
 						// release the command Queue
 
-						if (!grblHasBufferSizeStatus.get()) {
-							logger.debug("stream in not regulated, so release the commandQueue, current state :"
-									+ commandQueue.availablePermits());
-							commandQueue.release();
-							try {
-								// unmanaged way, be sure the sent is not too fast
-								Thread.sleep(100);
-							} catch (InterruptedException ex) {
-
-							}
+						if (!activeCommandList.isEmpty()) {
+							activeCommandList.pop();
 						}
 
-						logger.debug(
-								"available in command queue after command ack :" + commandQueue.availablePermits());
+						logger.debug("available in command queue after command ack :" + activeCommandList.size());
 					}
 
 					@Override
@@ -505,11 +504,18 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 	private void sendOneCommand(String cmd) throws Exception {
 
 		logger.debug("entered command lock");
-		commandQueue.acquire();
-		logger.debug("passed the command lock");
+		synchronized (commandBuffer) {
 
-		logger.debug("call send command");
-		grblProtocolState.sendCommand(cmd);
+			if (commandBuffer.size() > MAX_ACTIVE) {
+				// block
+				logger.debug("blocking thread for sending command :" + commandBuffer.size());
+				commandBuffer.wait();
+				logger.debug("done blocking");
+			}
+			logger.debug("adding command in buffer");
+			commandBuffer.add(cmd);
+		}
+		logger.debug("passed the command lock");
 
 	}
 

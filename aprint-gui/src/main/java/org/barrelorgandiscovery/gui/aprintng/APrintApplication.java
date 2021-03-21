@@ -88,7 +88,7 @@ public class APrintApplication {
 				}
 			}
 
-			if (!ProfilingCondition.isProfiling())
+			if (!ProfilingCondition.isProfiling() && !isdevelop)
 			{
 				Logger.getRootLogger().setLevel(Level.ERROR);
 			} else {
