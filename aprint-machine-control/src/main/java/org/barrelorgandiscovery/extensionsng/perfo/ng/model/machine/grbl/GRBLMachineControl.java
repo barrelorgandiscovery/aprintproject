@@ -58,7 +58,6 @@ class GRBLMachineControl implements MachineControl, MachineDirectControl {
 	 * semaphore for command sending a command, block if there is too much command
 	 * sent at a time
 	 */
-	// private Semaphore commandSendLockSem;
 
 	private final LinkedBlockingDeque<String> commandBuffer; // Manually specified commands
 
