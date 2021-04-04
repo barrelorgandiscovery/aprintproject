@@ -1,5 +1,6 @@
 package org.barrelorgandiscovery.gui.ainstrument;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -40,7 +41,7 @@ public class GUIInstrumentTools {
 
 			// perhaps a conversion to be done ... OK Done !!
 
-			AudioInputStream ais = AudioSystem.getAudioInputStream(wavStream);
+			AudioInputStream ais = AudioSystem.getAudioInputStream(new BufferedInputStream(wavStream));
 
 			logger.debug("convert wav ..."); //$NON-NLS-1$
 			AudioFormat f = ais.getFormat();

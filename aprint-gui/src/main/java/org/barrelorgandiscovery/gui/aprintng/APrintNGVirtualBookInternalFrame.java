@@ -390,11 +390,9 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		this.scriptManager = scriptManager;
 		this.currentSavedFile = virtualBookFile;
 		this.asyncJobsManager = jobManager;
-		
 
 		aSyncPreparePlayin = new ASyncPreparePlayin();
 
-		
 		internalDefineInstrument(instrument);
 
 		bookPropertiesPropertySheetPanel = new PropertySheetPanel();
@@ -414,7 +412,6 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 				updateTitle();
 			}
 		});
-
 
 		// book properties panel must be defined before
 		internalChangeVirtualBook(vb);
@@ -443,7 +440,6 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		};
 
 		playsubSystem.addPlaySubSystemManagerListener(psslistener);
-
 
 		InitNGExtensionPoint[] extpoints = ExtensionPointProvider.getAllPoints(InitNGExtensionPoint.class, exts);
 		for (int i = 0; i < extpoints.length; i++) {
@@ -1113,7 +1109,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		JVBToolingToolbar pianorolltb = new JVBToolingToolbar(pianoroll, pianoroll.getUndoStack(),
 				pianoroll.getSnappingEnvironment());
 
-		JPanel pianorollbutton = new JPanel();
+		pianorollbutton = new JPanel();
 		BoxLayout bl_pianorollbutton = new BoxLayout(pianorollbutton, BoxLayout.X_AXIS);
 		pianorollbutton.setLayout(bl_pianorollbutton);
 
@@ -1555,6 +1551,8 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 	 * propery bean for virtual book properties
 	 */
 	private PropertySheetPanel bookPropertiesPropertySheetPanel;
+
+	private JPanel pianorollbutton;
 
 	/**
 	 * Touch layer visibility from existing preferences
@@ -2859,7 +2857,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		JDialog groovyFrame = new VirtualBookScriptConsole((Frame) this,
 				Messages.getString("APrintNGVirtualBookInternalFrame.17") //$NON-NLS-1$
 						+ pianoroll.getVirtualBook().getName(),
-				pianoroll, asyncJobsManager, services, instrument, aprintproperties, scriptManager);
+				pianoroll, toolbarPanel , asyncJobsManager, services, instrument, aprintproperties, scriptManager);
 
 		groovyFrame.setModal(false);
 
@@ -3083,6 +3081,10 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 							p.appendOutputNl(">>  " + "currentinstrument" + " " //$NON-NLS-3$ //$NON-NLS-2$
 																				// //$NON-NLS-3$
 									+ " instrument associated to the book view", null); // $NON-NLS-1$
+							p.appendOutputNl(">>  " + "toolbarspanel" + " " //$NON-NLS-3$ //$NON-NLS-2$
+							// //$NON-NLS-3$
+									+ " toolbar panel", null); // $NON-NLS-1$
+
 						} catch (Exception ex) {
 							logger.error("fail to output variables in console", ex); //$NON-NLS-1$
 						}
@@ -3110,6 +3112,8 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 								b.setProperty("pianoroll", pianoroll); //$NON-NLS-1$
 								b.setProperty("services", services); //$NON-NLS-1$
 								b.setProperty("currentinstrument", instrument); //$NON-NLS-1$
+								// toolbars panel, permit to add new JToolbars
+								b.setProperty("toolbarspanel", pianorollbutton); //$NON-NLS-1$
 								p.clearConsole();
 
 								try {

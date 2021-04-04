@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.barrelorgandiscovery.model.ModelParameter;
 import org.barrelorgandiscovery.model.ModelType;
+import org.barrelorgandiscovery.model.SinkSource;
 import org.barrelorgandiscovery.model.type.GenericSimpleType;
 import org.barrelorgandiscovery.model.type.JavaType;
 import org.barrelorgandiscovery.virtualbook.Hole;
@@ -33,6 +34,7 @@ public abstract class ModelGroovyScript {
 	protected ModelType newHolesType() {
 		return new GenericSimpleType(Collection.class, new Class[] { Hole.class });
 	}
+	
 	
 	/**
 	 * create a simple java type
@@ -68,4 +70,5 @@ public abstract class ModelGroovyScript {
 	 */
 	public abstract Map<String, Object> execute(Map<String, Object> parameterValues) throws Exception;
 
+	
 }

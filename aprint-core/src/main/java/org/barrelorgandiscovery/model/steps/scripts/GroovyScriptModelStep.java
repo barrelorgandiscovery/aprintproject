@@ -184,7 +184,35 @@ public class GroovyScriptModelStep extends ModelStep implements IModelStepContex
 				return ((SinkSource)compiledScript).isSink();
 			}
 		}
+		
+		if (modelParameters != null) {
+			boolean hasOutParameters = false;
+			boolean hasInParameters = false;
+			for (ModelParameter p: modelParameters) {
+				if (p == null)
+					continue;
+				
+				if (p.isOut()) {
+					hasOutParameters = true;
+				}
+				
+				if (p.isIn()) {
+					hasInParameters = true;
+				}
+			}
+
+			if (hasInParameters && !hasOutParameters) {
+				return true;
+			}
+			
+		}
+		
+		
 		return false;
+	}
+	
+	public void evaluateScriptParameters() throws Exception {
+		ModelParameter[] parameters = compiledScript.configureParameters();
 	}
 
 	/**
@@ -257,5 +285,6 @@ public class GroovyScriptModelStep extends ModelStep implements IModelStepContex
 		}
 
 		compiledScript = (ModelGroovyScript) ret;
+
 	}
 }

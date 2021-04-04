@@ -51,6 +51,8 @@ public class VirtualBookScriptConsole extends JDialog {
 	private QuickScriptManager scriptManager;
 
 	private Instrument currentInstrument;
+	
+	private JPanel toolbarsPanel;
 
 	/**
 	 * Current edited script
@@ -61,6 +63,7 @@ public class VirtualBookScriptConsole extends JDialog {
 
 	public VirtualBookScriptConsole(Frame owner, String title,
 			JEditableVirtualBookComponent pianoroll,
+			JPanel toolbarsPanel,
 			AsyncJobsManager asyncJobsManager,
 			APrintNGGeneralServices services, Instrument instrument,
 			APrintProperties aPrintProperties, QuickScriptManager scriptManager)
@@ -68,6 +71,7 @@ public class VirtualBookScriptConsole extends JDialog {
 		super(owner, title);
 
 		this.pianoroll = pianoroll;
+		this.toolbarsPanel = toolbarsPanel;
 		this.asyncJobsManager = asyncJobsManager;
 		this.services = services;
 		this.currentInstrument = instrument;
@@ -98,6 +102,11 @@ public class VirtualBookScriptConsole extends JDialog {
 					+ " " //$NON-NLS-1$
 					+ "current used instrument", //$NON-NLS-1$
 					null);
+			p.appendOutputNl(">>  " //$NON-NLS-1$
+					+ "toolbarspanel" //$NON-NLS-1$
+					+ " " //$NON-NLS-1$
+					+ "panel containing the toolbars", //$NON-NLS-1$
+					null);
 
 		} catch (Exception ex) {
 			logger.error("fail to output variables in console", ex); //$NON-NLS-1$
@@ -121,6 +130,7 @@ public class VirtualBookScriptConsole extends JDialog {
 					b.setProperty("pianoroll", pianoroll); //$NON-NLS-1$
 					b.setProperty("services", services); //$NON-NLS-1$
 					b.setProperty("currentinstrument", currentInstrument); //$NON-NLS-1$
+					b.setProperty("toolbarspanel", toolbarsPanel); //$NON-NLS-1$
 
 					p.clearConsole();
 

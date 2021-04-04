@@ -1140,6 +1140,11 @@ public class ModelEditor extends JPanel {
 
 		ModelRunner modelRunner = new ModelRunner(m);
 		this.currentModelRunner = modelRunner;
+		
+		if (modelRunner.getModel().schedule().size() == 0) {
+			console.appendOutput("No scheduled processor", null);
+		}
+		
 		return modelRunner;
 	}
 
