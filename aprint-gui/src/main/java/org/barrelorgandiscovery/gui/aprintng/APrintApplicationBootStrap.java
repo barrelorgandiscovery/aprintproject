@@ -72,8 +72,10 @@ public class APrintApplicationBootStrap {
 
     // get all the jar in the aprintstudiofolder
 
+    String cpseparator = System.getProperty("path.separator");
+    
     String cp = sysprop.getProperty("java.class.path");
-    String[] cplist = cp.split(";");
+    String[] cplist = cp.split(cpseparator); // ";"
 
     ArrayList<File> syslist = new ArrayList<File>();
     for (int i = 0; i < cplist.length; i++) {
@@ -100,6 +102,7 @@ public class APrintApplicationBootStrap {
       File file = (File) iterator.next();
       urls.add(file.toURL());
     }
+    
 
     // logger.debug("Main class loader :"
     // + APrintApplicationBootStrap.class.getClassLoader());

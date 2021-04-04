@@ -259,7 +259,7 @@ public class Wizard extends JPanel implements Disposable {
 				} catch (Exception ex) {
 					logger.error("error while going next :" + ex.getMessage(), //$NON-NLS-1$
 							ex);
-					JMessageBox.showError(this, ex);
+					JMessageBox.showError(Wizard.this, ex);
 				}
 			}
 		});
