@@ -39,7 +39,10 @@ dependencies {
     compile files(fileTree(dir:"${projectDir}/libs" , 
                     include:['**/*.jar']).toList())
 
- 	compile (group: 'org.bytedeco', name: 'opencv-platform', version: '4.4.0-1.5.4') 
+ 	 compile (group: 'org.bytedeco', name: 'opencv-platform', version: '4.5.1-1.5.5') 
+	// compile (group: 'org.bytedeco', name: 'ffmpeg-platform', version: '4.3.2-1.5.5') 
+
+//compile (group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.4')
 
 /*
  	compile (group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.4') {
