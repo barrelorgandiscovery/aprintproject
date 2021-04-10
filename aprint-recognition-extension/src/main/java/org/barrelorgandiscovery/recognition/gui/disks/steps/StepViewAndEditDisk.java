@@ -37,7 +37,7 @@ import org.barrelorgandiscovery.recognition.gui.disks.DiskImageTools;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.StepChooseOrientationAndBeginning.AngleAndOrientation;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.states.Book;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.states.ImageFileAndInstrument;
-import org.barrelorgandiscovery.recognition.gui.disks.steps.states.PointsAndEllipseParameters;
+import org.barrelorgandiscovery.recognition.gui.disks.steps.states.PointsAndEllipsisParameters;
 import org.barrelorgandiscovery.recognition.math.EllipseParameters;
 import org.barrelorgandiscovery.recognition.math.MathVect;
 import org.barrelorgandiscovery.recognition.messages.Messages;
@@ -331,15 +331,15 @@ public class StepViewAndEditDisk extends BasePanelStep {
 
 		// get the perimeter parameters
 
-		PointsAndEllipseParameters perimeterParameters = allStepsStates.getPreviousStateImplementing(getParentStep(),
-				PointsAndEllipseParameters.class);
+		PointsAndEllipsisParameters perimeterParameters = allStepsStates.getPreviousStateImplementing(getParentStep(),
+				PointsAndEllipsisParameters.class);
 		logger.debug("parent step :" + getParentStep().getId()); //$NON-NLS-1$
 
-		PointsAndEllipseParameters centerParameters = allStepsStates
-				.getPreviousStateImplementing(getParentStep().getParentStep(), PointsAndEllipseParameters.class);
+		PointsAndEllipsisParameters centerParameters = allStepsStates
+				.getPreviousStateImplementing(getParentStep().getParentStep(), PointsAndEllipsisParameters.class);
 		logger.debug("parent, parent step :" + getParentStep().getParentStep()); //$NON-NLS-1$
 
-		EllipseParameters ep = perimeterParameters.ellipseParameters;
+		EllipseParameters ep = perimeterParameters.outerEllipseParameters;
 
 		double mean_radius = (ep.a + ep.b) / 2;
 		Scale scale = instrument.getScale();
@@ -351,8 +351,8 @@ public class StepViewAndEditDisk extends BasePanelStep {
 
 		// vector centre -> point
 		MathVect v = new MathVect(
-				new Point2D.Double(centerParameters.ellipseParameters.centre.x,
-						centerParameters.ellipseParameters.centre.y),
+				new Point2D.Double(centerParameters.outerEllipseParameters.centre.x,
+						centerParameters.outerEllipseParameters.centre.y),
 				new Point2D.Double(angleAndOrientation.pointForAngle.getCenterX(),
 						angleAndOrientation.pointForAngle.getCenterY()));
 
@@ -362,7 +362,7 @@ public class StepViewAndEditDisk extends BasePanelStep {
 
 		logger.debug("origin angle :" + angleOrigine); //$NON-NLS-1$
 		BufferedImage correctedImage = DiskImageTools.createCorrectedImage(source,
-				centerParameters.ellipseParameters.centre, ep, angleOrigine,
+				centerParameters.outerEllipseParameters.centre, ep, angleOrigine,
 				(int) (2 * Math.PI * mean_radius * resolution_factor), (int) (mean_radius * resolution_factor));
 
 		if (currentState.virtualbook == null) {

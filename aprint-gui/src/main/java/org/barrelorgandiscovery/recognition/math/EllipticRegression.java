@@ -16,16 +16,14 @@ public class EllipticRegression {
 	private static Logger logger = Logger.getLogger(EllipticRegression.class);
 
 	/**
-	 * Renvoie les paramètre de l'ellipse qui s'ajuste mieux au nuage de points
-	 * 2D reçu (au sens des moindres carrés)
+	 * Renvoie les paramï¿½tre de l'ellipse qui s'ajuste mieux au nuage de points 2D
+	 * reï¿½u (au sens des moindres carrï¿½s)
 	 * 
-	 * @param lstPts2D
-	 *            liste de points 2D (Point2D.Double) du contour de l'ellipse
-	 * @return un tableau qui contient les paramètres de l'ellipse
+	 * @param lstPts2D liste de points 2D (Point2D.Double) du contour de l'ellipse
+	 * @return un tableau qui contient les paramï¿½tres de l'ellipse
 	 */
-	public static EllipseParameters mathElipseRegression(
-			List<Rectangle2D.Double> lstPts2D) {
-		// construction du système linéaire
+	public static EllipseParameters mathElipseRegression(List<Rectangle2D.Double> lstPts2D) {
+		// construction du systï¿½me linï¿½aire
 		int nNb_pts = lstPts2D.size();
 		Matrix mA = new Matrix(nNb_pts, 5);
 		Matrix vB = new Matrix(nNb_pts, 1);
@@ -55,13 +53,12 @@ public class EllipticRegression {
 
 		// calcule les caracteristiques de l'ellipse:
 		//
-		// d'après http://mathworld.wolfram.com/Ellipse.html
+		// d'aprï¿½s http://mathworld.wolfram.com/Ellipse.html
 		//
 		// formules (15), (16), ..., (23)
 
 		// verifie que l'ellipse est valide
-		double delta = a * (c * g - f * f) - b * (b * g - d * f) + d
-				* (b * f - d * c);
+		double delta = a * (c * g - f * f) - b * (b * g - d * f) + d * (b * f - d * c);
 		double nJ = a * c - b * b;
 		double nI = a + c;
 		if (delta == 0)
@@ -79,8 +76,7 @@ public class EllipticRegression {
 		double nAngle_rad = 0.5 * Math.atan(2.0 * b / (c - a));
 
 		// longueurs des 2 demi-axes
-		double num = 2.0 * (a * f * f + c * d * d + g * b * b - 2 * b * d * f - a
-				* c * g);
+		double num = 2.0 * (a * f * f + c * d * d + g * b * b - 2 * b * d * f - a * c * g);
 		double sq = Math.sqrt((a - c) * (a - c) + 4.0 * b * b);
 
 		double denom1 = (b * b - a * c) * (sq - (a + c));
@@ -104,37 +100,15 @@ public class EllipticRegression {
 		return result;
 	}// getParametres_ellipse_mc
 
-	public static Matrix computeEllipsePoint(EllipseParameters ellipse,
-			double angle) {
-		Matrix rotationMatrix = new Matrix(new double[][] {
-				{ Math.cos(ellipse.angle), -Math.sin(ellipse.angle) },
-				{ Math.sin(ellipse.angle), Math.cos(ellipse.angle) } });
-
-		Matrix center = new Matrix(new double[][] { { ellipse.centre.x,
-				ellipse.centre.y, } });
-
-		Matrix vpos = new Matrix(new double[][] { {
-				ellipse.a * Math.cos(angle), ellipse.b * Math.sin(angle) } });
-
-		Matrix r = rotationMatrix.times(vpos.transpose());
-
-		Matrix res = r.plus(center.transpose());
-		return res;
-	}
-
 	/**
 	 * calc the distance of a point to ellipse
 	 * 
-	 * @param parameters
-	 *            the ellipse parameters
-	 * @param x
-	 *            the x abscisse
-	 * @param y
-	 *            the y ordonnee
+	 * @param parameters the ellipse parameters
+	 * @param x          the x abscisse
+	 * @param y          the y ordonnee
 	 * @return
 	 */
-	public static double computeDistances(EllipseParameters parameters,
-			double x, double y) {
+	public static double computeDistances(EllipseParameters parameters, double x, double y) {
 
 		// compute angle
 
@@ -143,9 +117,9 @@ public class EllipticRegression {
 
 		double angleOrigine = v.moins(center).angleOrigine();
 
-		double angleEllipse = angleOrigine - parameters.angle;
+		MathVect pt = parameters.computePointOnEllipseMathVect(angleOrigine, 1.0);
 
-		MathVect pt = toVect(computeEllipsePoint(parameters, angleEllipse));
+		// MathVect pt = toVect(computeEllipsePoint(parameters, angleEllipse));
 
 		return pt.moins(v).norme();
 
@@ -156,8 +130,7 @@ public class EllipticRegression {
 	}
 
 	private static Matrix toM(EllipseParameters p) {
-		return new Matrix(new double[][] { { p.centre.x, p.centre.y, p.angle,
-				p.a, p.b } }).transpose();
+		return new Matrix(new double[][] { { p.centre.x, p.centre.y, p.angle, p.a, p.b } }).transpose();
 	}
 
 	private static EllipseParameters fromM(Matrix m) {
@@ -174,10 +147,15 @@ public class EllipticRegression {
 
 	}
 
-	public static EllipseParameters iterativeRegression(
-			final List<Rectangle2D.Double> list, EllipseParameters init) {
+	public static EllipseParameters iterativeRegression(final List<Rectangle2D.Double> list, EllipseParameters init) {
 
-		EllipseParameters p = (init != null ? init : mathElipseRegression(list));
+		EllipseParameters p = mathElipseRegression(list);
+
+		// compute the width of points, to be able to make a relative
+		// distance and not be influenced by the coordinate system
+
+		double min = list.stream().map((point) -> point.x).reduce((x1, x2) -> Math.min(x1, x2)).get();
+		double max = list.stream().map((point) -> point.x).reduce((x1, x2) -> Math.max(x1, x2)).get();
 
 		Matrix c = toM(p);
 
@@ -186,14 +164,11 @@ public class EllipticRegression {
 			public double compute(Matrix v) {
 
 				double distance = 0;
-				for (Iterator<Rectangle2D.Double> it = list.iterator(); it
-						.hasNext();) {
+				for (Iterator<Rectangle2D.Double> it = list.iterator(); it.hasNext();) {
 					Double n = it.next();
 
 					EllipseParameters p = fromM(v);
-					distance += computeDistances(p, n.x + n.width / 2, n.y
-							+ n.height / 2);
-
+					distance += computeDistances(p, n.x + n.width / 2, n.y + n.height / 2);
 				}
 
 				return distance;
@@ -205,29 +180,33 @@ public class EllipticRegression {
 		double d1 = d;
 
 		int cpt = 0;
-		int attempt = 3;
-		while (attempt > 0) {
-			double factor = 10 * attempt;
+		int initialAttempt = 30;
+		int attempt = initialAttempt;
+
+		main: while (attempt > 0) {
+			double factor = attempt / initialAttempt;
 			logger.debug("attempt :" + attempt);
 			while (true) { // (d1 <= d) { // while descending
-				c = g.gradientDescent(c, 1e-4 * factor);
-				d = d1;
-				d1 = f.compute(c);
+				Matrix nextc = g.gradientDescent(c, factor);
 
-				double relativeDescent = Math.abs(d - d1);
-				logger.debug(attempt + " - relative descent :" + relativeDescent);
-				if (relativeDescent < 1e-4 / factor){
+				d = d1;
+				d1 = f.compute(nextc);
+
+				if (d1 / Math.abs(max - min) < 1e-15)
+					break main;
+
+				c = nextc;
+
+				if (d1 > d)
 					break;
-				}
-				
+
 				cpt++;
-				if (cpt > 10000)
-				{
+				if (cpt > 1000) {
 					cpt = 0;
 					break;
 				}
 			}
-			attempt --;
+			attempt--;
 		}
 		logger.debug("nb iteration :" + cpt);
 

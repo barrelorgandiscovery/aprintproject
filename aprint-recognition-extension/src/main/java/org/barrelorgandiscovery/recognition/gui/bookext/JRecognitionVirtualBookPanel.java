@@ -657,6 +657,10 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 				ClassLoader old = Thread.currentThread().getContextClassLoader();
 
 				BufferedImage bi = imageToRecognize.loadImage(index);
+				if (bi == null) {
+					logger.error("erroneous index, image number " + index + " cannot be loaded in " + imageToRecognize);
+					return null;
+				}
 
 				ImagePlus ip = new ImagePlus();
 				ip.setImage(bi);

@@ -6,9 +6,11 @@ import java.util.List;
 
 import org.barrelorgandiscovery.recognition.math.EllipseParameters;
 
-public class PointsAndEllipseParameters implements Serializable {
+public class PointsAndEllipsisParameters implements Serializable {
 
-	public EllipseParameters ellipseParameters = null;
+	public EllipseParameters outerEllipseParameters = null;
+	
+	public EllipseParameters innerEllipseParameters = null;
 
 	public List<Rectangle2D.Double> points = null;
 

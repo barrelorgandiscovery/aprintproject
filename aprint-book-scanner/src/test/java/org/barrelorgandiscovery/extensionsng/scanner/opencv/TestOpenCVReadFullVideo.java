@@ -2,6 +2,8 @@ package org.barrelorgandiscovery.extensionsng.scanner.opencv;
 
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.opencv.opencv_java;
+import org.bytedeco.opencv.global.opencv_video;
+import org.bytedeco.opencv.global.opencv_videoio;
 import org.opencv.core.Mat;
 import org.opencv.videoio.VideoCapture;
 
@@ -11,12 +13,17 @@ public class TestOpenCVReadFullVideo {
 // //video size: 229 Mb
 //	
 //	public static void main(String[] args) throws Exception {
+//		
 //		Loader.load(opencv_java.class);
+//		Loader.load(opencv_video.class);
+//		Loader.load(opencv_videoio.class);
+//	
+//		
 //
 //		VideoCapture vcapture = new VideoCapture();
 //
 //		vcapture.open(
-//				"C:\\projets\\APrint\\contributions\\plf\\2020-10_Essais saisie video\\carton ancien avec fond blanc.mp4");
+//				"/home/use/tmp/Cartonneufavecfondnoir.mp4");
 //
 //		boolean opened = vcapture.isOpened();
 //		System.out.println("opened " + opened);

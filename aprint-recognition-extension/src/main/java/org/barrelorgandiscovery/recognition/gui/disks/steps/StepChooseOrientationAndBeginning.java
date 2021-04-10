@@ -19,7 +19,7 @@ import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener;
 import org.barrelorgandiscovery.gui.wizard.WizardStates;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.states.INumericImage;
-import org.barrelorgandiscovery.recognition.gui.disks.steps.states.PointsAndEllipseParameters;
+import org.barrelorgandiscovery.recognition.gui.disks.steps.states.PointsAndEllipsisParameters;
 import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JDisplay;
 import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JImageDisplayLayer;
 import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JShapeLayer;
@@ -182,12 +182,12 @@ public class StepChooseOrientationAndBeginning extends BasePanelStep implements
 				.getImageFile());
 		imageDisplayLayer.setImageToDisplay(bi);
 
-		PointsAndEllipseParameters centerEllipse = states
+		PointsAndEllipsisParameters centerEllipse = states
 				.getPreviousStateImplementing(getParentStep(),
-						PointsAndEllipseParameters.class);
+						PointsAndEllipsisParameters.class);
 
-		if (centerEllipse != null && centerEllipse.ellipseParameters != null) {
-			this.diskCenterPoint = (Point2D.Double) (centerEllipse.ellipseParameters.centre
+		if (centerEllipse != null && centerEllipse.outerEllipseParameters != null) {
+			this.diskCenterPoint = (Point2D.Double) (centerEllipse.outerEllipseParameters.centre
 					.clone());
 		}
 

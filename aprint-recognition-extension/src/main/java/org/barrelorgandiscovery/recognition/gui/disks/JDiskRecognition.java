@@ -33,6 +33,7 @@ import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.prefs.DummyPrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.recognition.gui.bookext.IRecognitionToolWindowCommands;
+import org.barrelorgandiscovery.recognition.gui.disks.steps.J2EllipticTracksLayer;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.JDiskTracksCorrectedLayer;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.StepChooseFilesAndInstrument;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.StepChooseOrientationAndBeginning;
@@ -40,7 +41,7 @@ import org.barrelorgandiscovery.recognition.gui.disks.steps.StepChooseOrientatio
 import org.barrelorgandiscovery.recognition.gui.disks.steps.StepMatchCenter;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.states.INumericImage;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.states.ImageFileAndInstrument;
-import org.barrelorgandiscovery.recognition.gui.disks.steps.states.PointsAndEllipseParameters;
+import org.barrelorgandiscovery.recognition.gui.disks.steps.states.PointsAndEllipsisParameters;
 import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JEllipticLayer;
 import org.barrelorgandiscovery.recognition.math.EllipseParameters;
 import org.barrelorgandiscovery.recognition.math.MathVect;
@@ -67,7 +68,9 @@ public class JDiskRecognition extends JPanel implements Disposable {
 // 	private static final String STEP_VIEW_AND_EDIT = "view_and_edit"; //$NON-NLS-1$
 
 	public static final String STEP_SELECT_DISK_CONTOUR = "selectDiskContour"; //$NON-NLS-1$
-
+	
+	public static final String STEP_SELECT_DISK_INNERCONTOUR = "selectDiskInnerContour"; //$NON-NLS-1$
+	
 	public static final String STEP_SELECT_DISK_CENTER = "selectDiskCenter"; //$NON-NLS-1$
 
 	public static final String STEP_INSTRUMENTS_AND_IMAGE = "instrumentsAndImage"; //$NON-NLS-1$
@@ -103,6 +106,8 @@ public class JDiskRecognition extends JPanel implements Disposable {
 	private StepMatchCenter chooseContourStep;
 
 	private StepMatchCenter chooseCenterStep;
+
+	private StepMatchCenter defineInnerEllipticStep;
 
 	public JDiskRecognition(Repository2 repository, IPrefsStorage prefsStorage, APrintNGGeneralServices services,
 			IAPrintWait waitFrame) throws Exception {
@@ -182,15 +187,17 @@ public class JDiskRecognition extends JPanel implements Disposable {
 
 					// get the perimeter parameters
 
-					PointsAndEllipseParameters perimeterParameters = ser.getInPreviousStates(chooseOrientationStep,
-							PointsAndEllipseParameters.class);
+					PointsAndEllipsisParameters perimeterParameters = ser.getInPreviousStates(chooseOrientationStep,
+							PointsAndEllipsisParameters.class);
 
-					PointsAndEllipseParameters centerParameters = ser.getInPreviousStates(chooseOrientationStep,
-							PointsAndEllipseParameters.class);
 
-					EllipseParameters ep = perimeterParameters.ellipseParameters;
-
-					double mean_radius = (ep.a + ep.b) / 2;
+					EllipseParameters outerEllipseParameter = perimeterParameters.outerEllipseParameters;
+					assert outerEllipseParameter != null;
+					
+					EllipseParameters innerEllipseParameter = perimeterParameters.innerEllipseParameters;
+					assert innerEllipseParameter != null;
+					
+					double mean_radius = (outerEllipseParameter.a + outerEllipseParameter.b) / 2;
 					Scale scale = instrument.getScale();
 
 					// compute angle for start
@@ -200,21 +207,26 @@ public class JDiskRecognition extends JPanel implements Disposable {
 
 					// vector centre -> point
 					MathVect v = new MathVect(
-							new Point2D.Double(centerParameters.ellipseParameters.centre.x,
-									centerParameters.ellipseParameters.centre.y),
+							new Point2D.Double(perimeterParameters.outerEllipseParameters.centre.x,
+									perimeterParameters.outerEllipseParameters.centre.y),
 							new Point2D.Double(angleAndOrientation.pointForAngle.getCenterX(),
 									angleAndOrientation.pointForAngle.getCenterY()));
-
-					double angleOrigine = v.angleOrigine();
-
+					
+					double angleOrigine = v.angleOrigine() ;
+				
 					double resolution_factor = 0.6; // ???? @@@
 
 					logger.debug("origin angle :" + angleOrigine); //$NON-NLS-1$
+					
+					int widthImage = (int) (2 * Math.PI * mean_radius * resolution_factor);
+					int heightImage = (int) (mean_radius * resolution_factor);
+					int heightFirstTrack = heightImage - (int)(heightImage * (scale.getFirstTrackAxis() - scale.getIntertrackHeight()/2 )/scale.getWidth());
 					BufferedImage correctedImage = DiskImageTools.createCorrectedImage(source,
-							centerParameters.ellipseParameters.centre, ep, angleOrigine,
-							(int) (2 * Math.PI * mean_radius * resolution_factor),
-							(int) (mean_radius * resolution_factor));
+							innerEllipseParameter, outerEllipseParameter,angleOrigine ,
+							widthImage, heightImage, heightFirstTrack
+							);
 
+					
 					VirtualBook virtualBook = new VirtualBook(instrument.getScale());
 					// adjust virtualbook
 					VirtualBookMetadata metadata = virtualBook.getMetadata();
@@ -275,7 +287,7 @@ public class JDiskRecognition extends JPanel implements Disposable {
 				+ Messages.getString("JDiskRecognition.2")); //$NON-NLS-1$
 		steps.add(chooseCenterStep);
 
-		// step 2, match the perimeter of the disk
+		// step 3, match the perimeter of the disk
 		JDiskTracksCorrectedLayer ellipseLayerWithTracks = new JDiskTracksCorrectedLayer();
 		ellipseLayerWithTracks.setEllipseDrawingColor(Color.red);
 		chooseContourStep = new StepMatchCenter(STEP_SELECT_DISK_CONTOUR, chooseCenterStep,
@@ -283,8 +295,17 @@ public class JDiskRecognition extends JPanel implements Disposable {
 				ellipseLayerWithTracks, repository);
 		chooseContourStep.setDetails(Messages.getString("JDiskRecognition.3")); //$NON-NLS-1$
 		steps.add(chooseContourStep);
+		
+		// step 4 match the inner ellipsis 
+		
+		J2EllipticTracksLayer innerEllipticLayer = new J2EllipticTracksLayer(null);
+		defineInnerEllipticStep = new StepMatchCenter(STEP_SELECT_DISK_INNERCONTOUR,chooseContourStep, 
+				"Adjust the first track ellipse",
+				innerEllipticLayer, repository);
+		steps.add(defineInnerEllipticStep);
 
-		chooseOrientationStep = new StepChooseOrientationAndBeginning(STEP_CHOOSE_BEGINNING, chooseContourStep,
+		// orientation
+		chooseOrientationStep = new StepChooseOrientationAndBeginning(STEP_CHOOSE_BEGINNING, defineInnerEllipticStep,
 				Messages.getString("JDiskRecognition.9"));
 		chooseOrientationStep.setDetails(Messages.getString("JDiskRecognition.4")); //$NON-NLS-1$
 		steps.add(chooseOrientationStep);
