@@ -19,13 +19,14 @@ import org.barrelorgandiscovery.virtualbook.Hole;
 public abstract class ModelGroovyScript {
 
 	/**
-	 * configure parameters
+	 * configure stage parameters
 	 * 
 	 * @return
 	 * @throws Exception
 	 */
 	public abstract ModelParameter[] configureParameters() throws Exception;
 
+	
 	/**
 	 * create a hole type
 	 * 

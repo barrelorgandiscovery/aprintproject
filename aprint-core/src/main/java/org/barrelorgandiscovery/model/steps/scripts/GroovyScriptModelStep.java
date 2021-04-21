@@ -24,6 +24,12 @@ import org.codehaus.groovy.control.CompilerConfiguration;
 import groovy.lang.Binding;
 import groovy.lang.Script;
 
+/**
+ * Step handling scripting facilities
+ * 
+ * @author pfreydiere
+ *
+ */
 public class GroovyScriptModelStep extends ModelStep implements IModelStepContextAware {
 
 	/**
@@ -95,6 +101,7 @@ public class GroovyScriptModelStep extends ModelStep implements IModelStepContex
 
 		ModelParameter[] parameters = compiledScript.configureParameters();
 		if (parameters != null) {
+			// define the step for parameters
 			for (ModelParameter m : parameters) {
 				m.setStep(this);
 			}
@@ -157,6 +164,8 @@ public class GroovyScriptModelStep extends ModelStep implements IModelStepContex
 	 * null
 	 */
 	private ModelGroovyScript compiledScript;
+	
+	private ModelParameter[] configStageParameters;
 
 	private ModelParameter[] modelParameters;
 
