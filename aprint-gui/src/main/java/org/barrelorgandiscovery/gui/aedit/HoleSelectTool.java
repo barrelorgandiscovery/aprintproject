@@ -6,6 +6,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.virtualbook.Hole;
@@ -19,6 +20,10 @@ import org.barrelorgandiscovery.virtualbook.Position;
 public class HoleSelectTool extends Tool {
 
 	private static final Logger logger = Logger.getLogger(HoleSelectTool.class);
+
+	public static interface HoleSelectToolListener {
+		public void selectionChanged();
+	}
 
 	private JVirtualBookScrollableComponent c;
 
@@ -34,10 +39,16 @@ public class HoleSelectTool extends Tool {
 	private int xend = -1;
 	private int yend = -1;
 
+	private HoleSelectToolListener listener;
+
 	public HoleSelectTool(JVirtualBookScrollableComponent c, UndoStack us) {
+		this(c, us, null);
+	}
+
+	public HoleSelectTool(JVirtualBookScrollableComponent c, UndoStack us, HoleSelectToolListener listener) {
 		this.c = c;
 		this.us = us;
-
+		this.listener = listener;
 	}
 
 	@Override
@@ -57,9 +68,8 @@ public class HoleSelectTool extends Tool {
 
 		if (p == null)
 			return;
-		Point2D.Double d = new Point2D.Double(
-				c.convertScreenXToCarton(e.getX()), c.convertScreenYToCarton(e
-						.getY()));
+
+		Point2D.Double d = new Point2D.Double(c.convertScreenXToCarton(e.getX()), c.convertScreenYToCarton(e.getY()));
 
 		// se.snapPosition(d);
 
@@ -68,7 +78,7 @@ public class HoleSelectTool extends Tool {
 	}
 
 	/**
-	 * Recupère la position et borne les pistes, pour se caler sur les bords
+	 * Recupï¿½re la position et borne les pistes, pour se caler sur les bords
 	 * 
 	 * @return
 	 */
@@ -86,7 +96,7 @@ public class HoleSelectTool extends Tool {
 		if (p.track < 0) {
 			p.track = 0;
 		}
-		
+
 		return p;
 	}
 
@@ -107,34 +117,28 @@ public class HoleSelectTool extends Tool {
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
-		
+
 		Position p = limitedPositionQuery(e.getX(), e.getY());
 		if (p == null)
 			return;
 
-		Point2D.Double d = new Point2D.Double(
-				c.convertScreenXToCarton(e.getX()), c.convertScreenYToCarton(e
-						.getY()));
+		Point2D.Double d = new Point2D.Double(c.convertScreenXToCarton(e.getX()), c.convertScreenYToCarton(e.getY()));
 
-		Point2D.Double ps = new Point2D.Double(c.timestampToMM(positionstart),
-				pistestart);
+		Point2D.Double ps = new Point2D.Double(c.timestampToMM(positionstart), pistestart);
 
 		long first = c.MMToTime(d.x);
 		long second = c.MMToTime(ps.x);
-		
+
 		long length = Math.abs(first - second);
 		first = Math.min(first, second);
-		
-		
-		List<Hole> selectHoles = c.getVirtualBook().findHoles(
-				first, length, pistestart, p.track);
+
+		List<Hole> selectHoles = c.getVirtualBook().findHoles(first, length, pistestart, p.track);
 
 		if (e.getButton() == MouseEvent.BUTTON1) {
 
 			if ((e.getModifiersEx() & MouseEvent.SHIFT_DOWN_MASK) != 0) {
 				// add to selection
-				for (Iterator iterator = selectHoles.iterator(); iterator
-						.hasNext();) {
+				for (Iterator iterator = selectHoles.iterator(); iterator.hasNext();) {
 					Hole hole = (Hole) iterator.next();
 					c.addToSelection(hole);
 				}
@@ -142,8 +146,7 @@ public class HoleSelectTool extends Tool {
 			} else if ((e.getModifiersEx() & MouseEvent.CTRL_DOWN_MASK) != 0) {
 				// remove from selection
 
-				for (Iterator iterator = selectHoles.iterator(); iterator
-						.hasNext();) {
+				for (Iterator iterator = selectHoles.iterator(); iterator.hasNext();) {
 					Hole hole = (Hole) iterator.next();
 					c.removeFromSelection(hole);
 				}
@@ -151,8 +154,7 @@ public class HoleSelectTool extends Tool {
 			} else {
 
 				c.clearSelection();
-				for (Iterator iterator = selectHoles.iterator(); iterator
-						.hasNext();) {
+				for (Iterator iterator = selectHoles.iterator(); iterator.hasNext();) {
 					Hole hole = (Hole) iterator.next();
 					c.addToSelection(hole);
 				}
@@ -162,6 +164,10 @@ public class HoleSelectTool extends Tool {
 
 		x = y = xend = yend = -1;
 
+		if (listener != null) {
+			listener.selectionChanged();
+		}
+		
 		c.repaint();
 
 	}
@@ -181,12 +187,12 @@ public class HoleSelectTool extends Tool {
 
 		Color color = g.getColor();
 		try {
-			
+
 			int startx = Math.min(x, xend);
 			int starty = Math.min(y, yend);
 			int width = Math.abs(xend - x);
 			int height = Math.abs(yend - y);
-			
+
 			g.setColor(Color.black);
 			g.drawRect(startx, starty, width, height);
 		} finally {

@@ -1,10 +1,13 @@
 import java.text.*
 
+
 subprojects {
 
     apply plugin: 'eclipse'
     apply plugin: 'java'
     apply plugin: 'jacoco' 
+
+
 
     task sourcesJar(type: Jar, dependsOn: classes) {
        classifier = 'sources'
@@ -18,7 +21,8 @@ subprojects {
     }
 
     javadoc {
-       failOnError = false 
+       failOnError = false
+
     }
 
     // put sources into jar
@@ -43,6 +47,28 @@ subprojects {
         }
     }
 }
+
+
+
+def exportedProjects = [
+        ":aprint-core",
+	":aprint-gui",
+	":aprint-machine-control",
+	":aprint-punch-extension",
+	":aprint-recognition-extension",
+	":aprint-book-scanner",
+]
+
+task alljavadoc(type: Javadoc, dependsOn: [ ":aprint-gui:groovydoc"]) {
+    options.encoding = "iso-8859-1"
+    failOnError = false
+    source exportedProjects.collect { project(it).sourceSets.main.allJava }    											  
+    classpath = files(exportedProjects.collect { project(it).sourceSets.main.compileClasspath })
+    destinationDir = file("${buildDir}/docs/javadoc")
+}
+
+
+
 
 task testReport(type: TestReport) {
   destinationDir = file("$buildDir/reports/allTests")

@@ -399,6 +399,11 @@ public class Model implements Serializable {
 		return ret;
 	}
 
+	/**
+	 * get out terminal parameter by name
+	 * @param name
+	 * @return
+	 */
 	public TerminalParameterModelStep getOutTerminalByName(String name) {
 		ArrayList<TerminalParameterModelStep> terms = getTerminalModelStep(true);
 		assert terms != null;
@@ -410,6 +415,11 @@ public class Model implements Serializable {
 		return null;
 	}
 
+	/**
+	 * get in terminal parameter by name
+	 * @param name
+	 * @return
+	 */
 	public TerminalParameterModelStep getInTerminalByName(String name) {
 		ArrayList<TerminalParameterModelStep> terms = getTerminalModelStep(false);
 		assert terms != null;

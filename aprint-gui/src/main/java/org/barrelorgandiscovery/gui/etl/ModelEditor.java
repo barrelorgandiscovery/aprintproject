@@ -199,7 +199,7 @@ public class ModelEditor extends JPanel {
 					return Messages.getString("ModelEditor.8"); //$NON-NLS-1$
 				}
 
-				// vérification des types de paramètres
+				// vï¿½rification des types de paramï¿½tres
 
 				if (!ptarget.getType().isAssignableFrom(psource.getType())) {
 					return Messages.getString("ModelEditor.9") //$NON-NLS-1$
@@ -1056,9 +1056,9 @@ public class ModelEditor extends JPanel {
 	}
 
 	/**
-	 * Edition des paramètres de configuration
+	 * Edition des paramï¿½tres de configuration
 	 *
-	 * @param mxcell cellule editée
+	 * @param mxcell cellule editï¿½e
 	 * @throws Exception
 	 */
 	protected void editStepConfiguration(final mxCell mxcell) throws Exception {
@@ -1156,6 +1156,14 @@ public class ModelEditor extends JPanel {
 	/** reset and release the current model runner */
 	protected void invalidateCurrentModelRunner() {
 		currentModelRunner = null;
+	}
+	
+	
+	public boolean isRunning() {
+		if (currentModelRunner == null) {
+			return false;
+		}
+		return !currentModelRunner.isFinished();
 	}
 
 	/**
