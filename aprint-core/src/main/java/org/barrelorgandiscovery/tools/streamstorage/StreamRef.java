@@ -4,14 +4,14 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- * Classe référençant un stream ...
+ * Classe rÃ©fÃ©renÃ§ant un stream ...
  * 
  * @author Freydiere Patrice
  */
 public class StreamRef implements IStreamRef {
 
 	/**
-	 * Référence au stream storage
+	 * RÃ©fÃ©rence au stream storage
 	 */
 	private StreamStorage sst;
 

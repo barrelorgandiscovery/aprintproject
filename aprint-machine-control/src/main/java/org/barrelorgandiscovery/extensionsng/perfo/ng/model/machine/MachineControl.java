@@ -12,7 +12,7 @@ public interface MachineControl {
 	public void setMachineControlListener(MachineControlListener listener);
 
 	/**
-	 * send a command
+	 * send a command to machine, this method is a blocking one
 	 * 
 	 * @param command
 	 * @throws Exception
@@ -20,12 +20,26 @@ public interface MachineControl {
 	public void sendCommand(Command command) throws Exception;
 
 	/**
+	 * prepare , and presend some informations, before sending work commands
+	 * 
+	 * @throws Exception
+	 */
+	public void prepareForWork() throws Exception;
+
+	/**
+	 * ending the work, send commands for shutting down some functionnalities
+	 * 
+	 * @throws Exception
+	 */
+	public void endingForWork() throws Exception;
+
+	/**
 	 * close the machine control
 	 */
 	public void close() throws Exception;
 
 	/**
-	 * wait for all commands executed
+	 * wait for all commands executed, this method is a blocking one
 	 * 
 	 * @throws Exception
 	 */
@@ -37,5 +51,11 @@ public interface MachineControl {
 	 * @throws Exception
 	 */
 	public void reset() throws Exception;
+	
+	/**
+	 * return the machine current status
+	 * @return
+	 */
+	public MachineStatus getStatus();
 
 }

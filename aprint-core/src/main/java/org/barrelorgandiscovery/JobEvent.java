@@ -10,7 +10,7 @@ public interface JobEvent {
 
 	void jobFinished(Object result);
 
-	void jobError(Exception ex);
+	void jobError(Throwable ex);
 
 	void jobAborted();
 

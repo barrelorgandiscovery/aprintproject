@@ -1,11 +1,11 @@
 package org.barrelorgandiscovery.extensionsng.perfo;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -13,69 +13,58 @@ import java.util.Iterator;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
 import javax.swing.JToolBar;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensions.ExtensionPoint;
 import org.barrelorgandiscovery.extensions.IExtension;
 import org.barrelorgandiscovery.extensions.SimpleExtensionPoint;
+import org.barrelorgandiscovery.extensionsng.perfo.gui.PunchLayer;
 import org.barrelorgandiscovery.gui.CancelTracker;
 import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
 import org.barrelorgandiscovery.gui.ainstrument.InstrumentAssociatedParameters;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
-import org.barrelorgandiscovery.gui.aprint.extensionspoints.ImportersExtensionPoint;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.InformCurrentInstrumentExtensionPoint;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.InformCurrentVirtualBookExtensionPoint;
-import org.barrelorgandiscovery.gui.aprint.extensionspoints.InformRepositoryExtensionPoint;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.LayersExtensionPoint;
-import org.barrelorgandiscovery.gui.aprint.extensionspoints.OptionMenuItemsExtensionPoint;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.ToolbarAddExtensionPoint;
-import org.barrelorgandiscovery.gui.aprint.extensionspoints.VirtualBookToolbarButtonsExtensionPoint;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.VisibilityLayerButtonsExtensionPoint;
 import org.barrelorgandiscovery.gui.aprintng.APrintNG;
 import org.barrelorgandiscovery.gui.aprintng.APrintNGVirtualBookFrame;
 import org.barrelorgandiscovery.gui.aprintng.extensionspoints.InformVirtualBookFrameExtensionPoint;
 import org.barrelorgandiscovery.gui.aprintng.extensionspoints.InitNGExtensionPoint;
 import org.barrelorgandiscovery.gui.aprintng.extensionspoints.VirtualBookFrameToolRegister;
-import org.barrelorgandiscovery.gui.atrace.Punch;
-import org.barrelorgandiscovery.gui.atrace.PunchLayer;
 import org.barrelorgandiscovery.gui.issues.JIssuePresenter;
+import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
+import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.issues.IssueLayer;
-import org.barrelorgandiscovery.messages.Messages;
+import org.barrelorgandiscovery.optimizers.model.Punch;
 import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
-import org.barrelorgandiscovery.tools.FileNameExtensionFilter;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
-import org.barrelorgandiscovery.virtualbook.Hole;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 import org.noos.xing.mydoggy.ToolWindowAnchor;
 import org.noos.xing.mydoggy.plaf.MyDoggyToolWindowManager;
 
-import aprintextensions.fr.freydierepatrice.perfo.gerard.BeanAsk;
 import aprintextensions.fr.freydierepatrice.perfo.gerard.JPerfoExtensionParameters;
 import aprintextensions.fr.freydierepatrice.perfo.gerard.PerfoExtensionParameters;
 import aprintextensions.fr.freydierepatrice.perfo.gerard.PerfoPunchConverter;
 
 /**
- * Extension de perçage pour la machine à percer de gérard
+ * Extension de perÃ§age pour la machine de gÃ©rard
  * 
  * @author Freydiere Patrice
  * 
  */
-public class PerfoExtensionVirtualBook implements IExtension,
-		InitNGExtensionPoint, LayersExtensionPoint,
-		InformCurrentVirtualBookExtensionPoint,
-		InformCurrentInstrumentExtensionPoint,
-		VisibilityLayerButtonsExtensionPoint, ActionListener,
-		ToolbarAddExtensionPoint, VirtualBookFrameToolRegister,
-		InformVirtualBookFrameExtensionPoint {
+public class PerfoExtensionVirtualBook
+		implements IExtension, InitNGExtensionPoint, LayersExtensionPoint, InformCurrentVirtualBookExtensionPoint,
+		InformCurrentInstrumentExtensionPoint, VisibilityLayerButtonsExtensionPoint, ActionListener,
+		ToolbarAddExtensionPoint, VirtualBookFrameToolRegister, InformVirtualBookFrameExtensionPoint {
 
 	private static final String POINCONSIZE = "poinconsize";
 
@@ -87,8 +76,7 @@ public class PerfoExtensionVirtualBook implements IExtension,
 
 	private static final String AVANCEMENT = "avancement";
 
-	private static Logger logger = Logger
-			.getLogger(PerfoExtensionVirtualBook.class);
+	private static Logger logger = Logger.getLogger(PerfoExtensionVirtualBook.class);
 
 	// points d'extension ...
 
@@ -114,29 +102,20 @@ public class PerfoExtensionVirtualBook implements IExtension,
 
 		try {
 			return new ExtensionPoint[] {
-					new SimpleExtensionPoint(InitNGExtensionPoint.class,
+					new SimpleExtensionPoint(InitNGExtensionPoint.class, PerfoExtensionVirtualBook.this),
+					new SimpleExtensionPoint(LayersExtensionPoint.class, PerfoExtensionVirtualBook.this),
+					new SimpleExtensionPoint(InformCurrentVirtualBookExtensionPoint.class,
 							PerfoExtensionVirtualBook.this),
-					new SimpleExtensionPoint(LayersExtensionPoint.class,
+					new SimpleExtensionPoint(ToolbarAddExtensionPoint.class, PerfoExtensionVirtualBook.this),
+					new SimpleExtensionPoint(InformCurrentInstrumentExtensionPoint.class,
 							PerfoExtensionVirtualBook.this),
-					new SimpleExtensionPoint(
-							InformCurrentVirtualBookExtensionPoint.class,
+					new SimpleExtensionPoint(InformVirtualBookFrameExtensionPoint.class,
 							PerfoExtensionVirtualBook.this),
-					new SimpleExtensionPoint(ToolbarAddExtensionPoint.class,
-							PerfoExtensionVirtualBook.this),
-					new SimpleExtensionPoint(
-							InformCurrentInstrumentExtensionPoint.class,
-							PerfoExtensionVirtualBook.this),
-					new SimpleExtensionPoint(
-							InformVirtualBookFrameExtensionPoint.class,
-							PerfoExtensionVirtualBook.this),
-					new SimpleExtensionPoint(
-							VirtualBookFrameToolRegister.class,
-							PerfoExtensionVirtualBook.this)
+					new SimpleExtensionPoint(VirtualBookFrameToolRegister.class, PerfoExtensionVirtualBook.this)
 
 			};
 		} catch (Exception ex) {
-			logger.error("error in declaring the extension points, "
-					+ ex.getMessage());
+			logger.error("error in declaring the extension points, " + ex.getMessage());
 			return new ExtensionPoint[0];
 		}
 	}
@@ -167,8 +146,7 @@ public class PerfoExtensionVirtualBook implements IExtension,
 			logger.debug("aprintfolder doesn't exist, create it .. ");
 			aprintFolder.mkdir();
 		}
-		this.instrumentPrefsStorage = new FilePrefsStorage(new File(
-				aprintFolder, "perfoextension.properties"));
+		this.instrumentPrefsStorage = new FilePrefsStorage(new File(aprintFolder, "perfoextension.properties"));
 
 		logger.debug("properties for perfo created ... ");
 
@@ -179,14 +157,13 @@ public class PerfoExtensionVirtualBook implements IExtension,
 	private JButton mi = null;
 
 	private JButton createOptionButton() {
-		mi = new JButton("Options de perçage ...");
-		// largeur du poinçon ...
-		// hauteur du poinçon ...
+		mi = new JButton("Options de perï¿½age ...");
+		// largeur du poinï¿½on ...
+		// hauteur du poinï¿½on ...
 		mi.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
-				PerfoExtensionParameters p = JPerfoExtensionParameters
-						.editParameters(aprintref, parameters);
+				PerfoExtensionParameters p = JPerfoExtensionParameters.editParameters(aprintref, parameters);
 				if (p != null) {
 
 					parameters = p;
@@ -225,14 +202,12 @@ public class PerfoExtensionVirtualBook implements IExtension,
 
 		logger.debug("creating associated parameter .. to instrument .. ");
 
-		cps = new InstrumentAssociatedParameters(this.instrumentPrefsStorage)
-				.getInstrumentPrefsStorage(instrument);
+		cps = new InstrumentAssociatedParameters(this.instrumentPrefsStorage).getInstrumentPrefsStorage(instrument);
 
 		try {
 			loadPerfoPrefs(parameters);
 		} catch (Throwable t) {
-			logger.warn(
-					"error when loading prefs parameters :" + t.getMessage(), t);
+			logger.warn("error when loading prefs parameters :" + t.getMessage(), t);
 		}
 		logger.debug("associated prefs storage created ... ");
 	}
@@ -241,11 +216,10 @@ public class PerfoExtensionVirtualBook implements IExtension,
 
 		this.currentVirtualBook = vb;
 
-		// Vérification des contraintes ...
+		// VÃ©rification des contraintes ...
 		perfoconverter = new PerfoPunchConverter(vb);
 
-		perfoconverter.convertToPunchPage(parameters.poinconsize,
-				parameters.poinconheight, parameters.page_size,
+		perfoconverter.convertToPunchPage(parameters.poinconsize, parameters.poinconheight, parameters.page_size,
 				parameters.avancement, parameters.minimum_length_for_two_punch);
 
 		issuesPunchLayer.setIssueCollection(null, vb);
@@ -261,7 +235,7 @@ public class PerfoExtensionVirtualBook implements IExtension,
 
 		// sinon
 
-		resultPunchLayer.setPunch(perfoconverter.getPunchesCopy());
+		resultPunchLayer.setOptimizedObject(perfoconverter.getPunchesCopy());
 		resultPunchLayer.setPunchHeight(parameters.poinconheight);
 		resultPunchLayer.setPunchWidth(parameters.poinconsize);
 
@@ -272,15 +246,13 @@ public class PerfoExtensionVirtualBook implements IExtension,
 
 		if ("OPTIMIZE".equals(actionCommand)) {
 			if (perfoconverter == null) {
-				JMessageBox.showMessage(aprintref.getOwnerForDialog(),
-						"Vous devez charger un carton");
+				JMessageBox.showMessage(aprintref.getOwnerForDialog(), "Vous devez charger un carton");
 				return;
 			}
 
 			if (perfoconverter.hasErrors()) {
-				JMessageBox
-						.showMessage(aprintref.getOwnerForDialog(),
-								"des erreurs subsistes dans le carton, le perçage ne reflete pas l'écoute");
+				JMessageBox.showMessage(aprintref.getOwnerForDialog(),
+						"des erreurs subsistes dans le carton, le perï¿½age ne reflete pas l'ï¿½coute");
 			}
 
 			// lancement de l'optimisation ...
@@ -291,13 +263,11 @@ public class PerfoExtensionVirtualBook implements IExtension,
 
 					CancelTracker ct = new CancelTracker();
 
-					frame.getWaitInterface().infiniteStartWait(
-							"Optimisation du tracé", ct);
+					frame.getWaitInterface().infiniteStartWait("Optimisation du tracï¿½", ct);
 					try {
 
 						perfoconverter.optimize(frame.getWaitInterface(), ct);
-						resultPunchLayer.setPunch(perfoconverter
-								.getPunchesCopy());
+						resultPunchLayer.setOptimizedObject(perfoconverter.getPunchesCopy());
 						frame.getPianoRoll().repaint();
 					} finally {
 						frame.getWaitInterface().infiniteEndWait();
@@ -311,99 +281,97 @@ public class PerfoExtensionVirtualBook implements IExtension,
 		else if ("SAVE".equals(actionCommand)) {
 
 			if (this.currentVirtualBook == null) {
-				JMessageBox.showMessage(aprintref.getOwnerForDialog(),
-						"Pas de carton virtuel");
+				JMessageBox.showMessage(aprintref.getOwnerForDialog(), "Pas de carton virtuel");
 				return;
 			}
 
 			if (this.perfoconverter == null) {
-				JMessageBox.showMessage(aprintref.getOwnerForDialog(),
-						"Pas de carton");
+				JMessageBox.showMessage(aprintref.getOwnerForDialog(), "Pas de carton");
 				return;
 			}
 
 			if (this.perfoconverter.hasErrors()) {
-				JMessageBox
-						.showMessage(aprintref.getOwnerForDialog(),
-								"Des erreurs subsistent dans le carton, corrigez les erreurs");
+				JMessageBox.showMessage(aprintref.getOwnerForDialog(),
+						"Des erreurs subsistent dans le carton, corrigez les erreurs");
 				return;
 			}
 
-			// Sélection du fichier ..
-			// demande du fichier à sauvegarder ...
-			JFileChooser choose = new JFileChooser();
+			// SÃ©lection du fichier ..
+			// demande du fichier  Ã  sauvegarder ...
+			APrintFileChooser choose = new APrintFileChooser();
 
-			choose.setFileSelectionMode(JFileChooser.FILES_ONLY);
+			choose.setFileSelectionMode(APrintFileChooser.FILES_ONLY);
 
-			choose.setFileFilter(new FileNameExtensionFilter(
-					"Fichier XYU", "xyu")); //$NON-NLS-1$ //$NON-NLS-2$
+			choose.setFileFilter(new VFSFileNameExtensionFilter("Fichier XYU", "xyu")); //$NON-NLS-1$ //$NON-NLS-2$
 
-			if (choose.showSaveDialog(aprintref) == JFileChooser.APPROVE_OPTION) {
+			if (choose.showSaveDialog(aprintref) == APrintFileChooser.APPROVE_OPTION) {
 
-				File savedfile = choose.getSelectedFile();
+				AbstractFileObject savedfile = choose.getSelectedFile();
 				if (savedfile == null) {
-					JMessageBox.showMessage(aprintref.getOwnerForDialog(),
-							"pas de fichier sélectionné");
+					JMessageBox.showMessage(aprintref.getOwnerForDialog(), "pas de fichier sÃ©lectionnÃ©");
 					return;
 				}
 
 				try {
 
-					FileWriter fw = new FileWriter(savedfile, false);
+					OutputStream os = savedfile.getOutputStream();
 					try {
-						// Ecriture de l'entete ...
+						OutputStreamWriter oswriter = new OutputStreamWriter(os);
+						try {
+							// Ecriture de l'entete ...
 
-						write(fw, 1, 0); // 1, longueur en mm du carton
+							write(oswriter, 1, 0); // 1, longueur en mm du carton
 
-						for (int i = 0; i < perfoconverter.getPageCount(); i++) {
+							for (int i = 0; i < perfoconverter.getPageCount(); i++) {
 
-							if (i > 0) {
-								// changement de page
-								write(fw, 0, 0);
-								write(fw, 2, i - 1);
+								if (i > 0) {
+									// changement de page
+									write(oswriter, 0, 0);
+									write(oswriter, 2, i - 1);
+								}
+
+								// ecriture des punch de la page
+								double decalage = i * perfoconverter.getPagesize();
+
+								ArrayList<Punch> page = perfoconverter.getPage(i);
+								for (Iterator iterator = page.iterator(); iterator.hasNext();) {
+									Punch punch = (Punch) iterator.next();
+
+									// calcul des pas ...
+									double x = punch.x - decalage;
+									double mmparpas = (25 * 4.2) / (4599 - 400); // calculs
+									// issus
+									// d'un
+									// fichier
+									// d'essai
+
+									int pasx = (int) (x / mmparpas);
+									int pasy = (int) (punch.y / mmparpas);
+
+									write(oswriter, pasy, pasx);
+
+								}
+
 							}
 
-							// ecriture des punch de la page
-							double decalage = i * perfoconverter.getPagesize();
+							write(oswriter, 0, 0);
+							write(oswriter, 2, perfoconverter.getPageCount() - 1);
 
-							ArrayList<Punch> page = perfoconverter.getPage(i);
-							for (Iterator iterator = page.iterator(); iterator
-									.hasNext();) {
-								Punch punch = (Punch) iterator.next();
+							write(oswriter, 3, 320); // espace entre morceaux
+							write(oswriter, 4, 0); // fin de parcours
 
-								// calcul des pas ...
-								double x = punch.x - decalage;
-								double mmparpas = (25 * 4.2) / (4599 - 400); // calculs
-								// issus
-								// d'un
-								// fichier
-								// d'essai
-
-								int pasx = (int) (x / mmparpas);
-								int pasy = (int) (punch.y / mmparpas);
-
-								write(fw, pasy, pasx);
-
-							}
-
+						} finally {
+							oswriter.close();
 						}
 
-						write(fw, 0, 0);
-						write(fw, 2, perfoconverter.getPageCount() - 1);
-
-						write(fw, 3, 320); // espace entre morceaux
-						write(fw, 4, 0); // fin de parcours
-
 					} finally {
-						fw.close();
+						os.close();
 					}
-
-					JMessageBox.showMessage(aprintref.getOwnerForDialog(),
-							"Fichier sauvegardé");
+					
+					JMessageBox.showMessage(aprintref.getOwnerForDialog(), "Fichier sauvegardÃ©");
 
 				} catch (Throwable ex) {
-					JMessageBox.showMessage(aprintref.getOwnerForDialog(),
-							"Erreur dans la sauvegarde du fichier");
+					JMessageBox.showMessage(aprintref.getOwnerForDialog(), "Erreur dans la sauvegarde du fichier");
 					logger.error("save", ex);
 
 					new Thread(new Runnable() {
@@ -435,7 +403,7 @@ public class PerfoExtensionVirtualBook implements IExtension,
 	private JButton savedxf = null;
 
 	private void addPerfoButtonsInToolBar(JToolBar tb) {
-		optimize = new JButton("Optimiser le tracé");
+		optimize = new JButton("Optimiser le tracÃ©");
 		optimize.setIcon(new ImageIcon(getClass().getResource("misc.png")));
 		optimize.setToolTipText("Optimisation du parcours du poincons pour l'extention perfo");
 		optimize.setActionCommand("OPTIMIZE");
@@ -512,8 +480,7 @@ public class PerfoExtensionVirtualBook implements IExtension,
 		}
 
 		cps.setDoubleProperty(AVANCEMENT, p.avancement);
-		cps.setDoubleProperty(MINIMUM_LENGTH_FOR_TWO_PUNCH,
-				p.minimum_length_for_two_punch);
+		cps.setDoubleProperty(MINIMUM_LENGTH_FOR_TWO_PUNCH, p.minimum_length_for_two_punch);
 		cps.setDoubleProperty(PAGE_SIZE, p.page_size);
 		cps.setDoubleProperty(POINCONHEIGHT, p.poinconheight);
 		cps.setDoubleProperty(POINCONSIZE, p.poinconsize);
@@ -532,16 +499,12 @@ public class PerfoExtensionVirtualBook implements IExtension,
 			cps.load();
 
 			PerfoExtensionParameters defaultp = new PerfoExtensionParameters();
-			p.avancement = cps.getDoubleProperty(AVANCEMENT,
-					defaultp.avancement);
-			p.minimum_length_for_two_punch = cps.getDoubleProperty(
-					MINIMUM_LENGTH_FOR_TWO_PUNCH,
+			p.avancement = cps.getDoubleProperty(AVANCEMENT, defaultp.avancement);
+			p.minimum_length_for_two_punch = cps.getDoubleProperty(MINIMUM_LENGTH_FOR_TWO_PUNCH,
 					defaultp.minimum_length_for_two_punch);
 			p.page_size = cps.getDoubleProperty(PAGE_SIZE, defaultp.page_size);
-			p.poinconheight = cps.getDoubleProperty(POINCONHEIGHT,
-					defaultp.poinconheight);
-			p.poinconsize = cps.getDoubleProperty(POINCONSIZE,
-					defaultp.poinconsize);
+			p.poinconheight = cps.getDoubleProperty(POINCONHEIGHT, defaultp.poinconheight);
+			p.poinconsize = cps.getDoubleProperty(POINCONSIZE, defaultp.poinconsize);
 
 		} catch (Exception ex) {
 			logger.error("error in loading prefs :" + ex.getMessage(), ex);
@@ -559,7 +522,7 @@ public class PerfoExtensionVirtualBook implements IExtension,
 	public void registerToolWindow(MyDoggyToolWindowManager manager) {
 
 		// Register a Tool.
-		manager.registerToolWindow("Erreurs sur le perçage", // Id //$NON-NLS-1$
+		manager.registerToolWindow("Erreurs sur le perÃ§age", // Id //$NON-NLS-1$
 				"Perfo Window", // Title //$NON-NLS-1$
 				null, // Icon
 				issuesPresenter, // Component

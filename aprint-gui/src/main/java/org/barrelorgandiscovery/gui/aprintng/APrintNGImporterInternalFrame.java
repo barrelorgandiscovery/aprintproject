@@ -13,6 +13,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.BeanInfo;
 import java.io.File;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -25,16 +26,12 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
-import javax.swing.border.TitledBorder;
 
+import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensions.ExtensionPointProvider;
 import org.barrelorgandiscovery.extensions.IExtension;
@@ -46,6 +43,8 @@ import org.barrelorgandiscovery.gui.aprint.extensionspoints.InformCurrentVirtual
 import org.barrelorgandiscovery.gui.aprint.instrumentchoice.IInstrumentChoice;
 import org.barrelorgandiscovery.gui.aprint.instrumentchoice.IInstrumentChoiceListener;
 import org.barrelorgandiscovery.gui.aprint.instrumentchoice.JCoverFlowInstrumentChoice;
+import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
+import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.issues.AbstractIssue;
 import org.barrelorgandiscovery.issues.IssueCollection;
@@ -53,11 +52,11 @@ import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.repository.Repository;
 import org.barrelorgandiscovery.repository.RepositoryAdapter;
 import org.barrelorgandiscovery.scale.Scale;
-import org.barrelorgandiscovery.tools.FileNameExtensionFilter;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.SwingUtils;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
+import org.barrelorgandiscovery.virtualbook.VirtualBookMetadata;
 import org.barrelorgandiscovery.virtualbook.checker.Checker;
 import org.barrelorgandiscovery.virtualbook.checker.CheckerFactory;
 import org.barrelorgandiscovery.virtualbook.checker.OverlappingHole;
@@ -73,7 +72,6 @@ import org.barrelorgandiscovery.virtualbook.transformation.Transpositor;
 import org.barrelorgandiscovery.virtualbook.transformation.importer.MidiConversionProblem;
 import org.barrelorgandiscovery.virtualbook.transformation.importer.MidiConversionResult;
 import org.barrelorgandiscovery.virtualbook.transformation.importer.MidiFileIO;
-import org.barrelorgandiscovery.virtualbook.x2010.impl.VirtualBookImpl;
 
 import com.jeta.forms.components.panel.FormPanel;
 import com.l2fprod.common.demo.BeanBinder;
@@ -85,41 +83,34 @@ import com.l2fprod.common.propertysheet.PropertySheetPanel;
  * @author Freydiere Patrice
  * 
  */
-public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
-		implements ActionListener {
+public class APrintNGImporterInternalFrame extends APrintNGInternalFrame implements ActionListener {
 
-	private static Logger logger = Logger
-			.getLogger(APrintNGImporterInternalFrame.class);
+	private static Logger logger = Logger.getLogger(APrintNGImporterInternalFrame.class);
 
 	private boolean init = true;
 
 	/**
-	 * Executor pour l'éxécution des taches longues
+	 * Executor pour l'ï¿½xï¿½cution des taches longues
 	 */
-	private Executor backgroundexecutor = Executors
-			.newCachedThreadPool(new ThreadFactory() {
-				public Thread newThread(Runnable r) {
-					Thread t = new Thread(r);
-					t.setPriority(Thread.MIN_PRIORITY);
-					return t;
-				}
-			});
+	private Executor backgroundexecutor = Executors.newCachedThreadPool(new ThreadFactory() {
+		public Thread newThread(Runnable r) {
+			Thread t = new Thread(r);
+			t.setPriority(Thread.MIN_PRIORITY);
+			return t;
+		}
+	});
 
 	private JButton chargementmidi = new JButton(Messages.getString("APrint.1")); //$NON-NLS-1$
 
-	
 	private JLabel nomfichier = new JLabel(Messages.getString("APrint.43")); //$NON-NLS-1$
 
-
 	private JComponent choixtransposition;
-
 
 	private JComboBox listetransposition = new JComboBox();
 
 	private JTextField searchTextField = new JTextField(20);
 	private JButton searchButton = new JButton(Messages.getString("APrint.292")); //$NON-NLS-1$
-	private JButton resetFilterButton = new JButton(
-			Messages.getString("APrint.293")); //$NON-NLS-1$
+	private JButton resetFilterButton = new JButton(Messages.getString("APrint.293")); //$NON-NLS-1$
 
 	private AbstractTransformation getCurrentTransposition() {
 		return (AbstractTransformation) listetransposition.getSelectedItem();
@@ -131,7 +122,7 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 
 	private RepositoryAdapter repository;
 
-	private File midifile = null;
+	private AbstractFileObject midifile = null;
 
 	// private VirtualBook readCarton;
 
@@ -146,14 +137,12 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 
 	private IExtension[] exts;
 
-	public APrintNGImporterInternalFrame(IAPrintWait waitininterface,
-			APrintRepositoryListener l, APrintProperties aprintproperties,
-			IExtension[] exts, RepositoryAdapter startRepository,
+	public APrintNGImporterInternalFrame(IAPrintWait waitininterface, APrintRepositoryListener l,
+			APrintProperties aprintproperties, IExtension[] exts, RepositoryAdapter startRepository,
 			APrintNGGeneralServices services) throws Exception {
 
-		super(
-				aprintproperties.getFilePrefsStorage(),
-				Messages.getString("APrintNGImporterInternalFrame.0"), true, true, true, true); //$NON-NLS-1$
+		super(aprintproperties.getFilePrefsStorage(), Messages.getString("APrintNGImporterInternalFrame.0"), true, true, //$NON-NLS-1$
+				true, true);
 
 		this.waitininterface = this;
 		this.aprintproperties = aprintproperties;
@@ -168,9 +157,7 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 			public void repositoryChanged(Repository newRepository) {
 				repository = (RepositoryAdapter) newRepository;
 				tm = repository.getTranspositionManager();
-				instrumentChoice
-						.setRepository(((RepositoryAdapter) newRepository)
-								.getRepository2());
+				instrumentChoice.setRepository(((RepositoryAdapter) newRepository).getRepository2());
 			}
 		});
 
@@ -181,13 +168,10 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 	private void initComponents() throws Exception {
 
 		getContentPane().setLayout(new BorderLayout());
-		
-		FormPanel pInstrument = new FormPanel(getClass().getResourceAsStream(
-				"importerframe.jfrm"));//$NON-NLS-1$
-		listetransposition = (JComboBox) pInstrument
-				.getComponentByName("cbtransposition");
-		JLabel labeltransposition = pInstrument
-				.getLabel("lbltransposition");
+
+		FormPanel pInstrument = new FormPanel(getClass().getResourceAsStream("importerframe.jfrm"));//$NON-NLS-1$
+		listetransposition = (JComboBox) pInstrument.getComponentByName("cbtransposition");
+		JLabel labeltransposition = pInstrument.getLabel("lbltransposition");
 		labeltransposition.setText(Messages.getString("APrint.11"));//$NON-NLS-1$
 
 		listetransposition.setToolTipText(Messages.getString("APrint.128")); //$NON-NLS-1$
@@ -201,9 +185,8 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 					//
 					checkState();
 				} catch (Exception ex) {
-					JMessageBox.showMessage(services.getOwnerForDialog(),
-							Messages.getString("APrint.55") //$NON-NLS-1$
-									+ ex.getMessage());
+					JMessageBox.showMessage(services.getOwnerForDialog(), Messages.getString("APrint.55") //$NON-NLS-1$
+							+ ex.getMessage());
 				}
 			}
 		});
@@ -211,18 +194,17 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 		chargementmidi = (JButton) pInstrument.getButton("browse"); //$NON-NLS-1$
 		chargementmidi.setActionCommand("CHARGEMENTMIDI"); //$NON-NLS-1$
 		chargementmidi.addActionListener(this);
-		chargementmidi.setIcon(new ImageIcon(getClass().getResource(
-				"folder_open.png"), Messages.getString("APrint.78"))); //$NON-NLS-1$ //$NON-NLS-2$
+		chargementmidi
+				.setIcon(new ImageIcon(getClass().getResource("folder_open.png"), Messages.getString("APrint.78"))); //$NON-NLS-1$ //$NON-NLS-2$
 		chargementmidi.setToolTipText(Messages.getString("APrint.127")); //$NON-NLS-1$
 		chargementmidi.setText(Messages.getString("APrint.1"));//$NON-NLS-1$
-		
-		
+
 		nomfichier = pInstrument.getLabel("lblfilename");//$NON-NLS-1$
 		nomfichier.setText(Messages.getString("APrint.43"));//$NON-NLS-1$
 
-		JLabel lblnomfichier =  pInstrument.getLabel("lblmidiorkartoimport");//$NON-NLS-1$
+		JLabel lblnomfichier = pInstrument.getLabel("lblmidiorkartoimport");//$NON-NLS-1$
 		lblnomfichier.setText(Messages.getString("APrint.160"));//$NON-NLS-1$
-		
+
 		// /////////////////////////////////////////////////////////////////////////////
 		// Panneau de choix de gamme, transposition et instruments
 
@@ -235,25 +217,20 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 		// }
 		// });
 
-		JCoverFlowInstrumentChoice cfic = new JCoverFlowInstrumentChoice(
-				repository.getRepository2(), new IInstrumentChoiceListener() {
-					public void instrumentChanged(
-							org.barrelorgandiscovery.instrument.Instrument newInstrument) {
+		JCoverFlowInstrumentChoice cfic = new JCoverFlowInstrumentChoice(repository.getRepository2(),
+				new IInstrumentChoiceListener() {
+					public void instrumentChanged(org.barrelorgandiscovery.instrument.Instrument newInstrument) {
 						APrintNGImporterInternalFrame.this.instrumentChanged();
 					}
 				});
 		instrumentChoice = cfic;
 
-	
-		pInstrument.getFormAccessor().replaceBean(
-				pInstrument.getComponentByName("instruments"), cfic);
+		pInstrument.getFormAccessor().replaceBean(pInstrument.getComponentByName("instruments"), cfic);
 
-	
-		JLabel lblSearch = (JLabel)pInstrument.getComponentByName("lblfilterinstruments");//$NON-NLS-1$
+		JLabel lblSearch = (JLabel) pInstrument.getComponentByName("lblfilterinstruments");//$NON-NLS-1$
 		lblSearch.setText(Messages.getString("APrint.161"));//$NON-NLS-1$
-		
-		searchTextField = (JTextField)pInstrument.getComponentByName("txtfilter");//$NON-NLS-1$
 
+		searchTextField = (JTextField) pInstrument.getComponentByName("txtfilter");//$NON-NLS-1$
 
 		final ActionListener searchListener = new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -280,9 +257,9 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 
 		});
 
-		resetFilterButton = (JButton)pInstrument.getButton("reset"); //$NON-NLS-1$
+		resetFilterButton = (JButton) pInstrument.getButton("reset"); //$NON-NLS-1$
 		resetFilterButton.setText(Messages.getString("APrint.293")); //$NON-NLS-1$
-		
+
 		resetFilterButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
@@ -298,24 +275,19 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 			}
 		});
 
-
-		searchButton = (JButton)pInstrument.getComponentByName("filterinstruments"); //$NON-NLS-1$
+		searchButton = (JButton) pInstrument.getComponentByName("filterinstruments"); //$NON-NLS-1$
 		searchButton.addActionListener(searchListener);
 		searchButton.setText(Messages.getString("APrint.292")); //$NON-NLS-1$
-		
-		
-		
-		JButton convertir = (JButton)pInstrument.getComponentByName("import"); //$NON-NLS-1$
+
+		JButton convertir = (JButton) pInstrument.getComponentByName("import"); //$NON-NLS-1$
 		convertir.setText(Messages.getString("APrint.130")); //$NON-NLS-1$
-		
+
 		convertir.setToolTipText(Messages.getString("APrint.131")); //$NON-NLS-1$
-		convertir.setIcon(new ImageIcon(getClass().getResource(
-				"2rightarrow.png")));//$NON-NLS-1$
+		convertir.setIcon(new ImageIcon(getClass().getResource("2rightarrow.png")));//$NON-NLS-1$
 		convertir.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					waitininterface.infiniteStartWait(Messages
-							.getString("APrint.150")); //$NON-NLS-1$
+					waitininterface.infiniteStartWait(Messages.getString("APrint.150")); //$NON-NLS-1$
 
 					backgroundexecutor.execute(new Runnable() {
 
@@ -332,39 +304,33 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 										try {
 
 											checkState();
-											
+
 											// close the window, we don't need it any more
-											
+
 											dispose();
-											
+
 										} catch (Exception ex) {
 											logger.error("transposeCarton", ex); //$NON-NLS-1$
-											JMessageBox.showMessage(services
-													.getOwnerForDialog(), ex
-													.getMessage());
+											JMessageBox.showMessage(services.getOwnerForDialog(), ex.getMessage());
 										}
 									}
 								});
 
 							} catch (Throwable ex) {
 								logger.error("transposeCarton", ex); //$NON-NLS-1$
-								JMessageBox.showMessage(
-										services.getOwnerForDialog(),
-										ex.getMessage());
+								JMessageBox.showMessage(services.getOwnerForDialog(), ex.getMessage());
 							}
 						}
 					});
 
 				} catch (Exception ex) {
 					logger.error("Convertir", ex); //$NON-NLS-1$
-					JMessageBox.showMessage(services.getOwnerForDialog(),
-							ex.getMessage());
+					JMessageBox.showMessage(services.getOwnerForDialog(), ex.getMessage());
 				}
 			}
 		});
 
-		
-		choixtransposition = (JComponent)pInstrument.getComponentByName("choixtransposition");//$NON-NLS-1$
+		choixtransposition = (JComponent) pInstrument.getComponentByName("choixtransposition");//$NON-NLS-1$
 
 		getContentPane().add(pInstrument, BorderLayout.CENTER);
 
@@ -375,16 +341,15 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowActivated(WindowEvent e) {
-				
-				System.out.println(((JComponent)instrumentChoice).getSize());
-				
+
+				System.out.println(((JComponent) instrumentChoice).getSize());
+
 				super.windowActivated(e);
 			}
 		});
-		
+
 		init = false;
 	}
-
 
 	private void setupLastSelectedInstrument() {
 		String ln = aprintproperties.getLastSelectedInstrument();
@@ -407,8 +372,7 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 			logger.error("actionPerformed", ex); //$NON-NLS-1$
 
 			BugReporter.sendBugReport();
-			JMessageBox.showMessage(services.getOwnerForDialog(),
-					Messages.getString("APrint.42") + ex.getMessage()); //$NON-NLS-1$
+			JMessageBox.showMessage(services.getOwnerForDialog(), Messages.getString("APrint.42") + ex.getMessage()); //$NON-NLS-1$
 
 		}
 	}
@@ -417,21 +381,16 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 	 * Open the load dialog box and define the load midi file
 	 */
 	private void loadMidi() {
-		JFileChooser choose = new JFileChooser();
+		APrintFileChooser choose = new APrintFileChooser();
 
-		choose.setFileFilter(new FileNameExtensionFilter(Messages
-				.getString("APrint.23"), //$NON-NLS-1$
+		choose.setFileFilter(new VFSFileNameExtensionFilter(Messages.getString("APrint.23"), //$NON-NLS-1$
 				new String[] { "mid", "kar" })); //$NON-NLS-1$ //$NON-NLS-2$
 
-		choose.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		choose.setFileSelectionMode(APrintFileChooser.FILES_ONLY);
 
-		if (aprintproperties.getLastMidiFile() != null) {
-			choose.setSelectedFile(aprintproperties.getLastMidiFile());
-		}
-
-		if (choose.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-			// Récupération du nom de fichier
-			final File result = choose.getSelectedFile();
+		if (choose.showOpenDialog(this) == APrintFileChooser.APPROVE_OPTION) {
+			// Rï¿½cupï¿½ration du nom de fichier
+			final AbstractFileObject result = choose.getSelectedFile();
 
 			defineCurrentMidiFile(result);
 
@@ -444,14 +403,13 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 	 * 
 	 * @param midiFile
 	 */
-	public void defineCurrentMidiFile(final File midiFile) {
-		aprintproperties.setLastMidiFile(midiFile);
+	public void defineCurrentMidiFile(final AbstractFileObject midiFile) {
 
 		if (midiFile != null) {
 			// Chargement du carton virtuel ..
 
-			nomfichier.setText(midiFile.getName());
-			nomfichier.setToolTipText(midiFile.getAbsolutePath());
+			nomfichier.setText(midiFile.getName().getBaseName());
+			nomfichier.setToolTipText(midiFile.getName().getPath());
 
 			midifile = midiFile;
 
@@ -460,13 +418,13 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 
 	/**
 	 * Rafraichit la liste des transposition en fonction de la gamme, ou de
-	 * l'instrument sélectionné sélectionnée
+	 * l'instrument sï¿½lectionnï¿½ sï¿½lectionnï¿½e
 	 */
 	private void refreshTranspositions() {
 
 		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		try {
-			// On récupère la gamme sélectionnée dans la liste
+			// On rï¿½cupï¿½re la gamme sï¿½lectionnï¿½e dans la liste
 
 			Scale g = getSelectedGamme();
 
@@ -476,8 +434,7 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 			if (g != null) {
 
 				logger.debug("adding transpositions"); //$NON-NLS-1$
-				ArrayList<AbstractTransformation> t = tm.findTransposition(
-						Scale.getGammeMidiInstance(), g);
+				ArrayList<AbstractTransformation> t = tm.findTransposition(Scale.getGammeMidiInstance(), g);
 
 				for (int i = 0; i < t.size(); i++) {
 					listetransposition.addItem(t.get(i));
@@ -498,8 +455,8 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 				logger.debug("adding the extensions importers ..."); //$NON-NLS-1$
 
 				ArrayList<AbstractMidiImporter> extension_importers = new ArrayList<AbstractMidiImporter>();
-				ImportersExtensionPoint[] pts = ExtensionPointProvider
-						.getAllPoints(ImportersExtensionPoint.class, exts);
+				ImportersExtensionPoint[] pts = ExtensionPointProvider.getAllPoints(ImportersExtensionPoint.class,
+						exts);
 				for (int i = 0; i < pts.length; i++) {
 					ImportersExtensionPoint importersExtensionPoint = pts[i];
 					try {
@@ -514,10 +471,8 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 					}
 				}
 
-				for (Iterator<AbstractMidiImporter> iterator = extension_importers
-						.iterator(); iterator.hasNext();) {
-					AbstractMidiImporter abstractMidiImporter2 = iterator
-							.next();
+				for (Iterator<AbstractMidiImporter> iterator = extension_importers.iterator(); iterator.hasNext();) {
+					AbstractMidiImporter abstractMidiImporter2 = iterator.next();
 					logger.debug("adding " + abstractMidiImporter2); //$NON-NLS-1$
 					listetransposition.addItem(abstractMidiImporter2);
 				}
@@ -528,24 +483,26 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 		}
 	}
 
-	private MidiIOResult readMidiFile(File f) throws Exception {
+	private MidiIOResult readMidiFile(AbstractFileObject f) throws Exception {
 		try {
-
-			return MidiIO.readCartonWithError(f);
-
+			InputStream inputStream = f.getInputStream();
+			try {
+				return MidiIO.readCartonWithError(inputStream, f.getName().getBaseName());
+			} finally {
+				inputStream.close();
+			}
 		} catch (Exception ex) {
 			// Erreur de chargement du fichier
 
-			// Affichage du problème ..
+			// Affichage du problï¿½me ..
 			logger.error("Chargement du carton", ex); //$NON-NLS-1$
-			throw new Exception("Error while loading the midi file :"
-					+ ex.getMessage(), ex);
+			throw new Exception("Error while loading the midi file :" + ex.getMessage(), ex);
 		}
 
 	}
 
 	/**
-	 * Methode de transposition du carton pour un orgue donné
+	 * Methode de transposition du carton pour un orgue donnï¿½
 	 * 
 	 * @throws Exception
 	 */
@@ -560,18 +517,18 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 		MidiIOResult readMidiFile = readMidiFile(midifile);
 
 		VirtualBook readCarton = readMidiFile.virtualBook;
+		
 
 		assert readCarton != null;
 
 		//
-		// Mémorisation des erreurs lors de la lecture ou transformation
+		// Mï¿½morisation des erreurs lors de la lecture ou transformation
 		//
 		IssueCollection issueCollection = new IssueCollection();
 
 		List<AbstractIssue> issuesMidiFile = readMidiFile.issues;
 		if (issuesMidiFile != null) {
-			for (Iterator iterator = issuesMidiFile.iterator(); iterator
-					.hasNext();) {
+			for (Iterator iterator = issuesMidiFile.iterator(); iterator.hasNext();) {
 				AbstractIssue i = (AbstractIssue) iterator.next();
 				issueCollection.add(i);
 			}
@@ -579,14 +536,11 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 
 		if (at instanceof AbstractTransposeVirtualBook) {
 
-			waitininterface
-					.infiniteChangeText(Messages.getString("APrint.155")); //$NON-NLS-1$
+			waitininterface.infiniteChangeText(Messages.getString("APrint.155")); //$NON-NLS-1$
 
-			TranspositionResult tr = Transpositor.transpose(readCarton,
-					(AbstractTransposeVirtualBook) at);
+			TranspositionResult tr = Transpositor.transpose(readCarton, (AbstractTransposeVirtualBook) at);
 
-			if (tr.untransposedholes != null
-					&& tr.untransposedholes.size() != 0) {
+			if (tr.untransposedholes != null && tr.untransposedholes.size() != 0) {
 
 				// JMessageBox.showMessage(this,
 				// Messages.getString("APrint.33")); //$NON-NLS-1$
@@ -598,26 +552,23 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 				// // r.setModal(true);
 				// r.setVisible(true);
 
-				// ajout des problèmes détectés....
+				// ajout des problï¿½mes dï¿½tectï¿½s....
 
 				// patch for issueCollection ...
 
-				waitininterface.infiniteChangeText(Messages
-						.getString("APrintNGImporterInternalFrame.4")); //$NON-NLS-1$
+				waitininterface.infiniteChangeText(Messages.getString("APrintNGImporterInternalFrame.4")); //$NON-NLS-1$
 
 				// TODO
 				// il.setIssueCollection(TranspositionIssueConverter.convert(tr,
 				// readCarton.getScale()), tr.virtualbook);
 
-				IssueCollection convertErrors = TranspositionIssueConverter
-						.convert(tr, readCarton.getScale());
+				IssueCollection convertErrors = TranspositionIssueConverter.convert(tr, readCarton.getScale());
 				issueCollection.addAll(convertErrors);
 
 			} else {
 				// il n'y a pas d'erreurs
 
-				waitininterface.infiniteChangeText(Messages
-						.getString("APrintNGImporterInternalFrame.5")); //$NON-NLS-1$
+				waitininterface.infiniteChangeText(Messages.getString("APrintNGImporterInternalFrame.5")); //$NON-NLS-1$
 
 				// TODO
 				// il.setIssueCollection(null, null);
@@ -629,48 +580,59 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 
 		} else if (at instanceof AbstractMidiImporter) {
 
-			waitininterface
-					.infiniteChangeText(Messages.getString("APrint.156")); //$NON-NLS-1$
+			waitininterface.infiniteChangeText(Messages.getString("APrint.156")); //$NON-NLS-1$
 
 			AbstractMidiImporter mi = (AbstractMidiImporter) at;
 
 			askForImportParametersIfExist(mi);
 
-			waitininterface
-					.infiniteChangeText(Messages.getString("APrint.252")); //$NON-NLS-1$
+			waitininterface.infiniteChangeText(Messages.getString("APrint.252")); //$NON-NLS-1$
 
 			logger.debug("read midi file ..."); //$NON-NLS-1$
 
-			MidiConversionResult r = mi.convert(MidiFileIO.read(midifile));
+			InputStream inputStream = midifile.getInputStream();
+			try {
+				MidiConversionResult r = mi.convert(MidiFileIO.read(inputStream));
 
-			logger.debug("converting the errors ... "); //$NON-NLS-1$
+				logger.debug("converting the errors ... "); //$NON-NLS-1$
 
-			if (r.issues != null && r.issues.size() > 0) {
-				JMessageBox.showMessage(services.getOwnerForDialog(),
-						Messages.getString("APrint.33")); //$NON-NLS-1$
+				if (r.issues != null && r.issues.size() > 0) {
+					JMessageBox.showMessage(services.getOwnerForDialog(), Messages.getString("APrint.33")); //$NON-NLS-1$
 
-				for (Iterator iterator = r.issues.iterator(); iterator
-						.hasNext();) {
-					MidiConversionProblem mcp = (MidiConversionProblem) iterator
-							.next();
+					for (Iterator iterator = r.issues.iterator(); iterator.hasNext();) {
+						MidiConversionProblem mcp = (MidiConversionProblem) iterator.next();
 
-					issueCollection.add(mcp.toIssue());
+						issueCollection.add(mcp.toIssue());
+					}
+
 				}
 
+				logger.debug("get the result ..."); //$NON-NLS-1$
+			
+				transposedCarton = r.virtualbook;
+			} finally {
+				inputStream.close();
 			}
-
-			logger.debug("get the result ..."); //$NON-NLS-1$
-			transposedCarton = r.virtualbook;
-
 		} else {
 			throw new Exception("implementation error"); //$NON-NLS-1$
 		}
 
 		assert transposedCarton != null;
+		
+		
+		
+		VirtualBookMetadata virtualBookMetadata = new VirtualBookMetadata();
+		virtualBookMetadata.setName(midifile.getName().getBaseName());
+		virtualBookMetadata.setDescription("Converted from Midifile " + virtualBookMetadata.getName());
+		
+		transposedCarton.setMetadata(virtualBookMetadata);
+		
+		
+		
 
 		waitininterface.infiniteChangeText(Messages.getString("APrint.157")); //$NON-NLS-1$
 
-		// Dans les deux cas, on regarde les trous se téléscopant ...
+		// Dans les deux cas, on regarde les trous se tï¿½lï¿½scopant ...
 		OverlappingHole oh = new OverlappingHole();
 		IssueCollection ic = oh.check(transposedCarton);
 		if (ic != null)
@@ -678,24 +640,22 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 
 		waitininterface.infiniteChangeText(Messages.getString("APrint.158")); //$NON-NLS-1$
 
-		// Autres vérifications associées à la gamme ...
+		// Autres vï¿½rifications associï¿½es ï¿½ la gamme ...
 		Checker[] c = CheckerFactory.createCheckers(at.getScaleDestination());
 		Checker composite = CheckerFactory.toComposite(c);
-		
+
 		try {
 			IssueCollection compositeIssueCollection = composite.check(transposedCarton);
 			ic.addAll(compositeIssueCollection);
 			issueCollection.addAll(ic);
-		} catch(Exception ex) {
+		} catch (Exception ex) {
 			logger.error("fail to check constraints for holes:" + ex.getMessage(), ex);
 		}
-		
 
 		// call extensions
 		logger.debug("call extensions"); //$NON-NLS-1$
 		InformCurrentVirtualBookExtensionPoint[] allPoints = ExtensionPointProvider
-				.getAllPoints(InformCurrentVirtualBookExtensionPoint.class,
-						exts);
+				.getAllPoints(InformCurrentVirtualBookExtensionPoint.class, exts);
 		for (int i = 0; i < allPoints.length; i++) {
 			logger.debug("call " + allPoints[i]); //$NON-NLS-1$
 			InformCurrentVirtualBookExtensionPoint currentVirtualBook = allPoints[i];
@@ -707,16 +667,15 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 			}
 		}
 
-		services.newVirtualBook(transposedCarton, getSelectedInstrument(),
-				issueCollection);
+		services.newVirtualBook(transposedCarton, getSelectedInstrument(), issueCollection);
 
 		repaint();
 
 	}
 
 	/**
-	 * cette méthode interne permet de rafraichir le liste des instruments en
-	 * fonction de la soudbank chargée
+	 * cette mï¿½thode interne permet de rafraichir le liste des instruments en
+	 * fonction de la soudbank chargï¿½e
 	 */
 	private void refreshInstruments() {
 
@@ -725,7 +684,7 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 	}
 
 	/**
-	 * Récupère l'instrument sélectionné
+	 * Rï¿½cupï¿½re l'instrument sï¿½lectionnï¿½
 	 * 
 	 * @return
 	 */
@@ -734,7 +693,7 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 	}
 
 	// ////////////////////////////////////////////////////////////////////////
-	// Gestion de l'état de l'interface ...
+	// Gestion de l'ï¿½tat de l'interface ...
 
 	private void instrumentChanged() {
 		try {
@@ -743,19 +702,15 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 			// pianoroll.setVirtualBook(null);
 			//
 
-			Instrument currentInstrument = instrumentChoice
-					.getCurrentInstrument();
+			Instrument currentInstrument = instrumentChoice.getCurrentInstrument();
 			if (currentInstrument != null && !init) {
-				logger.debug("set preferences instrument :"
-						+ currentInstrument.getName());
+				logger.debug("set preferences instrument :" + currentInstrument.getName());
 
-				aprintproperties.setLastSelectedInstrument(currentInstrument
-						.getName());
+				aprintproperties.setLastSelectedInstrument(currentInstrument.getName());
 			}
 			refreshTranspositions();
 
-			choixtransposition
-					.setVisible(listetransposition.getItemCount() > 1);
+			choixtransposition.setVisible(listetransposition.getItemCount() > 1);
 
 			checkState();
 
@@ -766,7 +721,7 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 	}
 
 	/**
-	 * Verifie l'état de l'interface en fonction de l'état de l'IHM
+	 * Verifie l'ï¿½tat de l'interface en fonction de l'ï¿½tat de l'IHM
 	 */
 	private void checkState() throws Exception {
 
@@ -774,18 +729,18 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 	}
 
 	/**
-	 * Récupère la gamme actuellement sélectionnée, null si celle ci n'est pas
-	 * sélectionnée
+	 * Rï¿½cupï¿½re la gamme actuellement sï¿½lectionnï¿½e, null si celle ci n'est pas
+	 * sï¿½lectionnï¿½e
 	 * 
 	 * @return
 	 */
 	private Scale getSelectedGamme() {
 
-		// Récupération de l'instrument et de la gamme associée ...
+		// Rï¿½cupï¿½ration de l'instrument et de la gamme associï¿½e ...
 
 		org.barrelorgandiscovery.instrument.Instrument ins = getSelectedInstrument();
 		if (ins == null) {
-			return null; // pas de gamme sélectionnée ...
+			return null; // pas de gamme sï¿½lectionnï¿½e ...
 		}
 
 		return (Scale) ins.getScale();
@@ -794,18 +749,16 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 	/**
 	 * internal function than ask for parameters in the translation ..
 	 * 
-	 * @param amimport
-	 *            the importer ...
+	 * @param amimport the importer ...
 	 * @throws Exception
 	 */
-	private void askForImportParametersIfExist(
-			final AbstractMidiImporter amimport) throws Exception {
+	private void askForImportParametersIfExist(final AbstractMidiImporter amimport) throws Exception {
 
 		if (amimport instanceof CustomImporterParameters) {
 
 			logger.debug("asking for custom parameters in translation"); //$NON-NLS-1$
 
-			// on est invoké par un thread séparé
+			// on est invokï¿½ par un thread sï¿½parï¿½
 			SwingUtilities.invokeAndWait(new Runnable() {
 				public void run() {
 
@@ -818,9 +771,8 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 						logger.debug("done !"); //$NON-NLS-1$
 
 					} catch (Throwable ex) {
-						logger.error(
-								"error in getting the importer parameters , " //$NON-NLS-1$
-										+ ex.getMessage(), ex);
+						logger.error("error in getting the importer parameters , " //$NON-NLS-1$
+								+ ex.getMessage(), ex);
 
 						BugReporter.sendBugReport();
 					}
@@ -829,18 +781,16 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 
 		} else if (amimport instanceof ImporterParameters) {
 
-			waitininterface
-					.infiniteChangeText(Messages.getString("APrint.253")); //$NON-NLS-1$
+			waitininterface.infiniteChangeText(Messages.getString("APrint.253")); //$NON-NLS-1$
 
-			// on est invoké par un thread séparé
+			// on est invokï¿½ par un thread sï¿½parï¿½
 			SwingUtilities.invokeAndWait(new Runnable() {
 				public void run() {
 
 					try {
 						final ImporterParameters parametersinterface = (ImporterParameters) amimport;
 
-						final Object parameterbean = parametersinterface
-								.getParametersInstanceBean();
+						final Object parameterbean = parametersinterface.getParametersInstanceBean();
 						if (parameterbean == null)
 							return;
 
@@ -855,53 +805,44 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame
 						// looking for the beaninfo associated to the parameters
 						// ...
 
-						ClassLoader cl = parameterbean.getClass()
-								.getClassLoader();
+						ClassLoader cl = parameterbean.getClass().getClassLoader();
 
 						BeanInfo bi;
 
-						String beaninfoclassname = parameterbean.getClass()
-								.getName() + "BeanInfo"; //$NON-NLS-1$
+						String beaninfoclassname = parameterbean.getClass().getName() + "BeanInfo"; //$NON-NLS-1$
 
 						logger.debug("loading class " + beaninfoclassname //$NON-NLS-1$
 								+ " in the extension classloader"); //$NON-NLS-1$
 						try {
 
-							bi = (BeanInfo) cl.loadClass(beaninfoclassname)
-									.newInstance();
+							bi = (BeanInfo) cl.loadClass(beaninfoclassname).newInstance();
 
 						} catch (Exception ex) {
 							logger.error("no beaninfo for parameter bean " //$NON-NLS-1$
 									+ parameterbean.toString(), ex);
-							throw new Exception(
-									"no parameter beaninfo for parameters", ex); //$NON-NLS-1$
+							throw new Exception("no parameter beaninfo for parameters", ex); //$NON-NLS-1$
 						}
 
 						if (bi == null) {
-							throw new Exception(
-									"no beaninfo for parameter bean " //$NON-NLS-1$
-											+ parameterbean.toString());
+							throw new Exception("no beaninfo for parameter bean " //$NON-NLS-1$
+									+ parameterbean.toString());
 						}
 
-						final JDialog parameterDialog = new JDialog(
-								(JFrame) null, Messages.getString("APrint.239")); //$NON-NLS-1$
+						final JDialog parameterDialog = new JDialog((JFrame) null, Messages.getString("APrint.239")); //$NON-NLS-1$
 
 						PropertySheetPanel p = new PropertySheetPanel();
 						p.setDescriptionVisible(true);
 
 						new BeanBinder(parameterbean, p, bi);
 
-						Container contentPane = parameterDialog
-								.getContentPane();
+						Container contentPane = parameterDialog.getContentPane();
 						contentPane.setLayout(new BorderLayout());
 						contentPane.add(p, BorderLayout.CENTER);
 
-						JButton ok = new JButton(Messages
-								.getString("APrint.240")); //$NON-NLS-1$
+						JButton ok = new JButton(Messages.getString("APrint.240")); //$NON-NLS-1$
 						ok.addActionListener(new ActionListener() {
 							public void actionPerformed(ActionEvent e) {
-								parametersinterface
-										.setParametersToUse(parameterbean);
+								parametersinterface.setParametersToUse(parameterbean);
 								parameterDialog.setVisible(false);
 								logger.debug(" - OK parameters modified - "); //$NON-NLS-1$
 								parameterDialog.dispose();

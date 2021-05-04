@@ -17,7 +17,7 @@ import org.barrelorgandiscovery.listeningconverter.EcouteConverter;
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 
-import com.sun.media.sound.SoftSynthesizer;
+import gervill.SoftSynthesizer;
 
 
 @Deprecated

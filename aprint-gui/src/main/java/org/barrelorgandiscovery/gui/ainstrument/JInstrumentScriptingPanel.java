@@ -288,11 +288,11 @@ public class JInstrumentScriptingPanel extends JPanel implements Disposable,
 
 						asyncJobsManager.submitAlreadyExecutedJobToTrack(rf, new JobEvent() {
 							public void jobAborted() {
-								// TODO Auto-generated method stub
+								logger.info("job aborted");
 
 							}
 
-							public void jobError(Exception ex) {
+							public void jobError(Throwable ex) {
 								try {
 									scriptingPanel.appendOutput(ex);
 

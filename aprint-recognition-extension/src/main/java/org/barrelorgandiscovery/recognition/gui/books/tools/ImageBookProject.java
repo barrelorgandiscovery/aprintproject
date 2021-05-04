@@ -17,6 +17,7 @@ import javax.imageio.stream.ImageInputStream;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
+import org.barrelorgandiscovery.images.books.tools.TiledImage;
 import org.barrelorgandiscovery.scale.Scale;
 
 import ij.ImagePlus;

@@ -3,120 +3,119 @@ package org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
+import java.io.Writer;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.gcode.GCodeCompiler;
 
+/**
+ * this class is responsible to import / export XML punch plans, and convert
+ * them into model objects
+ * 
+ * @author pfreydiere
+ *
+ */
 public class PunchPlanIO {
 
-  private static Logger logger = Logger.getLogger(PunchPlanIO.class);
+	private static Logger logger = Logger.getLogger(PunchPlanIO.class);
 
-  public static void exportToGRBL(File file, PunchPlan p) throws Exception {
+	public static void exportToGRBL(File file, PunchPlan p, GCodeCompiler gcodeCompiler) throws Exception {
 
-    final FileWriter fos = new FileWriter(file);
-    try {
+		final FileWriter fos = new FileWriter(file);
+		try {
+			exportToGRBL(fos, p, gcodeCompiler);
+		} finally {
+			fos.close();
+		}
+	}
 
-      // write header
-      final AtomicInteger ai = new AtomicInteger(0);
+	public static void exportToGRBL(Writer writer, PunchPlan p, GCodeCompiler gcodeCompiler) throws Exception {
 
-      CommandVisitor v =
-          new CommandVisitor() {
-            @Override
-            public void visit(int index, DisplacementCommand displacementCommand) throws Exception {
-              fos.write(
-                  String.format(
-                      Locale.ENGLISH,
-                      "N%1$d G90 X%2$f Y%3$f\n", //$NON-NLS-1$
-                      ai.addAndGet(1),
-                      displacementCommand.getY(), // The X Axis (Y in punch plan)
-                      displacementCommand.getX()));
-            }
+		gcodeCompiler.visit(p); // raise an exception if failed
+		
+		writeList(writer, gcodeCompiler.getPreludeCommands());
+		List<String> list = gcodeCompiler.getGCODECommands();
+		writeList(writer, list);
+		writeList(writer, gcodeCompiler.getEndingCommands());
 
-            @Override
-            public void visit(int index, PunchCommand punchCommand) throws Exception {
-              fos.write(
-                  String.format(
-                      Locale.ENGLISH,
-                      "N%1$d G90 X%2$f Y%3$f\n",
-                      ai.addAndGet(1), //$NON-NLS-1$
-                      punchCommand.getY(),
-                      punchCommand.getX()));
-              fos.write("M100\n"); //$NON-NLS-1$
-            }
+	}
 
-            @Override
-            public void visit(int index, HomingCommand command) throws Exception {}
-          };
+	private static void writeList(Writer writer, List<String> list) throws IOException {
+		if (list == null) {
+			return;
+		}
+		for (String s : list) {
+			// all strings contains a "\n" at the end
+			assert s != null;
+			assert s.endsWith("\n");
+			writer.write(s);
+		}
+	}
 
-      v.visit(p);
+	/**
+	 * Read gcode from inputstream, and construct punchplan object
+	 *
+	 * @param gcodeFile
+	 * @return
+	 * @throws Exception
+	 */
+	public static PunchPlan readFromGRBL(InputStream inputStreamGcode) throws Exception {
 
-    } finally {
-      fos.close();
-    }
-  }
+		LineNumberReader ln = new LineNumberReader(new InputStreamReader(inputStreamGcode));
 
-  /**
-   * Read gcode from inputstream, and construct punchplan object
-   *
-   * @param gcodeFile
-   * @return
-   * @throws Exception
-   */
-  public static PunchPlan readFromGRBL(InputStream inputStreamGcode) throws Exception {
+		Pattern displacement = Pattern.compile("^(N[0-9]+ )?G90 X(.+) Y(.+)$");
+		Pattern punch = Pattern.compile("^M100$");
 
-    LineNumberReader ln = new LineNumberReader(new InputStreamReader(inputStreamGcode));
+		PunchPlan p = new PunchPlan();
 
-    Pattern displacement = Pattern.compile("^(N[0-9]+ )?G90 X(.+) Y(.+)$");
-    Pattern punch = Pattern.compile("^M100$");
+		String readLine;
 
-    PunchPlan p = new PunchPlan();
+		double x = Double.NaN, y = Double.NaN;
 
-    String readLine;
+		while ((readLine = ln.readLine()) != null) {
 
-    double x = Double.NaN, y = Double.NaN;
+			Matcher m = displacement.matcher(readLine);
+			if (m.matches()) {
 
-    while ((readLine = ln.readLine()) != null) {
+				// handle displacement
 
-      Matcher m = displacement.matcher(readLine);
-      if (m.matches()) {
-    	  
-        // handle displacement
-    	
-    	  // x -> it's the Y in the GCode file
-        x = Double.parseDouble(m.group(3));
-        // it's the X in the GCode
-        y = Double.parseDouble(m.group(2));
+				// x -> it's the Y in the GCode file
+				x = Double.parseDouble(m.group(3));
+				// it's the X in the GCode
+				y = Double.parseDouble(m.group(2));
 
-      } else {
+			} else {
 
-        Matcher mpunch = punch.matcher(readLine);
-        if (mpunch.matches()) {
-          //handle punch
-          p.getCommandsByRef().add(new PunchCommand(x, y));
-        } else {
-        	throw new Exception("unknown line :" + readLine);
-        }
-      }
-    }
+				Matcher mpunch = punch.matcher(readLine);
+				if (mpunch.matches()) {
+					// handle punch
+					p.getCommandsByRef().add(new PunchCommand(x, y));
+				} else {
+					throw new Exception("unknown line :" + readLine);
+				}
+			}
+		}
 
-    return p;
-  }
+		return p;
+	}
 
-  /**
-   * Read gcode from file, and construct punchplan object
-   *
-   * @param gcodeFile
-   * @return
-   * @throws Exception
-   */
-  public static PunchPlan readFromGRBL(File gcodeFile) throws Exception {
-
-    return readFromGRBL(new FileInputStream(gcodeFile));
-  }
+	/**
+	 * Read gcode from file, and construct punchplan object
+	 *
+	 * @param gcodeFile
+	 * @return
+	 * @throws Exception
+	 */
+	public static PunchPlan readFromGRBL(File gcodeFile) throws Exception {
+		return readFromGRBL(new FileInputStream(gcodeFile));
+	}
 }

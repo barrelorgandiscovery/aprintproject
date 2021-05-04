@@ -9,18 +9,18 @@ public class RegisterSetCommandResetDef extends AbstractRegisterCommandDef {
 	 */
 	private static final long serialVersionUID = 592740250280909072L;
 
-	private String registerset; // Tous ou un jeu de registre donné
+	private String registerset; // Tous ou un jeu de registre donnÃ©
 
 	/**
 	 * Constructeur
 	 * 
 	 * @param registerset
-	 *            jeu de registre arreté ou ALL pour tous ...
+	 *            jeu de registre arretÃ© ou ALL pour tous ...
 	 * @param longueur
 	 *            longueur de la commande, si celle ci est fixe (ou Double.NaN
 	 *            sinon)
 	 * @param retard
-	 *            retard de la commande (si celle ci doit être en avance de
+	 *            retard de la commande (si celle ci doit Ãªtre en avance de
 	 *            phase)
 	 */
 	public RegisterSetCommandResetDef(String registerset, double longueur,
@@ -32,7 +32,7 @@ public class RegisterSetCommandResetDef extends AbstractRegisterCommandDef {
 	}
 
 	/**
-	 * Récupère le set de registre resetté
+	 * RÃ©cupÃ¨re le set de registre resettÃ©
 	 * 
 	 * @return
 	 */

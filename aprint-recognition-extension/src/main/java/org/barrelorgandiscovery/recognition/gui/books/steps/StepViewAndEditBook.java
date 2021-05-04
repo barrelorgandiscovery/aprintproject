@@ -23,7 +23,10 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.bookimage.BookImage;
+import org.barrelorgandiscovery.bookimage.ZipBookImage;
 import org.barrelorgandiscovery.gui.aedit.CreationTool;
+import org.barrelorgandiscovery.gui.aedit.ImageAndHolesVisualizationLayer;
 import org.barrelorgandiscovery.gui.aedit.JEditableVirtualBookComponent;
 import org.barrelorgandiscovery.gui.aedit.UndoStack;
 import org.barrelorgandiscovery.gui.aedit.snapping.HolesSnappingEnvironnement;
@@ -34,12 +37,14 @@ import org.barrelorgandiscovery.gui.wizard.BasePanelStep;
 import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener;
 import org.barrelorgandiscovery.gui.wizard.WizardStates;
+import org.barrelorgandiscovery.images.books.tools.BookImageRecognitionTiledImage;
+import org.barrelorgandiscovery.images.books.tools.IFileFamilyTiledImage;
+import org.barrelorgandiscovery.images.books.tools.RecognitionTiledImage;
 import org.barrelorgandiscovery.instrument.Instrument;
-import org.barrelorgandiscovery.recognition.ImageAndHolesVisualizationLayer;
+// import org.barrelorgandiscovery.recognition.ImageAndHolesVisualizationLayer;
 import org.barrelorgandiscovery.recognition.gui.books.BackgroundTileImageProcessingThread;
 import org.barrelorgandiscovery.recognition.gui.books.BookReadProcessor;
 import org.barrelorgandiscovery.recognition.gui.books.BookReadProcessor.ReadResultBag;
-import org.barrelorgandiscovery.recognition.gui.books.RecognitionTiledImage;
 import org.barrelorgandiscovery.recognition.gui.books.states.EdgesStates;
 import org.barrelorgandiscovery.recognition.gui.booktoolbar.JVBToolingToolbar;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.states.Book;
@@ -89,7 +94,7 @@ public class StepViewAndEditBook extends BasePanelStep implements Disposable {
 
 	private EdgesStates edgesState;
 
-	private RecognitionTiledImage tiRenormedModel;
+	private IFileFamilyTiledImage tiRenormedModel;
 
 	private JSlider decisionThreshold;
 
@@ -135,11 +140,9 @@ public class StepViewAndEditBook extends BasePanelStep implements Disposable {
 
 		toolbarPanel.add(toolbar);
 		toolbarPanel.add(recognitionToolbar);
-
 		add(toolbarPanel, BorderLayout.NORTH);
 
 		// add save image informations button
-
 		JButton autoRecognition = new JButton(Messages.getString("StepViewAndEditDisk.1")); //$NON-NLS-1$
 		autoRecognition.setIcon(ImageTools.loadIcon(StepViewAndEditBook.class, "auto.png")); //$NON-NLS-1$
 		autoRecognition.setToolTipText(Messages.getString("StepViewAndEditDisk.3")); //$NON-NLS-1$
@@ -159,11 +162,11 @@ public class StepViewAndEditBook extends BasePanelStep implements Disposable {
 					}
 
 					assert tiRenormedModel != null;
-					RecognitionTiledImage rec = tiRenormedModel; // (RecognitionTiledImage)
+					IFileFamilyTiledImage rec = tiRenormedModel; // (RecognitionTiledImage)
 																	// iv.getTiledBackgroundimage();
 
-					RecognitionTiledImage recognized = new RecognitionTiledImage(rec);
-					recognized.setCurrentImageFamilyDisplay(model.getName());
+//					RecognitionTiledImage recognized = new RecognitionTiledImage(rec);
+//					recognized.setCurrentImageFamilyDisplay(model.getName());
 
 					VirtualBook virtualBook = editableVirtualbookComponent.getVirtualBook();
 
@@ -176,15 +179,14 @@ public class StepViewAndEditBook extends BasePanelStep implements Disposable {
 					assert d >= 0 && d <= 255;
 
 					// read all then tiles images
-					for (int i = 0; i < recognized.getImageCount(); i++) {
+					for (int i = 0; i < rec.getImageCount(); i++) {
 
 						try {
-							File f = rec.getImagePath(i);
-							if (!f.exists())
+							BufferedImage bi = rec.loadImage(i, model.getName());
+							
+							if (bi==null)
 								continue;
-
-							BufferedImage bi = ImageTools.loadImage(f.toURL());
-
+						
 							Scale scale = editableVirtualbookComponent.getVirtualBook().getScale();
 
 							double pixelSize = 1.0 * scale.getWidth() / meanBookWidthInImage; // mm
@@ -309,23 +311,39 @@ public class StepViewAndEditBook extends BasePanelStep implements Disposable {
 				ImageFileAndInstrument.class);
 
 		assert imageAndInstrument != null;
+		File imageFile = imageAndInstrument.diskFile;
 
 		model = allStepsStates.getPreviousStateImplementing(this, Model.class);
 
-		File imageDiskFile = imageAndInstrument.diskFile;
+		// read the imageSize
+		IFileFamilyTiledImage origin = null;
+		IFileFamilyTiledImage originModel = null;
+		IFileFamilyTiledImage tiView = null;
 
-		final RecognitionTiledImage origin = new RecognitionTiledImage(imageDiskFile);
-		// origin.setCurrentImageFamilyDisplay(model.getName());
+		if (imageFile.getName().endsWith(BookImage.BOOKIMAGE_EXTENSION)) {
 
-		RecognitionTiledImage originModel = new RecognitionTiledImage(imageDiskFile);
+			origin = new BookImageRecognitionTiledImage(new ZipBookImage(imageFile));
+			originModel = new BookImageRecognitionTiledImage(new ZipBookImage(imageFile));
+			tiRenormedModel = new BookImageRecognitionTiledImage(new ZipBookImage(imageFile));
+			tiView = new BookImageRecognitionTiledImage(new ZipBookImage(imageFile));
+		} else {
+
+			origin = new RecognitionTiledImage(imageFile);
+			originModel = new RecognitionTiledImage(imageFile);
+			tiRenormedModel = new RecognitionTiledImage(imageFile);
+			tiView = new RecognitionTiledImage(imageFile);
+		}
+
 		originModel.setCurrentImageFamilyDisplay(model.getName());
+		final IFileFamilyTiledImage finalOriginModel = originModel;
+		final IFileFamilyTiledImage finalTiView = tiView;
+		final IFileFamilyTiledImage finalOrigin = origin;
 
 		// renormalized
-		tiRenormedModel = new RecognitionTiledImage(imageDiskFile);
 		tiRenormedModel.setCurrentImageFamilyDisplay("renormed_model");
 
 		// view the renormalized model
-		final RecognitionTiledImage tiView = new RecognitionTiledImage(imageDiskFile);
+
 		tiView.setCurrentImageFamilyDisplay("renormed");
 
 		edgesState = allStepsStates.getPreviousStateImplementing(this, EdgesStates.class);
@@ -353,6 +371,18 @@ public class StepViewAndEditBook extends BasePanelStep implements Disposable {
 
 						}
 
+						@Override
+						public void errorInProcessingTile(String errormsg) {
+							SwingUtilities.invokeLater(new Runnable() {
+
+								@Override
+								public void run() {
+									JOptionPane.showMessageDialog(null, errormsg);
+								}
+
+							});
+						}
+
 					}, 1);
 
 			if (backProcessing != null) {
@@ -368,8 +398,9 @@ public class StepViewAndEditBook extends BasePanelStep implements Disposable {
 					File output = tiRenormedModel.constructImagePath(index,
 							tiRenormedModel.getCurrentImageFamilyDisplay());
 
-					BufferedImage result = BookReadProcessor.correctImage(tile, index * originModel.getHeight(),
-							originModel.getHeight(), edgesState.top, edgesState.bottom, originModel.getHeight(),
+					BufferedImage result = BookReadProcessor.correctImage(tile, index * finalOriginModel.getHeight(),
+							finalOriginModel.getHeight(), edgesState.top, edgesState.bottom,
+							finalOriginModel.getHeight(),
 							edgesState.viewInverted != instrument.getScale().isPreferredViewedInversed());
 
 					ImageIO.write(result, "JPEG", output);
@@ -397,6 +428,17 @@ public class StepViewAndEditBook extends BasePanelStep implements Disposable {
 
 						}
 
+						@Override
+						public void errorInProcessingTile(String errormsg) {
+							SwingUtilities.invokeLater(new Runnable() {
+
+								@Override
+								public void run() {
+									JOptionPane.showMessageDialog(null, errormsg);
+								}
+
+							});
+						}
 					}, 1);
 
 			if (backProcessingView != null) {
@@ -409,10 +451,10 @@ public class StepViewAndEditBook extends BasePanelStep implements Disposable {
 				@Override
 				public Void process(int index, BufferedImage tile) throws Exception {
 
-					File output = tiView.constructImagePath(index, tiView.getCurrentImageFamilyDisplay());
+					File output = finalTiView.constructImagePath(index, finalTiView.getCurrentImageFamilyDisplay());
 
-					BufferedImage result = BookReadProcessor.correctImage(tile, index * origin.getHeight(),
-							origin.getHeight(), edgesState.top, edgesState.bottom, origin.getHeight(),
+					BufferedImage result = BookReadProcessor.correctImage(tile, index * finalOrigin.getHeight(),
+							finalOrigin.getHeight(), edgesState.top, edgesState.bottom, finalOrigin.getHeight(),
 							edgesState.viewInverted ^ instrument.getScale().isPreferredViewedInversed());
 
 					ImageIO.write(result, "JPEG", output);

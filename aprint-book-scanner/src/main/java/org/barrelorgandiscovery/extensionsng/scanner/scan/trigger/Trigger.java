@@ -3,7 +3,7 @@ package org.barrelorgandiscovery.extensionsng.scanner.scan.trigger;
 import java.awt.image.BufferedImage;
 
 import org.apache.log4j.Logger;
-import org.barrelorgandiscovery.extensionsng.scanner.PerfoScanFolder;
+import org.barrelorgandiscovery.bookimage.PerfoScanFolder;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.IWebCamListener;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.WebCamPictureTake;
 

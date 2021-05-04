@@ -2,12 +2,11 @@ package org.barrelorgandiscovery.gui.repository2;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.OutputStream;
 
-import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 
+import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.editableinstrument.EditableInstrumentConstants;
 import org.barrelorgandiscovery.editableinstrument.EditableInstrumentManager;
@@ -15,9 +14,10 @@ import org.barrelorgandiscovery.editableinstrument.EditableInstrumentManagerRepo
 import org.barrelorgandiscovery.editableinstrument.EditableInstrumentStorage;
 import org.barrelorgandiscovery.editableinstrument.IEditableInstrument;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
+import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
+import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.messages.Messages;
-import org.barrelorgandiscovery.tools.FileNameExtensionFilter;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
 
@@ -36,8 +36,7 @@ public class ExportAction extends RepositoryAbstractAction {
 
 	@Override
 	protected void safeActionPerformed(ActionEvent e) throws Exception {
-		final EditableInstrumentManagerRepository eme = infos
-				.getCurrentInstrumentEditableInstrumentManagerRepository();
+		final EditableInstrumentManagerRepository eme = infos.getCurrentInstrumentEditableInstrumentManagerRepository();
 
 		final Instrument currentInstrument = infos.getCurrentInstrument();
 		if (currentInstrument == null)
@@ -50,48 +49,42 @@ public class ExportAction extends RepositoryAbstractAction {
 
 		APrintProperties aprintproperties = infos.getAPrintProperties();
 
-		JFileChooser fc = new JFileChooser(
-				aprintproperties.getLastInstrumentBundleFileFolder());
+		APrintFileChooser fc = new APrintFileChooser();
 
-		fc.setFileFilter(new FileNameExtensionFilter("instrumentfile", //$NON-NLS-1$
+		fc.setFileFilter(new VFSFileNameExtensionFilter("instrumentfile", //$NON-NLS-1$
 				EditableInstrumentConstants.INSTRUMENT_FILE_EXTENSION));
 
-		if (fc.showSaveDialog((Component) parent) == JFileChooser.APPROVE_OPTION) {
-			File fichier = fc.getSelectedFile();
-			if (!fichier.getName().endsWith("." + EditableInstrumentConstants.INSTRUMENT_FILE_EXTENSION)) //$NON-NLS-1$
+		if (fc.showSaveDialog((Component) parent) == APrintFileChooser.APPROVE_OPTION) {
+			AbstractFileObject fichier = fc.getSelectedFile();
+			String filename = fichier.getName().getBaseName();
+			if (!filename.endsWith("." + EditableInstrumentConstants.INSTRUMENT_FILE_EXTENSION)) //$NON-NLS-1$
 			{
-				fichier = new File(fichier.getParentFile(), fichier.getName()
-						+ "." + EditableInstrumentConstants.INSTRUMENT_FILE_EXTENSION); //$NON-NLS-1$
+				fichier = (AbstractFileObject) fichier.getFileSystem().resolveFile(
+						fichier.getName().toString() + "." + EditableInstrumentConstants.INSTRUMENT_FILE_EXTENSION); //$NON-NLS-1$
 			}
-			final File f = fichier;
+			final AbstractFileObject f = fichier;
 			if (f != null) {
-				aprintproperties.setLastInstrumentBundleFileFolder(f
-						.getParentFile());
 
 				logger.debug("export instrument :"//$NON-NLS-1$
 						+ f.toString());
 
-				final String instrumentName = eme
-						.findAssociatedEditableInstrumentName(currentInstrument
-								.getName());
+				final String instrumentName = eme.findAssociatedEditableInstrumentName(currentInstrument.getName());
 
 				new Thread(new Runnable() {
 					public void run() {
 						infos.getWaitInterface().infiniteStartWait(
-								Messages.getString("ExportAction.3")  + " " + currentInstrument.getName() //$NON-NLS-1$ //$NON-NLS-2$
-										+ " " + Messages.getString("ExportAction.6") + " " + f.getAbsolutePath()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+								Messages.getString("ExportAction.3") + " " + currentInstrument.getName() //$NON-NLS-1$ //$NON-NLS-2$
+										+ " " + Messages.getString("ExportAction.6") + " " + f.getName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 						try {
 
-							IEditableInstrument editableInstrument = im
-									.loadEditableInstrument(instrumentName);
+							IEditableInstrument editableInstrument = im.loadEditableInstrument(instrumentName);
 
 							EditableInstrumentStorage editableInstrumentStorage = new EditableInstrumentStorage();
 
-							FileOutputStream fos = new FileOutputStream(f);
+							OutputStream fos = f.getOutputStream();
 							try {
 
-								editableInstrumentStorage.save(
-										editableInstrument, fos);
+								editableInstrumentStorage.save(editableInstrument, fos);
 							} finally {
 								fos.close();
 							}
@@ -100,7 +93,7 @@ public class ExportAction extends RepositoryAbstractAction {
 								public void run() {
 
 									JMessageBox.showMessage(parent,
-											Messages.getString("ExportAction.8") + " " + f.getAbsolutePath() //$NON-NLS-1$ //$NON-NLS-2$
+											Messages.getString("ExportAction.8") + " " + f.getName() //$NON-NLS-1$ //$NON-NLS-2$
 													+ " " + Messages.getString("ExportAction.11")); //$NON-NLS-1$ //$NON-NLS-2$
 
 								};

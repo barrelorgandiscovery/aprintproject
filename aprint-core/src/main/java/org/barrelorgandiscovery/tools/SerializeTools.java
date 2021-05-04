@@ -11,9 +11,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.util.Base64;
-import java.util.Base64.Decoder;
-import java.util.Base64.Encoder;
 
 public class SerializeTools {
 
@@ -61,10 +58,9 @@ public class SerializeTools {
 	/**
 	 * Clone en profondeur de l'objet
 	 * 
-	 * si l'objet passé en paramètre est null, null est retourné
+	 * si l'objet passÃ© en paramÃ¨tre est null, null est retournÃ©
 	 * 
-	 * @param object
-	 *            l'objet à cloner
+	 * @param object l'objet Ã  cloner
 	 * @return la copie de l'objet
 	 */
 	public static <T extends Serializable> T deepClone(T object) {
@@ -73,7 +69,7 @@ public class SerializeTools {
 			return null;
 
 		assert object instanceof Serializable;
-		
+
 		try {
 			ByteArrayOutputStream baos = new ByteArrayOutputStream();
 			ObjectOutputStream oos = new ObjectOutputStream(baos);
@@ -83,11 +79,10 @@ public class SerializeTools {
 				oos.close();
 			}
 
-			ByteArrayInputStream bais = new ByteArrayInputStream(
-					baos.toByteArray());
+			ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
 			ObjectInputStream ois = new ObjectInputStream(bais);
 			try {
-				return (T)ois.readObject();
+				return (T) ois.readObject();
 			} finally {
 				ois.close();
 			}
@@ -106,11 +101,15 @@ public class SerializeTools {
 	public static void save(Object object, File file) throws IOException {
 		FileOutputStream fos = new FileOutputStream(file);
 		try {
-			ObjectOutputStream oos = new ObjectOutputStream(fos);
-			oos.writeObject(object);
+			save(object, fos);
 		} finally {
 			fos.close();
 		}
+	}
+
+	public static void save(Object object, OutputStream outStream) throws IOException {
+		ObjectOutputStream oos = new ObjectOutputStream(outStream);
+		oos.writeObject(object);
 	}
 
 	/**
@@ -120,15 +119,25 @@ public class SerializeTools {
 	 * @return
 	 * @throws Exception
 	 */
-	public static Object load(File file) throws IOException,
-			ClassNotFoundException {
+	public static Object load(File file) throws Exception {
 		FileInputStream fis = new FileInputStream(file);
 		try {
-			ObjectInputStream ois = new ObjectInputStream(fis);
-			return ois.readObject();
+			return load(fis);
 		} finally {
 			fis.close();
 		}
+	}
+
+	/**
+	 * load object from input stream
+	 * 
+	 * @param inputstream
+	 * @return
+	 * @throws Exception
+	 */
+	public static Object load(InputStream inputstream) throws Exception {
+		ObjectInputStream ois = new ObjectInputStream(inputstream);
+		return ois.readObject();
 	}
 
 	/**
@@ -138,9 +147,8 @@ public class SerializeTools {
 		if (base64Stream == null)
 			return null;
 
-		Decoder dec = Base64.getDecoder();
-		ByteArrayInputStream bais = new ByteArrayInputStream(
-				dec.decode(base64Stream));
+		byte[] b = Base64Tools.decode(base64Stream);
+		ByteArrayInputStream bais = new ByteArrayInputStream(b);
 		try {
 			return readObject(bais);
 		} finally {
@@ -162,9 +170,7 @@ public class SerializeTools {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		writeObject(o, baos);
 
-		Encoder enc = Base64.getEncoder();
-		return enc.encodeToString(baos.toByteArray());
-
+		return Base64Tools.encode(baos.toByteArray());
 	}
 
 }

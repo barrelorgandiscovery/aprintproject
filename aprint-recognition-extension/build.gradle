@@ -1,6 +1,5 @@
 
 
-// Apply the java plugin to add support for Java
 apply plugin: 'java'
 apply plugin: 'eclipse'
 
@@ -18,19 +17,19 @@ sourceSets {
 
 configurations.all {
 	resolutionStrategy.cacheChangingModulesFor 365, 'days'
-	resolutionStrategy.cacheDynamicVersionsFor 365, 'days'
 }
+
 // In this section you declare where to find the dependencies of your project
 repositories {
-    // Use 'jcenter' for resolving your dependencies.
-    // You can declare any Maven/Ivy/file repository here.
+
 	   jcenter()
 	   mavenCentral()
 	   mavenLocal()
 	   flatDir {
 	       dirs 'depends'
 	   }
-	   
+
+	   // imagej repositories 
 	   maven {
 		   url "http://maven.imagej.net/content/repositories/releases"
 	   }
@@ -38,8 +37,6 @@ repositories {
 		   
 		   url 'http://maven.imagej.net/content/groups/public'
 	   }
- 
-
 }
 
 
@@ -47,12 +44,21 @@ repositories {
 dependencies {
     compileOnly project(':aprint-gui')
 	testCompile name:'junit', group:'junit', version:'3.8'
-	//    compile name: 'Jama-1.0.3'
 	compile name: 'Gray_Morphology-2.3.2'
-    compile name: 'Trainable_Segmentation', group:'sc.fiji', version:'2.1.7-PF-PATCH' 
+    compile name: 'Trainable_Segmentation', group:'sc.fiji', version:'3.2.34' 
+    // https://mvnrepository.com/artifact/sc.fiji/imagescience
+compile group: 'sc.fiji', name: 'imagescience', version: '3.0.0'
+
+
+	compile group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.6.4'
+	compile group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.6.4'
+	compile group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.6.4'
+	
+    
+    
+    
+    
 }
-
-
 
 task fatJar(type: Jar, dependsOn: jar) {
   baseName = project.name + '-all'
@@ -65,8 +71,5 @@ task fatJar(type: Jar, dependsOn: jar) {
 	exclude 'META-INF/*.RSA'
 	exclude 'META-INF/*.PF'
   } with jar
-
-
-
 }
 

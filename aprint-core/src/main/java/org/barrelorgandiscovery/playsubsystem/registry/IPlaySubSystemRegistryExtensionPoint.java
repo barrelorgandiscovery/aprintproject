@@ -5,7 +5,7 @@ import org.barrelorgandiscovery.extensions.IExtensionPoint;
 /**
  * Extension point, permitting extension to provide playsubsystems
  * 
- * @author use
+ * @author pfreydiere
  */
 public interface IPlaySubSystemRegistryExtensionPoint  extends IExtensionPoint{
 

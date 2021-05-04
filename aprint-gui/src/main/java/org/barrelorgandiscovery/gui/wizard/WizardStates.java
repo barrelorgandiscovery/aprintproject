@@ -18,14 +18,12 @@ public class WizardStates implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = -5671965025981003312L;
-	
 
 	private static Logger logger = Logger.getLogger(WizardStates.class);
 
 	private Map<String, Serializable> states = new HashMap<String, Serializable>();
 
 	public WizardStates() {
-
 	}
 
 	public WizardStates(Serializable initialState) {
@@ -56,15 +54,30 @@ public class WizardStates implements Serializable {
 	}
 
 	/**
-	 * search a previous state that implement a typical interface
+	 * search a previous state that implement a typical interface, starting search
+	 * from the parent's currentStep
 	 * 
+	 * @param currentStep
 	 * @param clazz
 	 * @return
 	 */
 	public <T> T getPreviousStateImplementing(Step currentStep, Class<T> clazz) {
 		assert currentStep != null;
+		return getInPreviousStates(currentStep.getParentStep(), clazz);
+	}
+
+	/**
+	 * search a previous state that implement a typical state interface, starting
+	 * search from the currentStep
+	 * 
+	 * @param currentStep
+	 * @param clazz
+	 * @return
+	 */
+	public <T> T getInPreviousStates(Step currentStep, Class<T> clazz) {
+		assert currentStep != null;
 		assert clazz != null;
-		Step current = currentStep.getParentStep();
+		Step current = currentStep;
 		while (current != null) {
 			logger.debug("current evaluated step :" + current);
 			Serializable s = getState(current);
@@ -73,8 +86,10 @@ public class WizardStates implements Serializable {
 			} else {
 				logger.debug("state found " + s + " , check if assignable from " + clazz);
 				if (clazz.isAssignableFrom(s.getClass())) {
+					logger.debug("yes state is assignable");
 					return (T) s;
 				}
+				logger.debug("no it is not");
 			}
 			current = current.getParentStep();
 		}

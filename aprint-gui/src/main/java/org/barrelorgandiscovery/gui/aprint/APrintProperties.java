@@ -4,6 +4,7 @@ import java.awt.Dimension;
 import java.io.File;
 import java.util.Locale;
 
+import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
@@ -133,41 +134,6 @@ public class APrintProperties {
 		ps.setFileProperty(REPERTOIRE_GAMME, gammeAndTranlation);
 	}
 
-	public File getLastMOVFile() {
-		return ps.getFileProperty(LAST_MOV_FILE, null);
-	}
-	
-	public void setLastMOVFile(File virtualbookfile) {
-		ps.setFileProperty(LAST_MOV_FILE, virtualbookfile);
-	}
-
-	public File getLastVirtualBookFile() {
-		return ps.getFileProperty(LAST_VIRTUALBOOK_FILE, null);
-	}
-	
-	public void setLastVirtualBookFile(File virtualbookfile) {
-		ps.setFileProperty(LAST_VIRTUALBOOK_FILE, virtualbookfile);
-	}
-
-	
-	
-	
-	public File getLastMidiFile() {
-		return ps.getFileProperty(LAST_MIDI_FILE, null);
-	}
-
-	public void setLastMidiFile(File lastMidiFile) {
-		ps.setFileProperty(LAST_MIDI_FILE, lastMidiFile);
-	}
-
-	public File getLastGroovyScriptFile() {
-		return ps.getFileProperty(LAST_GROOVYSCRIPT_FILE, null);
-	}
-
-	public void setLastGroovyScriptFile(File lastMidiFile) {
-		ps.setFileProperty(LAST_GROOVYSCRIPT_FILE, lastMidiFile);
-	}
-
 	public boolean isErrorsVisible() {
 		return ps.getBooleanProperty(ERRORS_VISIBLE_LAYER, false);
 	}
@@ -286,14 +252,6 @@ public class APrintProperties {
 
 	public void setSearchFolder(File searchFolder) {
 		ps.setFileProperty(SEARCH_FOLDER, searchFolder);
-	}
-
-	public void setLastInstrumentBundleFileFolder(File folder) {
-		ps.setFileProperty(LAST_INSTRUMENTBUNDLEFILE_FOLDER, folder);
-	}
-
-	public File getLastInstrumentBundleFileFolder() {
-		return ps.getFileProperty(LAST_INSTRUMENTBUNDLEFILE_FOLDER, null);
 	}
 
 	public int getAdditionalWebRepositoriesCount() {

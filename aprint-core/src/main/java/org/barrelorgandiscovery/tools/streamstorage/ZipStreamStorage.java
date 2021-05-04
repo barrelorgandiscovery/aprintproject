@@ -13,8 +13,8 @@ import java.util.zip.ZipInputStream;
 
 import org.apache.log4j.Logger;
 import org.apache.xmlbeans.impl.util.Base64;
+import org.barrelorgandiscovery.tools.NotImplementedException;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 /**
  * Stream storage that uncompress on demand a specific stream
@@ -33,11 +33,11 @@ public class ZipStreamStorage implements StreamStorage {
 	private byte[] zipcontent;
 
 	/**
-	 * Constructeur, prend en paramètre un flux contenant le flux zippé ce flux
-	 * est chargé complètement dans l'outil. Attention aux flux volumineux
+	 * Constructeur, prend en paramÃ¨tre un flux contenant le flux zippÃ© ce flux
+	 * est chargÃ© complÃ¨tement dans l'outil. Attention aux flux volumineux
 	 * 
 	 * @param inputStream
-	 *            le flux d'entrée
+	 *            le flux d'entrÃ©e
 	 * @throws IOException
 	 */
 	public ZipStreamStorage(InputStream inputStream) throws IOException {
@@ -162,7 +162,7 @@ public class ZipStreamStorage implements StreamStorage {
 			while ((ze = z.getNextEntry()) != null) {
 				String name = ze.getName();
 				if (name.equals(stream)) {
-					// lecture du flux dans un tableau et réécriture dans un
+					// lecture du flux dans un tableau et rÃ©Ã©criture dans un
 					// byte array pour permettre l'utilisation du "reset"
 
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -197,7 +197,7 @@ public class ZipStreamStorage implements StreamStorage {
 			while ((ze = z.getNextEntry()) != null) {
 				String name = ze.getName();
 				if (name.equals(stream)) {
-					// lecture du flux dans un tableau et réécriture dans un
+					// lecture du flux dans un tableau et rÃ©Ã©criture dans un
 					// byte array pour permettre l'utilisation du "reset"
 
 					if (ze.getCrc() != -1)

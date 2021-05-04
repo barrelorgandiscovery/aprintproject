@@ -151,6 +151,8 @@ public class GRBLProtocolState {
 		if (sb.toString().startsWith("Grbl")) { //$NON-NLS-1$
 			logger.info("Machine ready to for sending commands"); //$NON-NLS-1$
 			currentState = GRBLState.READY;
+			
+			listener.welcome(sb.toString());
 			listener.resetted();
 			return;
 		}

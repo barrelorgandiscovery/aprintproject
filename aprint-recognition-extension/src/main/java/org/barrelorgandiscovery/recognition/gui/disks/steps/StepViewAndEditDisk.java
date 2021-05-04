@@ -20,6 +20,7 @@ import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.AsyncJobsManager;
 import org.barrelorgandiscovery.JobEvent;
 import org.barrelorgandiscovery.gui.aedit.CreationTool;
+import org.barrelorgandiscovery.gui.aedit.ImageAndHolesVisualizationLayer;
 import org.barrelorgandiscovery.gui.aedit.JEditableVirtualBookComponent;
 import org.barrelorgandiscovery.gui.aedit.UndoStack;
 import org.barrelorgandiscovery.gui.aedit.snapping.HolesSnappingEnvironnement;
@@ -30,14 +31,13 @@ import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener;
 import org.barrelorgandiscovery.gui.wizard.WizardStates;
 import org.barrelorgandiscovery.instrument.Instrument;
-import org.barrelorgandiscovery.recognition.ImageAndHolesVisualizationLayer;
 import org.barrelorgandiscovery.recognition.ImageHoleReader;
 import org.barrelorgandiscovery.recognition.gui.booktoolbar.JVBToolingToolbar;
 import org.barrelorgandiscovery.recognition.gui.disks.DiskImageTools;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.StepChooseOrientationAndBeginning.AngleAndOrientation;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.states.Book;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.states.ImageFileAndInstrument;
-import org.barrelorgandiscovery.recognition.gui.disks.steps.states.PointsAndEllipseParameters;
+import org.barrelorgandiscovery.recognition.gui.disks.steps.states.PointsAndEllipsisParameters;
 import org.barrelorgandiscovery.recognition.math.EllipseParameters;
 import org.barrelorgandiscovery.recognition.math.MathVect;
 import org.barrelorgandiscovery.recognition.messages.Messages;
@@ -80,9 +80,8 @@ public class StepViewAndEditDisk extends BasePanelStep {
 
 	private APrintNGGeneralServices services;
 
-	public StepViewAndEditDisk(String id, Step parent, Repository2 repository,
-			IAPrintWait wizardFrame, APrintNGGeneralServices services)
-			throws Exception {
+	public StepViewAndEditDisk(String id, Step parent, Repository2 repository, IAPrintWait wizardFrame,
+			APrintNGGeneralServices services) throws Exception {
 		super(id, parent);
 		this.waitFrame = wizardFrame;
 		this.repository = repository;
@@ -101,17 +100,14 @@ public class StepViewAndEditDisk extends BasePanelStep {
 		UndoStack us = new UndoStack();
 
 		// tool for editing on the book
-		HolesSnappingEnvironnement snappingEnvironment = new HolesSnappingEnvironnement(
-				editableVirtualbookComponent);
-		editableVirtualbookComponent.setCurrentTool(new CreationTool(
-				editableVirtualbookComponent, new UndoStack(),
-				snappingEnvironment));
+		HolesSnappingEnvironnement snappingEnvironment = new HolesSnappingEnvironnement(editableVirtualbookComponent);
+		editableVirtualbookComponent
+				.setCurrentTool(new CreationTool(editableVirtualbookComponent, new UndoStack(), snappingEnvironment));
 
 		setLayout(new BorderLayout());
 		add(editableVirtualbookComponent, BorderLayout.CENTER);
 
-		toolbar = new JVBToolingToolbar(editableVirtualbookComponent, us,
-				snappingEnvironment);
+		toolbar = new JVBToolingToolbar(editableVirtualbookComponent, us, snappingEnvironment);
 		add(toolbar, BorderLayout.NORTH);
 
 		// add save image informations button
@@ -119,20 +115,17 @@ public class StepViewAndEditDisk extends BasePanelStep {
 		toolbar.addSeparator();
 
 		JButton autoRecognition = new JButton(Messages.getString("StepViewAndEditDisk.1")); //$NON-NLS-1$
-		autoRecognition.setIcon(ImageTools.loadIcon(StepViewAndEditDisk.class,
-				"auto.png")); //$NON-NLS-1$
+		autoRecognition.setIcon(ImageTools.loadIcon(StepViewAndEditDisk.class, "auto.png")); //$NON-NLS-1$
 		autoRecognition.setToolTipText(Messages.getString("StepViewAndEditDisk.3")); //$NON-NLS-1$
 
 		autoRecognition.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
 
-				if (editableVirtualbookComponent.getVirtualBook()
-						.getOrderedHolesCopy().size() > 0) {
+				if (editableVirtualbookComponent.getVirtualBook().getOrderedHolesCopy().size() > 0) {
 
-					if (JOptionPane
-							.showConfirmDialog((Component) waitFrame,
-									Messages.getString("StepViewAndEditDisk.4")) != JOptionPane.YES_OPTION) { //$NON-NLS-1$
+					if (JOptionPane.showConfirmDialog((Component) waitFrame,
+							Messages.getString("StepViewAndEditDisk.4")) != JOptionPane.YES_OPTION) { //$NON-NLS-1$
 						return;
 					}
 
@@ -152,30 +145,24 @@ public class StepViewAndEditDisk extends BasePanelStep {
 
 								input.setImage(iv.getBackgroundimage());
 
-								WekaSegmentation ws = new WekaSegmentation(
-										input);
-								if (!ws.loadClassifier(StepViewAndEditDisk.class
-										.getResourceAsStream("classifier.model"))) { //$NON-NLS-1$
-									throw new Exception(
-											Messages.getString("StepViewAndEditDisk.6")); //$NON-NLS-1$
+								WekaSegmentation ws = new WekaSegmentation(input);
+								if (!ws.loadClassifier(
+										StepViewAndEditDisk.class.getResourceAsStream("classifier.model"))) { //$NON-NLS-1$
+									throw new Exception(Messages.getString("StepViewAndEditDisk.6")); //$NON-NLS-1$
 								}
 
 								if (waitFrame != null)
-									waitFrame
-											.infiniteChangeText(Messages.getString("StepViewAndEditDisk.7")); //$NON-NLS-1$
+									waitFrame.infiniteChangeText(Messages.getString("StepViewAndEditDisk.7")); //$NON-NLS-1$
 
 								ImagePlus r = ws.applyClassifier(input);
 
 								if (waitFrame != null)
-									waitFrame
-											.infiniteChangeText(Messages.getString("StepViewAndEditDisk.8")); //$NON-NLS-1$
+									waitFrame.infiniteChangeText(Messages.getString("StepViewAndEditDisk.8")); //$NON-NLS-1$
 
 								ImageProcessor processor = r.getProcessor();
-								processor.setAutoThreshold(
-										ij.process.ImageProcessor.RED_LUT, 0);
+								processor.setAutoThreshold(ij.process.ImageProcessor.RED_LUT, 0);
 
-								ByteProcessor bp = processor
-										.convertToByteProcessor();
+								ByteProcessor bp = processor.convertToByteProcessor();
 
 								bp.erode();
 								bp.erode();
@@ -186,11 +173,9 @@ public class StepViewAndEditDisk extends BasePanelStep {
 								ImagePlus opened = new ImagePlus("", bp); //$NON-NLS-1$
 
 								if (waitFrame != null)
-									waitFrame
-											.infiniteChangeText(Messages.getString("StepViewAndEditDisk.10")); //$NON-NLS-1$
+									waitFrame.infiniteChangeText(Messages.getString("StepViewAndEditDisk.10")); //$NON-NLS-1$
 
-								List<Hole> holes = ImageHoleReader.readHoles(
-										opened.getBufferedImage(),
+								List<Hole> holes = ImageHoleReader.readHoles(opened.getBufferedImage(),
 										currentState.virtualbook.getScale());
 
 								// read holes
@@ -201,8 +186,7 @@ public class StepViewAndEditDisk extends BasePanelStep {
 							}
 
 						} catch (Exception ex) {
-							logger.error(
-									"error in recognition " + ex.getMessage(), //$NON-NLS-1$
+							logger.error("error in recognition " + ex.getMessage(), //$NON-NLS-1$
 									ex);
 
 							throw ex;
@@ -234,20 +218,17 @@ public class StepViewAndEditDisk extends BasePanelStep {
 						editableVirtualbookComponent.getVirtualBook().clear();
 
 						// add the recogined holes
-						editableVirtualbookComponent.getVirtualBook().addHole(
-								holes);
+						editableVirtualbookComponent.getVirtualBook().addHole(holes);
 
 						// repaint the output
 						editableVirtualbookComponent.repaint();
 
-						JMessageBox
-								.showMessage(waitFrame,
-										Messages.getString("StepViewAndEditDisk.13")); //$NON-NLS-1$
+						JMessageBox.showMessage(waitFrame, Messages.getString("StepViewAndEditDisk.13")); //$NON-NLS-1$
 
 					}
 
 					@Override
-					public void jobError(Exception ex) {
+					public void jobError(Throwable ex) {
 
 						BugReporter.sendBugReport();
 
@@ -281,47 +262,41 @@ public class StepViewAndEditDisk extends BasePanelStep {
 
 		toolbar.addSeparator();
 
-		JButton saveImageInformationAndVirtualBook = new JButton(
-				Messages.getString("StepViewAndEditDisk.14")); //$NON-NLS-1$
+		JButton saveImageInformationAndVirtualBook = new JButton(Messages.getString("StepViewAndEditDisk.14")); //$NON-NLS-1$
 
 		// toolbar.add(saveImageInformationAndVirtualBook);
 
-		saveImageInformationAndVirtualBook
-				.addActionListener(new ActionListener() {
-					public void actionPerformed(ActionEvent e) {
+		saveImageInformationAndVirtualBook.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
 
-						try {
+				try {
 
-							assert currentState != null;
-							assert currentState.instrumentName != null;
+					assert currentState != null;
+					assert currentState.instrumentName != null;
 
-							File c = new File("c:\\temp\\recognition"); //$NON-NLS-1$
-							c.mkdirs();
+					File c = new File("c:\\temp\\recognition"); //$NON-NLS-1$
+					c.mkdirs();
 
-							logger.debug("saving image"); //$NON-NLS-1$
-							ImageIO.write(iv.getBackgroundimage(), "PNG", //$NON-NLS-1$
-									new File(c, "modifiedImage.png")); //$NON-NLS-1$
+					logger.debug("saving image"); //$NON-NLS-1$
+					ImageIO.write(iv.getBackgroundimage(), "PNG", //$NON-NLS-1$
+							new File(c, "modifiedImage.png")); //$NON-NLS-1$
 
-							VirtualBook vb = editableVirtualbookComponent
-									.getVirtualBook();
-							FileOutputStream fos = new FileOutputStream(
-									new File(c, "virtualBook.book")); //$NON-NLS-1$
-							try {
-								VirtualBookXmlIO.write(fos, vb,
-										currentState.instrumentName);
-							} finally {
-								fos.close();
-							}
-						} catch (Exception ex) {
-							logger.error(
-									"Error in saving informations :" //$NON-NLS-1$
-											+ ex.getMessage(), ex);
-							JMessageBox.showError(this, ex);
-						}
-
+					VirtualBook vb = editableVirtualbookComponent.getVirtualBook();
+					FileOutputStream fos = new FileOutputStream(new File(c, "virtualBook.book")); //$NON-NLS-1$
+					try {
+						VirtualBookXmlIO.write(fos, vb, currentState.instrumentName);
+					} finally {
+						fos.close();
 					}
+				} catch (Exception ex) {
+					logger.error("Error in saving informations :" //$NON-NLS-1$
+							+ ex.getMessage(), ex);
+					JMessageBox.showError(this, ex);
+				}
 
-				});
+			}
+
+		});
 
 	}
 
@@ -333,8 +308,8 @@ public class StepViewAndEditDisk extends BasePanelStep {
 
 	private JVBToolingToolbar toolbar;
 
-	public void activate(Serializable state, WizardStates allStepsStates,
-			StepStatusChangedListener stepListener) throws Exception {
+	public void activate(Serializable state, WizardStates allStepsStates, StepStatusChangedListener stepListener)
+			throws Exception {
 
 		if (state != null) {
 			currentState = (Book) state;
@@ -344,11 +319,10 @@ public class StepViewAndEditDisk extends BasePanelStep {
 			currentState = new Book();
 		}
 
-		ImageFileAndInstrument imageAndInstrument = allStepsStates
-				.getPreviousStateImplementing(this, ImageFileAndInstrument.class);
+		ImageFileAndInstrument imageAndInstrument = allStepsStates.getPreviousStateImplementing(this,
+				ImageFileAndInstrument.class);
 
-		BufferedImage source = ImageTools.loadImage(imageAndInstrument.diskFile
-				.toURL());
+		BufferedImage source = ImageTools.loadImage(imageAndInstrument.diskFile);
 
 		String currentInstrumentName = imageAndInstrument.instrumentName;
 		Instrument instrument = repository.getInstrument(currentInstrumentName);
@@ -357,44 +331,39 @@ public class StepViewAndEditDisk extends BasePanelStep {
 
 		// get the perimeter parameters
 
-		PointsAndEllipseParameters perimeterParameters = allStepsStates
-				.getPreviousStateImplementing(getParentStep(),
-						PointsAndEllipseParameters.class);
+		PointsAndEllipsisParameters perimeterParameters = allStepsStates.getPreviousStateImplementing(getParentStep(),
+				PointsAndEllipsisParameters.class);
 		logger.debug("parent step :" + getParentStep().getId()); //$NON-NLS-1$
 
-		PointsAndEllipseParameters centerParameters = allStepsStates
-				.getPreviousStateImplementing(getParentStep().getParentStep(),
-						PointsAndEllipseParameters.class);
+		PointsAndEllipsisParameters centerParameters = allStepsStates
+				.getPreviousStateImplementing(getParentStep().getParentStep(), PointsAndEllipsisParameters.class);
 		logger.debug("parent, parent step :" + getParentStep().getParentStep()); //$NON-NLS-1$
 
-		EllipseParameters ep = perimeterParameters.ellipseParameters;
+		EllipseParameters ep = perimeterParameters.outerEllipseParameters;
 
 		double mean_radius = (ep.a + ep.b) / 2;
 		Scale scale = instrument.getScale();
 
 		// compute angle for start
 
-		AngleAndOrientation angleAndOrientation = allStepsStates
-				.getPreviousStateImplementing(this, AngleAndOrientation.class);
+		AngleAndOrientation angleAndOrientation = allStepsStates.getPreviousStateImplementing(this,
+				AngleAndOrientation.class);
 
 		// vector centre -> point
-		MathVect v = new MathVect(new Point2D.Double(
-				centerParameters.ellipseParameters.centre.x,
-				centerParameters.ellipseParameters.centre.y),
-				new Point2D.Double(angleAndOrientation.pointForAngle
-						.getCenterX(), angleAndOrientation.pointForAngle
-						.getCenterY()));
+		MathVect v = new MathVect(
+				new Point2D.Double(centerParameters.outerEllipseParameters.centre.x,
+						centerParameters.outerEllipseParameters.centre.y),
+				new Point2D.Double(angleAndOrientation.pointForAngle.getCenterX(),
+						angleAndOrientation.pointForAngle.getCenterY()));
 
 		double angleOrigine = v.angleOrigine();
 
-		double resolution_factor = 0.6; //???? @@@
+		double resolution_factor = 0.6; // ???? @@@
 
 		logger.debug("origin angle :" + angleOrigine); //$NON-NLS-1$
-		BufferedImage correctedImage = DiskImageTools.createCorrectedImage(
-				source, centerParameters.ellipseParameters.centre, ep,
-				angleOrigine,
-				(int) (2 * Math.PI * mean_radius * resolution_factor),
-				(int) (mean_radius * resolution_factor));
+		BufferedImage correctedImage = DiskImageTools.createCorrectedImage(source,
+				centerParameters.outerEllipseParameters.centre, ep, angleOrigine,
+				(int) (2 * Math.PI * mean_radius * resolution_factor), (int) (mean_radius * resolution_factor));
 
 		if (currentState.virtualbook == null) {
 			currentState.virtualbook = new VirtualBook(scale);
@@ -409,8 +378,7 @@ public class StepViewAndEditDisk extends BasePanelStep {
 
 	public Serializable unActivateAndGetSavedState() throws Exception {
 
-		currentState.virtualbook = editableVirtualbookComponent
-				.getVirtualBook();
+		currentState.virtualbook = editableVirtualbookComponent.getVirtualBook();
 
 		return currentState;
 	}

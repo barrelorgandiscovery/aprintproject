@@ -30,6 +30,10 @@ public interface IAPrintWait {
 	 */
 	public abstract void infiniteEndWait();
 
+	/**
+	 * change wait text
+	 * @param text the new text
+	 */
 	public abstract void infiniteChangeText(final String text);
 
 }

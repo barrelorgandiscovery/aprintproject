@@ -9,14 +9,15 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Properties;
 
 import javax.sound.midi.Sequence;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -25,6 +26,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
 
+import org.apache.commons.vfs2.FileName;
+import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.lf5.LF5Appender;
@@ -35,14 +38,15 @@ import org.barrelorgandiscovery.gui.aedit.markers.MarkerCreateTool;
 import org.barrelorgandiscovery.gui.aedit.markers.MarkerLayer;
 import org.barrelorgandiscovery.gui.ainstrument.SBRegistersPlay;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
+import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
+import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.listeningconverter.VirtualBookToMidiConverter;
 import org.barrelorgandiscovery.repository.Repository2;
 import org.barrelorgandiscovery.repository.Repository2Collection;
 import org.barrelorgandiscovery.repository.Repository2Factory;
-import org.barrelorgandiscovery.tools.FileNameExtensionFilter;
 import org.barrelorgandiscovery.tools.JMessageBox;
-import org.barrelorgandiscovery.virtualbook.Hole;
 import org.barrelorgandiscovery.virtualbook.Fragment;
+import org.barrelorgandiscovery.virtualbook.Hole;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 import org.barrelorgandiscovery.virtualbook.io.MidiIO;
 import org.barrelorgandiscovery.virtualbook.transformation.LinearTransposition;
@@ -276,6 +280,19 @@ public class AEdit extends JFrame implements ActionListener {
 		setBounds(0, 0, 800, 600);
 
 	}
+	
+	
+	private void saveCarton(AbstractFileObject vfsFile) {
+		try {
+			OutputStream fos = vfsFile.getOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(fos);
+
+			oos.writeObject(jcarton.getVirtualBook());
+		} catch (IOException ex) {
+			JMessageBox.showMessage(this, ex.getMessage());
+			logger.error(ex);
+		}		
+	}
 
 	private void saveCarton(File fichier) {
 
@@ -291,6 +308,24 @@ public class AEdit extends JFrame implements ActionListener {
 
 	}
 
+	private void loadCarton(AbstractFileObject fichier) {
+		try {
+			InputStream fis = fichier.getInputStream();
+			ObjectInputStream ois = new ObjectInputStream(fis);
+
+			VirtualBook c = (VirtualBook) ois.readObject();
+
+			jcarton.setVirtualBook(c);
+			jcarton.touchBook();
+			jcarton.repaint();
+
+		} catch (Exception ex) {
+			JMessageBox.showMessage(this, ex.getMessage());
+			logger.error(ex);
+		}		
+	}
+
+	
 	private void loadCarton(File fichier) {
 
 		try {
@@ -362,21 +397,21 @@ public class AEdit extends JFrame implements ActionListener {
 				}
 
 			} else if ("OUVRIR".equals(e.getActionCommand())) {
-				JFileChooser choose = new JFileChooser();
-				choose.setFileSelectionMode(JFileChooser.FILES_ONLY);
+				APrintFileChooser choose = new APrintFileChooser();
+				choose.setFileSelectionMode(APrintFileChooser.FILES_ONLY);
 
-				choose.setFileFilter(new FileNameExtensionFilter(
+				choose.setFileFilter(new VFSFileNameExtensionFilter(
 						"Carton virtuel", "cv"));
-				if (choose.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+				if (choose.showOpenDialog(this) == APrintFileChooser.APPROVE_OPTION) {
 					loadCarton(choose.getSelectedFile());
 				}
 
 			} else if ("SAUVERSOUS".equals(e.getActionCommand())) {
-				JFileChooser choose = new JFileChooser();
-				choose.setFileSelectionMode(JFileChooser.FILES_ONLY);
-				choose.setFileFilter(new FileNameExtensionFilter(
+				APrintFileChooser choose = new APrintFileChooser();
+				choose.setFileSelectionMode(APrintFileChooser.FILES_ONLY);
+				choose.setFileFilter(new VFSFileNameExtensionFilter(
 						"Carton virtuel", "cv"));
-				if (choose.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+				if (choose.showSaveDialog(this) == APrintFileChooser.APPROVE_OPTION) {
 					saveCarton(choose.getSelectedFile());
 				}
 			}
@@ -392,21 +427,22 @@ public class AEdit extends JFrame implements ActionListener {
 	private void importMidiFile() throws AEditException {
 
 		// choix du fichier midi
-		JFileChooser choose = new JFileChooser();
-		choose.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		APrintFileChooser choose = new APrintFileChooser();
+		choose.setFileSelectionMode(APrintFileChooser.FILES_ONLY);
 
-		choose.setFileFilter(new FileNameExtensionFilter("Midi File", "mid"));
+		choose.setFileFilter(new VFSFileNameExtensionFilter("Midi File", "mid"));
 
-		if (choose.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+		if (choose.showOpenDialog(this) == APrintFileChooser.APPROVE_OPTION) {
 			// Récupération du nom de fichier
-			File result = choose.getSelectedFile();
+			AbstractFileObject result = choose.getSelectedFile();
 
 			if (result != null) {
 				// Chargement du carton virtuel ..
 
 				VirtualBook c;
 				try {
-					c = MidiIO.readCarton(result);
+					FileName filename = result.getName();
+					c = MidiIO.readCarton(result.getInputStream(), filename.getBaseName());
 				} catch (Exception ex) {
 					throw new AEditException(ex);
 				}

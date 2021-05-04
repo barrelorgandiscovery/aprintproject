@@ -15,7 +15,7 @@ public class ConstraintList implements Serializable,
 	private static final long serialVersionUID = 2239712002888501590L;
 
 	/**
-	 * Mémorisation de la liste des contraintes
+	 * MÃ©morisation de la liste des contraintes
 	 */
 
 	private static class AbstractScaleConstraintComparator implements

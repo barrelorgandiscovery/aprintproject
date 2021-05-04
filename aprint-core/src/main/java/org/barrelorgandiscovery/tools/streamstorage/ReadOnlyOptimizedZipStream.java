@@ -14,8 +14,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.apache.xmlbeans.impl.util.Base64;
+import org.barrelorgandiscovery.tools.NotImplementedException;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+
 
 public class ReadOnlyOptimizedZipStream implements StreamStorage {
 

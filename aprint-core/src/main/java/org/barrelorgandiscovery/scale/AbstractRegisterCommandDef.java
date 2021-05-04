@@ -1,7 +1,7 @@
 package org.barrelorgandiscovery.scale;
 
 /**
- * Définition d'une piste encodant une commande de registre
+ * DÃ©finition d'une piste encodant une commande de registre
  * 
  * @author Freydiere Patrice
  * 

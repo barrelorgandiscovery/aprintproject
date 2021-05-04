@@ -1,11 +1,13 @@
 package org.barrelorgandiscovery.gui.aprint;
 
 import java.io.File;
-import java.util.HashMap;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.Map;
 
 import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiDevice;
+import javax.sound.midi.MidiDevice.Info;
 import javax.sound.midi.MidiEvent;
 import javax.sound.midi.MidiMessage;
 import javax.sound.midi.MidiSystem;
@@ -16,7 +18,6 @@ import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Soundbank;
 import javax.sound.midi.Synthesizer;
 import javax.sound.midi.Track;
-import javax.sound.midi.MidiDevice.Info;
 import javax.sound.sampled.AudioFileFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
@@ -24,8 +25,8 @@ import javax.sound.sampled.AudioSystem;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.playsubsystem.GervillPlaySubSystemWithRegisterInstruments;
 
-import com.sun.media.sound.AudioSynthesizer;
-import com.sun.media.sound.SoftSynthesizer;
+import gervill.AudioSynthesizer;
+import gervill.SoftSynthesizer;
 
 public class SequencerTools {
 
@@ -35,7 +36,7 @@ public class SequencerTools {
 	 * Render sequence using selected or default soundbank into wave audio file.
 	 */
 	public static void render(Soundbank soundbank, Sequence sequence,
-			File audio_file, boolean onlyfirstinstrument) throws Exception {
+			OutputStream audiooutputStream, boolean onlyfirstinstrument) throws Exception {
 		try {
 			// Find available AudioSynthesizer.
 			AudioSynthesizer synth = new SoftSynthesizer(); // findAudioSynthesizer();
@@ -105,12 +106,27 @@ public class SequencerTools {
 			stream = new AudioInputStream(stream, stream.getFormat(), len);
 
 			// Write WAVE file to disk.
-			AudioSystem.write(stream, AudioFileFormat.Type.WAVE, audio_file);
+			AudioSystem.write(stream, AudioFileFormat.Type.WAVE, audiooutputStream);
 
 			// We are finished, close synthesizer.
 			synth.close();
 		} catch (Exception e) {
 			e.printStackTrace();
+		}
+	}
+	
+	/**
+	 * Render sequence using selected or default soundbank into wave audio file.
+	 */
+	public static void render(Soundbank soundbank, Sequence sequence,
+			File audio_file, boolean onlyfirstinstrument) throws Exception {
+		assert audio_file != null;
+		
+		FileOutputStream os = new FileOutputStream(audio_file);
+		try {
+			render(soundbank, sequence, os, onlyfirstinstrument);
+		} finally {
+			os.close();
 		}
 	}
 

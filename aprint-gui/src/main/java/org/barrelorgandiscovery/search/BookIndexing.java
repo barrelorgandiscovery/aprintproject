@@ -70,7 +70,6 @@ public class BookIndexing implements Disposable {
 		}
 
 		luceneDirectory = FSDirectory.open(searchFolder);
-
 	}
 
 	public void dispose() {
@@ -178,6 +177,7 @@ public class BookIndexing implements Disposable {
 		if (directory == null || !directory.isDirectory()) {
 			return;
 		}
+		
 		// To store an index on disk, use this instead:
 		// Directory directory = FSDirectory.open("/tmp/testindex");
 		IndexWriter iwriter = new IndexWriter(luceneDirectory, analyzer, true,

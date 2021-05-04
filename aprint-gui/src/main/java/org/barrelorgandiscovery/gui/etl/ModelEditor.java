@@ -9,10 +9,8 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -34,7 +32,6 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
-import javax.swing.text.AttributeSet;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -43,6 +40,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.apache.commons.vfs2.VFS;
+import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -100,9 +99,12 @@ import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxMultiplicity;
 
-//import test.org.barrelorgandiscovery.model.TestProcessor;
-
 public class ModelEditor extends JPanel {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3275277620342380159L;
 
 	/** logger */
 	private static Logger logger = Logger.getLogger(ModelEditor.class);
@@ -146,6 +148,9 @@ public class ModelEditor extends JPanel {
 	/** script Console */
 	private IScriptConsole console;
 
+	/**
+	 * async jobs handling
+	 */
 	private AsyncJobsManager asyncJobsManager;
 
 	/**
@@ -194,7 +199,7 @@ public class ModelEditor extends JPanel {
 					return Messages.getString("ModelEditor.8"); //$NON-NLS-1$
 				}
 
-				// vérification des types de paramètres
+				// vï¿½rification des types de paramï¿½tres
 
 				if (!ptarget.getType().isAssignableFrom(psource.getType())) {
 					return Messages.getString("ModelEditor.9") //$NON-NLS-1$
@@ -716,7 +721,7 @@ public class ModelEditor extends JPanel {
 		load.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					me.loadGraph(new File("c:\\temp\\test.xml")); //$NON-NLS-1$
+					me.loadGraph((AbstractFileObject) VFS.getManager().resolveFile("c:\\temp\\test.xml")); //$NON-NLS-1$
 
 				} catch (Exception ex) {
 					ex.printStackTrace(System.err);
@@ -731,7 +736,7 @@ public class ModelEditor extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				try {
 
-					me.saveGraph(new File("c:\\temp\\test.xml")); //$NON-NLS-1$
+					me.saveGraph((AbstractFileObject) VFS.getManager().resolveFile("c:\\temp\\test.xml")); //$NON-NLS-1$
 
 				} catch (Exception ex) {
 					ex.printStackTrace(System.err);
@@ -802,11 +807,16 @@ public class ModelEditor extends JPanel {
 		graphComponent.zoomAndCenter();
 	}
 
-	public void loadGraph(File file) throws Exception {
+	/**
+	 * load a graph from file
+	 * @param file
+	 * @throws Exception
+	 */
+	public void loadGraph(AbstractFileObject<?> file) throws Exception {
 
 		logger.debug("read XML"); //$NON-NLS-1$
 
-		FileInputStream fis = new FileInputStream(file);
+		InputStream fis = file.getInputStream();
 		try {
 			load(fis);
 		} finally {
@@ -841,7 +851,7 @@ public class ModelEditor extends JPanel {
 		graphComponent.zoomAndCenter();
 	}
 
-	public void saveGraph(File file) throws Exception {
+	public void saveGraph(AbstractFileObject file) throws Exception {
 		mxCodec c = new mxCodec();
 
 		Node n = c.encode(graphComponent.getGraph()); // save and
@@ -854,11 +864,12 @@ public class ModelEditor extends JPanel {
 		t.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
 		t.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		FileOutputStream outputStream = new FileOutputStream(file);
-
-		t.transform(new DOMSource(n), new StreamResult(outputStream));
-
-		outputStream.close();
+		OutputStream outputStream = file.getOutputStream();
+		try {
+			t.transform(new DOMSource(n), new StreamResult(outputStream));
+		} finally {
+			outputStream.close();
+		}
 	}
 
 	// this validate the current display state of the graph
@@ -997,7 +1008,7 @@ public class ModelEditor extends JPanel {
 				}
 
 				@Override
-				public void jobError(Exception ex) {
+				public void jobError(Throwable ex) {
 					logger.error("error in executing the jobs :" + ex.getMessage(), ex); //$NON-NLS-1$
 					execInUIThread(() -> {
 						console.appendOutput(ex);
@@ -1045,9 +1056,9 @@ public class ModelEditor extends JPanel {
 	}
 
 	/**
-	 * Edition des paramètres de configuration
+	 * Edition des paramï¿½tres de configuration
 	 *
-	 * @param mxcell cellule editée
+	 * @param mxcell cellule editï¿½e
 	 * @throws Exception
 	 */
 	protected void editStepConfiguration(final mxCell mxcell) throws Exception {
@@ -1129,6 +1140,11 @@ public class ModelEditor extends JPanel {
 
 		ModelRunner modelRunner = new ModelRunner(m);
 		this.currentModelRunner = modelRunner;
+		
+		if (modelRunner.getModel().schedule().size() == 0) {
+			console.appendOutput("No scheduled processor", null);
+		}
+		
 		return modelRunner;
 	}
 
@@ -1140,6 +1156,14 @@ public class ModelEditor extends JPanel {
 	/** reset and release the current model runner */
 	protected void invalidateCurrentModelRunner() {
 		currentModelRunner = null;
+	}
+	
+	
+	public boolean isRunning() {
+		if (currentModelRunner == null) {
+			return false;
+		}
+		return !currentModelRunner.isFinished();
 	}
 
 	/**

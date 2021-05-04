@@ -6,14 +6,12 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
-import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.util.TreeSet;
 import java.util.Vector;
 
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -22,21 +20,18 @@ import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
-import org.barrelorgandiscovery.gui.ascale.ScaleComponent;
+import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
+import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.issues.AbstractIssue;
 import org.barrelorgandiscovery.issues.IssueCollection;
 import org.barrelorgandiscovery.issues.IssueCollectionListener;
-import org.barrelorgandiscovery.issues.IssueHole;
 import org.barrelorgandiscovery.issues.IssueLayer;
-import org.barrelorgandiscovery.issues.IssueMissing;
-import org.barrelorgandiscovery.issues.IssuesConstants;
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.scale.AbstractScaleConstraint;
 import org.barrelorgandiscovery.scale.ConstraintList;
-import org.barrelorgandiscovery.tools.FileNameExtensionFilter;
 import org.barrelorgandiscovery.tools.JMessageBox;
-import org.barrelorgandiscovery.tools.TimeUtils;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 import org.barrelorgandiscovery.virtualbook.checker.Checker;
@@ -176,27 +171,28 @@ public class JIssuePresenter extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				try {
 
-					JFileChooser fileChooser = new JFileChooser();
-					fileChooser.setFileFilter(new FileNameExtensionFilter(
+					APrintFileChooser fileChooser = new APrintFileChooser();
+					fileChooser.setFileFilter(new VFSFileNameExtensionFilter(
 							Messages.getString("JIssuePresenter.10"), new String[] { "txt" })); //$NON-NLS-1$ //$NON-NLS-2$
 
 					int showSaveDialog = fileChooser
 							.showSaveDialog(JIssuePresenter.this);
-					if (showSaveDialog == JFileChooser.APPROVE_OPTION) {
+					if (showSaveDialog == APrintFileChooser.APPROVE_OPTION) {
 						logger.debug(Messages.getString("JIssuePresenter.12")); //$NON-NLS-1$
 
-						File selectedFile = fileChooser.getSelectedFile();
-						if (!selectedFile.getName().toLowerCase()
+						AbstractFileObject selectedFile = fileChooser.getSelectedFile();
+						String filename = selectedFile.getName().getBaseName();
+						if (!filename.toLowerCase()
 								.endsWith(".txt")) { //$NON-NLS-1$
-							selectedFile = new File(selectedFile
-									.getParentFile(), selectedFile.getName()
+							selectedFile = (AbstractFileObject)
+									selectedFile.getFileSystem().resolveFile(selectedFile.getName().toString()
 									+ ".txt"); //$NON-NLS-1$
 						}
 
 						logger.debug(Messages.getString("JIssuePresenter.15")); //$NON-NLS-1$
 
-						FileOutputStream fos = new FileOutputStream(
-								selectedFile);
+						OutputStream fos = 
+								selectedFile.getOutputStream();
 						try {
 
 							OutputStreamWriter osw = new OutputStreamWriter(fos);
@@ -226,7 +222,7 @@ public class JIssuePresenter extends JPanel {
 										JIssuePresenter.this.owner,
 										Messages.getString("JIssuePresenter.19") //$NON-NLS-1$
 												+ selectedFile
-														.getAbsolutePath()
+														.getName().toString()
 												+ Messages
 														.getString("JIssuePresenter.20")); //$NON-NLS-1$
 					}

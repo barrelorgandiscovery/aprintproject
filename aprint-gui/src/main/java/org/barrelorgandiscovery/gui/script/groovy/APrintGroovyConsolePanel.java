@@ -93,6 +93,7 @@ public class APrintGroovyConsolePanel extends JPanel implements IScriptConsole,
 
 		binding = new Binding();
 		// binding for the output in the console ...
+		binding.setProperty("console", this);
 		binding.setProperty("out", new PrintStream(new OutputStream() { //$NON-NLS-1$
 
 					@Override

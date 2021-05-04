@@ -6,17 +6,15 @@ import java.util.Iterator;
 import java.util.TreeSet;
 
 import org.apache.log4j.Logger;
-
 import org.barrelorgandiscovery.gui.ICancelTracker;
-import org.barrelorgandiscovery.gui.aprint.APrint;
-import org.barrelorgandiscovery.gui.atrace.Punch;
-import org.barrelorgandiscovery.gui.atrace.PunchConverter;
-import org.barrelorgandiscovery.gui.atrace.PunchConverter.PunchConverterResult;
 import org.barrelorgandiscovery.issues.IssueCollection;
+import org.barrelorgandiscovery.optimizers.ConverterResult;
+import org.barrelorgandiscovery.optimizers.ga.GeneticSolver;
+import org.barrelorgandiscovery.optimizers.ga.Graph;
+import org.barrelorgandiscovery.optimizers.ga.Path;
+import org.barrelorgandiscovery.optimizers.model.Punch;
+import org.barrelorgandiscovery.optimizers.punchconverters.PunchConverter;
 import org.barrelorgandiscovery.tools.TimeUtils;
-import org.barrelorgandiscovery.tracetools.ga.GeneticSolver;
-import org.barrelorgandiscovery.tracetools.ga.Graph;
-import org.barrelorgandiscovery.tracetools.ga.Path;
 import org.barrelorgandiscovery.virtualbook.Hole;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 
@@ -71,7 +69,7 @@ public class PerfoPunchConverter {
 				longueurpoinconsenscarton, longueurpoinconsenscarton
 						- avancement, lastpoincondistance);
 
-		PunchConverterResult result = pc.convert(vb.getOrderedHolesCopy());
+		ConverterResult<Punch> result = pc.convert(vb.getOrderedHolesCopy());
 
 		this.ic = result.holeerrors;
 

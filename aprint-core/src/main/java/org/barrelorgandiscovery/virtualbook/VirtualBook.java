@@ -12,14 +12,12 @@ import java.util.TreeSet;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-import org.barrelorgandiscovery.gui.atrace.Tools;
 import org.barrelorgandiscovery.scale.AbstractRegisterCommandDef;
 import org.barrelorgandiscovery.scale.PipeStopGroup;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.tools.HashCodeUtils;
 import org.barrelorgandiscovery.tools.ReadOnlySet;
 import org.barrelorgandiscovery.tools.SerializeTools;
-import org.barrelorgandiscovery.tools.StreamsTools;
 
 /**
  * Virtual book
@@ -99,7 +97,6 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	 *            the scale of this book
 	 */
 	public VirtualBook(Scale scale) {
-		super();
 		this.bookscale = scale;
 
 		trackIndex = new ArrayList[scale.getTrackNb()];
@@ -170,14 +167,15 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 		if (hole == null)
 			return;
 
+		if (hole.getTrack() >= trackIndex.length) {
+			throw new RuntimeException("for hole " + hole + " track number " + hole.getTrack() + " is out of scope (" + trackIndex.length + ") for the scale :" + bookscale);
+		}
+		
 		// Vérification de la note associée au carton ..
 		notes.add(hole);
 		// notesorderedbyend.add(n);
 		si.add(hole);
 
-		if (hole.getTrack() >= trackIndex.length) {
-			throw new RuntimeException("for hole " + hole + " track number is out of scope for the scale :" + bookscale);
-		}
 		
 		trackIndex[hole.getTrack()].add(hole);
 
@@ -356,7 +354,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * Recherche toutes les notes dans la fenetre donnée de temps donnée
+	 * Recherche toutes les notes dans la fenetre donnÃ©e de temps donnÃ©e
 	 * 
 	 * @param start
 	 * @param length
@@ -411,7 +409,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * Recherche toutes les notes dans la fenetre donnée de temps donnée
+	 * Recherche toutes les notes dans la fenetre donnÃ©e de temps donnÃ©e
 	 * 
 	 * @param start
 	 * @param length
@@ -442,7 +440,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * Recherche toutes les notes dans la fenetre donnée de temps donnée
+	 * Recherche toutes les notes dans la fenetre donnÃ©e de temps donnÃ©e
 	 * 
 	 * @param start
 	 * @param length
@@ -480,7 +478,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * Recherche des notes dans la fenetre donnée
+	 * Recherche des notes dans la fenetre donnÃ©e
 	 * 
 	 * @param start
 	 *            the start timestamp
@@ -836,47 +834,10 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 		events.remove(event);
 	}
 
-	// private void writeObject(java.io.ObjectOutputStream out) throws
-	// IOException {
-	// // Version
-	// out.writeInt(1);
-	// // Gamme
-	// out.writeObject(gamme);
-	//
-	// // notes
-	// out.writeLong(notes.size());
-	//
-	// for (Iterator iter = notes.iterator(); iter.hasNext();) {
-	// Note element = (Note) iter.next();
-	// out.writeObject(element);
-	// }
-	//
-	// }
-	//
-	// private void readObject(java.io.ObjectInputStream in) throws IOException,
-	// ClassNotFoundException {
-	//
-	// int version = in.readInt();
-	// if (version == 1)
-	// {
-	// Gamme g = (Gamme)in.readObject();
-	// long nbnotes = in.readLong();
-	// TreeSet<Note> notes = new TreeSet<Note>();
-	// for (long i = 0 ; i < nbnotes; i ++)
-	// {
-	// notes.add((Note)in.readObject());
-	// }
-	//
-	// // tout s'est bien déroulé
-	// gamme = g;
-	// this.notes = notes;
-	//
-	// }
-	//
-	// }
+
 
 	// ///////////////////////////////////////////////////////////////////////////
-	// methodes associées à la registration
+	// methodes associées à la registration
 
 	/**
 	 * Propriété mémorisant la liste des sections associées
@@ -1026,6 +987,9 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	 */
 	public void setMetadata(VirtualBookMetadata metadata) {
 		this.metadata = metadata;
+		if (metadata != null) {
+			setName(metadata.getName());
+		}
 	}
 
 	/**

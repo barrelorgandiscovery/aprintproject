@@ -2,6 +2,7 @@ package org.barrelorgandiscovery.tools;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.LineNumberReader;
 import java.nio.charset.Charset;
@@ -11,8 +12,7 @@ public class StringTools {
 	/**
 	 * this function remove all the special characters in the string
 	 * 
-	 * @param s
-	 *            the string to convert
+	 * @param s the string to convert
 	 */
 	public static String convertToPhysicalNameWithEndingHashCode(String s) {
 		if (s == null)
@@ -120,7 +120,7 @@ public class StringTools {
 	}
 
 	/**
-	 * Concatene les éléments en utilisant un delimiteur
+	 * Concatene les Ã©lÃ©ments en utilisant un delimiteur
 	 * 
 	 * @param elements
 	 * @param delimiter
@@ -179,9 +179,20 @@ public class StringTools {
 	 * @throws Exception
 	 */
 	public static StringBuffer loadUTF8FileContent(File file) throws Exception {
+		FileInputStream istream = new FileInputStream(file);
+		try {
+			return loadUTF8FileContent(istream);
+		} finally {
+			istream.close();
+		}
+	}
+
+	public static StringBuffer loadUTF8FileContent(InputStream file) throws Exception {
 		StringBuffer sb = new StringBuffer();
-		LineNumberReader r = new LineNumberReader(
-				new InputStreamReader(new FileInputStream(file), Charset.forName("UTF-8"))); //$NON-NLS-1$
+
+		InputStream istream = file;
+
+		LineNumberReader r = new LineNumberReader(new InputStreamReader(istream, Charset.forName("UTF-8"))); //$NON-NLS-1$
 		try {
 
 			String s = r.readLine();

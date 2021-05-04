@@ -11,7 +11,19 @@ import javax.swing.JPanel;
 
 import com.jeta.forms.components.panel.FormPanel;
 
+/**
+ * this XY panel, manage a x/y offset in the settings
+ * when the x/y changed, the listener is called for a 
+ * 
+ * @author pfreydiere
+ *
+ */
 public class XYPanel extends JPanel {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4105650312829819912L;
 
 	public interface XYListener {
 		public void xyChanged(double x, double y);

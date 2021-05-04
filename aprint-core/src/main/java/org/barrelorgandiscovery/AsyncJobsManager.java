@@ -83,7 +83,7 @@ public class AsyncJobsManager implements Disposable {
 												});
 
 									}
-								} catch (final Exception ex) {
+								} catch (final Throwable ex) {
 									logger.error(
 											"error launching the job callback :"
 													+ ex.getMessage(), ex);
@@ -191,7 +191,7 @@ public class AsyncJobsManager implements Disposable {
 				}
 			}
 
-			public void jobError(Exception ex) {
+			public void jobError(Throwable ex) {
 				try {
 					if (errorCallBack != null)
 						errorCallBack.call(ex);

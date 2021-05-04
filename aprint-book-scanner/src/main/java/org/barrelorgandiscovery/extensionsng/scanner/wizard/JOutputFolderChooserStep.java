@@ -11,7 +11,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 
 import org.apache.log4j.Logger;
-import org.barrelorgandiscovery.extensionsng.scanner.PerfoScanFolder;
+import org.barrelorgandiscovery.bookimage.PerfoScanFolder;
+import org.barrelorgandiscovery.extensionsng.scanner.Messages;
 import org.barrelorgandiscovery.gui.wizard.BasePanelStep;
 import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener;
@@ -44,10 +45,10 @@ public class JOutputFolderChooserStep extends BasePanelStep {
 	
 	private IPrefsStorage ps;
 	
-	private static final String DEFAULTCURRENTFOLDER = "defaultfolderstorage";
+	private static final String DEFAULTCURRENTFOLDER = "defaultfolderstorage"; //$NON-NLS-1$
 
 	public JOutputFolderChooserStep(Step parent, IPrefsStorage ps) throws Exception {
-		super("outputfolder", parent);
+		super("outputfolder", parent); //$NON-NLS-1$
 		this.ps = ps;
 		initComponents();
 	}
@@ -55,7 +56,7 @@ public class JOutputFolderChooserStep extends BasePanelStep {
 	/** update state */
 	private void updateState() {
 		if (folderChoosen == null) {
-			folderLabel.setText("< Choose Folder >");
+			folderLabel.setText(Messages.getString("JOutputFolderChooserStep.2")); //$NON-NLS-1$
 		} else {
 			folderLabel.setText(folderChoosen.getAbsolutePath());
 
@@ -65,23 +66,23 @@ public class JOutputFolderChooserStep extends BasePanelStep {
 				if (listener != null)
 					listener.stepStatusChanged();
 			} catch (Exception ex) {
-				logger.error("preview not available :" + ex.getMessage(), ex);
+				logger.error("preview not available :" + ex.getMessage(), ex); //$NON-NLS-1$
 			}
 		}
 	}
 
 	protected void initComponents() throws Exception {
-		InputStream formStream = getClass().getResourceAsStream("outputfolder.jfrm");
+		InputStream formStream = getClass().getResourceAsStream("outputfolder.jfrm"); //$NON-NLS-1$
 		FormPanel fp = new FormPanel(formStream);
 
-		lbloutputfolder = fp.getLabel("lbloutputfolder");
-		lbloutputfolder.setText("Choose in which folder you will save the pictures ...");
-		folderLabel = fp.getLabel("lblfolder");
+		lbloutputfolder = fp.getLabel("lbloutputfolder"); //$NON-NLS-1$
+		lbloutputfolder.setText(Messages.getString("JOutputFolderChooserStep.6")); //$NON-NLS-1$
+		folderLabel = fp.getLabel("lblfolder"); //$NON-NLS-1$
 		//
 
-		btnfolder = fp.getButton("btnfolder");
-		btnfolder.setText("Choose Folder ...");
-		btnfolder.setIcon(ImageTools.loadIcon(getClass(), "folder.png"));
+		btnfolder = fp.getButton("btnfolder"); //$NON-NLS-1$
+		btnfolder.setText(Messages.getString("JOutputFolderChooserStep.9")); //$NON-NLS-1$
+		btnfolder.setIcon(ImageTools.loadIcon(getClass(), "folder.png")); //$NON-NLS-1$
 		btnfolder.addActionListener((e) -> {
 
 			JDirectoryChooser c;
@@ -100,7 +101,7 @@ public class JOutputFolderChooserStep extends BasePanelStep {
 				int result = c.showOpenDialog(JOutputFolderChooserStep.this);
 				File selectedFolder = c.getSelectedFile();
 				if (selectedFolder != null && selectedFolder.isDirectory() && result == JFileChooser.APPROVE_OPTION) {
-					logger.debug("open the folder " + selectedFolder);
+					logger.debug("open the folder " + selectedFolder); //$NON-NLS-1$
 					folderChoosen = selectedFolder;
 					updateState();
 
@@ -124,7 +125,7 @@ public class JOutputFolderChooserStep extends BasePanelStep {
 
 	@Override
 	public String getLabel() {
-		return "Choose output folder";
+		return Messages.getString("JOutputFolderChooserStep.12"); //$NON-NLS-1$
 	}
 
 	@Override

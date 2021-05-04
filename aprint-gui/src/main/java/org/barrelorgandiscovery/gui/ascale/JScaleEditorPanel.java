@@ -2,7 +2,6 @@ package org.barrelorgandiscovery.gui.ascale;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -15,9 +14,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
-import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -40,9 +37,10 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 
 import org.apache.log4j.Logger;
-import org.barrelorgandiscovery.gui.aprint.APrint;
+import org.barrelorgandiscovery.gui.aprintng.APrintNG;
 import org.barrelorgandiscovery.gui.ascale.constraints.ConstraintListChangeListener;
 import org.barrelorgandiscovery.gui.ascale.constraints.ConstraintPanel;
+import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.scale.AbstractTrackDef;
 import org.barrelorgandiscovery.scale.ConstraintList;
@@ -217,7 +215,7 @@ public class JScaleEditorPanel extends JPanel {
 		spinneraxepremierepiste = (JSpinner) generalProperties
 				.getComponentByName("firstTrackAxis"); //$NON-NLS-1$
 		spinneraxepremierepiste.setModel(new SpinnerNumberModel(10.0, 0.0,
-				100.0, 0.1));
+				1000.0, 0.1));
 
 		spinneraxepremierepiste.setEditor(new JSpinner.NumberEditor(
 				spinneraxepremierepiste, "0.000")); //$NON-NLS-1$
@@ -235,7 +233,7 @@ public class JScaleEditorPanel extends JPanel {
 
 		spinnerentreaxepiste = (JSpinner) generalProperties
 				.getComponentByName("intertrackWidth"); //$NON-NLS-1$
-		spinnerentreaxepiste.setModel(new SpinnerNumberModel(5.0, 0.0, 30.0,
+		spinnerentreaxepiste.setModel(new SpinnerNumberModel(5.0, 0.0, 100.0,
 				0.1));
 
 		spinnerentreaxepiste.setEditor(new JSpinner.NumberEditor(
@@ -518,7 +516,7 @@ public class JScaleEditorPanel extends JPanel {
 				SLIDER_MIN_VALUE, SLIDER_MAX_VALUE, 10);
 
 		JButton zoomplus = new JButton(Messages.getString("GammeEditor.47")); //$NON-NLS-1$
-		zoomplus.setIcon(new ImageIcon(APrint.class.getResource("viewmag.png"))); //$NON-NLS-1$
+		zoomplus.setIcon(new ImageIcon(APrintNG.class.getResource("viewmag.png"))); //$NON-NLS-1$
 		zoomplus.setToolTipText(Messages.getString("GammeEditor.49")); //$NON-NLS-1$
 		zoomplus.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -540,7 +538,7 @@ public class JScaleEditorPanel extends JPanel {
 		tb.add(zoomplus);
 		JButton zoommoins = new JButton(Messages.getString("GammeEditor.50")); //$NON-NLS-1$
 		zoommoins
-				.setIcon(new ImageIcon(APrint.class.getResource("viewmag.png"))); //$NON-NLS-1$
+				.setIcon(new ImageIcon(APrintNG.class.getResource("viewmag.png"))); //$NON-NLS-1$
 		zoommoins.setToolTipText(Messages.getString("GammeEditor.52")); //$NON-NLS-1$
 		zoommoins.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -774,7 +772,7 @@ public class JScaleEditorPanel extends JPanel {
 	}
 
 	@SuppressWarnings(value = "unused")//$NON-NLS-1$
-	private void setupDefaultFolderForChooser(JFileChooser choose) {
+	private void setupDefaultFolderForChooser(APrintFileChooser choose) {
 		File default_folder = prefs.getLastGammeFolder();
 		if (default_folder != null && default_folder.exists()
 				&& default_folder.isDirectory())

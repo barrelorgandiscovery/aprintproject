@@ -46,6 +46,13 @@ public class RangeVisitor extends CommandVisitor {
     ymax = maxNotNan(ymax, displacementCommand.getY());
   }
   
+  @Override
+  public void visit(int index, CutToCommand cutToCommand) throws Exception {
+    xmin = minNotNan(xmin, cutToCommand.getX());
+    xmax = maxNotNan(xmax, cutToCommand.getX());
+    ymin = minNotNan(ymin, cutToCommand.getY());
+    ymax = maxNotNan(ymax, cutToCommand.getY());
+  }
   
   private double minNotNan(double a,double b) {
 	  if (Double.isNaN(a))

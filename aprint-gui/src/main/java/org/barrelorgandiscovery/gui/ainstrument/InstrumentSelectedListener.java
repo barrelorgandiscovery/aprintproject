@@ -9,6 +9,16 @@ import org.barrelorgandiscovery.instrument.Instrument;
  */
 public interface InstrumentSelectedListener {
 
+	/**
+	 * called when an instrument is selected
+	 * @param ins
+	 */
 	void instrumentSelected(Instrument ins);
+	
+	/**
+	 * called when an instrument is double clicked
+	 * @param ins
+	 */
+	void instrumentDoubleClicked(Instrument ins);
 
 }

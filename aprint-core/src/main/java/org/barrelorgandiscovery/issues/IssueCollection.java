@@ -52,7 +52,7 @@ public class IssueCollection implements Iterable<AbstractIssue> {
 	
 
 	/**
-	 * Recherche d'un ensemble de pbs associé à une zone donnée
+	 * Recherche d'un ensemble de pbs associÃ© Ã  une zone donnÃ©e
 	 * 
 	 * @param start
 	 * @param end

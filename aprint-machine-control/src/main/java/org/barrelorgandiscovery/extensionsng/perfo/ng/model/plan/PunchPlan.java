@@ -1,15 +1,11 @@
 package org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.barrelorgandiscovery.gui.atrace.Punch;
-import org.barrelorgandiscovery.tools.StreamsTools;
-
 /**
- * punch plan, fix the punch plan
+ * punch plan, containing the commands, and associated parameters for the optimizer
  * 
  * @author pfreydiere
  * 
@@ -22,7 +18,6 @@ public class PunchPlan {
 	private ArrayList<Command> commands = new ArrayList<>();
 
 	public PunchPlan() {
-
 	}
 
 	/**
@@ -40,13 +35,13 @@ public class PunchPlan {
 	/**
 	 * class that implements optimizer for punch
 	 */
-	private Class optimizerClass;
+	private Class<?> optimizerClass;
 
-	public void setOptimizerClass(Class optimizerClass) {
+	public void setOptimizerClass(Class<?> optimizerClass) {
 		this.optimizerClass = optimizerClass;
 	}
 
-	public Class getOptimizerClass() {
+	public Class<?> getOptimizerClass() {
 		return optimizerClass;
 	}
 
@@ -95,16 +90,6 @@ public class PunchPlan {
 		}
 		return null;
 	}
-	
-	public static PunchPlan createDefaultPunchPlan(Punch[] punches) {
-		PunchPlan pp = new PunchPlan();
-		for (Punch p : punches) {
-			if (p == null)
-				continue;
-			pp.commands.add(new PunchCommand(p.x, p.y));
-		}
-		return pp;
-	}
-	
+
 
 }

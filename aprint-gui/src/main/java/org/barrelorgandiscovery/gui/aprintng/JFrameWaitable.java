@@ -12,6 +12,11 @@ import org.barrelorgandiscovery.ui.animation.InfiniteProgressPanel;
 
 public class JFrameWaitable extends JFrame implements IAPrintWait{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1547398895400684254L;
+
 	private static Logger logger = Logger.getLogger(JFrameWaitable.class);
 	
 	/**

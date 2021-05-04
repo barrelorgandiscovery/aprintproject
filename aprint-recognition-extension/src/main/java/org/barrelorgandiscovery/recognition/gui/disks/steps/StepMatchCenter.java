@@ -17,7 +17,7 @@ import org.barrelorgandiscovery.gui.wizard.WizardStates;
 import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.states.ImageFileAndInstrument;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.states.INumericImage;
-import org.barrelorgandiscovery.recognition.gui.disks.steps.states.PointsAndEllipseParameters;
+import org.barrelorgandiscovery.recognition.gui.disks.steps.states.PointsAndEllipsisParameters;
 import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JDisplay;
 import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JEllipticLayer;
 import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JImageDisplayLayer;
@@ -51,18 +51,17 @@ public class StepMatchCenter extends BasePanelStep implements Step {
 
 	private StepStatusChangedListener stepStatusChangedListener;
 
-	private PointsAndEllipseParameters currentState;
+	private PointsAndEllipsisParameters currentState;
 
 	private String label;
 
 	private Repository2 repository;
 
-	public StepMatchCenter(String id, Step parent, String label,
-			JEllipticLayer ellipticLayer, Repository2 repository)
-			throws Exception {
+	public StepMatchCenter(String id, Step parent, String label, JEllipticLayer ellipticLayerToAdjustPointsOn,
+			Repository2 repository) throws Exception {
 		super(id, parent);
 		this.label = label;
-		this.ellipticLayer = ellipticLayer;
+		this.ellipticLayer = ellipticLayerToAdjustPointsOn;
 		this.repository = repository;
 		initComponent();
 
@@ -92,24 +91,21 @@ public class StepMatchCenter extends BasePanelStep implements Step {
 
 		setLayout(new BorderLayout());
 
-		FormPanel fp = new FormPanel(getClass().getResourceAsStream(
-				"diskandparameters.jfrm")); //$NON-NLS-1$
+		FormPanel fp = new FormPanel(getClass().getResourceAsStream("diskandparameters.jfrm")); //$NON-NLS-1$
 
 		add(fp, BorderLayout.CENTER);
 
 		FormAccessor formAccessor = fp.getFormAccessor();
 		formAccessor.replaceBean("canvas", display); //$NON-NLS-1$
 
-		CreatePointTool createPointTool = new CreatePointTool(display,
-				ellipticLayer);
+		CreatePointTool createPointTool = new CreatePointTool(display, ellipticLayer);
 
 		JViewingToolBar toolbar = new JViewingToolBar(display);
 
 		toolbar.addSeparator();
 
 		JToggleButton button = toolbar.addTool(createPointTool);
-		button.setIcon(new ImageIcon(CreatePointTool.class
-				.getResource("kedit.png"))); //$NON-NLS-1$
+		button.setIcon(new ImageIcon(CreatePointTool.class.getResource("kedit.png"))); //$NON-NLS-1$
 		button.setText(Messages.getString("StepMatchCenter.3")); //$NON-NLS-1$
 		button.setToolTipText(Messages.getString("StepMatchCenter.4")); //$NON-NLS-1$
 
@@ -123,30 +119,28 @@ public class StepMatchCenter extends BasePanelStep implements Step {
 		return label;
 	}
 
-	public void activate(Serializable state, WizardStates states,
-			StepStatusChangedListener stepListener) throws Exception {
+	public void activate(Serializable state, WizardStates states, StepStatusChangedListener stepListener)
+			throws Exception {
 
 		try {
-			currentState = (PointsAndEllipseParameters) state;
+			currentState = (PointsAndEllipsisParameters) state;
 		} catch (Exception ex) {
 			logger.error("error getting the state, creating a new one :" //$NON-NLS-1$
 					+ ex.getMessage(), ex);
 		}
 
 		if (currentState == null) {
-			currentState = new PointsAndEllipseParameters();
+			currentState = new PointsAndEllipsisParameters();
 		}
 
 		this.stepStatusChangedListener = stepListener;
 
 		// previous step
-		INumericImage previousStateImplementing = states
-				.getPreviousStateImplementing(this, INumericImage.class);
+		INumericImage previousStateImplementing = states.getPreviousStateImplementing(this, INumericImage.class);
 
 		assert previousStateImplementing != null;
 
-		BufferedImage bi = ImageTools.loadImage(previousStateImplementing
-				.getImageFile().toURL());
+		BufferedImage bi = ImageTools.loadImage(previousStateImplementing.getImageFile());
 		imageDisplayLayer.setImageToDisplay(bi);
 		if (currentState.points != null) {
 			ellipticLayer.clear();
@@ -155,15 +149,14 @@ public class StepMatchCenter extends BasePanelStep implements Step {
 			}
 		}
 
-		if (currentState.ellipseParameters != null) {
-			ellipticLayer.setEllipseParameters(currentState.ellipseParameters);
+		if (currentState.outerEllipseParameters != null) {
+			ellipticLayer.setEllipseParameters(currentState.outerEllipseParameters);
 		}
 
 		if (ellipticLayer instanceof JDiskTracksCorrectedLayer) {
 			// previous step
-			ImageFileAndInstrument previousInstrumentChoice = states
-					.getPreviousStateImplementing(this,
-							ImageFileAndInstrument.class);
+			ImageFileAndInstrument previousInstrumentChoice = states.getPreviousStateImplementing(this,
+					ImageFileAndInstrument.class);
 			assert previousInstrumentChoice != null;
 
 			String instrumentName = previousInstrumentChoice.instrumentName;
@@ -176,11 +169,35 @@ public class StepMatchCenter extends BasePanelStep implements Step {
 
 			((JDiskTracksCorrectedLayer) ellipticLayer).setScale(scale);
 
-			PointsAndEllipseParameters pdiskparameters = states
-					.getPreviousStateImplementing(this,
-							PointsAndEllipseParameters.class);
-			((JDiskTracksCorrectedLayer) ellipticLayer)
-					.setRealCenter(pdiskparameters.ellipseParameters.centre);
+			PointsAndEllipsisParameters pdiskparameters = states.getPreviousStateImplementing(this,
+					PointsAndEllipsisParameters.class);
+
+			if (currentState.outerEllipseParameters != null)
+				((JDiskTracksCorrectedLayer) ellipticLayer).setRealCenter(currentState.outerEllipseParameters.centre);
+
+		} else if (ellipticLayer instanceof J2EllipticTracksLayer) {
+
+			// previous step
+			ImageFileAndInstrument previousInstrumentChoice = states.getPreviousStateImplementing(this,
+					ImageFileAndInstrument.class);
+			assert previousInstrumentChoice != null;
+
+			String instrumentName = previousInstrumentChoice.instrumentName;
+			assert StringTools.nullIfEmpty(instrumentName) != null;
+
+			Instrument ins = repository.getInstrument(instrumentName);
+			assert ins != null;
+
+			Scale scale = ins.getScale();
+
+			PointsAndEllipsisParameters pdiskparameters = states.getPreviousStateImplementing(this,
+					PointsAndEllipsisParameters.class);
+			
+			((J2EllipticTracksLayer) ellipticLayer).setScale(scale);
+			((J2EllipticTracksLayer) ellipticLayer).setExternalEllipse(pdiskparameters.outerEllipseParameters);
+			
+			
+			
 
 		}
 
@@ -191,10 +208,16 @@ public class StepMatchCenter extends BasePanelStep implements Step {
 	public Serializable unActivateAndGetSavedState() throws Exception {
 		this.stepStatusChangedListener = null;
 
-		currentState.ellipseParameters = ellipticLayer
-				.getCurrentEllipseParameters();
-		currentState.points = new ArrayList<Rectangle2D.Double>(
-				ellipticLayer.getGraphics());
+		if (ellipticLayer instanceof JDiskTracksCorrectedLayer) {
+			currentState.outerEllipseParameters = ellipticLayer.getCurrentEllipseParameters();
+			currentState.points = new ArrayList<Rectangle2D.Double>(ellipticLayer.getGraphics());
+
+		} else if (ellipticLayer instanceof J2EllipticTracksLayer) {
+			J2EllipticTracksLayer l = (J2EllipticTracksLayer)ellipticLayer;
+			currentState.outerEllipseParameters = l.getExternalEllipse();
+			currentState.points = new ArrayList<Rectangle2D.Double>(ellipticLayer.getGraphics());
+			currentState.innerEllipseParameters = l.getCurrentEllipseParameters();
+		}
 
 		return currentState;
 	}
@@ -203,8 +226,7 @@ public class StepMatchCenter extends BasePanelStep implements Step {
 		if (ellipticLayer.getCurrentEllipseParameters() == null)
 			return false;
 
-		if (ellipticLayer.getGraphics() == null
-				|| ellipticLayer.getGraphics().size() < 5)
+		if (ellipticLayer.getGraphics() == null || ellipticLayer.getGraphics().size() < 5)
 			return false;
 
 		return true;

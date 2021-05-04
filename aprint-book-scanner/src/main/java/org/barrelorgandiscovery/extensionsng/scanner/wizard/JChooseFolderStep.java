@@ -11,12 +11,13 @@ import java.io.Serializable;
 import java.util.regex.Pattern;
 
 import javax.swing.AbstractButton;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
 import org.apache.log4j.Logger;
-import org.barrelorgandiscovery.extensionsng.scanner.FamilyImageFolder;
+import org.barrelorgandiscovery.bookimage.FamilyImageFolder;
+import org.barrelorgandiscovery.bookimage.IFamilyImageSeeker;
+import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
 import org.barrelorgandiscovery.gui.wizard.BasePanelStep;
 import org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener;
 import org.barrelorgandiscovery.gui.wizard.WizardStates;
@@ -80,7 +81,7 @@ public class JChooseFolderStep extends BasePanelStep {
 				}
 				int result = c.showOpenDialog(JChooseFolderStep.this);
 				File selectedFolder = c.getSelectedFile();
-				if (selectedFolder != null && selectedFolder.isDirectory() && result == JFileChooser.APPROVE_OPTION) {
+				if (selectedFolder != null && selectedFolder.isDirectory() && result == APrintFileChooser.APPROVE_OPTION) {
 					logger.debug("open the folder " + selectedFolder);
 					folderChoosen = selectedFolder;
 					updateState();
@@ -163,7 +164,7 @@ public class JChooseFolderStep extends BasePanelStep {
 
 	private File folderChoosen = null;
 
-	private FamilyImageFolder perfoScanFolder = null;
+	private IFamilyImageSeeker perfoScanFolder = null;
 
 	private StepStatusChangedListener listener = null;
 
@@ -201,3 +202,5 @@ public class JChooseFolderStep extends BasePanelStep {
 		return folderChoosen;
 	}
 }
+
+

@@ -8,11 +8,18 @@ import java.net.URL;
 
 public class Model implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3033527503203652584L;
+	
 	private String name; // model name
 	private String label;
 	transient private BufferedImage modelImage; // image model, must be 128x128
+	
 	private URL modelUrl;
-
+	
+	
 	public Model(String name, String label, BufferedImage modelImage, URL stream) {
 		this.name = name;
 		this.label = label;

@@ -17,15 +17,15 @@ import org.barrelorgandiscovery.scale.PercussionDef;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.tools.StreamsTools;
 
-import com.sun.media.sound.ModelByteBuffer;
-import com.sun.media.sound.ModelPatch;
-import com.sun.media.sound.SF2Instrument;
-import com.sun.media.sound.SF2InstrumentRegion;
-import com.sun.media.sound.SF2Layer;
-import com.sun.media.sound.SF2LayerRegion;
-import com.sun.media.sound.SF2Region;
-import com.sun.media.sound.SF2Sample;
-import com.sun.media.sound.SF2Soundbank;
+import gervill.ModelByteBuffer;
+import gervill.ModelPatch;
+import gervill.SF2Instrument;
+import gervill.SF2InstrumentRegion;
+import gervill.SF2Layer;
+import gervill.SF2LayerRegion;
+import gervill.SF2Region;
+import gervill.SF2Sample;
+import gervill.SF2Soundbank;
 
 public class SBCreator {
 
@@ -181,21 +181,14 @@ public class SBCreator {
 		
 		SF2Layer layer = new SF2Layer(sb);
 
-		// Création d'un patch ...
+		// CrÃ©ation d'un patch ...
 		ModelPatch p = new ModelPatch(isPercussion ? 128 : 0, program, isPercussion); // bank, program ...
 		ins.setPatch(p);
 
-		List<SF2InstrumentRegion> regions = ins.getRegions();
-
-		SF2InstrumentRegion r = new SF2InstrumentRegion();
-		
-
-		List<SF2LayerRegion> regions2 = layer.getRegions();
-		
+		List<SF2InstrumentRegion> listInstrumentRegions = ins.getRegions();
 
 		layer.setName(layername); //$NON-NLS-1$
 
-		//ArrayList<SF2Sample> samples = new ArrayList<SF2Sample>();
 		for (int i = 0; i < mapping.length; i++) {
 			SampleMapping sampleMapping = mapping[i];
 
@@ -230,6 +223,7 @@ public class SBCreator {
 			sample.setData(new ModelByteBuffer(baos.toByteArray()));
 
 			SF2LayerRegion lr = new SF2LayerRegion();
+
 			lr.putBytes(SF2Region.GENERATOR_KEYRANGE, new byte[] {
 					(byte) sampleMapping.getFirstMidiCode(),
 					(byte) sampleMapping.getLastMidiCode() });
@@ -240,30 +234,26 @@ public class SBCreator {
 			/**
 			 * added for smooth the attacks of the instruments
 			 */
-			lr.putShort(SF2Region.GENERATOR_ATTACKVOLENV, (short)-7000); // -12000 par défaut
+			lr.putShort(SF2Region.GENERATOR_ATTACKVOLENV, (short)-12000); // -12000 par dÃ©faut
 			
-			
-			// lr.putInteger(SF2Region.GENERATOR_INITIALATTENUATION, -100);
-
-//			
-//			lr.putShort(  SF2Region.GENERATOR_SUSTAINVOLENV,(short) -100);
-//			lr.putShort(  SF2Region.GENERATOR_DECAYVOLENV,(short) -100);
-//			
-//			
-			
+			// parameters proposed by Yann Baraffe
+			lr.putShort(SF2Region.GENERATOR_RELEASEVOLENV, (short)-3500);
+			lr.putShort(SF2Region.GENERATOR_DECAYVOLENV, (short)-1);
+									
 			lr.setSample(sample);
-
-			regions2.add(lr);
-
-			r.setLayer(layer);
-
-			regions.add(r);
 			
-
+			layer.getRegions().add(lr);
+			
 			sb.addResource(sample);
-
+			
 		}
-
+		
+		SF2InstrumentRegion instrumentRegion = new SF2InstrumentRegion();
+		
+		instrumentRegion.setLayer(layer);
+		
+		listInstrumentRegions.add(instrumentRegion);
+		
 		sb.addResource(layer);
 		return ins;
 	}

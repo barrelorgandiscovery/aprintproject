@@ -15,6 +15,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import javax.swing.text.AttributeSet;
+import javax.swing.text.Position;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
@@ -34,16 +35,19 @@ public class ASyncConsoleOutput implements IScriptConsole {
 	public SimpleAttributeSet defaultAttributeSet = new SimpleAttributeSet();
 
 	private JTextPane outputArea;
-	
+
+	// this may be null
 	private IScriptContentGetter scriptContentGetter;
+
+	private int maxLines = 1000;
 
 	/**
 	 * 
 	 * @param outputArea
 	 * @param scriptContentGetter may be null
 	 */
-	public ASyncConsoleOutput(JTextPane outputArea,
-			IScriptContentGetter scriptContentGetter) {
+	public ASyncConsoleOutput(JTextPane outputArea, IScriptContentGetter scriptContentGetter) {
+		assert outputArea != null;
 		this.outputArea = outputArea;
 		this.scriptContentGetter = scriptContentGetter;
 	}
@@ -51,12 +55,10 @@ public class ASyncConsoleOutput implements IScriptConsole {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.barrelorgandiscovery.script.groovy.IScriptConsole#appendOutput(java
+	 * @see org.barrelorgandiscovery.script.groovy.IScriptConsole#appendOutput(java
 	 * .awt.Component, javax.swing.text.AttributeSet)
 	 */
-	public void appendOutput(Component component, AttributeSet style)
-			throws Exception {
+	public void appendOutput(Component component, AttributeSet style) throws Exception {
 		SimpleAttributeSet sas = new SimpleAttributeSet(defaultAttributeSet);
 		sas.addAttribute(StyleConstants.NameAttribute, "component"); //$NON-NLS-1$
 		StyleConstants.setComponent(sas, component);
@@ -66,37 +68,33 @@ public class ASyncConsoleOutput implements IScriptConsole {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.barrelorgandiscovery.script.groovy.IScriptConsole#appendOutput(javax
+	 * @see org.barrelorgandiscovery.script.groovy.IScriptConsole#appendOutput(javax
 	 * .swing.Icon, javax.swing.text.AttributeSet)
 	 */
-	public void appendOutput(final Icon icon, AttributeSet style)
-			throws Exception {
+	public void appendOutput(final Icon icon, AttributeSet style) throws Exception {
 		final SimpleAttributeSet sas = defaultAttributeSet;
 		sas.addAttribute(StyleConstants.NameAttribute, "icon"); //$NON-NLS-1$
 		StyleConstants.setIcon(sas, icon);
-
 		appendOutput(icon.toString(), sas);
-
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.barrelorgandiscovery.script.groovy.IScriptConsole#appendOutput(java
+	 * @see org.barrelorgandiscovery.script.groovy.IScriptConsole#appendOutput(java
 	 * .lang.String, javax.swing.text.AttributeSet)
 	 */
-	public void appendOutput(final String text, final AttributeSet style)
-			throws Exception {
+	public void appendOutput(final String text, final AttributeSet style) throws Exception {
 
 		Runnable r = new Runnable() {
 			public void run() {
 				try {
 
 					StyledDocument doc = outputArea.getStyledDocument();
-					doc.insertString(doc.getLength(), text, style);
-
+					doc.insertString(doc.getLength(),text, style);
+					outputArea.moveCaretPosition(doc.getLength());
+					outputArea.repaint();
+					
 				} catch (Exception ex) {
 					logger.error("outputError " + ex.getMessage(), ex);
 				}
@@ -114,12 +112,10 @@ public class ASyncConsoleOutput implements IScriptConsole {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.barrelorgandiscovery.script.groovy.IScriptConsole#appendOutputNl(
+	 * @see org.barrelorgandiscovery.script.groovy.IScriptConsole#appendOutputNl(
 	 * java.lang.String, javax.swing.text.AttributeSet)
 	 */
-	public void appendOutputNl(final String text, final AttributeSet style)
-			throws Exception {
+	public void appendOutputNl(final String text, final AttributeSet style) throws Exception {
 
 		Runnable r = new Runnable() {
 			public void run() {
@@ -127,8 +123,7 @@ public class ASyncConsoleOutput implements IScriptConsole {
 
 					StyledDocument doc = outputArea.getStyledDocument();
 					int len = doc.getLength();
-					boolean alreadyNewLine = (len == 0 || doc.getText(len - 1,
-							1) == "\n"); //$NON-NLS-1$
+					boolean alreadyNewLine = (len == 0 || doc.getText(len - 1, 1) == "\n"); //$NON-NLS-1$
 					doc.insertString(doc.getLength(), " \n", style); //$NON-NLS-1$
 					if (alreadyNewLine) {
 						doc.remove(len, 2); // windows hack to fix
@@ -153,8 +148,7 @@ public class ASyncConsoleOutput implements IScriptConsole {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * org.barrelorgandiscovery.script.groovy.IScriptConsole#appendOutput(java
+	 * @see org.barrelorgandiscovery.script.groovy.IScriptConsole#appendOutput(java
 	 * .lang.Throwable)
 	 */
 	public void appendOutput(Throwable t) throws Exception {
@@ -186,8 +180,8 @@ public class ASyncConsoleOutput implements IScriptConsole {
 
 			String ji = "([\\p{Alnum}_\\$][\\p{Alnum}_\\$]*)";
 
-			Pattern p = Pattern.compile("\\tat " + ji + "(\\." + ji + ")+\\((("
-					+ ji + "(\\.(java|groovy))?):(\\d+))\\)");
+			Pattern p = Pattern
+					.compile("\\tat " + ji + "(\\." + ji + ")+\\(((" + ji + "(\\.(java|groovy))?):(\\d+))\\)");
 
 			for (int i = 0; i < lines.length; i++) {
 				String line = lines[i];
@@ -204,8 +198,7 @@ public class ASyncConsoleOutput implements IScriptConsole {
 
 						try {
 
-							int errorline = Integer
-									.parseInt(fileNameAndLineNumber);
+							int errorline = Integer.parseInt(fileNameAndLineNumber);
 
 							if (errorline + 1 < scriptLine.length())
 								scriptLine = scriptLines[errorline + 1];
@@ -213,8 +206,7 @@ public class ASyncConsoleOutput implements IScriptConsole {
 
 						}
 
-						appendOutputNl("error line " + fileNameAndLineNumber
-								+ ">> " + scriptLine, s);
+						appendOutputNl("error line " + fileNameAndLineNumber + ">> " + scriptLine, s);
 
 					}
 				}

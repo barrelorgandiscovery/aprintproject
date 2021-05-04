@@ -85,16 +85,16 @@ public class ScaleParser implements LineParser {
 				int nopiste = Integer.parseInt(key);
 
 				AbstractTrackDef d = null;
-				// on regarde si la définition est une percussion
+				// on regarde si la dÃ©finition est une percussion
 				if (value.toLowerCase().startsWith("p")) { //$NON-NLS-1$
 
-					// on decoupe les éléments de la ligne (pour la lecture du
+					// on decoupe les Ã©lÃ©ments de la ligne (pour la lecture du
 					// retard et de la longueur)
 
 					String[] values = value.split(","); //$NON-NLS-1$
 
 					// c'est une percussion
-					// on lit le nombre acollé au "P"
+					// on lit le nombre acollÃ© au "P"
 					String nopercu = values[0].substring(1);
 					int codepercu = Integer.parseInt(nopercu);
 
@@ -118,7 +118,7 @@ public class ScaleParser implements LineParser {
 
 //					if (version == 0)
 //						codenotemidi -= 12; // dans la version 0, il y a un
-//					// problème d'octave
+//					// problÃ¨me d'octave
 //					// non c'est moi qui merde !!!
 
 					NoteDef nd = new NoteDef(codenotemidi,

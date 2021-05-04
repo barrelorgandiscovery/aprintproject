@@ -1,8 +1,11 @@
 package org.barrelorgandiscovery.gui.ainstrument;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 import javax.sound.sampled.AudioFormat;
@@ -20,35 +23,40 @@ public class GUIInstrumentTools {
 
 	private static Logger logger = Logger.getLogger(GUIInstrumentTools.class);
 
-	public static AudioFormat TARGET_FORMAT = new AudioFormat(44000.0f, 16, 1,
-			true, false);
+	public static AudioFormat TARGET_FORMAT = new AudioFormat(44000.0f, 16, 1, true, false);
 
-	public static SoundSample loadWavFile(File wavFile) throws Exception {
-
+	/**
+	 * loadwav file from stream
+	 * 
+	 * @param wavStream the stream
+	 * @param name
+	 * @return
+	 * @throws Exception
+	 */
+	public static SoundSample loadWavFile(InputStream wavStream, String name) throws Exception {
+		assert wavStream != null;
+		assert name != null;
+		assert !name.isEmpty();
 		try {
 
 			// perhaps a conversion to be done ... OK Done !!
 
-			AudioInputStream ais = AudioSystem.getAudioInputStream(wavFile);
+			AudioInputStream ais = AudioSystem.getAudioInputStream(new BufferedInputStream(wavStream));
 
 			logger.debug("convert wav ..."); //$NON-NLS-1$
 			AudioFormat f = ais.getFormat();
 			System.out.println(Messages.getString("JPatchEditor.11") + f); //$NON-NLS-1$
 
-			AudioInputStream targetInputStream = AudioSystem
-					.getAudioInputStream(TARGET_FORMAT, ais);
+			AudioInputStream targetInputStream = AudioSystem.getAudioInputStream(TARGET_FORMAT, ais);
 
 			SoundSample ss;
 			File tempFile = File.createTempFile("tmp", "wav"); //$NON-NLS-1$ //$NON-NLS-2$
 
-			StreamsTools.copyStream(targetInputStream, new FileOutputStream(
-					tempFile));
+			StreamsTools.copyStream(targetInputStream, new FileOutputStream(tempFile));
 
 			// AudioSystem.write(targetInputStream, Type.WAVE, tempFile);
 
-			ss = new SoundSample(wavFile.getName(), -1,
-					new ManagedAudioInputStream(tempFile, TARGET_FORMAT,
-							tempFile.length()));
+			ss = new SoundSample(name, -1, new ManagedAudioInputStream(tempFile, TARGET_FORMAT, tempFile.length()));
 
 			return ss;
 
@@ -59,6 +67,20 @@ public class GUIInstrumentTools {
 	}
 
 	/**
+	 * load wav from file,
+	 * 
+	 * @param wavFile
+	 * @return
+	 * @throws Exception
+	 */
+	public static SoundSample loadWavFile(File wavFile) throws Exception {
+		assert wavFile != null;
+		assert wavFile.exists();
+		FileInputStream stream = new FileInputStream(wavFile);
+		return loadWavFile(stream, wavFile.getName());
+	}
+
+	/**
 	 * Adjust the volume ...
 	 * 
 	 * @param ais
@@ -66,16 +88,14 @@ public class GUIInstrumentTools {
 	 * @return
 	 * @throws Exception
 	 */
-	public static ManagedAudioInputStream adjust(AudioInputStream ais,
-			float factor, ProgressIndicator pi) throws Exception {
+	public static ManagedAudioInputStream adjust(AudioInputStream ais, float factor, ProgressIndicator pi)
+			throws Exception {
 
 		File newCroppedFile = File.createTempFile("adjusttmp", "tmp"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		logger.debug("new adjust temporary file :"
-				+ newCroppedFile.getAbsolutePath());
+		logger.debug("new adjust temporary file :" + newCroppedFile.getAbsolutePath());
 
-		OutputStream fos = new BufferedOutputStream(new FileOutputStream(
-				newCroppedFile), 100000);
+		OutputStream fos = new BufferedOutputStream(new FileOutputStream(newCroppedFile), 100000);
 		try {
 			byte[] chunk = new byte[10000];
 
@@ -99,12 +119,12 @@ public class GUIInstrumentTools {
 					int y = (b1 + 256 * (int) b2);
 
 					int newy = (int) ((double) y * factor);
-					if (newy > Short.MAX_VALUE ) {
-						newy = Short.MAX_VALUE ;
+					if (newy > Short.MAX_VALUE) {
+						newy = Short.MAX_VALUE;
 					}
 
-					if (newy < Short.MIN_VALUE ) {
-						newy = Short.MIN_VALUE ;
+					if (newy < Short.MIN_VALUE) {
+						newy = Short.MIN_VALUE;
 					}
 
 					fos.write(newy);
@@ -116,8 +136,8 @@ public class GUIInstrumentTools {
 		} finally {
 			fos.close();
 		}
-		ManagedAudioInputStream mas = new ManagedAudioInputStream(
-				newCroppedFile, ais.getFormat(), newCroppedFile.length());
+		ManagedAudioInputStream mas = new ManagedAudioInputStream(newCroppedFile, ais.getFormat(),
+				newCroppedFile.length());
 
 		return mas;
 
@@ -130,15 +150,13 @@ public class GUIInstrumentTools {
 	 * @param end
 	 * @throws Exception
 	 */
-	public static ManagedAudioInputStream crop(AudioInputStream ais,
-			long start, long end) throws Exception {
+	public static ManagedAudioInputStream crop(AudioInputStream ais, long start, long end) throws Exception {
 		logger.debug("crop " + start + "->" + end); //$NON-NLS-1$ //$NON-NLS-2$
 
 		File newCroppedFile = File.createTempFile("croptmp", "tmp"); //$NON-NLS-1$ //$NON-NLS-2$
 		// newCroppedFile.deleteOnExit();
 
-		OutputStream fos = new BufferedOutputStream(new FileOutputStream(
-				newCroppedFile), 100000);
+		OutputStream fos = new BufferedOutputStream(new FileOutputStream(newCroppedFile), 100000);
 		try {
 
 			// go to the start of the stream ...
@@ -194,8 +212,8 @@ public class GUIInstrumentTools {
 		// new FileInputStream(newCroppedFile)), ais.getFormat(),
 		// newCroppedFile.length());
 
-		ManagedAudioInputStream mas = new ManagedAudioInputStream(
-				newCroppedFile, ais.getFormat(), newCroppedFile.length());
+		ManagedAudioInputStream mas = new ManagedAudioInputStream(newCroppedFile, ais.getFormat(),
+				newCroppedFile.length());
 
 		return mas;
 

@@ -100,7 +100,7 @@ public class RegisterSoundLink implements Serializable {
 				pipeStopGroup);
 
 		/**
-		 * Vérification des paramètres
+		 * VÃ©rification des paramÃ¨tres
 		 */
 
 		if (pipeStopGroup2 == null)
@@ -140,7 +140,7 @@ public class RegisterSoundLink implements Serializable {
 				pipestopgroup);
 
 		/**
-		 * Vérification des paramètres
+		 * VÃ©rification des paramÃ¨tres
 		 */
 
 		if (pipeStopGroup2 == null)

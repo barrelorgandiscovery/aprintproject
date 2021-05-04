@@ -84,14 +84,23 @@ public class JMessageBox extends JDialog implements ActionListener {
 		} else if (parent == null) {
 			JOptionPane.showMessageDialog(null, message);
 		} else {
-			throw new RuntimeException("implementation error "
-					+ parent.getClass().getName());
+			throw new RuntimeException("implementation error object passed for display "
+					+ parent.getClass().getName() + " is neither a component, frame or dialog");
 		}
 
 	}
 
+	/**
+	 * display error message
+	 * @param parent
+	 * @param t
+	 */
 	public static void showError(Object parent, Throwable t) {
-		showMessage(parent, "An error has been raised :" + t.getMessage()
+		String message = t.getMessage();
+		if (message == null) {
+			message = "";
+		}
+		showMessage(parent, "An error has been raised :" + message
 				+ "\n" + "Please see logs");
 	}
 

@@ -39,9 +39,14 @@ public class StatisticVisitor extends CommandVisitor {
 	@Override
 	public void visit(int index,DisplacementCommand displacementCommand) throws Exception {
 		computeLengthAndUpdateCurrentPos(displacementCommand);
-		
 	}
 
+	@Override
+	public void visit(int index,CutToCommand cutToCommand) throws Exception {
+		computeLengthAndUpdateCurrentPos(cutToCommand);
+	}
+
+	
 	public StringBuilder getReport() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(Messages.getString("StatisticVisitor.0")); //$NON-NLS-1$

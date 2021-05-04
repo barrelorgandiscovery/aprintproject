@@ -3,7 +3,7 @@ package org.barrelorgandiscovery.scale.diff;
 import org.barrelorgandiscovery.scale.eval.Note;
 
 /**
- * indique une différence de note entre les deux gammes
+ * indique une diffÃ©rence de note entre les deux gammes
  * 
  * @author pfreydiere
  * 

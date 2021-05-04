@@ -16,8 +16,8 @@ import javax.swing.ButtonGroup;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
@@ -26,13 +26,19 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
+import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.bookimage.BookImage;
+import org.barrelorgandiscovery.bookimage.ZipBookImage;
+import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
 import org.barrelorgandiscovery.gui.wizard.BasePanelStep;
 import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener;
 import org.barrelorgandiscovery.gui.wizard.WizardStates;
+import org.barrelorgandiscovery.images.books.tools.BookImageRecognitionTiledImage;
+import org.barrelorgandiscovery.images.books.tools.IFileFamilyTiledImage;
+import org.barrelorgandiscovery.images.books.tools.RecognitionTiledImage;
 import org.barrelorgandiscovery.recognition.gui.books.BackgroundTileImageProcessingThread;
-import org.barrelorgandiscovery.recognition.gui.books.RecognitionTiledImage;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.states.ImageFileAndInstrument;
 import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JDisplay;
 import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JTiledImageDisplayLayer;
@@ -58,444 +64,461 @@ import trainableSegmentation.WekaSegmentation;
  */
 public class StepModelChooseChoice extends BasePanelStep implements Step, Disposable {
 
-  /** */
-  private static final long serialVersionUID = 1203739446221221981L;
-
-  private static Logger logger = Logger.getLogger(StepModelChooseChoice.class);
-
-  private JDisplay display;
-  private JTiledImageDisplayLayer imageDisplayLayer;
-  private JTiledImageDisplayLayer modelpreviewImage;
-
-  private Model currentmodel;
-
-  private static final char[] waiters = new char[] {'-', '\\', '|', '/'};
-  private int currentWaiterCharIdx = 0;
-
-  private ScheduledExecutorService waiter;
-
-  /** custom recognition model */
-  private Model customModel;
+	/** */
+	private static final long serialVersionUID = 1203739446221221981L;
+
+	private static Logger logger = Logger.getLogger(StepModelChooseChoice.class);
+
+	private JDisplay display;
+	
+	private JTiledImageDisplayLayer imageDisplayLayer;
+	private JTiledImageDisplayLayer modelpreviewImage;
+	
+	RecognitionTiledImage modelAndElements;
 
-  /**
-   * constructor
-   *
-   * @param id
-   * @param parent
-   * @throws Exception
-   */
-  public StepModelChooseChoice(String id, Step parent) throws Exception {
-    super(id, parent);
-    initComponents();
+	private Model currentmodel;
 
-    waiter = Executors.newSingleThreadScheduledExecutor();
+	private static final char[] waiters = new char[] { '-', '\\', '|', '/' };
+	private int currentWaiterCharIdx = 0;
 
-    waiter.scheduleAtFixedRate(
-        new Runnable() {
-          @Override
-          public void run() {
-            try {
-              if (SwingUtilities.isEventDispatchThread()) {
-                changeProgressText();
-              } else {
-                SwingUtilities.invokeLater(
-                    new Runnable() {
-                      @Override
-                      public void run() {
-                        changeProgressText();
-                      }
-                    });
-              }
-            } catch (Exception ex) {
-
-            }
-          }
-        },
-        200,
-        200,
-        TimeUnit.MILLISECONDS);
-  }
-
-  protected void initComponents() throws Exception {
-
-    display = new JDisplay();
-    imageDisplayLayer = new JTiledImageDisplayLayer(display);
-    display.addLayer(imageDisplayLayer);
-
-    modelpreviewImage = new JTiledImageDisplayLayer(display);
-    display.addLayer(modelpreviewImage);
-
-    setLayout(new BorderLayout());
-
-    FormPanel fp = new FormPanel(getClass().getResourceAsStream("modelchoice.jfrm")); //$NON-NLS-1$
-
-    add(fp, BorderLayout.CENTER);
-
-    FormAccessor formAccessor = fp.getFormAccessor();
-
-    JPanel imagepreviewpanel = new JPanel();
-    imagepreviewpanel.setLayout(new BorderLayout());
-    imagepreviewpanel.add(display, BorderLayout.CENTER);
-
-    JViewingToolBar vt = new JViewingToolBar(display);
-
-    vt.addSeparator(new Dimension(50, 10));
-    vt.add(new JLabel(Messages.getString("StepModelChooseChoice.0"))); //$NON-NLS-1$
-    sl = new JSlider(JSlider.HORIZONTAL, 10, 90, 50);
-    sl.setToolTipText(Messages.getString("StepModelChooseChoice.1")); //$NON-NLS-1$
-    sl.setMaximumSize(new Dimension(100, 30));
-    sl.addChangeListener(
-        new ChangeListener() {
-          @Override
-          public void stateChanged(ChangeEvent e) {
-
-            double floatValue = 1.0 * sl.getValue() / 100;
-
-            changeModelLayerTransparency(floatValue);
-          }
-        });
-    vt.add(sl);
-
-    vt.add(new JLabel(Messages.getString("StepModelChooseChoice.2"))); //$NON-NLS-1$
-    progressBar = new JProgressBar(0, 100);
-    progressBar.setPreferredSize(new Dimension(200, 40));
-    vt.addSeparator();
-    vt.add(progressBar);
+	private ScheduledExecutorService waiter;
 
-    imagepreviewpanel.add(vt, BorderLayout.NORTH);
+	/** custom recognition model */
+	private Model customModel;
 
-    formAccessor.replaceBean("bookview", imagepreviewpanel); //$NON-NLS-1$
+	/**
+	 * constructor
+	 *
+	 * @param id
+	 * @param parent
+	 * @throws Exception
+	 */
+	public StepModelChooseChoice(String id, Step parent) throws Exception {
+		super(id, parent);
+		initComponents();
 
-    formAccessor.replaceBean("modellist", constructModelGUI()); //$NON-NLS-1$
-  }
+		waiter = Executors.newSingleThreadScheduledExecutor();
 
-  private BackgroundTileImageProcessingThread<Void> backgroundThread;
+		waiter.scheduleAtFixedRate(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					if (SwingUtilities.isEventDispatchThread()) {
+						changeProgressText();
+					} else {
+						SwingUtilities.invokeLater(new Runnable() {
+							@Override
+							public void run() {
+								changeProgressText();
+							}
+						});
+					}
+				} catch (Exception ex) {
 
-  // event related events
-  protected void modelChanged(final Model selectedModel) throws Exception {
+				}
+			}
+		}, 200, 200, TimeUnit.MILLISECONDS);
+	}
 
-    // launch recognition thread
+	protected void initComponents() throws Exception {
+
+		display = new JDisplay();
+		imageDisplayLayer = new JTiledImageDisplayLayer(display);
+		display.addLayer(imageDisplayLayer);
+
+		modelpreviewImage = new JTiledImageDisplayLayer(display);
+		display.addLayer(modelpreviewImage);
+
+		setLayout(new BorderLayout());
+
+		FormPanel fp = new FormPanel(getClass().getResourceAsStream("modelchoice.jfrm")); //$NON-NLS-1$
 
-    currentmodel = selectedModel;
+		add(fp, BorderLayout.CENTER);
+
+		FormAccessor formAccessor = fp.getFormAccessor();
 
-    RecognitionTiledImage ti = (RecognitionTiledImage) imageDisplayLayer.getImageToDisplay();
-    if (ti != null) {
+		JPanel imagepreviewpanel = new JPanel();
+		imagepreviewpanel.setLayout(new BorderLayout());
+		imagepreviewpanel.add(display, BorderLayout.CENTER);
+
+		JViewingToolBar vt = new JViewingToolBar(display);
+
+		vt.addSeparator(new Dimension(50, 10));
+		vt.add(new JLabel(Messages.getString("StepModelChooseChoice.0"))); //$NON-NLS-1$
+		sl = new JSlider(JSlider.HORIZONTAL, 10, 90, 50);
+		sl.setToolTipText(Messages.getString("StepModelChooseChoice.1")); //$NON-NLS-1$
+		sl.setMaximumSize(new Dimension(100, 30));
+		sl.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+
+				double floatValue = 1.0 * sl.getValue() / 100;
+
+				changeModelLayerTransparency(floatValue);
+			}
+		});
+		vt.add(sl);
+
+		vt.add(new JLabel(Messages.getString("StepModelChooseChoice.2"))); //$NON-NLS-1$
+		progressBar = new JProgressBar(0, 100);
+		progressBar.setPreferredSize(new Dimension(200, 40));
+		vt.addSeparator();
+		vt.add(progressBar);
+
+		imagepreviewpanel.add(vt, BorderLayout.NORTH);
+
+		formAccessor.replaceBean("bookview", imagepreviewpanel); //$NON-NLS-1$
+
+		formAccessor.replaceBean("modellist", constructModelGUI()); //$NON-NLS-1$
+	}
+
+	private BackgroundTileImageProcessingThread<Void> backgroundThread;
+
+	// event related events
+	protected void modelChanged(final Model selectedModel) throws Exception {
 
-      if (selectedModel != null) {
+		// launch recognition thread
 
-        if (backgroundThread != null) {
-          backgroundThread.cancel();
-        }
+		currentmodel = selectedModel;
 
-        progressBar.setValue(0);
-        progressBar.setStringPainted(true);
-        lastText = Messages.getString("StepModelChooseChoice.3"); //$NON-NLS-1$
-        changeProgressText();
+		IFileFamilyTiledImage ti = (IFileFamilyTiledImage) imageDisplayLayer.getImageToDisplay();
+		if (ti != null) {
 
-        BackgroundTileImageProcessingThread<Void> c =
-            new BackgroundTileImageProcessingThread<Void>(
-                ti,
-                new BackgroundTileImageProcessingThread.TiledProcessedListener() {
-                  @Override
-                  public <T> void tileProcessed(int index, T result) {
-                    SwingUtilities.invokeLater(
-                        new Runnable() {
-                          @Override
-                          public void run() {
+			if (selectedModel != null) {
 
-                            progressBar.setValue(
-                                (int) Math.ceil(backgroundThread.currentProgress() * 100));
+				if (backgroundThread != null) {
+					backgroundThread.cancel();
+				}
 
-                            if (currentStepListener != null) {
-                              currentStepListener.stepStatusChanged();
-                            }
-                            display.repaint();
-                          }
-                        });
-                  }
-                },
-                // nb of threads for processing
-                1); // for huge images
-        //(int) Math.ceil(Runtime.getRuntime().availableProcessors() / 2.0));
+				progressBar.setValue(0);
+				progressBar.setStringPainted(true);
+				lastText = Messages.getString("StepModelChooseChoice.3"); //$NON-NLS-1$
+				changeProgressText();
 
-        backgroundThread = c;
+				BackgroundTileImageProcessingThread<Void> c = new BackgroundTileImageProcessingThread<Void>(ti,
+						new BackgroundTileImageProcessingThread.TiledProcessedListener() {
+							@Override
+							public <T> void tileProcessed(int index, T result) {
+								SwingUtilities.invokeLater(new Runnable() {
+									@Override
+									public void run() {
 
-        c.start(
-            new BackgroundTileImageProcessingThread.TileProcessing<Void>() {
-              @Override
-              public Void process(int index, BufferedImage tile) throws Exception {
+										progressBar.setValue((int) Math.ceil(backgroundThread.currentProgress() * 100));
 
-                File outputTile = ti.constructImagePath(index, selectedModel.getName());
+										if (currentStepListener != null) {
+											currentStepListener.stepStatusChanged();
+										}
+										display.repaint();
+									}
+								});
+							}
 
-                if (!outputTile.exists()) // already computed ?
-                {
-                  // compute
-                  ImagePlus input = new ImagePlus();
-                  input.setImage(tile);
+							@Override
+							public void errorInProcessingTile(String errormsg) {
+								SwingUtilities.invokeLater(new Runnable() {
 
-                  WekaSegmentation ws = new WekaSegmentation(input);
-                  ws.loadClassifier(selectedModel.createInputStream());
+									@Override
+									public void run() {
+										JOptionPane.showMessageDialog(null, errormsg);
+									}
 
-                  ImagePlus r = ws.applyClassifier(input);
+								});
+							}
+						},
+						// nb of threads for processing
+						1); // for huge images
+				// (int) Math.ceil(Runtime.getRuntime().availableProcessors() / 2.0));
 
-                  ImageProcessor processor = r.getProcessor();
+				backgroundThread = c;
 
-                  ByteProcessor bp = processor.convertToByteProcessor();
+				c.start(new BackgroundTileImageProcessingThread.TileProcessing<Void>() {
+					@Override
+					public Void process(int index, BufferedImage tile) throws Exception {
 
-                  ImagePlus binary = new ImagePlus("", bp); //$NON-NLS-1$
-                  ij.IJ.save(binary, outputTile.getAbsolutePath());
-                }
+						assert modelAndElements != null;
+						File outputModelTile = modelAndElements.constructImagePath(index, selectedModel.getName());
+						if (!outputModelTile.exists()) // already computed ?
+						{
+							// compute
+							logger.debug("computing");
+							
+							ImagePlus input = new ImagePlus();
+							input.setImage(tile);
 
-                File outputTileBook =
-                    ti.constructImagePath(index, selectedModel.getName() + "_book"); //$NON-NLS-1$
-                if (!outputTileBook.exists()) {
-                  ImagePlus handled = IJ.openImage(outputTile.getAbsolutePath());
+							WekaSegmentation ws = new WekaSegmentation(input);
+							try {
+								ws.loadClassifier(selectedModel.createInputStream());
+							} catch (Exception ex) {
+								logger.error("error in loading model :" + selectedModel + " :" + ex.getMessage(), ex);
+								throw ex;
+							}
+							ImagePlus r = ws.applyClassifier(input);
 
-                  // estimate the pixel size
+							ImageProcessor processor = r.getProcessor();
+							processor.multiply(250);
 
-                  StructureElement se =
-                      new StructureElement(
-                          StructureElement.SQARE, 0, 8.0f, StructureElement.OFFSET0);
+							ByteProcessor bp = processor.convertToByteProcessor(true);
 
-                  MorphoProcessor mp = new MorphoProcessor(se);
+							ImagePlus binary = new ImagePlus("", bp); //$NON-NLS-1$
+							ij.IJ.save(binary, outputModelTile.getAbsolutePath());
+						}
 
-                  mp.close(handled.getProcessor());
+						File outputTileBook = ti.constructImagePath(index, selectedModel.getName() + "_book"); //$NON-NLS-1$
+						if (!outputTileBook.exists()) {
+							
+							logger.debug("constructing " + outputTileBook);
+							
+							ImagePlus handled = IJ.openImage(outputModelTile.getAbsolutePath());
 
-                  ij.IJ.save(handled, outputTileBook.getAbsolutePath());
-                }
+							// estimate the pixel size
 
-                return null;
-              }
-            });
+							StructureElement se = new StructureElement(StructureElement.SQARE, 0, 8.0f,
+									StructureElement.OFFSET0);
 
-        progressBar.setValue((int) (Math.ceil(c.currentProgress() * 100)));
+							MorphoProcessor mp = new MorphoProcessor(se);
 
-        RecognitionTiledImage mo =
-            new RecognitionTiledImage(
-                (RecognitionTiledImage) imageDisplayLayer.getImageToDisplay());
-        mo.setCurrentImageFamilyDisplay(selectedModel.getName());
+							mp.close(handled.getProcessor());
 
-        modelpreviewImage.setImageToDisplay(mo);
+							ij.IJ.save(handled, outputTileBook.getAbsolutePath());
+						}
 
-      } else {
+						return null;
+					}
+				});
 
-        modelpreviewImage.setImageToDisplay(null);
-      }
+				progressBar.setValue((int) (Math.ceil(c.currentProgress() * 100)));
 
-      if (currentStepListener != null) {
-        currentStepListener.stepStatusChanged();
-      }
+				modelAndElements.setCurrentImageFamilyDisplay(selectedModel.getName());
 
-      display.repaint();
-    }
-
-    // reinit the transparency
-    sl.setValue(50);
-    changeModelLayerTransparency(0.5);
-  }
-
-  private String lastText = Messages.getString("StepModelChooseChoice.6"); //$NON-NLS-1$
-
-  private void changeProgressText() {
-
-    BackgroundTileImageProcessingThread<Void> bt = backgroundThread;
-    if (bt != null && bt.isRunning()) {
-      currentWaiterCharIdx = (currentWaiterCharIdx + 1) % waiters.length;
-    }
-    progressBar.setString(lastText + "   " + waiters[currentWaiterCharIdx]); //$NON-NLS-1$
-  }
-
-  private JPanel constructModelGUI() throws Exception {
-    JPanel contains = new JPanel();
-    JPanel p = contains;
+				modelpreviewImage.setImageToDisplay(modelAndElements);
 
-    BoxLayout bl = new BoxLayout(p, BoxLayout.X_AXIS);
-    p.setLayout(bl);
+			} else {
 
-    // construct models
+				modelpreviewImage.setImageToDisplay(null);
+			}
 
-    ButtonGroup bg = new ButtonGroup();
+			if (currentStepListener != null) {
+				currentStepListener.stepStatusChanged();
+			}
+
+			display.repaint();
+		}
+
+		// reinit the transparency
+		sl.setValue(50);
+		changeModelLayerTransparency(0.5);
+	}
+
+	private String lastText = Messages.getString("StepModelChooseChoice.6"); //$NON-NLS-1$
+
+	private void changeProgressText() {
+
+		BackgroundTileImageProcessingThread<Void> bt = backgroundThread;
+		if (bt != null && bt.isRunning()) {
+			currentWaiterCharIdx = (currentWaiterCharIdx + 1) % waiters.length;
+		}
+		progressBar.setString(lastText + "   " + waiters[currentWaiterCharIdx]); //$NON-NLS-1$
+	}
 
-    Model[] list = ModelFactory.createModels();
+	private JPanel constructModelGUI() throws Exception {
+		JPanel contains = new JPanel();
+		JPanel p = contains;
 
-    for (int i = 0; i < list.length; i++) {
+		BoxLayout bl = new BoxLayout(p, BoxLayout.X_AXIS);
+		p.setLayout(bl);
 
-      final Model model = list[i];
+		// construct models
 
-      JPanel modelPanel = new JPanel();
-      modelPanel.setLayout(new BorderLayout());
+		ButtonGroup bg = new ButtonGroup();
 
-      JRadioButton rb = new JRadioButton();
-      rb.setText(model.getLabel());
-      if (model.getModelImage() != null) {
-        JLabel img = new JLabel();
-        img.setIcon(new ImageIcon(model.getModelImage()));
-        modelPanel.add(img, BorderLayout.CENTER);
-      }
+		Model[] list = ModelFactory.createModels();
 
-      rb.addActionListener(
-          new ActionListener() {
+		for (int i = 0; i < list.length; i++) {
 
-            @Override
-            public void actionPerformed(ActionEvent e) {
-              try {
-                modelChanged(model);
-              } catch (Exception ex) {
-                logger.error("error in selected event :" + ex.getMessage(), ex); //$NON-NLS-1$
-              }
-            }
-          });
-      modelPanel.add(rb, BorderLayout.SOUTH);
-      bg.add(rb);
-      p.add(modelPanel);
-    }
-
-  
-
-    // add custom model
-    JRadioButton rb = new JRadioButton();
-    rb.setText("Custom ..");
-    JPanel customModelPanel = new JPanel();
-    customModelPanel.setLayout(new BorderLayout());
-    JButton btn = new JButton("open ...");
-    btn.addActionListener(
-        (e) -> {
-          try {
-        	  loadCustomModel();
-        	  if (customModel != null) {
-        		  rb.setText(customModel.getName());
-        	  }
-          } catch (Exception ex) {
-            logger.error("error :" + ex.getMessage(), ex);
-          }
-        });
-
-    // open the model choose option if activated
-
-    customModelPanel.add(btn, BorderLayout.CENTER);
-    customModelPanel.add(rb, BorderLayout.SOUTH);
-    p.add(customModelPanel);
-   
-    rb.addActionListener(
-        new ActionListener() {
-
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            try {
-              if (customModel != null) {
-                modelChanged(customModel);
-              }
-            } catch (Exception ex) {
-              logger.error("error in selected event :" + ex.getMessage(), ex); //$NON-NLS-1$
-            }
-          }
-        });
-
-    return p;
-  }
-
-  @Override
-  public String getLabel() {
-    return Messages.getString("StepModelChooseChoice.9"); //$NON-NLS-1$
-  }
-
-  @Override
-  public String getDetails() {
-    return Messages.getString("StepModelChooseChoice.10"); //$NON-NLS-1$
-  }
-
-  StepStatusChangedListener currentStepListener;
-
-  private JProgressBar progressBar;
-
-  private JSlider sl;
-
-  @Override
-  public void activate(
-      Serializable state, WizardStates allStepsStates, StepStatusChangedListener stepListener)
-      throws Exception {
-
-    currentStepListener = stepListener;
-
-    // get image
-    ImageFileAndInstrument d =
-        allStepsStates.getPreviousStateImplementing(this, ImageFileAndInstrument.class);
-    if (d != null) {
-      File imageFile = d.diskFile;
-
-      RecognitionTiledImage ti = new RecognitionTiledImage(imageFile);
-      ti.constructTiles();
-
-      imageDisplayLayer.setImageToDisplay(ti);
-    }
-
-    if (state != null) {
-      assert state instanceof Model;
-      modelChanged((Model) state);
-    }
-  }
-
-  @Override
-  public Serializable unActivateAndGetSavedState() throws Exception {
-
-    if (backgroundThread != null) {
-      backgroundThread.cancel();
-    }
-    return currentmodel;
-  }
-
-  @Override
-  public boolean isStepCompleted() {
-    boolean done = currentmodel != null && progressBar.getValue() >= 100;
-    if (done) {
-      lastText = Messages.getString("StepModelChooseChoice.11"); //$NON-NLS-1$
-      changeProgressText();
-    }
-    return done;
-  }
-
-  private void changeModelLayerTransparency(double floatValue) {
-    modelpreviewImage.setTransparency(floatValue);
-    display.repaint();
-  }
-
-  /**
-   * load a custom model into customModel element
-   *
-   * @throws Exception
-   */
-  private void loadCustomModel() throws Exception {
-
-    JFileChooser fc = new JFileChooser();
-    int showOpenDialog = fc.showOpenDialog(this);
-    if (showOpenDialog == JFileChooser.APPROVE_OPTION) {
-      File file = fc.getSelectedFile();
-      if (file != null) {
-        customModel =
-            new Model(
-                file.getName(),
-                file.getName(),
-                new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB),
-                file.toURL());
-      }
-    }
-  }
-
-  @Override
-  public void dispose() {
-    if (waiter != null) {
-      waiter.shutdownNow();
-      waiter = null;
-    }
-
-    if (backgroundThread != null) {
-      backgroundThread.cancel();
-      backgroundThread = null;
-    }
-  }
-
-  @Override
-  public Icon getPageImage() {
-    return null;
-  }
+			final Model model = list[i];
+
+			JPanel modelPanel = new JPanel();
+			modelPanel.setLayout(new BorderLayout());
+
+			JRadioButton rb = new JRadioButton();
+			rb.setText(model.getLabel());
+			if (model.getModelImage() != null) {
+				JLabel img = new JLabel();
+				img.setIcon(new ImageIcon(model.getModelImage()));
+				modelPanel.add(img, BorderLayout.CENTER);
+			}
+
+			rb.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					try {
+						modelChanged(model);
+					} catch (Exception ex) {
+						logger.error("error in selected event :" + ex.getMessage(), ex); //$NON-NLS-1$
+					}
+				}
+			});
+			modelPanel.add(rb, BorderLayout.SOUTH);
+			bg.add(rb);
+			p.add(modelPanel);
+		}
+
+		// add custom model
+		JRadioButton rb = new JRadioButton();
+		rb.setText("Custom ..");
+		JPanel customModelPanel = new JPanel();
+		customModelPanel.setLayout(new BorderLayout());
+		JButton btn = new JButton("open ...");
+		btn.addActionListener((e) -> {
+			try {
+				loadCustomModel();
+				if (customModel != null) {
+					rb.setText(customModel.getName());
+				}
+			} catch (Exception ex) {
+				logger.error("error :" + ex.getMessage(), ex);
+			}
+		});
+
+		// open the model choose option if activated
+
+		customModelPanel.add(btn, BorderLayout.CENTER);
+		customModelPanel.add(rb, BorderLayout.SOUTH);
+		p.add(customModelPanel);
+
+		rb.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				try {
+					if (customModel != null) {
+						modelChanged(customModel);
+					}
+				} catch (Exception ex) {
+					logger.error("error in selected event :" + ex.getMessage(), ex); //$NON-NLS-1$
+				}
+			}
+		});
+
+		return p;
+	}
+
+	@Override
+	public String getLabel() {
+		return Messages.getString("StepModelChooseChoice.9"); //$NON-NLS-1$
+	}
+
+	@Override
+	public String getDetails() {
+		return Messages.getString("StepModelChooseChoice.10"); //$NON-NLS-1$
+	}
+
+	StepStatusChangedListener currentStepListener;
+
+	private JProgressBar progressBar;
+
+	private JSlider sl;
+
+	@Override
+	public void activate(Serializable state, WizardStates allStepsStates, StepStatusChangedListener stepListener)
+			throws Exception {
+
+		currentStepListener = stepListener;
+
+		// get image
+		ImageFileAndInstrument d = allStepsStates.getPreviousStateImplementing(this, ImageFileAndInstrument.class);
+		if (d != null) {
+			
+			assert d.diskFile != null;
+			
+			File imageFile = d.diskFile;
+
+			if (imageFile.getName().endsWith(BookImage.BOOKIMAGE_EXTENSION)) {
+
+				ZipBookImage z = new ZipBookImage(imageFile);
+
+				BookImageRecognitionTiledImage bookImageRecognitionTiledImage = new BookImageRecognitionTiledImage(z);
+
+				imageDisplayLayer.setImageToDisplay(bookImageRecognitionTiledImage);
+
+			} else {
+				RecognitionTiledImage ti = new RecognitionTiledImage(imageFile);
+				ti.constructTiles();
+
+				imageDisplayLayer.setImageToDisplay(ti);
+
+			}
+			
+			// write tiled image
+			this.modelAndElements = new RecognitionTiledImage(imageFile);
+
+		}
+
+		if (state != null) {
+			assert state instanceof Model;
+			modelChanged((Model) state);
+		}
+	}
+
+	@Override
+	public Serializable unActivateAndGetSavedState() throws Exception {
+
+		if (backgroundThread != null) {
+			backgroundThread.cancel();
+		}
+		return currentmodel;
+	}
+
+	@Override
+	public boolean isStepCompleted() {
+		boolean done = currentmodel != null && progressBar.getValue() >= 100;
+		if (done) {
+			lastText = Messages.getString("StepModelChooseChoice.11"); //$NON-NLS-1$
+			changeProgressText();
+		}
+		return done;
+	}
+
+	private void changeModelLayerTransparency(double floatValue) {
+		modelpreviewImage.setTransparency(floatValue);
+		display.repaint();
+	}
+
+	/**
+	 * load a custom model into customModel element
+	 *
+	 * @throws Exception
+	 */
+	private void loadCustomModel() throws Exception {
+
+		APrintFileChooser fc = new APrintFileChooser();
+		int showOpenDialog = fc.showOpenDialog(this);
+		if (showOpenDialog == APrintFileChooser.APPROVE_OPTION) {
+			AbstractFileObject file = fc.getSelectedFile();
+			if (file != null) {
+				String filename = file.getName().getBaseName();
+				customModel = new Model(filename, filename, new BufferedImage(10, 10, BufferedImage.TYPE_INT_ARGB),
+						file.getURL());
+			}
+		}
+	}
+
+	@Override
+	public void dispose() {
+		if (waiter != null) {
+			waiter.shutdownNow();
+			waiter = null;
+		}
+
+		if (backgroundThread != null) {
+			backgroundThread.cancel();
+			backgroundThread = null;
+		}
+	}
+
+	@Override
+	public Icon getPageImage() {
+		return null;
+	}
 }

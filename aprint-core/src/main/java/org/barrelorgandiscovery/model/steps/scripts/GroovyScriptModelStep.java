@@ -24,6 +24,12 @@ import org.codehaus.groovy.control.CompilerConfiguration;
 import groovy.lang.Binding;
 import groovy.lang.Script;
 
+/**
+ * Step handling scripting facilities
+ * 
+ * @author pfreydiere
+ *
+ */
 public class GroovyScriptModelStep extends ModelStep implements IModelStepContextAware {
 
 	/**
@@ -95,6 +101,7 @@ public class GroovyScriptModelStep extends ModelStep implements IModelStepContex
 
 		ModelParameter[] parameters = compiledScript.configureParameters();
 		if (parameters != null) {
+			// define the step for parameters
 			for (ModelParameter m : parameters) {
 				m.setStep(this);
 			}
@@ -157,6 +164,8 @@ public class GroovyScriptModelStep extends ModelStep implements IModelStepContex
 	 * null
 	 */
 	private ModelGroovyScript compiledScript;
+	
+	private ModelParameter[] configStageParameters;
 
 	private ModelParameter[] modelParameters;
 
@@ -184,7 +193,35 @@ public class GroovyScriptModelStep extends ModelStep implements IModelStepContex
 				return ((SinkSource)compiledScript).isSink();
 			}
 		}
+		
+		if (modelParameters != null) {
+			boolean hasOutParameters = false;
+			boolean hasInParameters = false;
+			for (ModelParameter p: modelParameters) {
+				if (p == null)
+					continue;
+				
+				if (p.isOut()) {
+					hasOutParameters = true;
+				}
+				
+				if (p.isIn()) {
+					hasInParameters = true;
+				}
+			}
+
+			if (hasInParameters && !hasOutParameters) {
+				return true;
+			}
+			
+		}
+		
+		
 		return false;
+	}
+	
+	public void evaluateScriptParameters() throws Exception {
+		ModelParameter[] parameters = compiledScript.configureParameters();
 	}
 
 	/**
@@ -257,5 +294,6 @@ public class GroovyScriptModelStep extends ModelStep implements IModelStepContex
 		}
 
 		compiledScript = (ModelGroovyScript) ret;
+
 	}
 }

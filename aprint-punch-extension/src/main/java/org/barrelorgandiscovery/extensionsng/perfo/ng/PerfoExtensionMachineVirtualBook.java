@@ -3,11 +3,14 @@ package org.barrelorgandiscovery.extensionsng.perfo.ng;
 import java.io.File;
 
 import org.apache.log4j.Logger;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.messages.Messages;
+import org.barrelorgandiscovery.extensions.ExtensionManager;
 import org.barrelorgandiscovery.extensions.ExtensionPoint;
 import org.barrelorgandiscovery.extensions.IExtension;
 import org.barrelorgandiscovery.extensions.SimpleExtensionPoint;
+import org.barrelorgandiscovery.extensionsng.perfo.gui.PunchLayer;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.messages.Messages;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.panel.wizard.JPunchWizard;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.panel.wizard.MachineParameterFactory;
 import org.barrelorgandiscovery.gui.aedit.IVirtualBookChangedListener;
 import org.barrelorgandiscovery.gui.aedit.JEditableVirtualBookComponent;
 import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
@@ -19,22 +22,16 @@ import org.barrelorgandiscovery.gui.aprintng.APrintNGVirtualBookFrame;
 import org.barrelorgandiscovery.gui.aprintng.extensionspoints.InformVirtualBookFrameExtensionPoint;
 import org.barrelorgandiscovery.gui.aprintng.extensionspoints.InitNGExtensionPoint;
 import org.barrelorgandiscovery.gui.aprintng.extensionspoints.VirtualBookFrameToolRegister;
-import org.barrelorgandiscovery.gui.atrace.PunchLayer;
 import org.barrelorgandiscovery.issues.IssueLayer;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
+import org.barrelorgandiscovery.tools.Disposable;
 import org.barrelorgandiscovery.ui.tools.ToolWindowTools;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 import org.noos.xing.mydoggy.DockedTypeDescriptor;
-import org.noos.xing.mydoggy.FloatingTypeDescriptor;
-import org.noos.xing.mydoggy.PushAwayMode;
 import org.noos.xing.mydoggy.ToolWindow;
 import org.noos.xing.mydoggy.ToolWindowAnchor;
 import org.noos.xing.mydoggy.ToolWindowType;
-import org.noos.xing.mydoggy.ToolWindowTypeDescriptor;
 import org.noos.xing.mydoggy.plaf.MyDoggyToolWindowManager;
-import org.noos.xing.mydoggy.plaf.ui.DockableDescriptor;
-
-import com.sun.media.jfxmediaimpl.MediaDisposer.Disposable;
 
 /**
  * Extension de perçage pour la machine à percer de gérard
@@ -88,7 +85,7 @@ public class PerfoExtensionMachineVirtualBook
 	}
 
 	public String getName() {
-		return Messages.getString("PerfoExtensionMachineVirtualBook.2");  //$NON-NLS-1$
+		return Messages.getString("PerfoExtensionMachineVirtualBook.2"); //$NON-NLS-1$
 	}
 
 	// cycle de vie
@@ -175,8 +172,15 @@ public class PerfoExtensionMachineVirtualBook
 	public void informVirtualBookFrame(APrintNGVirtualBookFrame frame) {
 		this.frame = frame;
 		try {
+
+			ExtensionManager extensionManager = new ExtensionManager(aprintref.getProperties().getAprintFolder(),
+					"extensionsng.properties" , ".machine");
+
+			MachineParameterFactory machineParameterFactory = new MachineParameterFactory(
+					extensionManager.getExtensions(getClass().getClassLoader()));
+
 			punchPanel = new JPunchWizard(resultPunchLayer, issuesPunchLayer, aprintref.getAsyncJobs(),
-					aprintref.getPrefsStorage(getName()), frame.getPianoRoll());
+					aprintref.getPrefsStorage(getName()), frame.getPianoRoll(), machineParameterFactory);
 
 			// register for changes on virtual book changes
 			JEditableVirtualBookComponent pianoRoll = (JEditableVirtualBookComponent) frame.getPianoRoll();
@@ -210,7 +214,7 @@ public class PerfoExtensionMachineVirtualBook
 
 		ToolWindowTools.defineProperties(tw);
 		// change width
-		DockedTypeDescriptor desc = (DockedTypeDescriptor)tw.getTypeDescriptor(ToolWindowType.DOCKED);
+		DockedTypeDescriptor desc = (DockedTypeDescriptor) tw.getTypeDescriptor(ToolWindowType.DOCKED);
 		desc.setDockLength(550);
 	}
 

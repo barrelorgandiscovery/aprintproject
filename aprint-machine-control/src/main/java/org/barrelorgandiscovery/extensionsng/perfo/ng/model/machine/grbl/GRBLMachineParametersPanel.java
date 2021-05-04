@@ -28,9 +28,9 @@ public class GRBLMachineParametersPanel extends JPanel {
 	/**
 	 * associated parameters
 	 */
-	private GRBLMachineParameters parameters;
+	private GRBLPunchMachineParameters parameters;
 
-	public GRBLMachineParametersPanel(GRBLMachineParameters parameters)
+	public GRBLMachineParametersPanel(GRBLPunchMachineParameters parameters)
 			throws Exception {
 		assert parameters != null;
 		this.parameters = parameters;
@@ -73,7 +73,6 @@ public class GRBLMachineParametersPanel extends JPanel {
 		
 		setLayout(new BorderLayout());
 		add(f, BorderLayout.CENTER);
-
 	}
 
 }

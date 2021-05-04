@@ -37,15 +37,18 @@ public class GradientDescent {
 		double epsilon = 1e-5;
 
 		Matrix origin = point.copy();
+		
 		double result = f.compute(origin);
+		
 
 		for (int i = 0; i < point.getRowDimension(); i++) {
 			Matrix pointCompute = point.copy();
+			
 			pointCompute.set(i, 0, pointCompute.get(i, 0) + epsilon);
 			double resultEpsilon = f.compute(pointCompute);
 			// partial derivative
-			double derive = (resultEpsilon - result) / epsilon;
-			origin.set(i, 0, origin.get(i, 0) - alpha * derive);
+			double deriveNorm = (resultEpsilon - result) / epsilon;
+			origin = origin.minus( pointCompute.minus(point).times(alpha * deriveNorm));
 		}
 
 		logger.debug("distance :" + f.compute(origin));

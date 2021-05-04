@@ -66,7 +66,7 @@ class RegisterSectionParsing {
 
 				assert o1.timestamp == o2.timestamp;
 
-				// on met les commandes reset après les autres pour le
+				// on met les commandes reset aprÃ¨s les autres pour le
 				// traitement
 				if (o1.rd instanceof RegisterSetCommandResetDef
 						&& o2.rd instanceof RegisterCommandStartDef)

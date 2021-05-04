@@ -94,21 +94,21 @@ public class RepositoryImpl implements Repository {
 	}
 
 	/**
-	 * Récupère l'instance du gestionnaire de gammes
+	 * RÃ©cupÃ¨re l'instance du gestionnaire de gammes
 	 */
 	public ScaleManager getScaleManager() {
 		return gm;
 	}
 
 	/**
-	 * Récupère l'instance du gestionnaire d'instrument
+	 * RÃ©cupÃ¨re l'instance du gestionnaire d'instrument
 	 */
 	public InstrumentManager getInstrumentManager() {
 		return im;
 	}
 
 	/**
-	 * Récupère l'instance du gestionnaire de transposition
+	 * RÃ©cupÃ¨re l'instance du gestionnaire de transposition
 	 */
 	public TransformationManager getTranspositionManager() {
 		return tm;

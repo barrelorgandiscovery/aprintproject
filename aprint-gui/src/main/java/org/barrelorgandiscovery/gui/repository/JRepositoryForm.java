@@ -3,26 +3,21 @@ package org.barrelorgandiscovery.gui.repository;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Iterator;
 
-import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JRadioButton;
-import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
+import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.editableinstrument.EditableInstrument;
 import org.barrelorgandiscovery.editableinstrument.EditableInstrumentConstants;
@@ -39,11 +34,11 @@ import org.barrelorgandiscovery.gaerepositoryclient.synchroreport.Synchronizatio
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
 import org.barrelorgandiscovery.gui.aprintng.APrintNG;
 import org.barrelorgandiscovery.gui.gaerepositoryclient.GaeConnectionPropertiesPanel;
-import org.barrelorgandiscovery.gui.gaerepositoryclient.GaeRepositoryClientConnection;
+import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
+import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.repository.Repository2;
 import org.barrelorgandiscovery.repository.httpxmlrepository.HttpXmlRepository;
-import org.barrelorgandiscovery.tools.FileNameExtensionFilter;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.SwingUtils;
 import org.barrelorgandiscovery.tools.streamstorage.FolderStreamStorage;
@@ -373,20 +368,20 @@ public class JRepositoryForm extends JAbstractRepositoryForm {
 	protected void importInstrument() {
 		try {
 
-			JFileChooser fc = new JFileChooser();
-			fc.setFileFilter(new FileNameExtensionFilter(
+			APrintFileChooser fc = new APrintFileChooser();
+			fc.setFileFilter(new VFSFileNameExtensionFilter(
 					Messages.getString("JRepositoryForm.10002"), //$NON-NLS-1$
 					EditableInstrumentConstants.INSTRUMENT_FILE_EXTENSION));
 
 			int sel = fc.showOpenDialog(JRepositoryForm.this);
-			if (sel == JFileChooser.APPROVE_OPTION) {
-				File file = fc.getSelectedFile();
+			if (sel == APrintFileChooser.APPROVE_OPTION) {
+				AbstractFileObject file = fc.getSelectedFile();
 
 				logger.debug("opening file " //$NON-NLS-1$
-						+ file.getAbsolutePath());
+						+ file.getName().toString());
 
 				EditableInstrumentStorage eis = new EditableInstrumentStorage();
-				FileInputStream fis = new FileInputStream(file);
+				InputStream fis = file.getInputStream();
 				try {
 					IEditableInstrument ei = eis.load(fis,
 							"importedinstrument");//$NON-NLS-1$

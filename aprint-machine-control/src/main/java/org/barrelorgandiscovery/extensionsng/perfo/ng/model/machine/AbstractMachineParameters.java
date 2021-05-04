@@ -23,7 +23,7 @@ public abstract class AbstractMachineParameters implements Serializable {
 
 
 	/**
-	 * create the associated machine instance linked to this parameters
+	 * Create the associated machine instance linked to this parameters
 	 * 
 	 * @return
 	 * @throws Exception
@@ -36,7 +36,7 @@ public abstract class AbstractMachineParameters implements Serializable {
 		String machineClassName = className.substring(0, className.length()
 				- PARAMETERS_CLASS_SUFFIX.length());
 
-		return (AbstractMachine) Class.forName(machineClassName).newInstance();
+		return (AbstractMachine)  getClass().getClassLoader().loadClass(machineClassName).newInstance();
 
 	}
 

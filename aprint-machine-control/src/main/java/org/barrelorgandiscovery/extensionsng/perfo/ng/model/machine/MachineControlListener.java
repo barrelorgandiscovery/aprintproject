@@ -24,6 +24,27 @@ public interface MachineControlListener {
 	 * @param mx machine x
 	 * @param my machine y
 	 */
-	public void currentMachinePosition(String status,double wx,double wy, double mx, double my);
+	public void currentMachinePosition(String status, double mx, double my);
+
+	/**
+	 * report the sent command
+	 * 
+	 * @param commandSent
+	 */
+	public void rawElementSent(String commandSent);
+
+	/**
+	 * report the raw command received
+	 * 
+	 * @param commandReceived
+	 */
+	public void rawElementReceived(String commandReceived);
+	
+	/**
+	 * 
+	 * @param commands
+	 */
+	public void informationReceived(String commands);
+	
 
 }

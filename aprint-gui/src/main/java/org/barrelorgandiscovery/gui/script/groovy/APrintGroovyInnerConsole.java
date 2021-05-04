@@ -1,18 +1,15 @@
 package org.barrelorgandiscovery.gui.script.groovy;
 
-import groovy.lang.Binding;
-
 import java.awt.BorderLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
@@ -20,13 +17,12 @@ import java.util.concurrent.Future;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.text.SimpleAttributeSet;
 
+import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.lf5.LF5Appender;
@@ -34,10 +30,14 @@ import org.barrelorgandiscovery.AsyncJobsManager;
 import org.barrelorgandiscovery.JobEvent;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
 import org.barrelorgandiscovery.gui.aprintng.APrintNGInternalFrame;
+import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
+import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.tools.FileNameExtensionFilter;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.StringTools;
+
+import groovy.lang.Binding;
 
 /**
  * APrint adapted console for book stuff manipulating
@@ -71,7 +71,7 @@ public class APrintGroovyInnerConsole extends APrintNGInternalFrame {
 	/**
 	 * The current opened file ...
 	 */
-	private File openedFile = null;
+	private AbstractFileObject openedFile = null;
 
 	/**
 	 * Async job manager
@@ -101,7 +101,7 @@ public class APrintGroovyInnerConsole extends APrintNGInternalFrame {
 		initComponents();
 	}
 
-	private void setOpenedFile(File f) {
+	private void setOpenedFile(AbstractFileObject f) {
 		setTitle(Messages.getString("APrintGroovyConsole.1") + (f != null ? "-" + f.getName() : "")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		this.openedFile = f;
 	}
@@ -116,22 +116,19 @@ public class APrintGroovyInnerConsole extends APrintNGInternalFrame {
 			public void actionPerformed(ActionEvent e) {
 				try {
 
-					JFileChooser fc = new JFileChooser();
-					fc.setFileFilter(new FileNameExtensionFilter("APrint Groovy Script", //$NON-NLS-1$
+					APrintFileChooser fc = new APrintFileChooser();
+					fc.setFileFilter(new VFSFileNameExtensionFilter("APrint Groovy Script", //$NON-NLS-1$
 							APRINTGROOVYSCRIPTEXTENSION));
 
-					fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+					fc.setFileSelectionMode(APrintFileChooser.FILES_ONLY);
 
 					if (openedFile != null) {
 						fc.setSelectedFile(openedFile);
-					} else if (props.getLastGroovyScriptFile() != null) {
-						fc.setSelectedFile(props.getLastGroovyScriptFile());
 					}
 
-					if (fc.showOpenDialog(APrintGroovyInnerConsole.this) == JFileChooser.APPROVE_OPTION) {
+					if (fc.showOpenDialog(APrintGroovyInnerConsole.this) == APrintFileChooser.APPROVE_OPTION) {
 
-						File result = fc.getSelectedFile();
-						props.setLastGroovyScriptFile(result);
+						AbstractFileObject result = fc.getSelectedFile();
 
 						openScript(result);
 
@@ -201,7 +198,7 @@ public class APrintGroovyInnerConsole extends APrintNGInternalFrame {
 							}
 						}
 
-						public void jobError(Exception ex) {
+						public void jobError(Throwable ex) {
 							try {
 								consolePanel.appendOutputNl("\n ERROR >> " //$NON-NLS-1$
 										+ ex.getMessage(), new SimpleAttributeSet());
@@ -298,14 +295,18 @@ public class APrintGroovyInnerConsole extends APrintNGInternalFrame {
 				return;
 			}
 
-			Writer w = new OutputStreamWriter(new FileOutputStream(openedFile), Charset.forName("UTF-8")); //$NON-NLS-1$
+			OutputStream ostream = openedFile.getOutputStream();
 			try {
-				w.write(consolePanel.getScriptContent());
-				logger.debug("file written ..."); //$NON-NLS-1$
+				Writer w = new OutputStreamWriter(ostream, Charset.forName("UTF-8")); //$NON-NLS-1$
+				try {
+					w.write(consolePanel.getScriptContent());
+					logger.debug("file written ..."); //$NON-NLS-1$
+				} finally {
+					w.close();
+				}
 			} finally {
-				w.close();
+				ostream.close();
 			}
-
 		} catch (Exception ex) {
 			logger.error("error in saving the script :" //$NON-NLS-1$
 					+ ex.getMessage(), ex);
@@ -315,22 +316,19 @@ public class APrintGroovyInnerConsole extends APrintNGInternalFrame {
 
 	private void saveAs() {
 		try {
-			JFileChooser fc = new JFileChooser();
-			fc.setFileFilter(new FileNameExtensionFilter("APrint Groovy Script", //$NON-NLS-1$
+			APrintFileChooser fc = new APrintFileChooser();
+			fc.setFileFilter(new VFSFileNameExtensionFilter("APrint Groovy Script", //$NON-NLS-1$
 					APRINTGROOVYSCRIPTEXTENSION));
 
-			File lastGroovyScriptFile = props.getLastGroovyScriptFile();
-			if (lastGroovyScriptFile != null)
-				fc.setSelectedFile(lastGroovyScriptFile);
+			if (fc.showSaveDialog(APrintGroovyInnerConsole.this) == APrintFileChooser.APPROVE_OPTION) {
 
-			if (fc.showSaveDialog(APrintGroovyInnerConsole.this) == JFileChooser.APPROVE_OPTION) {
-
-				File f = fc.getSelectedFile();
+				AbstractFileObject f = fc.getSelectedFile();
 				if (f == null)
 					return;
 
-				if (!f.getName().toLowerCase().endsWith("." + APRINTGROOVYSCRIPTEXTENSION)) //$NON-NLS-1$
-					f = new File(f.getParentFile(), f.getName() + "." //$NON-NLS-1$
+				String filename = f.getName().getBaseName();
+				if (!filename.toLowerCase().endsWith("." + APRINTGROOVYSCRIPTEXTENSION)) //$NON-NLS-1$
+					f = (AbstractFileObject) f.getFileSystem().resolveFile(f.getName().toString() + "." //$NON-NLS-1$
 							+ APRINTGROOVYSCRIPTEXTENSION);
 
 				if (f.exists()) {
@@ -339,12 +337,17 @@ public class APrintGroovyInnerConsole extends APrintNGInternalFrame {
 						return;
 					}
 				}
-				Writer w = new OutputStreamWriter(new FileOutputStream(f), Charset.forName("UTF-8")); //$NON-NLS-1$
+				OutputStream ostream = f.getOutputStream();
 				try {
-					w.write(consolePanel.getScriptContent());
-					logger.debug("file written ..."); //$NON-NLS-1$
+					Writer w = new OutputStreamWriter(ostream, Charset.forName("UTF-8")); //$NON-NLS-1$
+					try {
+						w.write(consolePanel.getScriptContent());
+						logger.debug("file written ..."); //$NON-NLS-1$
+					} finally {
+						w.close();
+					}
 				} finally {
-					w.close();
+					ostream.close();
 				}
 
 				setOpenedFile(f);
@@ -375,12 +378,15 @@ public class APrintGroovyInnerConsole extends APrintNGInternalFrame {
 	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public void openScript(File result) throws Exception {
-
-		StringBuffer sb = StringTools.loadUTF8FileContent(result);
-		setOpenedFile(result);
-		consolePanel.setScriptContent(sb.toString());
-
+	public void openScript(AbstractFileObject result) throws Exception {
+		InputStream istream = result.getInputStream();
+		try {
+			StringBuffer sb = StringTools.loadUTF8FileContent(istream);
+			setOpenedFile(result);
+			consolePanel.setScriptContent(sb.toString());
+		} finally {
+			istream.close();
+		}
 	}
 
 	public void setLoaderForScripts(ClassLoader loaderForScripts) {

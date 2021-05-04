@@ -30,7 +30,7 @@ public class ScaleParserV2 implements LineParser {
 
 	private String infos = null;
 	/**
-	 * tableau de définition des pistes
+	 * tableau de dÃ©finition des pistes
 	 */
 	private AbstractTrackDef[] notemidi;
 
@@ -47,18 +47,18 @@ public class ScaleParserV2 implements LineParser {
 	private String contact = null;
 
 	/**
-	 * liste des contraintes associées à la gamme ...
+	 * liste des contraintes associÃ©es Ã  la gamme ...
 	 */
 	private ConstraintList constraintlist = new ConstraintList();
 
 	/**
-	 * variable contenant le nom du jeu de registre utilisé pour la définition
+	 * variable contenant le nom du jeu de registre utilisÃ© pour la dÃ©finition
 	 * de la note
 	 */
 	private String currentregisterset = null;
 
 	/**
-	 * tableau de définition des jeux de registres
+	 * tableau de dÃ©finition des jeux de registres
 	 */
 	private PipeStopGroup[] registerset;
 
@@ -71,7 +71,7 @@ public class ScaleParserV2 implements LineParser {
 			if (value == null || value.length() == 0)
 				return;
 
-			// on passe en lowercase pour éviter les saisies difficiles ...
+			// on passe en lowercase pour Ã©viter les saisies difficiles ...
 			key = key.toLowerCase();
 			// value = value.toLowerCase();
 			value = value.replace("<EOL>", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -99,7 +99,7 @@ public class ScaleParserV2 implements LineParser {
 				logger.debug("version :" + value); //$NON-NLS-1$
 			} else if ("infos".equals(key)) { //$NON-NLS-1$
 				logger
-						.debug("lecture des informations associées à la gamme ..."); //$NON-NLS-1$
+						.debug("lecture des informations associÃ©es Ã  la gamme ..."); //$NON-NLS-1$
 				infos = value;
 			} else if ("minimuminterholelength".equals(key)) { //$NON-NLS-1$
 				logger.debug("lecture de la longueur minimum entre les trous"); //$NON-NLS-1$
@@ -119,11 +119,11 @@ public class ScaleParserV2 implements LineParser {
 				} else {
 					currentregisterset = value.toUpperCase();
 				}
-				// vérification de la déclaration préalable du jeu de registre
+				// vÃ©rification de la dÃ©claration prÃ©alable du jeu de registre
 
-				// la vérification est réalisé par l'objet Gamme ...
-				// une exception est levée s'il y a un problème dans la
-				// définition
+				// la vÃ©rification est rÃ©alisÃ© par l'objet Gamme ...
+				// une exception est levÃ©e s'il y a un problÃ¨me dans la
+				// dÃ©finition
 				// des registres ....
 
 			} else if ("registersetcount".equals(key)) { //$NON-NLS-1$
@@ -173,16 +173,16 @@ public class ScaleParserV2 implements LineParser {
 				int nopiste = Integer.parseInt(key);
 
 				AbstractTrackDef d = null;
-				// on regarde si la définition est une percussion
+				// on regarde si la dÃ©finition est une percussion
 				if (value.toLowerCase().startsWith("p")) { //$NON-NLS-1$
 
-					// on decoupe les éléments de la ligne (pour la lecture du
+					// on decoupe les Ã©lÃ©ments de la ligne (pour la lecture du
 					// retard et de la longueur)
 
 					String[] values = value.split(","); //$NON-NLS-1$
 
 					// c'est une percussion
-					// on lit le nombre acollé au "P"
+					// on lit le nombre acollÃ© au "P"
 					String nopercu = values[0].substring(1);
 					int codepercu = Integer.parseInt(nopercu);
 
@@ -204,7 +204,7 @@ public class ScaleParserV2 implements LineParser {
 					// c'est une note
 					int codenotemidi = MidiHelper.midiCode(value);
 					
-					codenotemidi += 12; // décalage vis à vis de l'implémentation
+					codenotemidi += 12; // dÃ©calage vis Ã  vis de l'implÃ©mentation
 					
 					
 					NoteDef nd = new NoteDef(codenotemidi, currentregisterset);

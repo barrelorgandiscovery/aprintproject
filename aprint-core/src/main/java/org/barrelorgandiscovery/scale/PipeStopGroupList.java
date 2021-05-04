@@ -63,7 +63,7 @@ public class PipeStopGroupList implements Serializable, Iterable<PipeStopGroup> 
 	}
 
 	/**
-	 * Supprime le registerset nommé
+	 * Supprime le registerset nommÃ©
 	 * 
 	 * @param registersetname
 	 */
@@ -93,7 +93,7 @@ public class PipeStopGroupList implements Serializable, Iterable<PipeStopGroup> 
 	}
 
 	/**
-	 * Recupère le registerset i
+	 * RecupÃ¨re le registerset i
 	 * 
 	 * @param i
 	 * @return
@@ -103,7 +103,7 @@ public class PipeStopGroupList implements Serializable, Iterable<PipeStopGroup> 
 	}
 
 	/**
-	 * Récupère un registerset par son nom
+	 * RÃ©cupÃ¨re un registerset par son nom
 	 * 
 	 * @param name
 	 * @return

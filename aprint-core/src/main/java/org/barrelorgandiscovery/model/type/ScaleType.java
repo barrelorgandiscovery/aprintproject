@@ -3,14 +3,15 @@ package org.barrelorgandiscovery.model.type;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
+import java.util.Base64;
+import java.util.Base64.Decoder;
+import java.util.Base64.Encoder;
 
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.model.ModelType;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.scale.io.ScaleIO;
-
-import sun.misc.BASE64Decoder;
-import sun.misc.BASE64Encoder;
+import org.barrelorgandiscovery.tools.Base64Tools;
 
 /**
  * Scale of a specific organ Permit to parametrize a scale for a given organ or
@@ -26,13 +27,8 @@ public class ScaleType implements ModelType, Serializable {
 	private JavaType inner = new JavaType(Scale.class);
 
 	public ScaleType(String serializedForm) throws Exception {
-
 		// read the Scale
-		BASE64Decoder base64Decoder = new BASE64Decoder();
-
-		scale = ScaleIO.readGamme(new ByteArrayInputStream(base64Decoder
-				.decodeBuffer(serializedForm)));
-
+		scale = ScaleIO.readGamme(new ByteArrayInputStream(Base64Tools.decode(serializedForm)));
 	}
 
 	public String serializedForm() throws Exception {
@@ -40,9 +36,7 @@ public class ScaleType implements ModelType, Serializable {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		ScaleIO.writeGamme(scale, baos);
 
-		BASE64Encoder base64Encoder = new BASE64Encoder();
-
-		return base64Encoder.encode(baos.toByteArray());
+		return new String(Base64Tools.encode(baos.toByteArray()));
 	}
 
 	public ScaleType(Scale scale) {
@@ -84,12 +78,11 @@ public class ScaleType implements ModelType, Serializable {
 	public String getName() {
 		return scale.getName();
 	}
-	
+
 	@Override
 	public String getLabel() {
 		String key = getName();
 		return Messages.getString(key);
 	}
-	
 
 }

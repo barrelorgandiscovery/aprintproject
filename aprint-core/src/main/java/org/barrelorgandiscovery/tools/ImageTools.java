@@ -8,10 +8,11 @@ import java.awt.MediaTracker;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.InputStream;
 import java.net.URL;
 
-import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
@@ -26,15 +27,39 @@ public class ImageTools {
 	/**
 	 * Load image and reduce it
 	 * 
-	 * @param imageUrl
+	 * @param imageUrl  the image url
 	 * @param maxwidth
 	 * @param maxheight
-	 * @return
+	 * @return the read buffered image
 	 * @throws Exception
 	 */
 	public static BufferedImage loadImageAndCrop(URL imageUrl, int maxwidth, int maxheight) throws Exception {
 		Image image = Toolkit.getDefaultToolkit().createImage(imageUrl);
 
+		JLabel l = new JLabel();
+		l.setIcon(new ImageIcon(image));
+		MediaTracker mt = new MediaTracker(l);
+		mt.waitForAll();
+
+		BufferedImage bi = crop(maxwidth, maxheight, image);
+
+		return bi;
+	}
+
+	/**
+	 * read image stream and crop (warn this method load all the image content in
+	 * memory)
+	 * 
+	 * @param imageFile
+	 * @param maxwidth
+	 * @param maxheight
+	 * @return
+	 * @throws Exception
+	 */
+	public static BufferedImage loadImageAndCrop(InputStream imageFile, int maxwidth, int maxheight) throws Exception {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		StreamsTools.copyStream(imageFile, baos);
+		Image image = Toolkit.getDefaultToolkit().createImage(baos.toByteArray());
 		JLabel l = new JLabel();
 		l.setIcon(new ImageIcon(image));
 		MediaTracker mt = new MediaTracker(l);
@@ -99,14 +124,11 @@ public class ImageTools {
 	/**
 	 * Load an image associated to a class ressource
 	 * 
-	 * @param associatedClass
-	 *            the associated class
-	 * @param resourcename
-	 *            the resource name
+	 * @param associatedClass the associated class
+	 * @param resourcename    the resource name
 	 * @return the image
-	 * @throws Exception
-	 *             an exception is raised if the resource is not found or if
-	 *             there is a probleme loading the resource
+	 * @throws Exception an exception is raised if the resource is not found or if
+	 *                   there is a probleme loading the resource
 	 */
 	public static BufferedImage loadImage(Class associatedClass, String resourcename) throws Exception {
 		if (associatedClass == null || resourcename == null) {
@@ -123,14 +145,11 @@ public class ImageTools {
 	/**
 	 * Load an image associated to a class ressource
 	 * 
-	 * @param associatedClass
-	 *            the associated class
-	 * @param resourcename
-	 *            the resource name
+	 * @param associatedClass the associated class
+	 * @param resourcename    the resource name
 	 * @return the image
-	 * @throws Exception
-	 *             an exception is raised if the resource is not found or if
-	 *             there is a probleme loading the resource
+	 * @throws Exception an exception is raised if the resource is not found or if
+	 *                   there is a probleme loading the resource
 	 */
 	public static BufferedImage loadImageIfExists(Class associatedClass, String resourcename) throws Exception {
 		if (associatedClass == null || resourcename == null) {
@@ -140,12 +159,11 @@ public class ImageTools {
 		URL resourceUrl = associatedClass.getResource(resourcename);
 		if (resourceUrl == null)
 			return null;
-		
+
 		assert resourceUrl != null;
 		return loadImage(resourceUrl);
 	}
-	
-	
+
 	/**
 	 * load an icon
 	 * 
@@ -165,6 +183,7 @@ public class ImageTools {
 
 	/**
 	 * load icon if exists
+	 * 
 	 * @param associatedClass
 	 * @param resourceName
 	 * @return
@@ -177,8 +196,7 @@ public class ImageTools {
 		}
 		return null;
 	}
-	
-	
+
 	public static BufferedImage loadImage(URL url) throws Exception {
 		if (url == null) {
 			throw new Exception("null image url passed for loading the image");
@@ -187,12 +205,17 @@ public class ImageTools {
 		Image image = kit.createImage(url);
 		return loadImage(image);
 	}
+	
+	public static BufferedImage loadImage(File file) throws Exception {
+		return loadImage(file.toURL());
+	}
 
 	public static BufferedImage loadImage(Image image) throws Exception {
 
-		if (image == null)
+		if (image == null) {
 			return null;
-
+		}
+		
 		JLabel l = new JLabel();
 		l.setIcon(new ImageIcon(image));
 		MediaTracker mt = new MediaTracker(l);

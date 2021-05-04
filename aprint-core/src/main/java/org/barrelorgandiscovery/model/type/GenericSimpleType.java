@@ -16,6 +16,11 @@ import org.barrelorgandiscovery.model.ModelType;
  */
 public class GenericSimpleType implements ModelType, Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3046674706122703851L;
+	
 	private Class genericType;
 	private Class[] components;
 

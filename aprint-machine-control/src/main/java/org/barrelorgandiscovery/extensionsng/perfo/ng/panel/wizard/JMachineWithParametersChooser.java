@@ -4,8 +4,12 @@ import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.InputStream;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
@@ -16,15 +20,16 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.extensions.IExtension;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachine;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.GUIMachineParametersRepository;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLMachineParameters;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.mock.MockMachineParameters;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLPunchMachineParameters;
 import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.prefs.PrefixedNamePrefsStorage;
 import org.barrelorgandiscovery.tools.JMessageBox;
+import org.barrelorgandiscovery.tools.StringTools;
 import org.barrelorgandiscovery.tools.SwingUtils;
 
 import com.jeta.forms.components.panel.FormPanel;
@@ -41,10 +46,16 @@ public class JMachineWithParametersChooser extends JPanel {
 	private IPrefsStorage preferences;
 
 	// by default
-	private AbstractMachineParameters selectedMachineParameters = new GRBLMachineParameters();
+	private AbstractMachineParameters selectedMachineParameters = new GRBLPunchMachineParameters();
 
-	public JMachineWithParametersChooser(IPrefsStorage ps) throws Exception {
+	private MachineParameterFactory machineFactory;
+
+	public JMachineWithParametersChooser(IPrefsStorage ps, MachineParameterFactory factory) throws Exception {
 		this.preferences = ps;
+
+		assert factory != null;
+		this.machineFactory = factory;
+
 		setLayout(new BorderLayout());
 		initComponents();
 	}
@@ -66,8 +77,11 @@ public class JMachineWithParametersChooser extends JPanel {
 	}
 
 	public PrefixedNamePrefsStorage constructMachinePreferenceStorage(AbstractMachineParameters gp) {
+
+		String machineLabelDomain = StringTools.toHex(gp.getLabelName());
+
 		PrefixedNamePrefsStorage pps = new PrefixedNamePrefsStorage(
-				STORAGE_MACHINE_PROPERTIES_DOMAIN + gp.getLabelName(), preferences);
+				STORAGE_MACHINE_PROPERTIES_DOMAIN + machineLabelDomain, preferences);
 		return pps;
 	}
 
@@ -78,21 +92,41 @@ public class JMachineWithParametersChooser extends JPanel {
 		FormPanel fp = new FormPanel(is);
 		add(fp, BorderLayout.CENTER);
 
-		GRBLMachineParameters gp = new GRBLMachineParameters();
-		try {
-			PrefixedNamePrefsStorage pps = constructMachinePreferenceStorage(gp);
-			gp.loadParameters(pps);
-		} catch (Exception ex) {
-			logger.error("error while loading the preference storage for machine :" //$NON-NLS-1$
-					+ ex.getMessage(), ex);
+//		GRBLPunchMachineParameters grblpunchpachineparameters = new GRBLPunchMachineParameters();
+//		try {
+//			PrefixedNamePrefsStorage pps = constructMachinePreferenceStorage(grblpunchpachineparameters);
+//			grblpunchpachineparameters.loadParameters(pps);
+//		} catch (Exception ex) {
+//			logger.error("error while loading the preference storage for machine :" //$NON-NLS-1$
+//					+ ex.getMessage(), ex);
+//		}
+
+		// default selected
+		// selectedMachineParameters = grblpunchpachineparameters;
+
+		AbstractMachineParameters[] allDiscoveredParameters = machineFactory.createAllMachineParameters();
+
+		if (allDiscoveredParameters != null) {
+			for (AbstractMachineParameters parameters : allDiscoveredParameters) {
+				// try load from storage, the parameters
+				try {
+					parameters.loadParameters(constructMachinePreferenceStorage(parameters));
+				} catch (Throwable t) {
+					logger.error(
+							"fail to load parameters for machine parameters : " + parameters + " : " + t.getMessage(),
+							t);
+				}
+
+			}
 		}
 
-		selectedMachineParameters = gp;
+		if (allDiscoveredParameters.length > 0) {
+			selectedMachineParameters = allDiscoveredParameters[0];
+		}
 
-		MockMachineParameters mockMachine = new MockMachineParameters();
-
-		MachineParameterDisplayer[] displayers = new MachineParameterDisplayer[] { new MachineParameterDisplayer(gp),
-				new MachineParameterDisplayer(mockMachine) };
+		MachineParameterDisplayer[] displayers = Arrays.stream(allDiscoveredParameters)
+				.map((p) -> new MachineParameterDisplayer(p)).collect(Collectors.toList())
+				.toArray(new MachineParameterDisplayer[0]);
 
 		machineCombo = fp.getComboBox("cbmachine"); //$NON-NLS-1$
 		machineCombo.setModel(new DefaultComboBoxModel<MachineParameterDisplayer>(displayers));
@@ -113,9 +147,10 @@ public class JMachineWithParametersChooser extends JPanel {
 
 					JPanel panelParameter = guiMachineParametersGUIRepository
 							.createMachineParameters(selectedMachineParameters);
-					
+
 					if (panelParameter == null) {
-						JOptionPane.showMessageDialog(JMachineWithParametersChooser.this,"No Parameters for this machine");
+						JOptionPane.showMessageDialog(JMachineWithParametersChooser.this,
+								"No Parameters for this machine");
 						return;
 					}
 
@@ -125,6 +160,20 @@ public class JMachineWithParametersChooser extends JPanel {
 					cp.add(panelParameter, BorderLayout.CENTER);
 					dialog.setSize(500, 300);
 					SwingUtils.center(dialog);
+
+					dialog.addWindowListener(new WindowAdapter() {
+						public void windowClosing(WindowEvent e) {
+							try {
+								// save parameters
+								selectedMachineParameters
+										.saveParameters(constructMachinePreferenceStorage(selectedMachineParameters));
+								logger.info("machine parameters saved ..");
+							} catch (Throwable t) {
+								logger.error("error in saving parameters :" + t.getMessage(), t);
+							}
+						};
+
+					});
 
 					dialog.setVisible(true);
 
@@ -163,7 +212,8 @@ public class JMachineWithParametersChooser extends JPanel {
 		FilePrefsStorage p = new FilePrefsStorage(new File("c:\\temp\\testmachinechoose.properties"));
 		p.load();
 
-		f.getContentPane().add(new JMachineWithParametersChooser(p), BorderLayout.CENTER);
+		f.getContentPane().add(new JMachineWithParametersChooser(p, new MachineParameterFactory(new IExtension[0])),
+				BorderLayout.CENTER);
 		f.setVisible(true);
 	}
 }

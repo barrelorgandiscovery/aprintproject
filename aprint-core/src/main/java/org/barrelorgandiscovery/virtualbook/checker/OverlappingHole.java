@@ -32,7 +32,7 @@ public class OverlappingHole implements Checker {
 	 */
 	public IssueCollection check(VirtualBook carton) throws Exception {
 
-		// Parcourt du carton pour rechercher les notes qui se téléscopent
+		// Parcourt du carton pour rechercher les notes qui se tÃ©lÃ©scopent
 
 		IssueCollection ic = new IssueCollection();
 

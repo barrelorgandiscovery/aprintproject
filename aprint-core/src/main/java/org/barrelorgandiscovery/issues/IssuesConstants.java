@@ -1,7 +1,7 @@
 package org.barrelorgandiscovery.issues;
 
 /**
- * Interface définissant les type d'erreurs sur le carton
+ * Interface dÃ©finissant les type d'erreurs sur le carton
  * 
  * @author Freydiere Patrice
  * 

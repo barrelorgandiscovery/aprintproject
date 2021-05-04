@@ -18,7 +18,7 @@ Function .onInit
         
         InitPluginsDir
         
-        File /oname=$PLUGINSDIR\splash.bmp "..\images\splash-aprint-studio-2017.bmp"
+        File /oname=$PLUGINSDIR\splash.bmp "..\images\splash-aprint-studio-2020-beta.bmp"
         #optional
         File /oname=$PLUGINSDIR\splash.wav "button-19.wav"
 
@@ -144,7 +144,8 @@ Section "!APrint Studio"
   
   ; purge the instrument cache directory
   RMDir /r "$APRINTDATAS\aprintstudio\private.cache"
-  
+  ; remove old extensions
+  Delete   "$APRINTDATAS\aprintstudio\*.extension"
   
   
 SectionEnd ; end the section
@@ -158,38 +159,31 @@ Section /o "Advanced - Source and Developper documentation"
 	
 SectionEnd ; end the section
 
-;Section /o "Extension - Acces Web au pilotage APrint Studio"
-;	SetOutPath "$DOCUMENTS\..\aprintstudio"
-;	File /r "..\offlineinstall-extensions\WebServer\*.*"
-;SectionEnd ; end the section
-
-;Section /o "Extension - Reconnaissance de disques cartons d'aristons"
-;	SetOutPath "$DOCUMENTS\..\aprintstudio"
-;	File /r "..\offlineinstall-extensions\DiskAndBookRecognition\*.*"	
-;SectionEnd ; end the section
-
 Section /o "Extension - Percage de cartons"
     CreateDirectory "$APRINTDATAS\aprintstudio"
 	SetOutPath "$APRINTDATAS\aprintstudio"
 	File /r "..\offlineinstall-extensions\Punch\*.*"
 SectionEnd ; end the section
 
+Section /o "Extension - Scan de cartons"
+    CreateDirectory "$APRINTDATAS"
+	SetOutPath "$APRINTDATAS\aprintstudio"
+	File /r "..\offlineinstall-extensions\Scan\*.*"
+SectionEnd ; end the section
+
 Section /o "Scripts"
     CreateDirectory "$APRINTDATAS\aprintstudio\quickscripts"
 	SetOutPath "$APRINTDATAS\aprintstudio\quickscripts"
 	File "officialscripts\*.aprintbookgroovyscript"
-
 SectionEnd
 
 Section /o "Scripts sample development (learning)"
     CreateDirectory "$APRINTDATAS\aprintstudio\quickscripts"
 	SetOutPath "$APRINTDATAS\aprintstudio\quickscripts"
 	File "officialscriptsdev\*.aprintbookgroovyscript"
-
 SectionEnd
 
 ;--------------------------------
-
 ; Uninstaller
 
 Section "Uninstall"

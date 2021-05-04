@@ -10,28 +10,28 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.awt.print.PrinterJob;
 import java.io.File;
-import java.io.FilenameFilter;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import javax.imageio.ImageIO;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 
+import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.gui.aprint.PrintPreview;
+import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
+import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.repository.Repository2;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.scale.importer.MidiBoekGammeImporter;
 import org.barrelorgandiscovery.scale.io.ScaleIO;
-import org.barrelorgandiscovery.tools.FileNameExtensionFilter;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
-import org.barrelorgandiscovery.virtualbook.transformation.LinearTransposition;
-import org.barrelorgandiscovery.virtualbook.transformation.TranspositionIO;
 
 /**
  * Standalone scale editor, for file based scales
@@ -45,8 +45,7 @@ public class StandAloneScaleEditor extends JFrame {
 	 */
 	private static final long serialVersionUID = -8484645796626431335L;
 
-	private static Logger logger = Logger
-			.getLogger(StandAloneScaleEditor.class);
+	private static Logger logger = Logger.getLogger(StandAloneScaleEditor.class);
 
 	private JMenuBar barredemenu;
 	private JMenu menuFile;
@@ -82,8 +81,7 @@ public class StandAloneScaleEditor extends JFrame {
 	 * 
 	 * @param owner
 	 */
-	public StandAloneScaleEditor(Frame owner, ScaleEditorPrefs prefs)
-			throws Exception {
+	public StandAloneScaleEditor(Frame owner, ScaleEditorPrefs prefs) throws Exception {
 		this(prefs);
 
 		if (owner != null) {
@@ -119,8 +117,7 @@ public class StandAloneScaleEditor extends JFrame {
 				menuFile.setText(Messages.getString("GammeEditor.7")); //$NON-NLS-1$
 
 				//
-				JMenuItem newScale = new JMenuItem(Messages
-						.getString("ScaleEditor.13")); //$NON-NLS-1$
+				JMenuItem newScale = new JMenuItem(Messages.getString("ScaleEditor.13")); //$NON-NLS-1$
 				newScale.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						newScale();
@@ -162,62 +159,55 @@ public class StandAloneScaleEditor extends JFrame {
 
 				menuFile.addSeparator();
 
-				JMenuItem exportAsImage = menuFile.add(Messages
-						.getString("ScaleEditor.15")); //$NON-NLS-1$
+				JMenuItem exportAsImage = menuFile.add(Messages.getString("ScaleEditor.15")); //$NON-NLS-1$
 				exportAsImage.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						try {
 
-							BufferedImage scalePicture = ScaleComponent
-									.createScaleImage(scaleEditorPanel
-											.getScale());
+							BufferedImage scalePicture = ScaleComponent.createScaleImage(scaleEditorPanel.getScale());
 
-							JFileChooser fileChooser = new JFileChooser();
-							fileChooser
-									.setFileFilter(new FileNameExtensionFilter(
-											Messages
-													.getString("ScaleEditor.16"), "png")); //$NON-NLS-1$ //$NON-NLS-2$
+							APrintFileChooser fileChooser = new APrintFileChooser();
+							fileChooser.setFileFilter(
+									new VFSFileNameExtensionFilter(Messages.getString("ScaleEditor.16"), "png")); //$NON-NLS-1$ //$NON-NLS-2$
 							fileChooser.setMultiSelectionEnabled(false);
 
 							if (fileChooser
-									.showSaveDialog(StandAloneScaleEditor.this) == JFileChooser.APPROVE_OPTION) {
-								File f = fileChooser.getSelectedFile();
-								if (!f.getName().endsWith(".png")) { //$NON-NLS-1$
-									f = new File(f.getParentFile(), f.getName()
-											+ ".png"); //$NON-NLS-1$
+									.showSaveDialog(StandAloneScaleEditor.this) == APrintFileChooser.APPROVE_OPTION) {
+								AbstractFileObject f = fileChooser.getSelectedFile();
+								String filename = f.getName().getBaseName();
+								if (!filename.toLowerCase().endsWith(".png")) { //$NON-NLS-1$
+									f = (AbstractFileObject) f.getFileSystem()
+											.resolveFile(f.getName().toString() + ".png"); //$NON-NLS-1$
 								}
 
 								logger.debug("saving file :" //$NON-NLS-1$
-										+ f.getAbsolutePath());
+										+ f.getName().toString());
 
-								ImageIO.write(scalePicture, "PNG", f); //$NON-NLS-1$
-
-								JMessageBox
-										.showMessage(
-												StandAloneScaleEditor.this,
-												Messages
-														.getString("ScaleEditor.22") + f.getAbsolutePath() //$NON-NLS-1$
-														+ Messages
-																.getString("ScaleEditor.23")); //$NON-NLS-1$
+								OutputStream outputStream = f.getOutputStream();
+								try {
+									ImageIO.write(scalePicture, "PNG", outputStream); //$NON-NLS-1$
+								} finally {
+									outputStream.close();
+								}
+								JMessageBox.showMessage(StandAloneScaleEditor.this,
+										Messages.getString("ScaleEditor.22") + f.getName().toString() //$NON-NLS-1$
+												+ Messages.getString("ScaleEditor.23")); //$NON-NLS-1$
 							}
 
 						} catch (Exception ex) {
-							logger.error(
-									"error in saving image of the scale ...", //$NON-NLS-1$
+							logger.error("error in saving image of the scale ...", //$NON-NLS-1$
 									ex);
 							BugReporter.sendBugReport();
 
-							JMessageBox.showMessage(StandAloneScaleEditor.this,
-									Messages.getString("ScaleEditor.25") //$NON-NLS-1$
-											+ ex.getMessage());
+							JMessageBox.showMessage(StandAloneScaleEditor.this, Messages.getString("ScaleEditor.25") //$NON-NLS-1$
+									+ ex.getMessage());
 						}
 					}
 				});
 
 				menuFile.addSeparator();
 
-				JMenuItem importFromMidiBoek = new JMenuItem(
-						Messages.getString("StandAloneScaleEditor.100")); //$NON-NLS-1$
+				JMenuItem importFromMidiBoek = new JMenuItem(Messages.getString("StandAloneScaleEditor.100")); //$NON-NLS-1$
 				importFromMidiBoek.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
 						importFromMidiBoek();
@@ -270,8 +260,7 @@ public class StandAloneScaleEditor extends JFrame {
 				menuAideEnLigne.setText(Messages.getString("GammeEditor.15")); //$NON-NLS-1$
 				menuAideEnLigne.addActionListener(new ActionListener() {
 					public void actionPerformed(ActionEvent e) {
-						JMessageBox.showMessage(StandAloneScaleEditor.this,
-								Messages.getString("GammeEditor.16")); //$NON-NLS-1$
+						JMessageBox.showMessage(StandAloneScaleEditor.this, Messages.getString("GammeEditor.16")); //$NON-NLS-1$
 					}
 				});
 				itemaide.add(menuAideEnLigne);
@@ -296,7 +285,7 @@ public class StandAloneScaleEditor extends JFrame {
 	 * This member remember the opened scale to ask the user their wishes.
 	 */
 	private Scale lastLoadedOrSavedScale = null;
-	private File lastLoadedOrSavedFile = null;
+	private AbstractFileObject lastLoadedOrSavedFile = null;
 
 	private JScaleEditorPanel scaleEditorPanel;
 
@@ -310,8 +299,7 @@ public class StandAloneScaleEditor extends JFrame {
 
 		} catch (Exception ex) {
 			logger.error("newScale", ex); //$NON-NLS-1$
-			JMessageBox.showMessage(this,
-					Messages.getString("ScaleEditor.14") + ex.getMessage()); //$NON-NLS-1$
+			JMessageBox.showMessage(this, Messages.getString("ScaleEditor.14") + ex.getMessage()); //$NON-NLS-1$
 			BugReporter.sendBugReport();
 		}
 	}
@@ -324,21 +312,25 @@ public class StandAloneScaleEditor extends JFrame {
 
 			// liste des gammes du repository ...
 
-			JFileChooser fileChooser = new JFileChooser();
-			fileChooser.setFileFilter(new FileNameExtensionFilter("Scale File", //$NON-NLS-1$
+			APrintFileChooser fileChooser = new APrintFileChooser();
+			fileChooser.setFileFilter(new VFSFileNameExtensionFilter("Scale File", //$NON-NLS-1$
 					ScaleIO.SCALE_FILE_EXTENSION));
 
-			setupDefaultFolderForChooser(fileChooser);
-
-			if (fileChooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION)
+			if (fileChooser.showOpenDialog(this) != APrintFileChooser.APPROVE_OPTION)
 				return;
 
-			File selectedFile = fileChooser.getSelectedFile();
+			AbstractFileObject selectedFile = fileChooser.getSelectedFile();
 			if (selectedFile == null)
 				return;
 
-			Scale returnscale = ScaleIO.readGamme(selectedFile);
+			Scale returnscale = null;
 
+			InputStream istream = selectedFile.getInputStream();
+			try {
+				returnscale = ScaleIO.readGamme(istream);
+			} finally {
+				istream.close();
+			}
 			if (returnscale != null) {
 				lastLoadedOrSavedScale = returnscale;
 				loadGamme(returnscale);
@@ -356,24 +348,22 @@ public class StandAloneScaleEditor extends JFrame {
 	private void saveAsGamme() {
 		try {
 
-			JFileChooser fileChooser = new JFileChooser();
-			fileChooser.setFileFilter(new FileNameExtensionFilter("Scale File", //$NON-NLS-1$
+			APrintFileChooser fileChooser = new APrintFileChooser();
+			fileChooser.setFileFilter(new VFSFileNameExtensionFilter("Scale File", //$NON-NLS-1$
 					ScaleIO.SCALE_FILE_EXTENSION));
 
-			setupDefaultFolderForChooser(fileChooser);
-
-			if (fileChooser.showSaveDialog(this) != JFileChooser.APPROVE_OPTION)
+			if (fileChooser.showSaveDialog(this) != APrintFileChooser.APPROVE_OPTION)
 				return;
 
-			File choosedFile = fileChooser.getSelectedFile();
+			AbstractFileObject choosedFile = fileChooser.getSelectedFile();
 			if (choosedFile == null)
 				return;
 
-			if (!choosedFile.getName().endsWith("." + ScaleIO.SCALE_FILE_EXTENSION)) { //$NON-NLS-1$
+			String filename = choosedFile.getName().getBaseName();
+			if (!filename.endsWith("." + ScaleIO.SCALE_FILE_EXTENSION)) { //$NON-NLS-1$
 				logger.debug("adjust the filename with scale"); //$NON-NLS-1$
-				choosedFile = new File(choosedFile.getParentFile(), choosedFile
-						.getName()
-						+ "." + ScaleIO.SCALE_FILE_EXTENSION); //$NON-NLS-1$
+				choosedFile = (AbstractFileObject) choosedFile.getFileSystem()
+						.resolveFile(choosedFile.getName().toString() + "." + ScaleIO.SCALE_FILE_EXTENSION); //$NON-NLS-1$
 			}
 			logger.debug("vérification de la gamme ..."); //$NON-NLS-1$
 			String checkGamme = scaleEditorPanel.checkScale();
@@ -384,20 +374,22 @@ public class StandAloneScaleEditor extends JFrame {
 
 			Scale g = scaleEditorPanel.getScale();
 
-			ScaleIO.writeGamme(g, choosedFile);
-
+			OutputStream istream = choosedFile.getOutputStream();
+			try {
+				ScaleIO.writeGamme(g, istream);
+			} finally {
+				istream.close();
+			}
 			JMessageBox.showMessage(this, Messages.getString("GammeEditor.31") //$NON-NLS-1$
-					//$NON-NLS-1$
-					+ choosedFile.getName()
-					+ Messages.getString("GammeEditor.32")); //$NON-NLS-1$
+					// $NON-NLS-1$
+					+ choosedFile.getName() + Messages.getString("GammeEditor.32")); //$NON-NLS-1$
 
 			lastLoadedOrSavedFile = choosedFile;
-			rememberDefaultFolderForFile(lastLoadedOrSavedFile);
 
 		} catch (Exception ex) {
 
 			JMessageBox.showMessage(this, Messages.getString("GammeEditor.31") //$NON-NLS-1$
-			//$NON-NLS-1$
+					// $NON-NLS-1$
 					+ Messages.getString("GammeEditor.32")); //$NON-NLS-1$
 
 			logger.error("saveAsGamme :" + ex.getMessage(), ex); //$NON-NLS-1$
@@ -423,12 +415,15 @@ public class StandAloneScaleEditor extends JFrame {
 
 			Scale g = scaleEditorPanel.getScale();
 
-			ScaleIO.writeGamme(g, lastLoadedOrSavedFile);
-
+			OutputStream outputStream = lastLoadedOrSavedFile.getOutputStream();
+			try {
+				ScaleIO.writeGamme(g, outputStream);
+			} finally {
+				outputStream.close();
+			}
 			JMessageBox.showMessage(this, Messages.getString("GammeEditor.31") //$NON-NLS-1$
-					//$NON-NLS-1$
-					+ lastLoadedOrSavedFile.getName()
-					+ Messages.getString("GammeEditor.32")); //$NON-NLS-1$
+					// $NON-NLS-1$
+					+ lastLoadedOrSavedFile.getName() + Messages.getString("GammeEditor.32")); //$NON-NLS-1$
 
 		} catch (Exception ex) {
 			logger.error("saveGamme", ex); //$NON-NLS-1$
@@ -439,40 +434,31 @@ public class StandAloneScaleEditor extends JFrame {
 		try {
 			logger.debug("import From MidiBoek"); //$NON-NLS-1$
 
-			JFileChooser fileChooser = new JFileChooser();
-			fileChooser.setFileFilter(new FileNameExtensionFilter(
-					Messages.getString("StandAloneScaleEditor.101"), "gam")); //$NON-NLS-1$ //$NON-NLS-2$
+			APrintFileChooser fileChooser = new APrintFileChooser();
+			fileChooser.setFileFilter(
+					new VFSFileNameExtensionFilter(Messages.getString("StandAloneScaleEditor.101"), "gam")); //$NON-NLS-1$ //$NON-NLS-2$
 
-			setupDefaultFolderForChooser(fileChooser);
-
-			if (fileChooser.showOpenDialog(this) != JFileChooser.APPROVE_OPTION)
+			if (fileChooser.showOpenDialog(this) != APrintFileChooser.APPROVE_OPTION)
 				return;
 
-			File choosedFile = fileChooser.getSelectedFile();
+			AbstractFileObject choosedFile = fileChooser.getSelectedFile();
 			if (choosedFile == null)
 				return;
 
-			Scale importScale = MidiBoekGammeImporter.importScale(choosedFile);
+			InputStream istream = choosedFile.getInputStream();
+			try {
+				Scale importScale = MidiBoekGammeImporter.importScale(istream, choosedFile.getName().getBaseName());
 
-			lastLoadedOrSavedScale = importScale;
-			loadGamme(importScale);
+				lastLoadedOrSavedScale = importScale;
+				loadGamme(importScale);
 
+			} finally {
+				istream.close();
+			}
 		} catch (Exception ex) {
 			JMessageBox.showError(this, ex);
 			logger.error("importFromMidiBoek", ex); //$NON-NLS-1$
 		}
-	}
-
-	private void rememberDefaultFolderForFile(File selectedFile) {
-		File new_default_folder = selectedFile.getParentFile();
-		prefs.setLastGammeFolder(new_default_folder);
-	}
-
-	private void setupDefaultFolderForChooser(JFileChooser choose) {
-		File default_folder = prefs.getLastGammeFolder();
-		if (default_folder != null && default_folder.exists()
-				&& default_folder.isDirectory())
-			choose.setCurrentDirectory(default_folder);
 	}
 
 	private void previewGamme() {

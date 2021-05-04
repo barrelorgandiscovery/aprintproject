@@ -250,14 +250,14 @@ public abstract class ModelStep implements Serializable {
 	}
 
 	/**
-	 * Parametres de configuration, ces paramètres sont construits par référence
+	 * Parametres de configuration, ces paramÃ¨tres sont construits par rÃ©fÃ©rence
 	 * dans la construction de l'objet et ne changent pas dans le cycle de vie
 	 * de l'objet
 	 */
 	protected ModelValuedParameter[] configureParameters = new ModelValuedParameter[0];
 
 	/**
-	 * retourne les paramètres de configuration
+	 * retourne les paramÃ¨tres de configuration
 	 * 
 	 * @return
 	 */

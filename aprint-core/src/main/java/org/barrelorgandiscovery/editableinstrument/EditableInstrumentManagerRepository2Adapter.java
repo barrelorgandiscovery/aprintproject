@@ -45,7 +45,7 @@ import org.barrelorgandiscovery.virtualbook.transformation.GroovyImporterScript;
 import org.barrelorgandiscovery.virtualbook.transformation.LinearTransposition;
 import org.barrelorgandiscovery.virtualbook.transformation.TranspositionIO;
 
-import com.sun.media.sound.SF2Soundbank;
+import gervill.SF2Soundbank;
 
 /**
  * This class is a bridge between an editable instrument Manager and a

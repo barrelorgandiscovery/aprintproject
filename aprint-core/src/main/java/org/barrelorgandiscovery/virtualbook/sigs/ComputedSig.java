@@ -2,7 +2,7 @@ package org.barrelorgandiscovery.virtualbook.sigs;
 
 /**
  * Class Handling a signature in the virtual book object
- * @author use
+ * @author pfreydiere
  *
  */
 public class ComputedSig {

@@ -13,9 +13,7 @@ public class ModelFactory {
 	 */
 	public static Model[] createModels() throws Exception {
 		return new Model[] { 
-				loadResourceModel("Carton"),
-				loadResourceModel("Poncif1"),
-				loadResourceModel("Carton3"),loadResourceModel("Carton2"), loadResourceModel("Carton4") };
+				loadResourceModel("classifier1")};
 	}
 
 	/**

@@ -29,11 +29,21 @@ configurations {
 dependencies {
 
 	compile project(':aprint-gervill')
+	
+	// compile "xml-apis:xml-apis"
 	compile files(fileTree(dir:"${projectDir}/libs" , include:['**/*.jar']).toList())
 	
 	// https://mvnrepository.com/artifact/log4j/log4j
 	compile group: 'log4j', name: 'log4j', version: '1.2.14'
-
+	
+	// https://mvnrepository.com/artifact/org.apache.commons/commons-vfs2
+    compile group: 'org.apache.commons', name: 'commons-vfs2', version: '2.6.0'
+	
+	
+	compile group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.6.4'
+	compile group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.6.4'
+	compile group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.6.4'
+	
 	testCompile 'junit:junit:4.12'
 	
 	xmlbean files(fileTree(dir:"${projectDir}/libs", include:['xbean.jar','jsr173_1.0_api.jar']).toList())

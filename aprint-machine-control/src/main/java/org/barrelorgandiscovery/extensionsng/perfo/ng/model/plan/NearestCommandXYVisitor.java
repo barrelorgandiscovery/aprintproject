@@ -39,6 +39,11 @@ public class NearestCommandXYVisitor extends CommandVisitor {
 	}
 	
 	@Override
+	public void visit(int index,CutToCommand cutToCommand) throws Exception {
+		evaluateNearest(index, cutToCommand);
+	}
+	
+	@Override
 	public void visit(int index,HomingCommand command) throws Exception {
 		
 		

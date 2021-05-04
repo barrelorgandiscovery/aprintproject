@@ -9,16 +9,19 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.Serializable;
 import java.net.MalformedURLException;
+import java.net.URL;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 
+import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.bookimage.BookImage;
+import org.barrelorgandiscovery.bookimage.ZipBookImage;
 import org.barrelorgandiscovery.gui.aprint.instrumentchoice.IInstrumentChoiceListener;
-import org.barrelorgandiscovery.gui.aprint.instrumentchoice.JCoverFlowInstrumentChoice;
 import org.barrelorgandiscovery.gui.aprint.instrumentchoice.JCoverFlowInstrumentChoiceWithFilter;
+import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
 import org.barrelorgandiscovery.gui.wizard.BasePanelStep;
 import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener;
@@ -28,16 +31,23 @@ import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.recognition.gui.disks.steps.states.ImageFileAndInstrument;
 import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JDisplay;
 import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JImageDisplayLayer;
+import org.barrelorgandiscovery.recognition.gui.interactivecanvas.JTiledImageDisplayLayer;
 import org.barrelorgandiscovery.recognition.gui.interactivecanvas.tools.JViewingToolBar;
 import org.barrelorgandiscovery.recognition.messages.Messages;
 import org.barrelorgandiscovery.repository.Repository2;
 import org.barrelorgandiscovery.tools.ImageTools;
 import org.barrelorgandiscovery.tools.JMessageBox;
+import org.barrelorgandiscovery.ui.tools.VFSTools;
 
 import com.jeta.forms.components.panel.FormPanel;
 import com.jeta.forms.gui.form.FormAccessor;
 
 public class StepChooseFilesAndInstrument extends BasePanelStep {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5849877785127366190L;
 
 	private static final String CURRENT_DIRECTORY_PREF = "currentDirectory"; //$NON-NLS-1$
 	private static final String LASTBOOKIMAGE_FILE_PREF = "lastBookImageOpened"; //$NON-NLS-1$
@@ -56,7 +66,13 @@ public class StepChooseFilesAndInstrument extends BasePanelStep {
 	/**
 	 * ImageDisplayer
 	 */
-	private JImageDisplayLayer layer;
+	private JImageDisplayLayer imagelayer;
+
+	/**
+	 * tiled imagelayer
+	 */
+	private JTiledImageDisplayLayer tiledImageLayer;
+
 	/**
 	 * initial image file
 	 */
@@ -121,20 +137,15 @@ public class StepChooseFilesAndInstrument extends BasePanelStep {
 
 					File lastLocation = prefStorage.getFileProperty(CURRENT_DIRECTORY_PREF, null);
 					File lastFile = prefStorage.getFileProperty(LASTBOOKIMAGE_FILE_PREF, null);
-					JFileChooser fc = new JFileChooser(lastFile);
+					APrintFileChooser fc = new APrintFileChooser(lastFile);
 					if (lastLocation != null && lastFile == null) {
 						fc.setCurrentDirectory(lastLocation);
 					}
 					int ret = fc.showOpenDialog(StepChooseFilesAndInstrument.this);
-					if (ret == JFileChooser.APPROVE_OPTION) {
-						File selectedFile = fc.getSelectedFile();
-						if (selectedFile != null) {
-							prefStorage.setFileProperty(CURRENT_DIRECTORY_PREF, selectedFile.getParentFile());
-							prefStorage.setFileProperty(LASTBOOKIMAGE_FILE_PREF, selectedFile);
-
-							prefStorage.save();
-						}
-						internalChangeImageFile(selectedFile);
+					if (ret == APrintFileChooser.APPROVE_OPTION) {
+						AbstractFileObject selectedFile = fc.getSelectedFile();
+						File f = VFSTools.convertToFile(selectedFile);
+						internalChangeImageFile(f);
 					}
 				} catch (Exception ex) {
 					logger.error("error in reading the file :" + ex.getMessage(), ex); //$NON-NLS-1$
@@ -145,8 +156,11 @@ public class StepChooseFilesAndInstrument extends BasePanelStep {
 
 		display = new JDisplay();
 
-		this.layer = new JImageDisplayLayer();
-		display.addLayer(layer);
+		this.imagelayer = new JImageDisplayLayer();
+		display.addLayer(imagelayer);
+
+		this.tiledImageLayer = new JTiledImageDisplayLayer(display);
+		display.addLayer(tiledImageLayer);
 
 		FormAccessor formAccessor = fp.getFormAccessor();
 		formAccessor.replaceBean("picturepreview", display); //$NON-NLS-1$
@@ -199,8 +213,18 @@ public class StepChooseFilesAndInstrument extends BasePanelStep {
 
 		display.fit();
 
-		internalChangeInstrumentName(currentState.instrumentName);
+		if (currentState.instrumentName == null) {
+			// select first instrument
 
+			Instrument firstOne = instrumentChooser.getFirstInstrument();
+			if (firstOne != null) {
+				currentState.instrumentName = firstOne.getName();
+			}
+		}
+
+		if (currentState.instrumentName != null) {
+			internalChangeInstrumentName(currentState.instrumentName);
+		}
 		this.stepChangedListener = stepChangedListener;
 
 	}
@@ -246,16 +270,33 @@ public class StepChooseFilesAndInstrument extends BasePanelStep {
 	 * @throws MalformedURLException
 	 */
 	private void internalChangeImageFile(File selectedFile) throws Exception, MalformedURLException {
+
 		// load the file
 		BufferedImage bi = null;
-		if (selectedFile != null && selectedFile.exists()) {
-			try {
-				bi = ImageTools.loadImage(selectedFile.toURL());
-			} catch (Exception ex) {
-				logger.error("error while loading the image :" + ex.getMessage(), ex); //$NON-NLS-1$
+		if (selectedFile != null) {
+
+			if (selectedFile.getName().endsWith(BookImage.BOOKIMAGE_EXTENSION)) {
+
+				ZipBookImage bookImage = new ZipBookImage(selectedFile);
+				tiledImageLayer.setImageToDisplay(bookImage);
+				tiledImageLayer.setVisible(true);
+				imagelayer.setVisible(false);
+
+			} else {
+
+				try {
+					bi = ImageTools.loadImage(selectedFile);
+					tiledImageLayer.setVisible(false);
+					imagelayer.setVisible(true);
+					imagelayer.setImageToDisplay(bi);
+				} catch (Exception ex) {
+					logger.error("error while loading the image :" + ex.getMessage(), ex); //$NON-NLS-1$
+				}
+
 			}
+
 		}
-		layer.setImageToDisplay(bi);
+
 		imageFile = selectedFile;
 		display.fit();
 		checkStateAndCallStepChangedListener();

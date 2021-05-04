@@ -1,6 +1,5 @@
 package org.barrelorgandiscovery.gui.aedit;
 
-import java.awt.Graphics;
 import java.awt.event.MouseEvent;
 
 import org.barrelorgandiscovery.virtualbook.Position;
@@ -12,38 +11,53 @@ import org.barrelorgandiscovery.virtualbook.Position;
  */
 public class SelectionTool extends Tool {
 
+	public static interface SelectionListener {
+		void blockSelectionDone();
+	}
+
 	private JVirtualBookScrollableComponent c = null;
 
+	private SelectionListener listener = null;
+
 	private long positionstart = 0;
-	
-	
 
 	/**
-	 * Constructo
+	 * Constructor
 	 * 
-	 * @param c
-	 *            the component
+	 * @param c the component
 	 */
 	public SelectionTool(JVirtualBookScrollableComponent c) {
+		this(c, null);
+	}
+
+	/**
+	 * Constructor with selection listener
+	 * 
+	 * @param c
+	 * @param listener
+	 */
+	public SelectionTool(JVirtualBookScrollableComponent c, SelectionListener listener) {
 		this.c = c;
+		this.listener = listener;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see fr.freydierepatrice.gui.aedit.Tool#mousePressed(java.awt.event.MouseEvent)
+	 * @see
+	 * fr.freydierepatrice.gui.aedit.Tool#mousePressed(java.awt.event.MouseEvent)
 	 */
 	@Override
 	public void mousePressed(MouseEvent e) {
-		
+
 		Position p = c.query(e.getX(), e.getY());
-		
-		if (p == null){
+
+		if (p == null) {
 			return;
 		}
-		
+
 		positionstart = p.position;
-		
+
 		c.setBlockSelection(p.position, 0);
 		c.repaint();
 	}
@@ -51,7 +65,8 @@ public class SelectionTool extends Tool {
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see fr.freydierepatrice.gui.aedit.Tool#mouseDragged(java.awt.event.MouseEvent)
+	 * @see
+	 * fr.freydierepatrice.gui.aedit.Tool#mouseDragged(java.awt.event.MouseEvent)
 	 */
 	@Override
 	public void mouseDragged(MouseEvent e) {
@@ -63,37 +78,33 @@ public class SelectionTool extends Tool {
 		c.repaint();
 	}
 
-	
 	@Override
 	public void mouseMoved(MouseEvent e) {
-	
-	
-		
+
 	}
-	
-	
+
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see fr.freydierepatrice.gui.aedit.Tool#mouseReleased(java.awt.event.MouseEvent)
+	 * @see
+	 * fr.freydierepatrice.gui.aedit.Tool#mouseReleased(java.awt.event.MouseEvent)
 	 */
 	@Override
 	public void mouseReleased(MouseEvent e) {
 		Position p = c.query(e.getX(), e.getY());
-		if (p == null)
-		{
+		if (p == null) {
 			return;
 		}
-		
-		
+
 		long s = positionstart;
 		long length = p.position - s;
-		
+
 		c.setBlockSelection(s, length);
-			
+
+		if (listener != null) {
+			listener.blockSelectionDone();
+		}
 		c.repaint();
 	}
-	
-	
 
 }

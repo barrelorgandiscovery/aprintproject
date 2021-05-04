@@ -21,7 +21,7 @@ import org.barrelorgandiscovery.tools.StreamsTools;
 import org.barrelorgandiscovery.tools.StringTools;
 
 /**
- * Implémentation d'un stockage sous forme de répertoire
+ * ImplÃ©mentation d'un stockage sous forme de rÃ©pertoire
  * 
  * @author Freydiere Patrice
  * 
@@ -227,7 +227,7 @@ public class FolderStreamStorage implements StreamStorage {
 
 		logger.debug("saving stream " + streamname);
 
-		// création d'un fichier temporaire ...
+		// crÃ©ation d'un fichier temporaire ...
 		File temp = File.createTempFile("tmp", "tmp");
 		FileOutputStream fos = new FileOutputStream(temp);
 		try {
@@ -264,7 +264,7 @@ public class FolderStreamStorage implements StreamStorage {
 					throw new IOException("fail to rename to backup file");
 			}
 			
-			// invariant, le fichier de destination est renommé en .bak
+			// invariant, le fichier de destination est renommÃ© en .bak
 
 			if (!FileTools.rename(temp, destfile)) {
 

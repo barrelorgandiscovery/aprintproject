@@ -27,7 +27,7 @@ public class ReferencedPercussionList {
 			"58 Vibraslap" }; //$NON-NLS-1$
 
 	/**
-	 * retourne la liste des percussions référencées
+	 * retourne la liste des percussions rÃ©fÃ©rencÃ©es
 	 * 
 	 * @return
 	 */

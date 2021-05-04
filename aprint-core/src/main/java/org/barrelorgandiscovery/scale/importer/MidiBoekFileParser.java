@@ -25,9 +25,9 @@ public class MidiBoekFileParser {
 	 * Constructeur
 	 * 
 	 * @param reader
-	 *            le fichier ou stream à lire
+	 *            le fichier ou stream Ã  lire
 	 * @param parser
-	 *            le parser d'évènements
+	 *            le parser d'Ã©vÃ¨nements
 	 */
 	public MidiBoekFileParser(Reader reader, LineParser parser) {
 		super();
@@ -47,7 +47,7 @@ public class MidiBoekFileParser {
 		String line = null;
 		int cpt = 0;
 		while ((line = reader.readLine()) != null) {
-			// On enlève les commentaires
+			// On enlÃ¨ve les commentaires
 			cpt++;
 			int comment = line.indexOf(';');
 			if (comment != -1) {

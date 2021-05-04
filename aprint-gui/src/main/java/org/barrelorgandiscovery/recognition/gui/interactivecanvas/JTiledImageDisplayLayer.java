@@ -12,15 +12,17 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 
 import org.apache.log4j.Logger;
-import org.barrelorgandiscovery.recognition.gui.books.tools.ITiledImage;
+import org.barrelorgandiscovery.bookimage.IFamilyImageSeeker;
+import org.barrelorgandiscovery.images.books.tools.IFileBasedTiledImage;
+import org.barrelorgandiscovery.images.books.tools.ITiledImage;
 import org.barrelorgandiscovery.tools.ImageTools;
 
 public class JTiledImageDisplayLayer extends JLayer {
 
 	private static final Logger logger = Logger.getLogger(JTiledImageDisplayLayer.class);
-	
+
 	private ITiledImage imageToDisplay = null;
-	
+
 	private JDisplay id = null;
 
 	private java.lang.Double transparency;
@@ -37,7 +39,7 @@ public class JTiledImageDisplayLayer extends JLayer {
 	@Override
 	public void drawLayer(Graphics2D g2d) {
 
-		if (imageToDisplay != null) {
+		if (imageToDisplay != null && isVisible()) {
 
 			Composite oldc = g2d.getComposite();
 			try {
@@ -55,19 +57,34 @@ public class JTiledImageDisplayLayer extends JLayer {
 					try {
 						Double d = imageToDisplay.subTileDimension(images[i]);
 						AffineTransform t = AffineTransform.getTranslateInstance(d.getX(), 0);
-						File imagePath = imageToDisplay.getImagePath(images[i]);
-						if (imagePath.exists()) {
+
+						if (imageToDisplay instanceof IFamilyImageSeeker) {
+
 							try {
-								BufferedImage loadImage = ImageTools.loadImage(
-										Toolkit.getDefaultToolkit().createImage(imagePath.getAbsolutePath()));
-								g2d.drawImage(loadImage, t, id);
+								g2d.drawImage(((IFamilyImageSeeker) imageToDisplay).loadImage(images[i]), t, id);
 							} catch (Exception ex) {
-								// image may be currently under writing
-								// conditions,
-								// ignore the exceptions
-								// log it to avoid silent exceptions
 								logger.debug(ex.getMessage(), ex);
 							}
+
+						} else if (imageToDisplay instanceof IFileBasedTiledImage) {
+
+							File imagePath = ((IFileBasedTiledImage) imageToDisplay).getImagePath(images[i]);
+							if (imagePath.exists()) {
+								try {
+									BufferedImage loadImage = ImageTools.loadImage(
+											Toolkit.getDefaultToolkit().createImage(imagePath.getAbsolutePath()));
+									g2d.drawImage(loadImage, t, id);
+								} catch (Exception ex) {
+									// image may be currently under writing
+									// conditions,
+									// ignore the exceptions
+									// log it to avoid silent exceptions
+									logger.debug(ex.getMessage(), ex);
+								}
+							}
+
+						} else {
+							throw new Exception("unsupported imageToDisplay file");
 						}
 					} catch (Exception ex) {
 						ex.printStackTrace();

@@ -1,9 +1,13 @@
 import java.text.*
 
+
 subprojects {
 
     apply plugin: 'eclipse'
     apply plugin: 'java'
+    apply plugin: 'jacoco' 
+
+
 
     task sourcesJar(type: Jar, dependsOn: classes) {
        classifier = 'sources'
@@ -17,7 +21,8 @@ subprojects {
     }
 
     javadoc {
-       failOnError = false 
+       failOnError = false
+
     }
 
     // put sources into jar
@@ -29,6 +34,46 @@ subprojects {
         archives sourcesJar
         archives javadocJar
     }
+    java {
+        reporting.baseDir = "${rootProject.buildDir.path}/reports/${project.name}"
+    }
+    jacocoTestReport {
+
+        reports {
+            xml.enabled = true
+            csv.enabled = false
+            html.enabled = true
+            html.destination = file("${buildDir}/reports/jacoco/html")
+        }
+    }
+}
+
+
+
+def exportedProjects = [
+        ":aprint-core",
+	":aprint-gui",
+	":aprint-machine-control",
+	":aprint-punch-extension",
+	":aprint-recognition-extension",
+	":aprint-book-scanner",
+]
+
+task alljavadoc(type: Javadoc, dependsOn: [ ":aprint-gui:groovydoc"]) {
+    options.encoding = "iso-8859-1"
+    failOnError = false
+    source exportedProjects.collect { project(it).sourceSets.main.allJava }    											  
+    classpath = files(exportedProjects.collect { project(it).sourceSets.main.compileClasspath })
+    destinationDir = file("${buildDir}/docs/javadoc")
+}
+
+
+
+
+task testReport(type: TestReport) {
+  destinationDir = file("$buildDir/reports/allTests")
+  // Combine all 'test' task results into a single HTML report
+  reportOn subprojects.collect { it.tasks.withType(Test) }
 }
 
 
@@ -52,7 +97,6 @@ rootProject.ext.execAndGetOutput = { String command ->
 rootProject.ext.asUTC = { Date date, String format ->
   def snapshotDateFormat = new SimpleDateFormat(format)
   snapshotDateFormat.setTimeZone(TimeZone.getTimeZone('UTC'))
-  
   return snapshotDateFormat.format(date)
 }
  
@@ -76,6 +120,7 @@ project(':bundle') {
         into ('Scan') {
             from project(':aprint-book-scanner').fileTree('build/libs') {
                 include "*.extension"
+                include "*.extensionlazy"
             }
         }
         into ('Punch') {
@@ -101,17 +146,29 @@ project(':bundle') {
         into 'build'
     }
 
+    task createAllJars(dependsOn: [copyOutputJars, copyExtensionJars]) {
+    }
+
+    task createNixMacBundle(type:Zip /*, dependsOn: [createAllJars]*/) {
+       archiveName "nix-and-macosX.zip"
+       from ('build') { include 'aprint.jar' }
+       from ('offlineinstall-extensions') { include '**/*' }
+       from ('maxosx-bundle') { include '**/*' }
+    }
+
     // create installer
     task createBundles(type: Exec, dependsOn: [copyOutputJars,copyExtensionJars] ) {
         commandLine 'C:\\Program Files (x86)\\NSIS\\makensis.exe',
            "${project.projectDir}/offlineinstall-studio/aprint_studio.nsi"
         workingDir = 'offlineinstall-studio'
     }
+
+    // create x64 installer
     task createInstaller(dependsOn: ['createBundles']) { 
         doLast {
             def f = file('offlineinstall-studio/APrintStudioInstall.exe')
             assert f.exists()
-            assert f.renameTo(new File('build_file_APrintStudioInstall_' + rootProject.ext.currentVersion + ".exe"))
+            assert f.renameTo(new File('build_file_x64_APrintStudioInstall_' + rootProject.ext.currentVersion + ".exe"))
         }
     }
 
@@ -121,16 +178,27 @@ project(':bundle') {
            "${project.projectDir}/offlineinstall-studio/aprint_studio_32.nsi"
         workingDir = 'offlineinstall-studio'
     }
+
+    // create x86 installer
     task createInstaller32(dependsOn: ['createBundles32']) { 
         doLast {
             def f = file('offlineinstall-studio/APrintStudioInstall32.exe')
             assert f.exists()
-            assert f.renameTo(new File('build_file_APrintStudioInstall_x32_' + rootProject.ext.currentVersion + ".exe"))
+            assert f.renameTo(new File('build_file_x32_APrintStudioInstall_' + rootProject.ext.currentVersion + ".exe"))
         }
     }
 
+    // create zip for linux and macos
+    task createMacOsAndLinuxBundle(dependsOn: ['createNixMacBundle']) {
+        doLast {
+         def f = file('build/distributions/nix-and-macosX.zip')
+         assert f.exists()
+         assert f.renameTo(new File('build_file_NixAndMacOsX_' + rootProject.ext.currentVersion + ".zip"))
+        }
+    }
 
+    task createAllInstallers(dependsOn: ['createInstaller', 'createInstaller32', 'createMacOsAndLinuxBundle']) {
 
-
+    }
 }
 

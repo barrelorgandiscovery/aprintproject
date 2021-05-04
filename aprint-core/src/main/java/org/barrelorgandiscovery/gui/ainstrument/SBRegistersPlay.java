@@ -21,9 +21,9 @@ import org.barrelorgandiscovery.scale.AbstractTrackDef;
 import org.barrelorgandiscovery.scale.NoteDef;
 import org.barrelorgandiscovery.scale.Scale;
 
-import com.sun.media.sound.SF2Instrument;
-import com.sun.media.sound.SF2Soundbank;
-import com.sun.media.sound.SoftSynthesizer;
+import gervill.SF2Instrument;
+import gervill.SF2Soundbank;
+import gervill.SoftSynthesizer;
 
 /**
  * Class for playing notes with register specification

@@ -1,20 +1,19 @@
 package org.barrelorgandiscovery.recognition.gui.books;
 
 import java.awt.image.BufferedImage;
-import java.io.File;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.log4j.Logger;
-import org.barrelorgandiscovery.recognition.gui.books.tools.TiledImage;
+import org.barrelorgandiscovery.images.books.tools.IFileFamilyTiledImage;
 import org.barrelorgandiscovery.tools.Disposable;
-import org.barrelorgandiscovery.tools.ImageTools;
 
 /**
- * background processing
+ * background processing images tile
  * 
  * @author pfreydiere
  *
@@ -23,42 +22,88 @@ public class BackgroundTileImageProcessingThread<T> implements Disposable {
 
 	private static final Logger logger = Logger.getLogger(BackgroundTileImageProcessingThread.class);
 
-	
 	public interface TileProcessing<T> {
 		T process(int index, BufferedImage tile) throws Exception;
 	}
 
 	public interface TiledProcessedListener {
 		<T> void tileProcessed(int index, T result);
+
+		void errorInProcessingTile(String errormsg);
 	}
 
-	private TiledImage image;
+	private IFileFamilyTiledImage image;
 	private TiledProcessedListener l;
 	private ExecutorService exec;
 
 	private boolean aborted = false;
-	private AtomicInteger currentImageProcessed = new AtomicInteger(0);
 
-	public BackgroundTileImageProcessingThread(TiledImage image, TiledProcessedListener l, int nbThreads) {
+	public BackgroundTileImageProcessingThread(IFileFamilyTiledImage image, TiledProcessedListener l, int nbThreads) {
 		this.image = image;
 		this.l = l;
 		exec = Executors.newFixedThreadPool(nbThreads); // Runtime.getRuntime().availableProcessors()
+	}
 
-	
+	/**
+	 * contains the tiles to process
+	 */
+	private ArrayList<Integer> tilesToProcess = new ArrayList<>();
 
+	/**
+	 * contains the tiles currently in process
+	 */
+	private HashSet<Integer> currentlyInProcess = new HashSet<>();
+	private AtomicInteger processedCount = new AtomicInteger(0);
+
+	private synchronized Integer getNextToProcess() {
+		if (tilesToProcess.size() == 0) {
+			return null;
+		}
+		Integer t = tilesToProcess.remove(0);
+		currentlyInProcess.add(t);
+		return t;
+	}
+
+	private synchronized boolean isFinished() {
+		return tilesToProcess.size() == 0 && currentlyInProcess.size() == 0;
+	}
+
+	private synchronized void informProcessed(Integer tile) {
+		assert tile != null;
+		currentlyInProcess.remove(tile);
+		processedCount.addAndGet(1);
+	}
+
+	public void sortProcessingQueue(Comparator<Integer> tileOrdering) {
+		if (tileOrdering != null) {
+			tilesToProcess.sort(tileOrdering);
+		}
 	}
 
 	public <T> void start(TileProcessing<T> p) {
+		start(p, null);
+	}
+
+	public <T> void start(TileProcessing<T> p, Comparator<Integer> initialTileProcessingSort) {
 
 		assert exec != null;
 
 		aborted = false;
-		currentImageProcessed.set(0);
 
-		for (int i = 0; i < image.getImageCount(); i++) {
+		tilesToProcess.clear();
+		currentlyInProcess.clear();
+		int imageCount = image.getImageCount();
 
-			File imagePath = image.getImagePath(i);
-			final int current = i;
+		for (int i = 0; i < imageCount; i++) {
+			tilesToProcess.add(i);
+		}
+
+		if (initialTileProcessingSort != null) {
+			sortProcessingQueue(initialTileProcessingSort);
+		}
+
+		for (int i = 0; i < imageCount; i++) {
+
 			Runnable c = new Runnable() {
 				@Override
 				public void run() {
@@ -66,21 +111,45 @@ public class BackgroundTileImageProcessingThread<T> implements Disposable {
 						if (aborted)
 							return;
 
-						if (!imagePath.exists())
+						Integer current = getNextToProcess();
+						if (current == null) {
+							// no more to process
 							return;
-
-						BufferedImage bi = ImageTools.loadImage(imagePath.toURL());
-						T result = p.process(current, bi);
-						if (l != null) {
-							try {
-								l.tileProcessed(current, result);
-							} catch (Exception ex) {
-								logger.error(ex.getMessage(), ex);
-							}
-							currentImageProcessed.addAndGet(1);
 						}
-					} catch (Exception ex) {
-						ex.printStackTrace();
+
+						try {
+							if (!(image instanceof IFileFamilyTiledImage)) {
+								throw new Exception(
+										"image " + image + " does not implements " + IFileFamilyTiledImage.class);
+							}
+
+							// take the root image
+
+							BufferedImage bi = ((IFileFamilyTiledImage) image).loadImage(current, null);
+							if (bi == null) {
+								return;
+							}
+
+							T result = p.process(current, bi);
+							if (l != null) {
+								try {
+									l.tileProcessed(current, result);
+								} catch (Exception ex) {
+									logger.error(ex.getMessage(), ex);
+								}
+
+							}
+						} finally {
+							informProcessed(current);
+						}
+
+					} catch (Throwable ex) {
+						logger.error(ex.getMessage(), ex);
+						try {
+							l.errorInProcessingTile("error in processing tile :" + ex.getMessage());
+						} catch (Exception exerr) {
+							logger.error("error in processin error feedback " + exerr.getMessage(), exerr);
+						}
 					}
 				}
 			};
@@ -99,7 +168,7 @@ public class BackgroundTileImageProcessingThread<T> implements Disposable {
 		if (aborted)
 			return false;
 
-		if (image.getImageCount() != currentImageProcessed.get()) {
+		if (!isFinished()) {
 			return true;
 		}
 
@@ -110,14 +179,12 @@ public class BackgroundTileImageProcessingThread<T> implements Disposable {
 		if (aborted)
 			return 1.0;
 
-		return currentImageProcessed.get() * 1.0 / image.getImageCount();
+		return processedCount.get() * 1.0 / image.getImageCount();
 	}
 
 	@Override
 	public void dispose() {
 		cancel();
-
-	
 	}
 
 }

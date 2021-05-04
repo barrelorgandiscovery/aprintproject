@@ -34,8 +34,8 @@ public class MachinePositionLayer implements VirtualBookComponentLayer {
 	}
 
 	/**
-	 * Define the machine position BEWARE, the X and Y are those of the machine
-	 * AXIS, then inverted from the screen
+	 * Define the machine position BEWARE, the X and Y are those of the MACHINE
+	 * AXIS, they are difference from the screen coordinates
 	 * 
 	 * @param x
 	 * @param y

@@ -2,11 +2,23 @@ package org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan;
 
 import org.barrelorgandiscovery.tools.HashCodeUtils;
 
+/**
+ * displacement command, the X is the FIRST AXIS of the machine, the Y, the
+ * second one
+ * 
+ * @author pfreydiere
+ *
+ */
 public class DisplacementCommand extends Command implements XYCommand {
 
 	private double moveToX;
 	private double moveToY;
 
+	/**
+	 * software move to (screen coordinates)
+	 * @param moveToX
+	 * @param moveToY
+	 */
 	public DisplacementCommand(double moveToX, double moveToY) {
 		this.moveToX = moveToX;
 		this.moveToY = moveToY;
@@ -44,6 +56,11 @@ public class DisplacementCommand extends Command implements XYCommand {
 
 		DisplacementCommand n = (DisplacementCommand) obj;
 		return moveToX == n.moveToX && moveToY == n.moveToY;
+	}
+
+	@Override
+	public String toString() {
+		return "Displacement " + moveToX + "," + moveToY;
 	}
 
 }

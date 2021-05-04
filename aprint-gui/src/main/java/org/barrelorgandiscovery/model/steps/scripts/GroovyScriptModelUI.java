@@ -3,6 +3,7 @@ package org.barrelorgandiscovery.model.steps.scripts;
 import java.awt.BorderLayout;
 
 import org.barrelorgandiscovery.gui.etl.JConfigurePanel;
+import org.barrelorgandiscovery.model.ModelParameter;
 import org.barrelorgandiscovery.tools.JMessageBox;
 
 import groovy.ui.ConsoleTextEditor;
@@ -43,6 +44,7 @@ public class GroovyScriptModelUI extends JConfigurePanel {
 			if (content != null && !content.trim().isEmpty())
 			{
 				groovyScriptModelStep.compileScript();
+				groovyScriptModelStep.evaluateScriptParameters();				
 			}
 		} catch(Exception ex) {
 			JMessageBox.showError(this, ex);

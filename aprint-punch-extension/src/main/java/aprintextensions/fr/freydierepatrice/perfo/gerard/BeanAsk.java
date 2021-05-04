@@ -12,16 +12,13 @@ import java.beans.BeanInfo;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.messages.Messages;
+import org.barrelorgandiscovery.tools.SwingUtils;
 
 import com.l2fprod.common.demo.BeanBinder;
 import com.l2fprod.common.propertysheet.PropertySheetPanel;
-
-import org.barrelorgandiscovery.gui.aprint.APrint;
-import org.barrelorgandiscovery.messages.Messages;
-import org.barrelorgandiscovery.tools.SwingUtils;
 
 public class BeanAsk extends JDialog {
 

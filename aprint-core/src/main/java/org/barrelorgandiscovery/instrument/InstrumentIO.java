@@ -73,7 +73,7 @@ public class InstrumentIO {
 			throw new Exception("Scale " + ip.getGammeName() //$NON-NLS-1$
 					+ " not defined ... "); //$NON-NLS-1$
 
-		// Lecture de l'image associée à l'instrument ...
+		// Lecture de l'image associÃ©e Ã  l'instrument ...
 		String imagestream = ip.getPicture();
 		Image image = null;
 
@@ -117,7 +117,7 @@ public class InstrumentIO {
 
 		IStreamRef ref = new StreamRef(fis, ip.getPatchstream());
 
-		// Création de l'instrument ...
+		// CrÃ©ation de l'instrument ...
 		Instrument ins = new Instrument(ip.getName(), g, ref, image, ip
 				.getInstrumentDescriptionUrl());
 

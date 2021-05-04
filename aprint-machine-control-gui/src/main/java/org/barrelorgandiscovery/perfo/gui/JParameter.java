@@ -69,8 +69,6 @@ public class JParameter extends JPanel implements IPunchMachinePanelActivate, IP
 			}
 		});
 
-		
-		
 		fa.replaceBean("offsetcomponent", numOffset);
 		fa.replaceBean("spacecomponent", spaceComponent);
 

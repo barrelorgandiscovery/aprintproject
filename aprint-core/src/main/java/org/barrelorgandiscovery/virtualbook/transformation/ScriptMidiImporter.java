@@ -69,7 +69,7 @@ public class ScriptMidiImporter extends AbstractMidiImporter {
 			sb.append((char) c);
 		}
 
-		logger.debug("Script lu, interprétation du script");
+		logger.debug("Script lu, interprÃ©tation du script");
 
 		// create a script engine manager
 
@@ -83,12 +83,12 @@ public class ScriptMidiImporter extends AbstractMidiImporter {
 		Object wrappedOut = Context.javaToJS(scalemanager, engine);
 		ScriptableObject.putProperty(engine, "gammemanager", wrappedOut);
 
-		// vérification que la gamme de destination existe bien
+		// vÃ©rification que la gamme de destination existe bien
 		if (getScaleDestination() == null)
 			throw new Exception("destination gamme for importer script " + name
 					+ " not found");
 
-		logger.debug("script interprété");
+		logger.debug("script interprÃ©tÃ©");
 
 	}
 
@@ -186,7 +186,7 @@ public class ScriptMidiImporter extends AbstractMidiImporter {
 
 		BasicConfigurator.configure(new LF5Appender());
 
-		// Création d'un gamme manager ...
+		// CrÃ©ation d'un gamme manager ...
 		FolderStreamStorage fis = new FolderStreamStorage(
 				new File(
 						"C:\\Documents and Settings\\Freydiere Patrice\\workspace\\APrint\\gammes"));
@@ -220,7 +220,7 @@ public class ScriptMidiImporter extends AbstractMidiImporter {
 				description_cache = getDescription();
 			} catch (Exception ex) {
 				logger
-						.debug("impossible de récupérer la description du script");
+						.debug("impossible de rÃ©cupÃ©rer la description du script");
 				description_cache = "";
 			}
 		}

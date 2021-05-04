@@ -3,6 +3,8 @@ package org.barrelorgandiscovery.gui.ainstrument;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -127,6 +129,29 @@ public class JInstrumentTileViewer extends JPanel {
 		l.setSelectionModel(new DefaultListSelectionModel());
 
 		l.addListSelectionListener(iscl);
+		l.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getClickCount()>1) {
+					Instrument i = (Instrument)l.getSelectedValue();
+					if (i != null) {
+						selectionChanged(i);
+						if (instrumentSelectedListener != null) {
+							try {
+
+								instrumentSelectedListener.instrumentDoubleClicked(i);
+
+							} catch (Throwable ex) {
+								logger.error(
+										"error in instrument selection :" + ex.getMessage(), ex);
+								JMessageBox.showError(null, ex);
+								BugReporter.sendBugReport();
+							}
+						}
+					}
+				}
+			}
+		});
 
 		setLayout(new BorderLayout());
 

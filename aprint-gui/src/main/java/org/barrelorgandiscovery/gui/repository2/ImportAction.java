@@ -2,14 +2,13 @@ package org.barrelorgandiscovery.gui.repository2;
 
 import java.awt.Component;
 import java.awt.event.ActionEvent;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 
-import javax.swing.JFileChooser;
 import javax.swing.SwingUtilities;
 
+import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.editableinstrument.EditableInstrumentConstants;
 import org.barrelorgandiscovery.editableinstrument.EditableInstrumentManager;
@@ -18,8 +17,9 @@ import org.barrelorgandiscovery.editableinstrument.EditableInstrumentStorage;
 import org.barrelorgandiscovery.editableinstrument.IEditableInstrument;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
 import org.barrelorgandiscovery.gui.aprintng.IAPrintWait;
+import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
+import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.messages.Messages;
-import org.barrelorgandiscovery.tools.FileNameExtensionFilter;
 import org.barrelorgandiscovery.tools.JMessageBox;
 
 public class ImportAction extends RepositoryAbstractAction {
@@ -45,18 +45,15 @@ public class ImportAction extends RepositoryAbstractAction {
 
 		APrintProperties aprintproperties = infos.getAPrintProperties();
 
-		JFileChooser fc = new JFileChooser(
-				aprintproperties.getLastInstrumentBundleFileFolder());
+		APrintFileChooser fc = new APrintFileChooser();
 
-		fc.setFileFilter(new FileNameExtensionFilter("instrumentfile", //$NON-NLS-1$
+		fc.setFileFilter(new VFSFileNameExtensionFilter("instrumentfile", //$NON-NLS-1$
 				EditableInstrumentConstants.INSTRUMENT_FILE_EXTENSION));
 
-		if (fc.showOpenDialog((Component) parent) == JFileChooser.APPROVE_OPTION) {
-			File f = fc.getSelectedFile();
+		if (fc.showOpenDialog((Component) parent) == APrintFileChooser.APPROVE_OPTION) {
+			AbstractFileObject f = fc.getSelectedFile();
 			if (f != null) {
-				aprintproperties.setLastInstrumentBundleFileFolder(f
-						.getParentFile());
-
+			
 				logger.debug("loading instrument :"//$NON-NLS-1$
 						+ f.toString());
 
@@ -75,10 +72,10 @@ public class ImportAction extends RepositoryAbstractAction {
 	 * @throws IOException
 	 */
 	protected void importInstrumentToRepository(
-			final EditableInstrumentManager im, File f) throws Exception {
+			final EditableInstrumentManager im, AbstractFileObject f) throws Exception {
 
 		final EditableInstrumentStorage eis = new EditableInstrumentStorage();
-		final FileInputStream fis = new FileInputStream(f);
+		final InputStream fis = f.getInputStream();
 
 		final IAPrintWait w = infos.getWaitInterface();
 
@@ -88,6 +85,7 @@ public class ImportAction extends RepositoryAbstractAction {
 			public void run() {
 
 				try {
+					try {
 					IEditableInstrument ei = eis
 							.load(fis, "importedinstrument");//$NON-NLS-1$
 
@@ -103,7 +101,9 @@ public class ImportAction extends RepositoryAbstractAction {
 						};
 
 					});
-
+					} finally {
+						fis.close();
+					}
 				} catch (final Exception ex) {
 
 					logger.error("error in exporting " + ex.getMessage(), ex);

@@ -1,7 +1,7 @@
 package org.barrelorgandiscovery.gui.aprint.extensionspoints;
 
 import org.barrelorgandiscovery.extensions.IExtensionPoint;
-import org.barrelorgandiscovery.gui.aprint.APrint;
+import org.barrelorgandiscovery.gui.aprintng.APrintNG;
 
 /**
  * This extension point permit the application to have a reference of the aprint
@@ -16,5 +16,5 @@ public interface InitExtensionPoint  extends IExtensionPoint{
 	 * 
 	 * @param f
 	 */
-	void init(APrint f);
+	void init(APrintNG f);
 }

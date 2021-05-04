@@ -32,7 +32,7 @@ public class PipeStopGroup implements Serializable, Iterable<PipeStop> {
 	 * @param registersetname
 	 *            le nom du jeu de registre
 	 * @param registers
-	 *            la liste des registres associés, peut être null
+	 *            la liste des registres associÃ©s, peut Ãªtre null
 	 */
 	public PipeStopGroup(String registersetname, PipeStop[] registers) {
 
@@ -71,7 +71,7 @@ public class PipeStopGroup implements Serializable, Iterable<PipeStop> {
 	}
 
 	/**
-	 * supprime le register passé en paramètres
+	 * supprime le register passÃ© en paramÃ¨tres
 	 * 
 	 * @param register
 	 */
@@ -80,7 +80,7 @@ public class PipeStopGroup implements Serializable, Iterable<PipeStop> {
 	}
 
 	/**
-	 * Indique si le registre passé en paramètre existe
+	 * Indique si le registre passÃ© en paramÃ¨tre existe
 	 * 
 	 * @param register
 	 * @return
@@ -100,7 +100,7 @@ public class PipeStopGroup implements Serializable, Iterable<PipeStop> {
 	}
 
 	/**
-	 * Liste des registres associés au jeu de registre
+	 * Liste des registres associÃ©s au jeu de registre
 	 * 
 	 * @return
 	 */

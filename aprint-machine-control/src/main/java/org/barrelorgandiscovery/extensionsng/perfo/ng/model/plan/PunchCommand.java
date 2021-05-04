@@ -1,6 +1,5 @@
 package org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan;
 
-import org.barrelorgandiscovery.gui.atrace.Punch;
 import org.barrelorgandiscovery.tools.HashCodeUtils;
 
 public class PunchCommand extends Command implements XYCommand {
@@ -52,6 +51,11 @@ public class PunchCommand extends Command implements XYCommand {
 
 		PunchCommand n = (PunchCommand) obj;
 		return x == n.x && y == n.y;
+	}
+	
+	@Override
+	public String toString() {
+		return "Punch At " + x + "," + y;
 	}
 	
 }

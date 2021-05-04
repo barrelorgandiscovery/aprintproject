@@ -20,6 +20,10 @@ import org.barrelorgandiscovery.virtualbook.Position;
  */
 public class CreationTool extends Tool {
 
+	public interface CreationToolAction {
+		void handleAction(Hole n, boolean isRemove);
+	}
+
 	private JEditableVirtualBookComponent c;
 
 	private boolean hasstarted = false;
@@ -41,18 +45,67 @@ public class CreationTool extends Tool {
 	 */
 	private Cursor customCursorRemove;
 
-	public CreationTool(JEditableVirtualBookComponent c, UndoStack us,
-			ISnappingEnvironment se) throws Exception {
+	CreationToolAction action = new CreationToolAction() {
+
+		@Override
+		public void handleAction(Hole n, boolean isRemove) {
+
+			c.startEventTransaction();
+			try {
+
+				if (isRemove) {
+					// remove hole part
+					us.push(new GlobalVirtualBookUndoOperation(c.getVirtualBook(), "Undo cut holes", c));
+					c.getVirtualBook().cutHoles(n);
+
+				} else {
+					us.push(new GlobalVirtualBookUndoOperation(c.getVirtualBook(), "Undo create hole", c));
+					c.getVirtualBook().addAndMerge(n);
+				}
+
+			} finally {
+				c.endEventTransaction();
+			}
+		}
+
+	};
+
+	/**
+	 * default creation tool
+	 * 
+	 * @param c
+	 * @param us
+	 * @param se
+	 * @throws Exception
+	 */
+	public CreationTool(JEditableVirtualBookComponent c, UndoStack us, ISnappingEnvironment se) throws Exception {
+		this(c, us, se, null);
+	}
+
+	/**
+	 * create a tool with custom creation action, this permit to do several things
+	 * with the created or modified hole
+	 * 
+	 * @param c
+	 * @param us
+	 * @param se
+	 * @param customCreationToolAction
+	 * @throws Exception
+	 */
+	public CreationTool(JEditableVirtualBookComponent c, UndoStack us, ISnappingEnvironment se,
+			CreationToolAction customCreationToolAction) throws Exception {
 		this.c = c;
 		this.us = us;
 		this.se = se;
 
-		customCursor = CursorTools.createCursorWithImage(ImageTools
-				.loadImage(getClass().getResource("tablet.png")));
-		
-		customCursorRemove = CursorTools.createCursorWithImage(ImageTools
-				.loadImage(getClass().getResource("tabletremove.png")));
-		
+		customCursor = CursorTools.createCursorWithImage(ImageTools.loadImage(CreationTool.class.getResource("tablet.png")));
+
+		customCursorRemove = CursorTools
+				.createCursorWithImage(ImageTools.loadImage(CreationTool.class.getResource("tabletremove.png")));
+
+		if (customCreationToolAction != null) {
+			this.action = customCreationToolAction;
+		}
 
 	}
 
@@ -68,6 +121,9 @@ public class CreationTool extends Tool {
 		super.unactivated();
 	}
 
+	/**
+	 * reset tool state
+	 */
 	private void reinitPosition() {
 		hasstarted = false;
 		positionstart = -1;
@@ -79,8 +135,7 @@ public class CreationTool extends Tool {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * fr.freydierepatrice.gui.aedit.Tool#mousePressed(java.awt.event.MouseEvent
-	 * )
+	 * fr.freydierepatrice.gui.aedit.Tool#mousePressed(java.awt.event.MouseEvent )
 	 */
 	@Override
 	public void mousePressed(MouseEvent e) {
@@ -88,8 +143,7 @@ public class CreationTool extends Tool {
 		if (p == null)
 			return;
 
-		Point2D.Double ps = new Point2D.Double(c.timestampToMM(p.position),
-				c.convertScreenYToCarton(e.getY()));
+		Point2D.Double ps = new Point2D.Double(c.timestampToMM(p.position), c.convertScreenYToCarton(e.getY()));
 
 		snapPosition(e, ps);
 
@@ -98,14 +152,10 @@ public class CreationTool extends Tool {
 		hasstarted = true;
 	}
 
-	
-	
-	
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * fr.freydierepatrice.gui.aedit.Tool#mouseMoved(java.awt.event.MouseEvent)
+	 * @see fr.freydierepatrice.gui.aedit.Tool#mouseMoved(java.awt.event.MouseEvent)
 	 */
 	@Override
 	public void mouseMoved(MouseEvent e) {
@@ -114,9 +164,7 @@ public class CreationTool extends Tool {
 		if (p == null)
 			return;
 
-		Point2D.Double d = new Point2D.Double(
-				c.convertScreenXToCarton(e.getX()), c.convertScreenYToCarton(e
-						.getY()));
+		Point2D.Double d = new Point2D.Double(c.convertScreenXToCarton(e.getX()), c.convertScreenYToCarton(e.getY()));
 
 		snapPosition(e, d);
 
@@ -127,7 +175,7 @@ public class CreationTool extends Tool {
 	private void snapPosition(MouseEvent e, Point2D.Double d) {
 		if (se == null)
 			return;
-		
+
 		if (((e.getModifiersEx() & KeyEvent.SHIFT_DOWN_MASK) != 0)) {
 			se.snapPosition(d);
 		}
@@ -142,9 +190,7 @@ public class CreationTool extends Tool {
 		Position p = c.query(e.getX(), e.getY());
 		if (p == null)
 			return;
-		Point2D.Double d = new Point2D.Double(
-				c.convertScreenXToCarton(e.getX()), c.convertScreenYToCarton(e
-						.getY()));
+		Point2D.Double d = new Point2D.Double(c.convertScreenXToCarton(e.getX()), c.convertScreenYToCarton(e.getY()));
 
 		snapPosition(e, d);
 
@@ -158,8 +204,7 @@ public class CreationTool extends Tool {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * fr.freydierepatrice.gui.aedit.Tool#mouseReleased(java.awt.event.MouseEvent
-	 * )
+	 * fr.freydierepatrice.gui.aedit.Tool#mouseReleased(java.awt.event.MouseEvent )
 	 */
 	@Override
 	public void mouseReleased(MouseEvent e) {
@@ -174,8 +219,8 @@ public class CreationTool extends Tool {
 
 			feedbackEnd = -1;
 
-			Point2D.Double d = new Point2D.Double(c.convertScreenXToCarton(e
-					.getX()), c.convertScreenYToCarton(e.getY()));
+			Point2D.Double d = new Point2D.Double(c.convertScreenXToCarton(e.getX()),
+					c.convertScreenYToCarton(e.getY()));
 
 			snapPosition(e, d);
 
@@ -198,26 +243,12 @@ public class CreationTool extends Tool {
 				return;
 			}
 
-			c.startEventTransaction();
-			try {
+			Hole n = new Hole(pistestart, positionstart, length);
 
-				Hole n = new Hole(pistestart, positionstart, length);
+			boolean isRemove = e.getButton() == MouseEvent.BUTTON3 || removeKeyModifier;
 
-				if (e.getButton() == MouseEvent.BUTTON3 || removeKeyModifier) {
-					// remove hole part
-					us.push(new GlobalVirtualBookUndoOperation(c
-							.getVirtualBook(), "Undo cut holes", c));
-					c.getVirtualBook().cutHoles(n);
-					
-				} else {
-					us.push(new GlobalVirtualBookUndoOperation(c
-							.getVirtualBook(), "Undo create hole", c));
-					c.getVirtualBook().addAndMerge(n);
-				}
-
-			} finally {
-				c.endEventTransaction();
-			}
+			assert action != null;
+			action.handleAction(n, isRemove);
 
 			reinitPosition();
 		} finally {
@@ -226,36 +257,31 @@ public class CreationTool extends Tool {
 	}
 
 	private boolean removeKeyModifier = false;
-	
+
 	@Override
 	public void keyPressed(KeyEvent e) {
-		
-		if ( (e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0)
-		{
+
+		if ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) != 0) {
 			removeKeyModifier = true;
 			c.setCursor(customCursorRemove);
 		}
-		
+
 	}
-	
+
 	@Override
 	public void keyReleased(KeyEvent e) {
-		if ( (e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) == 0)
-		{
+		if ((e.getModifiersEx() & KeyEvent.CTRL_DOWN_MASK) == 0) {
 			c.setCursor(customCursor);
 			removeKeyModifier = false;
 		}
 	}
-	
-	
-	
+
 	@Override
 	public void paintElements(Graphics g) {
 
 		if (feedbackEnd != -1 && hasstarted) {
 
-			int start = c
-					.convertCartonToScreenX(c.timestampToMM(positionstart));
+			int start = c.convertCartonToScreenX(c.timestampToMM(positionstart));
 			int end = c.convertCartonToScreenX(c.timestampToMM(feedbackEnd));
 
 			int y = c.convertCartonToScreenY(c.trackToMM(pistestart));

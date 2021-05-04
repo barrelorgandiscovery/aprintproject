@@ -6,15 +6,18 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.Serializable;
+import java.util.Collection;
 
 import org.barrelorgandiscovery.gui.etl.JConfigurePanel;
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.model.ModelType;
 import org.barrelorgandiscovery.model.TerminalParameterModelStep;
+import org.barrelorgandiscovery.model.type.GenericSimpleType;
 import org.barrelorgandiscovery.model.type.JavaType;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.tools.ImageCellRenderer;
 import org.barrelorgandiscovery.tools.ScaleChooserPropertyEditor;
+import org.barrelorgandiscovery.virtualbook.Hole;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 import org.barrelorgandiscovery.virtualbook.transformation.importer.MidiFile;
 import org.barrelorgandiscovery.virtualbook.transformation.importer.MidiFilePropertyEditor;
@@ -27,19 +30,24 @@ import com.l2fprod.common.propertysheet.PropertyRendererRegistry;
 import com.l2fprod.common.propertysheet.PropertySheetPanel;
 
 /**
- * Panneau de configuration des constantes d'entrée ou de sortie
+ * Panneau de configuration des constantes d'entrï¿½e ou de sortie
  * 
  * @author pfreydiere
  * 
  */
 public class JConfigureTerminalParameter extends JConfigurePanel {
 
-	private Object[] TYPE_COMBO_CHOICE = new Object[] { new JavaType(String.class), 
-			new JavaType(Integer.class), 
-			new JavaType(Boolean.class),
-			new JavaType(Scale.class), 
-			new JavaType(VirtualBook.class), 
-			new JavaType(File.class) };
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5099794142385107015L;
+
+	private Object[] TYPE_COMBO_CHOICE = new Object[] { new JavaType(String.class), new JavaType(Integer.class),
+			new JavaType(Double.class), new JavaType(Boolean.class), new JavaType(Scale.class),
+			new JavaType(VirtualBook.class), new JavaType(File.class),
+			new GenericSimpleType(Collection.class, new Class[] { Hole.class })
+
+	};
 
 	protected TerminalParameterModelStep tpms;
 	protected PropertySheetPanel propertySheetPanel;
@@ -52,7 +60,7 @@ public class JConfigureTerminalParameter extends JConfigurePanel {
 		assert tpms != null;
 		this.tpms = tpms;
 
-		// construction des propriétés à partir des paramètres
+		// construction des propriï¿½tï¿½s ï¿½ partir des paramï¿½tres
 		propertySheetPanel = new PropertySheetPanel();
 		propertySheetPanel.setDescriptionVisible(true);
 		propertySheetPanel.setSortingCategories(true);
@@ -63,7 +71,7 @@ public class JConfigureTerminalParameter extends JConfigurePanel {
 
 		propertySheetPanel.setRendererFactory(prr);
 
-		// préparation des propriétés
+		// prï¿½paration des propriï¿½tï¿½s
 
 		nameProperty = new DefaultProperty();
 		nameProperty.setDisplayName(Messages.getString("JConfigureTerminalParameter.0")); //$NON-NLS-1$
@@ -79,11 +87,7 @@ public class JConfigureTerminalParameter extends JConfigurePanel {
 		typeProperty.setEditable(true);
 		typeProperty.setType(ModelType.class);
 		typeProperty.setName("type"); //$NON-NLS-1$
-		
-		
-		
-		
-	
+
 		inoutProperty = new DefaultProperty();
 		inoutProperty.setDisplayName(Messages.getString("JConfigureTerminalParameter.6")); //$NON-NLS-1$
 		inoutProperty.setShortDescription(Messages.getString("JConfigureTerminalParameter.7")); //$NON-NLS-1$
@@ -98,39 +102,40 @@ public class JConfigureTerminalParameter extends JConfigurePanel {
 		valueProperty.setEditable(true);
 		valueProperty.setType(String.class);
 		valueProperty.setName("value"); //$NON-NLS-1$
-		
+
 		propertySheetPanel.setProperties(new Property[] { nameProperty, typeProperty, inoutProperty, valueProperty });
 
 		typeProperty.addPropertyChangeListener(new PropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent evt) {
-				if (evt == null) { return; }
+				if (evt == null) {
+					return;
+				}
 				if ("value".equals(evt.getPropertyName())) { //$NON-NLS-1$
-					// adaptation du type de la propriété ..
+					// adaptation du type de la propriï¿½tï¿½ ..
 					propertySheetPanel.removeProperty(valueProperty);
-					JavaType newType = (JavaType) evt.getNewValue();
-					valueProperty.setType(newType.getTargetedJavaType());
-					valueProperty.setValue(null); // reset value
-					propertySheetPanel.addProperty(valueProperty);
+					ModelType newType = (ModelType) evt.getNewValue();
+					if (newType instanceof JavaType) {
+						valueProperty.setType(((JavaType) newType).getTargetedJavaType());
+						valueProperty.setValue(null); // reset value
+						propertySheetPanel.addProperty(valueProperty);
+					}
 				}
 			}
 		});
-	
+
 		// beware translated type
 		typeProperty.setValue(tpms.getModelType());
 		valueProperty.setValue(tpms.getValue());
 
-
 		// editors
 
 		ComboBoxPropertyEditor typeComboEditor = new ComboBoxPropertyEditor();
-		typeComboEditor.setAvailableValues(
-				TYPE_COMBO_CHOICE);
+		typeComboEditor.setAvailableValues(TYPE_COMBO_CHOICE);
 
 		PropertyEditorRegistry pr = new PropertyEditorRegistry();
 		pr.registerDefaults();
 		pr.registerEditor(MidiFile.class, MidiFilePropertyEditor.class);
-		pr.registerEditor(Scale.class, 
-				new ScaleChooserPropertyEditor(env.getRepository()));
+		pr.registerEditor(Scale.class, new ScaleChooserPropertyEditor(env.getRepository()));
 		pr.registerEditor(typeProperty, typeComboEditor);
 
 		propertySheetPanel.setEditorFactory(pr);

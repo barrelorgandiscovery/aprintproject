@@ -19,6 +19,10 @@ public class JImageDisplayLayer extends JLayer {
 
 	@Override
 	public void drawLayer(Graphics2D g2d) {
+		
+		if (!isVisible()) {
+			return;
+		}
 
 		if (imageToDisplay != null) {
 

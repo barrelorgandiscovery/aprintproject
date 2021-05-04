@@ -5,7 +5,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * Modélisation d'un fichier midi
+ * ModÃ©lisation d'un fichier midi
  * 
  * @author Freydiere Patrice
  */
@@ -28,7 +28,7 @@ public class MidiFile extends MidiEventGroup {
 	public int[] listTracks() {
 		Set<Integer> s = new TreeSet<Integer>();
 
-		// recherche la liste des tracks utilisés ...
+		// recherche la liste des tracks utilisÃ©s ...
 		for (MidiAdvancedEvent e : this) {
 			if (e instanceof MidiNote) {
 				MidiNote mn = (MidiNote) e;

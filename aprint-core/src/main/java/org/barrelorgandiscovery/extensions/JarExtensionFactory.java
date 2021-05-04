@@ -41,7 +41,7 @@ public class JarExtensionFactory implements ExtensionFactory {
 	 */
 	public IExtension[] getExtensions() {
 
-		// liste de tous les fichiers jar du répertoire ...
+		// liste de tous les fichiers jar du rÃ©pertoire ...
 
 		if (!folder.isDirectory() || !folder.exists())
 			return new IExtension[0];

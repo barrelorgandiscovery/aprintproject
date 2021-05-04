@@ -8,7 +8,7 @@ import javax.sound.sampled.AudioInputStream;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.instrument.sample.ManagedAudioInputStream;
 
-import com.sun.media.sound.FFT;
+import gervill.FFT;
 
 /**
  * FFT Tools

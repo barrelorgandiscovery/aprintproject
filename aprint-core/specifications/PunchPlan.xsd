@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<schema targetNamespace="http://barrelorgandiscovery.org/punch/2016"
+<schema
+	targetNamespace="http://barrelorgandiscovery.org/punch/2020"
 	elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema"
-	xmlns:tns="http://barrelorgandiscovery.org/punch/2016"
+	xmlns:tns="http://barrelorgandiscovery.org/punch/2020"
 	xmlns:metadata="http://barrelorgandiscovery.org/virtualbook/2016">
 
-<import namespace="http://barrelorgandiscovery.org/virtualbook/2016" schemaLocation="Metadata.xsd" />
+	<import
+		namespace="http://barrelorgandiscovery.org/virtualbook/2016"
+		schemaLocation="Metadata.xsd" />
 
 	<annotation>
 		<documentation>
 			Description of a punch plan
 		</documentation>
-	</annotation>
+	</annotation>
 	<element name="metadata" type="metadata:VirtualBookMetadata"></element>
 
 	<complexType name="Information">
@@ -19,10 +22,10 @@
 
 	<complexType name="PunchPlan">
 		<sequence>
-		<element ref="tns:metadata"></element>
-		<sequence minOccurs="0" maxOccurs="unbounded">
-			<element name="punchcommand" type="tns:PunchCommand"></element>
-		</sequence>
+			<element ref="tns:metadata"></element>
+			<sequence minOccurs="0" maxOccurs="unbounded">
+				<element name="punchcommand" type="tns:PunchCommand"></element>
+			</sequence>
 		</sequence>
 		<attribute name="punchwidth" type="double"></attribute>
 	</complexType>
@@ -38,6 +41,21 @@
 		</complexContent>
 	</complexType>
 
+	<complexType name="CutTo">
+		<complexContent>
+			<extension base="tns:PunchCommand">
+				<attribute name="x" type="double" use="required"></attribute>
+
+				<attribute name="y" type="double" use="required"></attribute>
+
+				<attribute name="powerfactor" type="double" use="required"></attribute>
+
+				<attribute name="speedfactor" type="double" use="required"></attribute>
+
+			</extension>
+		</complexContent>
+	</complexType>
+
 	<complexType name="Punch">
 		<complexContent>
 			<extension base="tns:PunchDisplacement"></extension>
@@ -46,5 +64,5 @@
 
 	<element name="punchplan" type="tns:PunchPlan"></element>
 
-    <complexType name="PunchCommand" abstract="true"></complexType>
+	<complexType name="PunchCommand" abstract="true"></complexType>
 </schema>

@@ -11,6 +11,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import org.apache.log4j.BasicConfigurator;
+import org.apache.log4j.Logger;
 import org.apache.log4j.lf5.LF5Appender;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
 import org.barrelorgandiscovery.instrument.Instrument;
@@ -25,13 +26,18 @@ public class JInstrumentCombo extends JPanel {
 	 */
 	private static final long serialVersionUID = -1581972416838379690L;
 
+	private static Logger logger = Logger.getLogger(JInstrumentCombo.class);
+
 	/**
 	 * instrument repository
 	 */
 	private Repository2 rep;
 
+	private IInstrumentChoiceListener choiceListener;
+
 	/**
-	 * constructor, 
+	 * constructor,
+	 * 
 	 * @param repository2 the instrument repository
 	 */
 	public JInstrumentCombo(Repository2 repository2) {
@@ -52,12 +58,28 @@ public class JInstrumentCombo extends JPanel {
 			}
 		});
 		initComponents();
+
+		cb.addItemListener((item) -> {
+			if (choiceListener != null) {
+				try {
+				choiceListener.instrumentChanged(this.getSelectedInstrument());
+				} catch(Throwable t) {
+					logger.error(t.getMessage(), t);
+				}
+			}
+		});
 	}
 
+	public void setChoiceListener(IInstrumentChoiceListener choiceListener) {
+		this.choiceListener = choiceListener;
+	}
+	
 	/**
 	 * the combo box
 	 */
 	private JComboBox cb;
+
+	private JLabel text;
 
 	/**
 	 * init the internal components
@@ -65,7 +87,7 @@ public class JInstrumentCombo extends JPanel {
 	protected void initComponents() {
 		setLayout(new BorderLayout());
 
-		JLabel text = new JLabel("Select Instrument :");
+		text = new JLabel("Select Instrument :");
 		add(text, BorderLayout.WEST);
 
 		cb = new JComboBox();
@@ -74,9 +96,14 @@ public class JInstrumentCombo extends JPanel {
 
 		add(cb, BorderLayout.CENTER);
 	}
+	
+	public void setLabel(String label) {
+		text.setText(label);
+	}
 
 	/**
 	 * internal class for diplay instrument label in combobox
+	 * 
 	 * @author use
 	 *
 	 */
@@ -105,8 +132,7 @@ public class JInstrumentCombo extends JPanel {
 			ids.add(id);
 		}
 
-		DefaultComboBoxModel defaultComboBoxModel = new DefaultComboBoxModel(
-				ids);
+		DefaultComboBoxModel defaultComboBoxModel = new DefaultComboBoxModel(ids);
 		cb.setModel(defaultComboBoxModel);
 
 	}
@@ -124,18 +150,17 @@ public class JInstrumentCombo extends JPanel {
 
 		return id.instrument;
 	}
-	
-	
+
 	public static void main(String[] args) throws Exception {
-		
+
 		BasicConfigurator.configure(new LF5Appender());
-		
+
 		JFrame f = new JFrame();
-		
-		Repository2 r2 = Repository2Factory.create(new Properties(), new APrintProperties("aprintstudio",true));
-		
+
+		Repository2 r2 = Repository2Factory.create(new Properties(), new APrintProperties("aprintstudio", true));
+
 		f.getContentPane().add(new JInstrumentCombo(r2));
-		
+
 		f.pack();
 		f.setVisible(true);
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

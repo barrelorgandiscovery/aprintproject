@@ -13,12 +13,18 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.XYCommand;
 import org.barrelorgandiscovery.tools.JMessageBox;
 
 /**
- * create a stream for sending commands
+ * create a stream for sending commands, this class handle normal CNC command
+ * streams, and also pause timer
  * 
  * @author pfreydiere
  * 
  */
 public class MachineCommandStream {
+
+	private static final Logger logger = Logger.getLogger(MachineCommandStream.class);
+
+	public static final int STATE_PROCESSING = 0;
+	public static final int STATE_PAUSED = 1;
 
 	public interface StreamingProcessingListener {
 		/**
@@ -32,22 +38,52 @@ public class MachineCommandStream {
 		 * end of stream
 		 */
 		void allCommandsEnded();
+
+		/**
+		 * error while processing
+		 * 
+		 * @param ex
+		 */
+		void errorInProcessing(Exception ex);
+
+		/**
+		 * inform about the current stream state (used for gui)
+		 * 
+		 * @param currentStreamState the current stream state
+		 */
+		void currentStreamState(int currentStreamState);
 	}
 
-	private static final Logger logger = Logger
-			.getLogger(MachineCommandStream.class);
-
+	/**
+	 * the machine command handling
+	 */
 	private MachineControl machineControl;
 
+	/**
+	 * the current punch plan
+	 */
 	private PunchPlan punchPlan;
 
+	/**
+	 * processing thread
+	 */
 	private Thread processingThread = null;
 
+	/**
+	 * feedback on streaming
+	 */
 	private StreamingProcessingListener listener = null;
 
-	public MachineCommandStream(MachineControl machineControl,
-			PunchPlan punchPlan, StreamingProcessingListener listener)
-			throws Exception {
+	/**
+	 * configured Pause state for machines
+	 */
+	// may be null if no pause time state
+	private PauseTimerState pauseTimerState = null;
+
+	public MachineCommandStream(MachineControl machineControl, PunchPlan punchPlan,
+			StreamingProcessingListener listener, PauseTimerState pauseTimerState) throws Exception {
+		
+		
 		assert machineControl != null;
 		this.machineControl = machineControl;
 		assert punchPlan != null;
@@ -55,6 +91,8 @@ public class MachineCommandStream {
 
 		assert listener != null;
 		this.listener = listener;
+		
+		this.pauseTimerState = pauseTimerState;
 
 	}
 
@@ -68,6 +106,15 @@ public class MachineCommandStream {
 
 		// index check
 
+		if (listener != null) {
+			try {
+				listener.currentStreamState(STATE_PROCESSING);
+			} catch (Throwable t) {
+				logger.error(t.getMessage(), t);
+			}
+		}
+		
+
 		assert index < punchPlan.getCommandsByRef().size();
 		assert index >= 0;
 
@@ -75,68 +122,117 @@ public class MachineCommandStream {
 			public void run() {
 
 				try {
+					
+					if (pauseTimerState != null) {
+						pauseTimerState.startPunch();
+					}
+					
 					final int j = index;
 					List<Command> commands = punchPlan.getCommandsByRef();
-					for (int i = j; i < commands.size(); i++) {
-						try {
 
-							Command cmd = commands.get(i);
-							logger.debug("stream command sent :" + cmd);
+					machineControl.prepareForWork();
+					try {
 
-							// hack for testing
-							if (System.getProperty("fakeM100") != null) {
-								if (cmd instanceof PunchCommand) {
-									XYCommand c = (XYCommand) cmd;
-									cmd = new DisplacementCommand(c.getX(),
-											c.getY());
-								}
-							}
-							
-							// // and hack
-							if (logger.isDebugEnabled()) {
-								logger.debug("command stream send command :"
-										+ cmd);
-							}
-							
-							
-							machineControl.sendCommand(cmd);
-							
-							StreamingProcessingListener l = listener;
-							if (l != null) {
-								logger.debug("command processed");
-								l.commandProcessed(i);
-							}
+						for (int i = j; i < commands.size(); i++) {
+							try {
 
-						} catch (InterruptedException interrupt) {
-							// nothing to report
-						} catch (RuntimeException t) {
+								Command cmd = commands.get(i);
+								logger.debug("stream command sent :" + cmd);
 
-							final Throwable ft = t;
-							logger.error(t.getMessage(), t);
-							SwingUtilities.invokeLater(new Runnable() {
-								@Override
-								public void run() {
-									JMessageBox.showError(null, new Exception(
-											"une erreur a été rencontrée lors du perçage :"
-													+ ft.getMessage(), ft));
+								// hack for testing
+								if (System.getProperty("fakeM100") != null) {
+									if (cmd instanceof PunchCommand) {
+										XYCommand c = (XYCommand) cmd;
+										cmd = new DisplacementCommand(c.getX(), c.getY());
+									}
 								}
 
-							});
+								// and hack
+								if (logger.isDebugEnabled()) {
+									logger.debug("command stream send command :" + cmd);
+								}
 
-							throw t;
+								if (machineControl.getStatus() == MachineStatus.ERROR) {
+									throw new Exception("Machine has been returned an alarm");
+								}
+
+								machineControl.sendCommand(cmd);
+
+								if (pauseTimerState != null) {
+									boolean enter = false;
+									while (pauseTimerState.isInPause()) {
+										if (!enter) {
+											if (listener != null) {
+												try {
+													listener.currentStreamState(STATE_PAUSED);
+												} catch (Throwable t) {
+													logger.error(t.getMessage(), t);
+												}
+											}
+										}
+										enter = true;
+
+										Thread.sleep(1000);
+									}
+									if (enter) {
+										// signal the processing
+										if (listener != null) {
+											try {
+												listener.currentStreamState(STATE_PROCESSING);
+											} catch (Throwable t) {
+												logger.error(t.getMessage(), t);
+											}
+										}
+									}
+								}
+
+								StreamingProcessingListener l = listener;
+								if (l != null) {
+									logger.debug("command processed");
+									l.commandProcessed(i);
+								}
+
+							} catch (InterruptedException interrupt) {
+								// nothing to report
+							} catch (RuntimeException t) {
+
+								final Throwable ft = t;
+								logger.error(t.getMessage(), t);
+								SwingUtilities.invokeLater(new Runnable() {
+									@Override
+									public void run() {
+										JMessageBox.showError(null, new Exception(
+												"une erreur a été rencontrée lors du perçage :" + ft.getMessage(), ft));
+									}
+
+								});
+								// raise
+								throw t;
+							}
+
 						}
 
-					}
+					} finally {
+						// in case we must send specific commands on stop,
+						// for example, disable laser
+						machineControl.endingForWork();
 
-					processingThread = null;
-					if (listener != null) {
-						listener.allCommandsEnded();
+						if (pauseTimerState != null) {
+							pauseTimerState.startPunch();
+						}
+
+
+						processingThread = null;
+						if (listener != null) {
+							listener.allCommandsEnded();
+						}
 					}
 
 				} catch (Exception ex) {
-					logger.error(
-							"Error while processing commands :"
-									+ ex.getMessage(), ex);
+					if (!(ex instanceof InterruptedException)) {
+						logger.error("Error while processing commands :" + ex.getMessage(), ex);
+						listener.errorInProcessing(ex);
+					}
 				}
 
 				logger.info("end of command processing");
@@ -147,7 +243,6 @@ public class MachineCommandStream {
 		synchronized (this) {
 			this.processingThread = t;
 			t.start();
-			
 		}
 
 	}
@@ -192,4 +287,12 @@ public class MachineCommandStream {
 
 	}
 
+	public void setPauseTimerState(PauseTimerState pauseTimerState) {
+		this.pauseTimerState = pauseTimerState;
+	}
+	
+	public PauseTimerState getPauseTimerState() {
+		return pauseTimerState;
+	}
+	
 }

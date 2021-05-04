@@ -3,7 +3,7 @@ package org.barrelorgandiscovery.scale;
 import java.io.Serializable;
 
 /**
- * Contraintes associées à l'instrument .. à la gamme ...
+ * Contraintes associÃ©es Ã  l'instrument .. Ã  la gamme ...
  * 
  * @author Freydiere Patrice
  * 

@@ -30,7 +30,7 @@ public class TracksAndPositionedNoteComparator extends TracksNumberComparator {
 						NoteDef nd1 = (NoteDef) td1[i];
 						NoteDef nd2 = (NoteDef) td2[i];
 
-						// si pas les mêmes notes, indépendamment de la hauteur
+						// si pas les mÃªmes notes, indÃ©pendamment de la hauteur
 						if (!MidiHelper.getMidiNote(nd1.getMidiNote()).equals(
 								MidiHelper.getMidiNote(nd2.getMidiNote()))) {
 							return false;

@@ -31,7 +31,7 @@ public class StorageInstrumentManager implements InstrumentManager {
 			.getLogger(StorageInstrumentManager.class);
 
 	/**
-	 * Mémorisation des différents instruments ..
+	 * MÃ©morisation des diffÃ©rents instruments ..
 	 */
 	private List<Instrument> instruments = new ArrayList<Instrument>();
 

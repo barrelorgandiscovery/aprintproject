@@ -8,9 +8,9 @@ import org.barrelorgandiscovery.model.Model;
 import org.barrelorgandiscovery.tools.SerializeTools;
 
 /**
- * simple class to load and save model, for debug purpose
+ * simple class to load and save model, for DEBUG purpose
  * 
- * @author use
+ * @author pfreydiere
  *
  */
 public class BinaryModelIO {

@@ -6,7 +6,7 @@ import java.io.InputStream;
 public interface IStreamRef {
 
 	/**
-	 * Ouverture du stream référencé
+	 * Ouverture du stream rÃ©fÃ©rencÃ©
 	 * 
 	 * @return
 	 * @throws IOException

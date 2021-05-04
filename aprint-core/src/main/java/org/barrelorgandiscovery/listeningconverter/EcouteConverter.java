@@ -38,9 +38,9 @@ public class EcouteConverter {
 
 	/**
 	 * fonction permettant de transformer un carton virtuel, en sequence midi
-	 * pouvant être jouée.
+	 * pouvant Ãªtre jouÃ©e.
 	 * 
-	 * les notes se touchant sont fusionnées.
+	 * les notes se touchant sont fusionnÃ©es.
 	 * 
 	 * @param carton
 	 *            le carton virtuel
@@ -51,7 +51,7 @@ public class EcouteConverter {
 			int midicanal) throws InvalidMidiDataException {
 
 		/**
-		 * Fusion des notes dédoublées
+		 * Fusion des notes dÃ©doublÃ©es
 		 */
 
 		long micropertick = (long) (10000.0 / 384.0 * ticksperbeat);

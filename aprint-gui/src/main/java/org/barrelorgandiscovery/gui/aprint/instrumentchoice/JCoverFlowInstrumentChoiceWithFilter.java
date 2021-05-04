@@ -13,7 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 
 import org.apache.log4j.Logger;
-import org.barrelorgandiscovery.gui.aprintng.APrintNGImporterInternalFrame;
+import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.repository.Repository2;
 
@@ -112,6 +112,10 @@ public class JCoverFlowInstrumentChoiceWithFilter extends JPanel {
 
 	public void selectInstrument(String instrumentName) {
 		instrumentChoice.selectInstrument(instrumentName);
+	}
+	
+	public Instrument getFirstInstrument() {
+		return instrumentChoice.getFirstInstrument();
 	}
 	
 	

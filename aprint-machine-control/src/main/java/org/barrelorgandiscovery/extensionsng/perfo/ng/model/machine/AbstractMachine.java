@@ -1,19 +1,14 @@
 package org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchPlan;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.gcode.GCodeCompiler;
 
 /**
- * abstract machine command, interpreting the punchplan
- * 
+ * abstract machine command, interpreting the punch plan
  * @author pfreydiere
  * 
  */
 public abstract class AbstractMachine {
 
-	
 	public AbstractMachine() {
 
 	}
@@ -32,13 +27,31 @@ public abstract class AbstractMachine {
 	 */
 	public abstract String getDescription();
 
-
 	/**
-	 * open the machine control, 
-	 * this raise exception if the machine is not ready or connected
+	 * open the machine control, this raise exception if the machine is not ready or
+	 * connected
 	 * 
 	 * @param punchPlan
 	 */
 	public abstract MachineControl open(AbstractMachineParameters parameters) throws Exception;
 
+	/**
+	 * create a new gcode compiler
+	 * 
+	 * @return
+	 * @throws Exception
+	 */
+	public abstract GCodeCompiler createNewGCodeCompiler(AbstractMachineParameters parameters) throws Exception;
+
+	/**
+	 * test is this machine model is the same as the one passed in parameters
+	 * @param machine
+	 */
+	public boolean isSameModelAs(AbstractMachine machine) {
+		if (machine == null) {
+			return false;
+		}
+		
+		return machine.getClass().getName().equals(getClass().getName());
+	}
 }

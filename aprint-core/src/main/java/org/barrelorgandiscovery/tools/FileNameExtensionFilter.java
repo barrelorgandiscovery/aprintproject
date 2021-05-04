@@ -1,5 +1,7 @@
 package org.barrelorgandiscovery.tools;
 
+import java.util.Arrays;
+
 import javax.swing.filechooser.FileFilter;
 
 public class FileNameExtensionFilter extends FileFilter {
@@ -10,8 +12,9 @@ public class FileNameExtensionFilter extends FileFilter {
 
 	/**
 	 * FileNameExtension filter
+	 * 
 	 * @param description the description that appear in the box
-	 * @param extension the extension (without '.')
+	 * @param extension   the extension (without '.')
 	 */
 	public FileNameExtensionFilter(String description, String extension) {
 		this.description = description;
@@ -30,7 +33,7 @@ public class FileNameExtensionFilter extends FileFilter {
 		if (f == null)
 			return false;
 
-		// on accepte les répertoire
+		// on accepte les rÃ©pertoire
 
 		if (f.isDirectory())
 			return true;
@@ -45,6 +48,11 @@ public class FileNameExtensionFilter extends FileFilter {
 	@Override
 	public String getDescription() {
 		return description;
+	}
+
+	@Override
+	public String toString() {
+		return "" + getDescription() + " - " + Arrays.asList(extensions);
 	}
 
 }

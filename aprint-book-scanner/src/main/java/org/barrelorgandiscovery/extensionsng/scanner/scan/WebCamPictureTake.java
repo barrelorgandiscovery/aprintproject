@@ -10,6 +10,11 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.DisplacementCom
 
 import com.github.sarxos.webcam.Webcam;
 
+/**
+ * runnable for getting the images
+ * @author pfreydiere
+ *
+ */
 public class WebCamPictureTake implements Runnable {
 
 	private static Logger logger = Logger.getLogger(WebCamPictureTake.class);
@@ -31,7 +36,6 @@ public class WebCamPictureTake implements Runnable {
 			if (listener != null) {
 				listener.imageReceived(picture, System.nanoTime() / 1_000_000);
 			}
-			// display image
 
 		} catch (Exception ex) {
 			logger.error("error while showing the image " + ex.getMessage(), ex);//$NON-NLS-1$

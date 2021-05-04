@@ -1,6 +1,6 @@
 package org.barrelorgandiscovery.extensionsng.perfo.ng.process;
 
-import org.barrelorgandiscovery.gui.atrace.OptimizerResult;
+import org.barrelorgandiscovery.optimizers.OptimizerResult;
 
 public interface PunchProcessingResult {
 

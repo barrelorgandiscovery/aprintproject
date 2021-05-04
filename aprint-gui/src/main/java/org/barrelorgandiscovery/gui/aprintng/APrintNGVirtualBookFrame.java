@@ -22,7 +22,7 @@ public interface APrintNGVirtualBookFrame {
 	VirtualBook getVirtualBook();
 
 	/**
-	 * Return the pianoroll component
+	 * Return the pianoroll component, this gives access to the book component
 	 * 
 	 * @return
 	 */
@@ -46,7 +46,7 @@ public interface APrintNGVirtualBookFrame {
 	void stop() throws Exception;
 	
 	/**
-	 * Get the frame wait interface
+	 * Get the frame wait interface, permitting to freeze the screen during large operations
 	 * @return
 	 */
 	IAPrintWait getWaitInterface();

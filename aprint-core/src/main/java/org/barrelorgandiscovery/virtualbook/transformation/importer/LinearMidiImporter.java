@@ -27,7 +27,7 @@ public class LinearMidiImporter implements MidiImporter {
 	}
 
 	// ///////////////////////////////////////////////////////
-	// méthodes de définition de la transposition
+	// mÃ©thodes de dÃ©finition de la transposition
 
 	/**
 	 * map a midinote to a track number
@@ -180,7 +180,7 @@ public class LinearMidiImporter implements MidiImporter {
 							}
 
 							if (!Double.isNaN(pd.getLength())) {
-								// on a une longueur imposée pour la percussion
+								// on a une longueur imposÃ©e pour la percussion
 								long calculatedlength = destinationgamme
 										.mmToTime(pd.getLength());
 								longueur = calculatedlength;
@@ -193,7 +193,7 @@ public class LinearMidiImporter implements MidiImporter {
 									piste));
 						}
 
-						// Création du trou ... en prenant en compte le retard
+						// CrÃ©ation du trou ... en prenant en compte le retard
 						Hole h = new Hole(piste, timestamp, longueur);
 						cv.addHole(h);
 						shiftMapping(mappingpercussion, mn.getMidiNote());
@@ -206,7 +206,7 @@ public class LinearMidiImporter implements MidiImporter {
 				} else {
 					logger.debug("Note " + mn); //$NON-NLS-1$
 					if (hasMapping(mappingnote, mn.getMidiNote())) {
-						// Création du trou ...
+						// CrÃ©ation du trou ...
 						Hole h = new Hole(getFirst(mappingnote,
 								mn.getMidiNote()), mn.getTimeStamp(),
 								mn.getLength());

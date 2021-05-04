@@ -24,12 +24,13 @@ import javax.swing.event.ChangeListener;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.lf5.LF5Appender;
+import org.barrelorgandiscovery.bookimage.PerfoScanFolder;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.MachineControl;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLMachine;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLMachineParameters;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLPunchMachine;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLPunchMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.DisplacementCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.HomingCommand;
-import org.barrelorgandiscovery.extensionsng.scanner.PerfoScanFolder;
+import org.barrelorgandiscovery.extensionsng.scanner.Messages;
 import org.barrelorgandiscovery.gui.CancelTracker;
 import org.barrelorgandiscovery.gui.ICancelTracker;
 import org.barrelorgandiscovery.tools.Disposable;
@@ -79,7 +80,7 @@ public class JPerfoScanner extends JPanel implements Disposable {
     @Override
     public void run() {
 
-      double y = 0.0;
+      double bookdisplacement = 0.0;
 
       while (!cancelTracker.isCanceled()) {
         try {
@@ -101,13 +102,13 @@ public class JPerfoScanner extends JPanel implements Disposable {
             logger.debug("save and move");//$NON-NLS-1$
             try {
               perfoScan.addNewImage(picture);
-              machineControl.sendCommand(new DisplacementCommand(y, -50.0));
+              machineControl.sendCommand(new DisplacementCommand(bookdisplacement, 0.0));
               Thread.sleep(2000);
               // machineControl.flushCommands();
             } catch (Exception ex) {
               logger.error(ex.getMessage(), ex);
             }
-            y += 20.0;
+            bookdisplacement += 20.0;
             try {
               Thread.sleep(1000);
             } catch (Exception ex) {
@@ -146,23 +147,23 @@ public class JPerfoScanner extends JPanel implements Disposable {
     add(labelImage, BorderLayout.CENTER);
 
     JToggleButton tb = new JToggleButton();
-    tb.setText("Record");
+    tb.setText(Messages.getString("JPerfoScanner.0")); //$NON-NLS-1$
     tb.addChangeListener(
         new ChangeListener() {
           @Override
           public void stateChanged(ChangeEvent e) {
             JToggleButton t = (JToggleButton) e.getSource();
             if (t.getModel().isSelected()) {
-              tb.setText("Record");
+              tb.setText(Messages.getString("JPerfoScanner.1")); //$NON-NLS-1$
               onlyWebCam.set(false);
             } else {
-              tb.setText("Stop Record");
+              tb.setText(Messages.getString("JPerfoScanner.2")); //$NON-NLS-1$
               onlyWebCam.set(true);
             }
           }
         });
 
-    final JButton btn = new JButton("Start");
+    final JButton btn = new JButton(Messages.getString("JPerfoScanner.3")); //$NON-NLS-1$
     btn.addActionListener(
         new ActionListener() {
           @Override
@@ -171,12 +172,12 @@ public class JPerfoScanner extends JPanel implements Disposable {
 
               if (!cancelTracker.isCanceled()) {
                 cancelTracker.cancel();
-                btn.setText("Start");
+                btn.setText(Messages.getString("JPerfoScanner.4")); //$NON-NLS-1$
                 defaultWebCam = null;
                 return;
               }
 
-              btn.setText("Stop");
+              btn.setText(Messages.getString("JPerfoScanner.5")); //$NON-NLS-1$
               logger.debug("open web cam");//$NON-NLS-1$
               defaultWebCam = openWebCam();
 
@@ -231,8 +232,8 @@ public class JPerfoScanner extends JPanel implements Disposable {
           BasicConfigurator.configure(new LF5Appender());
         });
 
-    GRBLMachine machine = new GRBLMachine();
-    GRBLMachineParameters params = new GRBLMachineParameters();
+    GRBLPunchMachine machine = new GRBLPunchMachine();
+    GRBLPunchMachineParameters params = new GRBLPunchMachineParameters();
     System.out.println("Available Port List :" + Arrays.asList(SerialPortList.getPortNames()));//$NON-NLS-1$
     params.setComPort("COM5");//$NON-NLS-1$
     MachineControl open = machine.open(params);

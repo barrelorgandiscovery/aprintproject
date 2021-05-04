@@ -1,7 +1,10 @@
 package org.barrelorgandiscovery.scale.importer;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -21,8 +24,22 @@ import org.barrelorgandiscovery.scale.Scale;
  */
 public class MidiBoekGammeImporter {
 
-	private static Logger logger = Logger
-			.getLogger(MidiBoekGammeImporter.class);
+	private static Logger logger = Logger.getLogger(MidiBoekGammeImporter.class);
+
+	/**
+	 * import midiboek file from file object
+	 * @param file
+	 * @return
+	 * @throws Exception
+	 */
+	public static Scale importScale(File file) throws Exception {
+		FileInputStream f = new FileInputStream(file);
+		try {
+			return importScale(f, file.getName());
+		} finally {
+			f.close();
+		}
+	}
 
 	/**
 	 * import midiboek file in scale file for APrint ...
@@ -31,7 +48,7 @@ public class MidiBoekGammeImporter {
 	 * @return
 	 * @throws Exception
 	 */
-	public static Scale importScale(File file) throws Exception {
+	public static Scale importScale(InputStream file, String filename) throws Exception {
 
 		// Ouverture du fichier ..
 
@@ -72,8 +89,7 @@ public class MidiBoekGammeImporter {
 				this.name = name;
 			}
 
-			public void lineParsed(String cmd, String[] params)
-					throws Exception {
+			public void lineParsed(String cmd, String[] params) throws Exception {
 
 				line++;
 				lineFile++;
@@ -83,8 +99,7 @@ public class MidiBoekGammeImporter {
 					// chant ...
 					hasChant = true;
 
-					NoteDef nd = new NoteDef(Integer.parseInt(params[0]),
-							PipeStopListReference.REGISTERSET_CHANT);
+					NoteDef nd = new NoteDef(Integer.parseInt(params[0]), PipeStopListReference.REGISTERSET_CHANT);
 
 					pistes[line] = nd;
 
@@ -99,7 +114,7 @@ public class MidiBoekGammeImporter {
 					pistes[line] = nd;
 
 				} else if ("resrv".equals(s)) {
-					// la ligne est réservée ...
+					// la ligne est rÃ©servÃ©e ...
 
 				} else if ("snelh".equals(s)) {
 
@@ -109,10 +124,10 @@ public class MidiBoekGammeImporter {
 
 				} else if ("leima".equals(s)) {
 
-					// Axe de la première piste
+					// Axe de la premiÃ¨re piste
 
 					premierepiste = 1.0 * Integer.parseInt(params[0]) / 10.0;
-					logger.debug("première piste :" + premierepiste);
+					logger.debug("premiÃ¨re piste :" + premierepiste);
 
 				} else if ("ondma".equals(s)) {
 
@@ -125,11 +140,9 @@ public class MidiBoekGammeImporter {
 				} else if ("harta".equals(s)) {
 					// entre axe ...
 
-					boolean ishi = params.length > 1
-							&& "h".equals(params[1].toLowerCase());
+					boolean ishi = params.length > 1 && "h".equals(params[1].toLowerCase());
 
-					entreaxe = 1.0 * Integer.parseInt(params[0])
-							/ (ishi ? 100.0 : 10.0);
+					entreaxe = 1.0 * Integer.parseInt(params[0]) / (ishi ? 100.0 : 10.0);
 					logger.debug("entre axe :" + entreaxe);
 
 				} else if ("ntype".equals(s)) {
@@ -148,14 +161,12 @@ public class MidiBoekGammeImporter {
 
 					int midicode = Integer.parseInt(params[0]);
 
-					if (params.length > 1
-							&& !params[1].toLowerCase().equals("m")) {
+					if (params.length > 1 && !params[1].toLowerCase().equals("m")) {
 						// lecture de la longueur
 						longueur = 1.0 * Integer.parseInt(params[1]) / 10.0;
 					}
 
-					if (params.length > 2
-							&& !params[2].toLowerCase().equals("m")) {
+					if (params.length > 2 && !params[2].toLowerCase().equals("m")) {
 
 						if ("e".equals(params[2].toLowerCase())) {
 							retard = longueur;
@@ -164,8 +175,7 @@ public class MidiBoekGammeImporter {
 						}
 					}
 
-					PercussionDef p = new PercussionDef(midicode, retard,
-							longueur);
+					PercussionDef p = new PercussionDef(midicode, retard, longueur);
 					this.pistes[line] = p;
 
 				} else if ("regis".equals(s)) {
@@ -180,17 +190,15 @@ public class MidiBoekGammeImporter {
 				} else if ("melod".equals(s)) {
 					line--;
 					logger.debug("melod not supported");
-					throw new Exception(
-							"Plusieures mélodies , non supportée .... ");
+					throw new Exception("Plusieures mÃ©lodies , non supportÃ©e .... ");
 				} else {
-					throw new Exception("unsupported command " + s + " line "
-							+ lineFile);
+					throw new Exception("unsupported command " + s + " line " + lineFile);
 				}
 
 			}
 
 			/**
-			 * Cette fonction cree la gamme à partir du parsing ...
+			 * Cette fonction cree la gamme Ã  partir du parsing ...
 			 * 
 			 * @return
 			 */
@@ -198,8 +206,7 @@ public class MidiBoekGammeImporter {
 
 				// Calcul de la largeur du carton ...
 
-				double largeur = nbpistes * entreaxe + margedubas
-						+ premierepiste;
+				double largeur = nbpistes * entreaxe + margedubas + premierepiste;
 
 				// copie du tableau // BackPort en 1.5
 
@@ -213,27 +220,23 @@ public class MidiBoekGammeImporter {
 
 				PipeStopGroupList l = new PipeStopGroupList();
 				if (hasChant)
-					l.put(new PipeStopGroup(
-							PipeStopListReference.REGISTERSET_CHANT, null));
+					l.put(new PipeStopGroup(PipeStopListReference.REGISTERSET_CHANT, null));
 				if (hasContreChant)
-					l.put(new PipeStopGroup(
-							PipeStopListReference.REGISTERSET_CONTRECHAMP, null));
+					l.put(new PipeStopGroup(PipeStopListReference.REGISTERSET_CONTRECHAMP, null));
 
 				// TODO , Rendering ...
 
-				Scale g = new Scale(this.name, largeur, entreaxe, entreaxe,
-						premierepiste, nbpistes, tds, l, vitessedefilement,
-						null, "Converted from Midiboek",
-						Scale.GAMME_STATE_INPROGRESS, "Piet", null, false,
-						false, null);
+				Scale g = new Scale(this.name, largeur, entreaxe, entreaxe, premierepiste, nbpistes, tds, l,
+						vitessedefilement, null, "Converted from Midiboek", Scale.GAMME_STATE_INPROGRESS, "Piet", null,
+						false, false, null);
 
 				return g;
 			}
 
 		}
 
-		RegistersRead r = new RegistersRead(file.getName());
-		MidiBoekFileParser fp = new MidiBoekFileParser(new FileReader(file), r);
+		RegistersRead r = new RegistersRead(filename);
+		MidiBoekFileParser fp = new MidiBoekFileParser(new InputStreamReader(file), r);
 		fp.parse();
 
 		return r.toScale();
@@ -250,9 +253,7 @@ public class MidiBoekGammeImporter {
 
 		logger.debug("Start Importing ... ");
 
-		logger.debug("resultat : "
-				+ importScale(new File(
-						"C:\\Projets\\APrint\\midiboek_gammes\\m_lim51.gam")));
+		logger.debug("resultat : " + importScale(new File("C:\\Projets\\APrint\\midiboek_gammes\\m_lim51.gam")));
 
 	}
 
