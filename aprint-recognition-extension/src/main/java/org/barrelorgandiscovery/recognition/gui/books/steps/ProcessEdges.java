@@ -13,6 +13,7 @@ import org.barrelorgandiscovery.recognition.gui.books.BookReadProcessor;
 import org.barrelorgandiscovery.recognition.gui.books.states.EdgesStates;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.tools.Disposable;
+import org.barrelorgandiscovery.tools.ImageTools;
 
 public class ProcessEdges implements Disposable {
 
@@ -89,7 +90,7 @@ public class ProcessEdges implements Disposable {
 							finalOrigin.getHeight(), edgesState.top, edgesState.bottom, finalOrigin.getHeight(),
 							edgesState.viewInverted ^ instrumentScale.isPreferredViewedInversed());
 
-					ImageIO.write(result, "JPEG", output);
+					ImageTools.saveJpeg(result, output);
 
 					return null;
 				}

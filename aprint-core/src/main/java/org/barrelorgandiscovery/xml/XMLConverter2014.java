@@ -66,8 +66,7 @@ public class XMLConverter2014 {
 
 	private static Logger logger = Logger.getLogger(XMLConverter2014.class);
 
-	public static ScaleDocument toScaleDocument(
-			org.barrelorgandiscovery.scale.Scale scale) throws Exception {
+	public static ScaleDocument toScaleDocument(org.barrelorgandiscovery.scale.Scale scale) throws Exception {
 
 		ScaleDocument scaledoc = ScaleDocument.Factory.newInstance();
 		Scale xmlscale = scaledoc.addNewScale();
@@ -76,8 +75,7 @@ public class XMLConverter2014 {
 		return scaledoc;
 	}
 
-	public static Scale toScale(org.barrelorgandiscovery.scale.Scale scale)
-			throws Exception {
+	public static Scale toScale(org.barrelorgandiscovery.scale.Scale scale) throws Exception {
 
 		Scale xmlscale = Scale.Factory.newInstance();
 
@@ -93,9 +91,7 @@ public class XMLConverter2014 {
 	 * @param xmlscale
 	 * @throws Exception
 	 */
-	private static void populateXmlScale(
-			org.barrelorgandiscovery.scale.Scale scale, Scale xmlscale)
-			throws Exception {
+	private static void populateXmlScale(org.barrelorgandiscovery.scale.Scale scale, Scale xmlscale) throws Exception {
 
 		xmlscale.setName(scale.getName());
 		ScaleInformations scaleinformation = xmlscale.addNewInfos();
@@ -123,8 +119,7 @@ public class XMLConverter2014 {
 
 			logger.debug("adding pipestops ... ");
 
-			for (Iterator iterator = pipestoplist.iterator(); iterator
-					.hasNext();) {
+			for (Iterator iterator = pipestoplist.iterator(); iterator.hasNext();) {
 				PipeStopGroup g = (PipeStopGroup) iterator.next();
 
 				// adding registers ....
@@ -132,8 +127,7 @@ public class XMLConverter2014 {
 
 				pss.setName(g.getName());
 
-				org.barrelorgandiscovery.scale.PipeStop[] pipestops = g
-						.getPipeStops();
+				org.barrelorgandiscovery.scale.PipeStop[] pipestops = g.getPipeStops();
 
 				ArrayList<PipeStop> psret = new ArrayList<PipeStop>();
 				for (int i = 0; i < pipestops.length; i++) {
@@ -168,8 +162,7 @@ public class XMLConverter2014 {
 
 				TrackDef newtrack = tracksdefinition.addNewTrack();
 
-				TrackNoteDef tnd = (TrackNoteDef) newtrack
-						.changeType(TrackNoteDef.type);
+				TrackNoteDef tnd = (TrackNoteDef) newtrack.changeType(TrackNoteDef.type);
 
 				tnd.setNote(MidiHelper.midiLibelle(cnd.getMidiNote()));
 				tnd.setPipestopsetname(cnd.getRegisterSetName());
@@ -185,8 +178,7 @@ public class XMLConverter2014 {
 				if (r != null) {
 
 					TrackDef newtrack = tracksdefinition.addNewTrack();
-					TrackDrum tnd = (TrackDrum) newtrack
-							.changeType(TrackDrum.type);
+					TrackDrum tnd = (TrackDrum) newtrack.changeType(TrackDrum.type);
 
 					tnd.setMididef(r.getNamecode());
 
@@ -244,15 +236,13 @@ public class XMLConverter2014 {
 					tnd.setNo(i);
 
 				} else {
-					throw new Exception("unsupported trackedef "
-							+ trackdef.getClass().getName() + " "
-							+ trackdef.toString());
+					throw new Exception(
+							"unsupported trackedef " + trackdef.getClass().getName() + " " + trackdef.toString());
 				}
 
 			} else {
-				throw new Exception("unsupported trackedef "
-						+ trackdef.getClass().getName() + " "
-						+ trackdef.toString());
+				throw new Exception(
+						"unsupported trackedef " + trackdef.getClass().getName() + " " + trackdef.toString());
 			}
 
 		}
@@ -261,19 +251,15 @@ public class XMLConverter2014 {
 	/**
 	 * Convert the virtual book in an xml document ..
 	 * 
-	 * @param vb
-	 *            the virtual book to convert
+	 * @param vb the virtual book to convert
 	 * @return
 	 * @throws Exception
 	 */
-	public static VirtualBookDocument toVirtualBookDocument(VirtualBook vb)
-			throws Exception {
+	public static VirtualBookDocument toVirtualBookDocument(VirtualBook vb) throws Exception {
 
-		VirtualBookDocument xmlvbdoc = VirtualBookDocument.Factory
-				.newInstance();
+		VirtualBookDocument xmlvbdoc = VirtualBookDocument.Factory.newInstance();
 
-		org.barrelorgandiscovery.virtualbook.x2014.VirtualBook xmlvb = xmlvbdoc
-				.addNewVirtualBook();
+		org.barrelorgandiscovery.virtualbook.x2014.VirtualBook xmlvb = xmlvbdoc.addNewVirtualBook();
 
 		Scale xmlscale = toScale(vb.getScale());
 
@@ -289,8 +275,7 @@ public class XMLConverter2014 {
 		VirtualBookMetadata xmlmetadata = xmlvb.getMetadata();
 
 		if (vb.getMetadata() != null) {
-			org.barrelorgandiscovery.virtualbook.VirtualBookMetadata mt = vb
-					.getMetadata();
+			org.barrelorgandiscovery.virtualbook.VirtualBookMetadata mt = vb.getMetadata();
 
 			if (mt.getLastModifiedDate() != null) {
 				Calendar c = Calendar.getInstance();
@@ -314,7 +299,7 @@ public class XMLConverter2014 {
 				BufferedImage bi = ImageTools.loadImage(cover);
 
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				ImageIO.write(bi, "JPEG", baos);
+				ImageTools.saveJpeg(bi, baos);
 
 				xmlvb.setFrontimage(baos.toByteArray());
 			}
@@ -329,8 +314,7 @@ public class XMLConverter2014 {
 		for (Iterator iterator = holes.iterator(); iterator.hasNext();) {
 			Hole hole = (Hole) iterator.next();
 
-			org.barrelorgandiscovery.virtualbook.x2014.Hole xmlhole = xmlholes
-					.addNewHole();
+			org.barrelorgandiscovery.virtualbook.x2014.Hole xmlhole = xmlholes.addNewHole();
 			xmlhole.setTimestamp(hole.getTimestamp());
 			xmlhole.setLength(hole.getTimeLength());
 			xmlhole.setTrack(hole.getTrack());
@@ -341,8 +325,7 @@ public class XMLConverter2014 {
 		// Write the ordered events
 		Set<AbstractEvent> orderedEventsByRef = vb.getOrderedEventsByRef();
 		if (orderedEventsByRef != null) {
-			for (Iterator iterator = orderedEventsByRef.iterator(); iterator
-					.hasNext();) {
+			for (Iterator iterator = orderedEventsByRef.iterator(); iterator.hasNext();) {
 				AbstractEvent abstractEvent = (AbstractEvent) iterator.next();
 
 				if (abstractEvent instanceof SignatureEvent) {
@@ -350,8 +333,7 @@ public class XMLConverter2014 {
 					SignatureEvent sigevent = (SignatureEvent) abstractEvent;
 
 					Annotation an = xmlvb.addNewAnnotations();
-					SignatureAnnotation sig = (SignatureAnnotation) an
-							.changeType(SignatureAnnotation.type);
+					SignatureAnnotation sig = (SignatureAnnotation) an.changeType(SignatureAnnotation.type);
 
 					sig.setTimestamp(sigevent.getTimestamp());
 					sig.setNumerator(sigevent.getNumerateur());
@@ -361,8 +343,7 @@ public class XMLConverter2014 {
 
 					TempoChangeEvent tce = (TempoChangeEvent) abstractEvent;
 					Annotation an = xmlvb.addNewAnnotations();
-					TempoAnnotation ta = (TempoAnnotation) an
-							.changeType(TempoAnnotation.type);
+					TempoAnnotation ta = (TempoAnnotation) an.changeType(TempoAnnotation.type);
 
 					ta.setTimestamp(tce.getTimestamp());
 					ta.setBeatlength(tce.getNoirLength());
@@ -371,8 +352,7 @@ public class XMLConverter2014 {
 
 					MarkerEvent me = (MarkerEvent) abstractEvent;
 					Annotation an = xmlvb.addNewAnnotations();
-					MarkerAnnotation ta = (MarkerAnnotation) an
-							.changeType(MarkerAnnotation.type);
+					MarkerAnnotation ta = (MarkerAnnotation) an.changeType(MarkerAnnotation.type);
 
 					ta.setTimestamp(me.getTimestamp());
 					ta.setName(me.getMarkerName());
@@ -403,15 +383,12 @@ public class XMLConverter2014 {
 
 				logger.warn("match search from the drum name not implemented");
 
-				int midicode = ReferencedPercussionList
-						.findReferencePercussionByName(trackDrum.getMididef());
+				int midicode = ReferencedPercussionList.findReferencePercussionByName(trackDrum.getMididef());
 				if (midicode == -1)
 					throw new Exception(
-							"cannot find the midi code for percussion associated to "
-									+ trackDrum.getMididef());
+							"cannot find the midi code for percussion associated to " + trackDrum.getMididef());
 
-				retvalue = new PercussionDef(midicode, trackDrum.getDelay(),
-						trackDrum.getFixedlength());
+				retvalue = new PercussionDef(midicode, trackDrum.getDelay(), trackDrum.getFixedlength());
 
 				// search the drum from the name ....
 
@@ -419,32 +396,26 @@ public class XMLConverter2014 {
 
 				TrackRegisterControlResetDef trackRegisterControlResetDef = (TrackRegisterControlResetDef) td;
 
-				retvalue = new RegisterSetCommandResetDef(
-						trackRegisterControlResetDef.getResetpipestopsetname(),
-						trackRegisterControlResetDef.getDelay(),
-						trackRegisterControlResetDef.getFixedlength());
+				retvalue = new RegisterSetCommandResetDef(trackRegisterControlResetDef.getResetpipestopsetname(),
+						trackRegisterControlResetDef.getDelay(), trackRegisterControlResetDef.getFixedlength());
 
 			} else if (td instanceof TrackRegisterControlStartDef) {
 
 				TrackRegisterControlStartDef registerControlStartDef = (TrackRegisterControlStartDef) td;
 
-				retvalue = new RegisterCommandStartDef(
-						registerControlStartDef.getPipestopsetname(),
-						registerControlStartDef.getPipestopnameinset(),
-						registerControlStartDef.getDelay(),
+				retvalue = new RegisterCommandStartDef(registerControlStartDef.getPipestopsetname(),
+						registerControlStartDef.getPipestopnameinset(), registerControlStartDef.getDelay(),
 						registerControlStartDef.getFixedlength());
 
 			} else {
-				throw new Exception("track definition " + td.xmlText()
-						+ " unknown");
+				throw new Exception("track definition " + td.xmlText() + " unknown");
 			}
 
 		} else if (td instanceof TrackNoteDef) {
 
 			TrackNoteDef trackNoteDef = (TrackNoteDef) td;
 
-			retvalue = new NoteDef(MidiHelper.midiCode(trackNoteDef.getNote()),
-					trackNoteDef.getPipestopsetname());
+			retvalue = new NoteDef(MidiHelper.midiCode(trackNoteDef.getNote()), trackNoteDef.getPipestopsetname());
 
 		} else {
 			throw new Exception("track definition " + td.xmlText() + " unknown");
@@ -454,9 +425,8 @@ public class XMLConverter2014 {
 
 	}
 
-	public static org.barrelorgandiscovery.scale.Scale fromScale(
-			org.barrelorgandiscovery.virtualbook.x2014.Scale scale, int maxTrackindex)
-			throws Exception {
+	public static org.barrelorgandiscovery.scale.Scale fromScale(org.barrelorgandiscovery.virtualbook.x2014.Scale scale,
+			int maxTrackindex) throws Exception {
 
 		String scalename = scale.getName();
 		ScaleDefinition definition = scale.getDefinition();
@@ -466,8 +436,7 @@ public class XMLConverter2014 {
 		double defaulttrackheight = definition.getDefaulttrackheight();
 		double speed = definition.getSpeed();
 		double width = definition.getWidth();
-		boolean ispreferredviewinverted = definition
-				.getIspreferredviewinverted();
+		boolean ispreferredviewinverted = definition.getIspreferredviewinverted();
 
 		TrackDef[] trackArray = tracks.getTrackArray();
 
@@ -476,7 +445,7 @@ public class XMLConverter2014 {
 			int tn = t.getNo();
 			maxtrack = Math.max(tn, maxtrack);
 		}
-		
+
 		maxtrack = Math.max(maxTrackindex, maxtrack);
 
 		logger.debug("max track :" + maxtrack);
@@ -519,16 +488,13 @@ public class XMLConverter2014 {
 						PipeStop pipeStop = pipestoparray[j];
 
 						org.barrelorgandiscovery.scale.PipeStop p = new org.barrelorgandiscovery.scale.PipeStop(
-								pipeStop.getName(),
-								pipeStop.getIsPartOfRegister());
+								pipeStop.getName(), pipeStop.getIsPartOfRegister());
 						retpipestop.add(p);
 					}
 				}
 
-				PipeStopGroup g = new PipeStopGroup(
-						pipeStopGroupName,
-						retpipestop
-								.toArray(new org.barrelorgandiscovery.scale.PipeStop[0]));
+				PipeStopGroup g = new PipeStopGroup(pipeStopGroupName,
+						retpipestop.toArray(new org.barrelorgandiscovery.scale.PipeStop[0]));
 
 				if (psgl == null)
 					psgl = new PipeStopGroupList();
@@ -541,35 +507,28 @@ public class XMLConverter2014 {
 		VirtualBookRendering rendering = VirtualBookRenderingFactory
 				.createRenderingFromName(scale.getDefinition().getScaletype());
 
-		org.barrelorgandiscovery.scale.Scale s = new org.barrelorgandiscovery.scale.Scale(
-				scalename, width, intertrackdistance, defaulttrackheight,
-				firsttrackdistance, tdefinitions.length, tdefinitions, psgl,
-				speed, (ConstraintList) null,
-				scale.getInfos().getDescription(), scale.getInfos().getState(),
-				scale.getInfos().getContact(), rendering,
-				ispreferredviewinverted, false, null);
+		org.barrelorgandiscovery.scale.Scale s = new org.barrelorgandiscovery.scale.Scale(scalename, width,
+				intertrackdistance, defaulttrackheight, firsttrackdistance, tdefinitions.length, tdefinitions, psgl,
+				speed, (ConstraintList) null, scale.getInfos().getDescription(), scale.getInfos().getState(),
+				scale.getInfos().getContact(), rendering, ispreferredviewinverted, false, null);
 
 		return s;
 	}
 
-	public static VirtualBook fromVirtualBookDocument(VirtualBookDocument vbd)
-			throws Exception {
+	public static VirtualBook fromVirtualBookDocument(VirtualBookDocument vbd) throws Exception {
 
-		org.barrelorgandiscovery.virtualbook.x2014.VirtualBook virtualBook = vbd
-				.getVirtualBook();
-		
+		org.barrelorgandiscovery.virtualbook.x2014.VirtualBook virtualBook = vbd.getVirtualBook();
+
 		// compute the max of track, because some books may have no definitions
-		// for the latests tracks that can cause an issue to reload, 
+		// for the latests tracks that can cause an issue to reload,
 		int maxTrack = -1;
-		org.barrelorgandiscovery.virtualbook.x2014.Hole[] holeArray = virtualBook
-				.getHoles().getHoleArray();
-		
+		org.barrelorgandiscovery.virtualbook.x2014.Hole[] holeArray = virtualBook.getHoles().getHoleArray();
+
 		for (org.barrelorgandiscovery.virtualbook.x2014.Hole h : holeArray) {
 			maxTrack = Math.max(maxTrack, h.getTrack());
 		}
-		
-		org.barrelorgandiscovery.scale.Scale s = fromScale(virtualBook
-				.getScale(), maxTrack);
+
+		org.barrelorgandiscovery.scale.Scale s = fromScale(virtualBook.getScale(), maxTrack);
 
 		logger.debug("converting holes ...");
 
@@ -609,8 +568,7 @@ public class XMLConverter2014 {
 			byte[] frontimage = virtualBook.getFrontimage();
 			if (frontimage != null) {
 				try {
-					BufferedImage image = ImageIO
-							.read(new ByteArrayInputStream(frontimage));
+					BufferedImage image = ImageIO.read(new ByteArrayInputStream(frontimage));
 
 					m.setCover(image);
 				} catch (Exception ex) {
@@ -634,8 +592,7 @@ public class XMLConverter2014 {
 				if (annotation instanceof SignatureAnnotation) {
 
 					SignatureAnnotation sig = (SignatureAnnotation) annotation;
-					SignatureEvent signatureEvent = new SignatureEvent(ts,
-							sig.getNumerator(), sig.getDenominator());
+					SignatureEvent signatureEvent = new SignatureEvent(ts, sig.getNumerator(), sig.getDenominator());
 					if (logger.isDebugEnabled())
 						logger.debug("signature event :" + signatureEvent);
 					v.addEvent(signatureEvent);
@@ -643,8 +600,7 @@ public class XMLConverter2014 {
 				} else if (annotation instanceof TempoAnnotation) {
 					TempoAnnotation ta = (TempoAnnotation) annotation;
 
-					TempoChangeEvent tce = new TempoChangeEvent(ts,
-							ta.getBeatlength());
+					TempoChangeEvent tce = new TempoChangeEvent(ts, ta.getBeatlength());
 					if (logger.isDebugEnabled()) {
 						logger.debug("tempo change event :" + tce);
 					}
@@ -660,8 +616,7 @@ public class XMLConverter2014 {
 					v.addEvent(tce);
 
 				} else {
-					logger.warn(" annotation :" + annotation
-							+ " is unknown, it won't be taken into account");
+					logger.warn(" annotation :" + annotation + " is unknown, it won't be taken into account");
 				}
 			}
 

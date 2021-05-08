@@ -752,7 +752,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 
 		editMenu.addSeparator();
 
-		editMenu.add(new SetBackGroundAction("Définir l'image de fond du carton .."));
+		editMenu.add(new SetBackGroundAction("Dï¿½finir l'image de fond du carton .."));
 
 		mb.add(editMenu);
 
@@ -820,7 +820,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		exportAsOgg.setToolTipText(Messages.getString("APrint.220")); //$NON-NLS-1$
 
 		exportAsMidi.setIcon(new ImageIcon(getClass().getResource("kdat.png"))); //$NON-NLS-1$
-		exportAsMidi.setToolTipText("Enregistre l'écoute du carton dans un nouveau fichier midi"); //$NON-NLS-1$
+		exportAsMidi.setToolTipText("Enregistre l'ï¿½coute du carton dans un nouveau fichier midi"); //$NON-NLS-1$
 		exportAsMidi.setActionCommand("EXPORTTOMID"); //$NON-NLS-1$
 		exportAsMidi.addActionListener(this);
 
@@ -1069,7 +1069,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		bookPropertiesPanel.add(bookPropertiesPropertySheetPanel, BorderLayout.CENTER);
 
 		logger.debug("register book properties window");
-		tw = toolWindowManager.registerToolWindow("Propriétés du carton", "Propriétés du carton", null,
+		tw = toolWindowManager.registerToolWindow("Propriï¿½tï¿½s du carton", "Propriï¿½tï¿½s du carton", null,
 				bookPropertiesPanel, ToolWindowAnchor.LEFT);
 
 		// change width
@@ -1454,6 +1454,9 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 
 	/** @param virtualBook */
 	protected void preparePlayin(VirtualBook virtualBook) {
+		if (virtualBook == null) {
+			return;
+		}
 		PlaySubSystem pss = playsubsystem.getCurrent();
 		if (pss instanceof IPreparedCapableSubSystem) {
 			try {

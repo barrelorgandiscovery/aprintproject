@@ -29,6 +29,7 @@ import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.listeningconverter.EcouteConverter;
 import org.barrelorgandiscovery.listeningconverter.VirtualBookToMidiConverter;
 import org.barrelorgandiscovery.messages.Messages;
+import org.barrelorgandiscovery.tools.ImageTools;
 import org.barrelorgandiscovery.virtualbook.Hole;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 
@@ -148,7 +149,7 @@ public class MovieConverter {
 		BufferedImage bi = createImage(comp);
 
 		File file = new File(folder, filename);
-		ImageIO.write(bi, "JPG", file); //$NON-NLS-1$
+		ImageTools.saveJpeg(bi, file); //$NON-NLS-1$
 
 		return file.getAbsolutePath();
 	}

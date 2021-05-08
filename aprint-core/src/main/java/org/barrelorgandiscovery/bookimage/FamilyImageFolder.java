@@ -43,6 +43,10 @@ public class FamilyImageFolder implements IFamilyImageSeeker {
 		// read all images
 		
 		File[] allFiles = folder.listFiles();
+		if (allFiles == null) {
+			allFiles = new File[0];
+		}
+		
 		if (filePatternMatching != null) {
 			logger.debug("filter content");
 			allFiles = folder.listFiles(new FilenameFilter() {

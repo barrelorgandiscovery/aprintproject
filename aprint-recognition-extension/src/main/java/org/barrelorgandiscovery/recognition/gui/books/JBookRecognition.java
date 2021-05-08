@@ -68,6 +68,7 @@ import org.barrelorgandiscovery.recognition.gui.disks.steps.states.ImageFileAndI
 import org.barrelorgandiscovery.recognition.messages.Messages;
 import org.barrelorgandiscovery.repository.Repository2;
 import org.barrelorgandiscovery.repository.Repository2Factory;
+import org.barrelorgandiscovery.tools.ImageTools;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.SerializeTools;
 import org.barrelorgandiscovery.tools.URLTools;
@@ -221,7 +222,7 @@ public class JBookRecognition extends JPanel {
 			}
 
 			private void rescaleImageFile(File imageFile, int newwidth, File newFileName)
-					throws MalformedURLException, InterruptedException, FileNotFoundException, IOException {
+					throws Exception {
 				Image loadImage = Toolkit.getDefaultToolkit().createImage(imageFile.toURL()).getScaledInstance(newwidth,
 						PREFERRED_COMPUTED_HEIGHT, 0);
 				// load image
@@ -240,7 +241,7 @@ public class JBookRecognition extends JPanel {
 
 				OutputStream outStream = new FileOutputStream(newFileName);
 				try {
-					ImageIO.write(newImage, "JPEG", outStream); //$NON-NLS-1$
+					ImageTools.saveJpeg(newImage, outStream); //$NON-NLS-1$
 				} finally {
 					outStream.close();
 				}

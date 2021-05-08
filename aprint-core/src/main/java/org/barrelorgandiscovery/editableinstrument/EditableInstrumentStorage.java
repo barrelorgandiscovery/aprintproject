@@ -21,6 +21,7 @@ import org.barrelorgandiscovery.instrument.sample.SoundSample;
 import org.barrelorgandiscovery.scale.PercussionDef;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.scale.io.ScaleIO;
+import org.barrelorgandiscovery.tools.ImageTools;
 import org.barrelorgandiscovery.tools.StreamsTools;
 import org.barrelorgandiscovery.tools.StringTools;
 import org.barrelorgandiscovery.tools.streamstorage.FolderStreamStorage;
@@ -172,7 +173,7 @@ public class EditableInstrumentStorage {
 				BufferedImage bi = (BufferedImage) model.getInstrumentPicture();
 
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				ImageIO.write(bi, "JPG", baos); //$NON-NLS-1$
+				ImageTools.saveJpeg(bi, baos); //$NON-NLS-1$
 
 				fss.saveStream("image", "jpg", new ByteArrayInputStream(baos //$NON-NLS-1$ //$NON-NLS-2$
 						.toByteArray()));

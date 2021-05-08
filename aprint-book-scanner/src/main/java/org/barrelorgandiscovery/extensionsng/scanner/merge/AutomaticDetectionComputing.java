@@ -81,7 +81,7 @@ public class AutomaticDetectionComputing extends AbstractAction {
 
 		} catch (Exception ex) {
 			logger.error("error in saving parameters :" + ex.getMessage(), ex);
-			JMessageBox.showError(this, ex);
+			JMessageBox.showError(mergePanel, ex);
 		}
 	}
 

@@ -18,6 +18,8 @@ import javax.imageio.stream.ImageInputStream;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
+import org.barrelorgandiscovery.tools.ImageTools;
+
 /**
  * this class implements access to part of an image, using a decomposed image in
  * tiles, tiles are saved into a subfolder, with named conventions
@@ -150,7 +152,7 @@ public class TiledImage implements ITiledImage, IFileBasedTiledImage {
 				g.dispose();
 			}
 
-			ImageIO.write(part, "JPEG", constructImagePath(i, null));
+			ImageTools.saveJpeg(part, constructImagePath(i, null));
 		}
 	}
 

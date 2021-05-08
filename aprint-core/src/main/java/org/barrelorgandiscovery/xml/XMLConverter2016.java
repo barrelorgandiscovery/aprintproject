@@ -319,7 +319,7 @@ public class XMLConverter2016 {
 				BufferedImage bi = ImageTools.loadImage(cover);
 
 				ByteArrayOutputStream baos = new ByteArrayOutputStream();
-				ImageIO.write(bi, "JPEG", baos);
+				ImageTools.saveJpeg(bi, baos);
 
 				xmlvb.setFrontimage(baos.toByteArray());
 			}

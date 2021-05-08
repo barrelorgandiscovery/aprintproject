@@ -66,7 +66,7 @@ public class BooksImagesDisplacementsCalculation {
 			}
 		}
 
-		System.out.println("detect cost :" + (System.currentTimeMillis() - start));
+		System.out.println("detect time cost :" + (System.currentTimeMillis() - start));
 		// Drawing the detected key points
 
 		// create image
@@ -93,8 +93,9 @@ public class BooksImagesDisplacementsCalculation {
 					keyPointMatch.displacement = new MathVect(second.x, second.y).moins(keyPointMatch.origin);
 
 					double displacementVectorNorm = keyPointMatch.displacement.norme();
-					double THRESHOLD_DISPLACEMENT = 15.0;
+					double THRESHOLD_DISPLACEMENT =  15;
 					Color c = Color.blue; // no displacement
+					
 					if (displacementVectorNorm > THRESHOLD_DISPLACEMENT) {
 						c = Color.red;
 						// filter non colinear ones

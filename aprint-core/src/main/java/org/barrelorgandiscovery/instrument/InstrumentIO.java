@@ -20,11 +20,11 @@ import org.apache.log4j.lf5.util.StreamUtils;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.scale.ScaleManager;
 import org.barrelorgandiscovery.scale.VersionParser;
+import org.barrelorgandiscovery.tools.ImageTools;
 import org.barrelorgandiscovery.tools.IniFileParser;
 import org.barrelorgandiscovery.tools.streamstorage.IStreamRef;
 import org.barrelorgandiscovery.tools.streamstorage.StreamRef;
 import org.barrelorgandiscovery.tools.streamstorage.StreamStorage;
-
 
 /**
  * Classe for I/O Instruments
@@ -45,14 +45,12 @@ public class InstrumentIO {
 	 * @return
 	 * @throws Exception
 	 */
-	public static Instrument readInstrument(ScaleManager gm, StreamStorage fis,
-			String streamName) throws Exception {
+	public static Instrument readInstrument(ScaleManager gm, StreamStorage fis, String streamName) throws Exception {
 
 		// lecture de la version ....
 
 		VersionParser vp = new VersionParser();
-		new IniFileParser(new InputStreamReader(fis.openStream(streamName)), vp)
-				.parse();
+		new IniFileParser(new InputStreamReader(fis.openStream(streamName)), vp).parse();
 
 		String version = vp.getVersion();
 
@@ -64,8 +62,7 @@ public class InstrumentIO {
 			ip = new InstrumentParserV1();
 		}
 
-		IniFileParser fp = new IniFileParser(new InputStreamReader(fis
-				.openStream(streamName)), ip);
+		IniFileParser fp = new IniFileParser(new InputStreamReader(fis.openStream(streamName)), ip);
 		fp.parse();
 
 		Scale g = gm.getScale(ip.getGammeName());
@@ -94,8 +91,7 @@ public class InstrumentIO {
 
 					byte[] imagecontent = baos.toByteArray();
 
-					image = Toolkit.getDefaultToolkit().createImage(
-							imagecontent);
+					image = Toolkit.getDefaultToolkit().createImage(imagecontent);
 
 					logger.debug("image loaded"); //$NON-NLS-1$
 
@@ -118,8 +114,7 @@ public class InstrumentIO {
 		IStreamRef ref = new StreamRef(fis, ip.getPatchstream());
 
 		// Création de l'instrument ...
-		Instrument ins = new Instrument(ip.getName(), g, ref, image, ip
-				.getInstrumentDescriptionUrl());
+		Instrument ins = new Instrument(ip.getName(), g, ref, image, ip.getInstrumentDescriptionUrl());
 
 		if ("1".equals(version)) {
 			InstrumentParserV1 ipv1 = (InstrumentParserV1) ip;
@@ -128,13 +123,10 @@ public class InstrumentIO {
 			logger.debug("adding the bank associated to registers ...");
 
 			ArrayList<RegisterLinkDef> registerLinks = ipv1.getRegisterLinks();
-			for (Iterator iterator = registerLinks.iterator(); iterator
-					.hasNext();) {
-				RegisterLinkDef registerLinkDef = (RegisterLinkDef) iterator
-						.next();
+			for (Iterator iterator = registerLinks.iterator(); iterator.hasNext();) {
+				RegisterLinkDef registerLinkDef = (RegisterLinkDef) iterator.next();
 
-				ins.getRegisterSoundLink().defineLink(
-						registerLinkDef.pipeStopSet, registerLinkDef.pipeStop,
+				ins.getRegisterSoundLink().defineLink(registerLinkDef.pipeStopSet, registerLinkDef.pipeStop,
 						registerLinkDef.instrumentNumber);
 
 			}
@@ -153,8 +145,7 @@ public class InstrumentIO {
 	 * @param streamName
 	 * @throws Exception
 	 */
-	public static void writeInstrument(StreamStorage fis, Instrument ins,
-			String streamName) throws Exception {
+	public static void writeInstrument(StreamStorage fis, Instrument ins, String streamName) throws Exception {
 
 		Properties p = new Properties();
 
@@ -166,8 +157,7 @@ public class InstrumentIO {
 		StreamUtils.copyThenClose(is, baos);
 
 		String instrumentsoundbankname = "" + ins.getName() + "sb";
-		fis.saveStream(instrumentsoundbankname, "sb", new ByteArrayInputStream(
-				baos.toByteArray()));
+		fis.saveStream(instrumentsoundbankname, "sb", new ByteArrayInputStream(baos.toByteArray()));
 
 		Scale gamme = ins.getScale();
 
@@ -179,7 +169,7 @@ public class InstrumentIO {
 		if (thumbnail != null) {
 			imagename = "picture_" + ins.getName();
 			OutputStream os = (OutputStream) baosimage;
-			ImageIO.write((RenderedImage) thumbnail, "JPG", os);
+			ImageTools.saveJpeg(ImageTools.loadImage(thumbnail), os);
 		}
 
 		p.setProperty("version", "1");
@@ -192,28 +182,20 @@ public class InstrumentIO {
 
 		int cpt = 0;
 		RegisterSoundLink registerSoundLink = ins.getRegisterSoundLink();
-		List<String> groups = registerSoundLink
-				.getPipeStopGroupNamesInWhichThereAreMappings();
+		List<String> groups = registerSoundLink.getPipeStopGroupNamesInWhichThereAreMappings();
 		for (Iterator iterator = groups.iterator(); iterator.hasNext();) {
 			String groupname = (String) iterator.next();
 			logger.debug("adding mapping for the group ..." + groupname);
 
 			List<String> pipeStopNamesInWhichThereAreMappings = registerSoundLink
 					.getPipeStopNamesInWhichThereAreMappings(groupname);
-			for (Iterator iterator2 = pipeStopNamesInWhichThereAreMappings
-					.iterator(); iterator2.hasNext();) {
+			for (Iterator iterator2 = pipeStopNamesInWhichThereAreMappings.iterator(); iterator2.hasNext();) {
 				String pipeStopName = (String) iterator2.next();
 
-				logger.debug("mapping pipestop " + pipeStopName + " in "
-						+ groupname);
+				logger.debug("mapping pipestop " + pipeStopName + " in " + groupname);
 
-				p.setProperty("registerpatch." + (cpt++), ""
-						+ groupname
-						+ ","
-						+ pipeStopName
-						+ ","
-						+ registerSoundLink.getInstrumentNumber(groupname,
-								pipeStopName));
+				p.setProperty("registerpatch." + (cpt++), "" + groupname + "," + pipeStopName + ","
+						+ registerSoundLink.getInstrumentNumber(groupname, pipeStopName));
 
 			}
 
@@ -228,8 +210,7 @@ public class InstrumentIO {
 		p.save(pp, "instrument file");
 		pp.close();
 
-		fis.saveStream(streamName, "instrument", new ByteArrayInputStream(pp
-				.toByteArray()));
+		fis.saveStream(streamName, "instrument", new ByteArrayInputStream(pp.toByteArray()));
 
 	}
 }

@@ -10,9 +10,12 @@ import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 
@@ -205,7 +208,7 @@ public class ImageTools {
 		Image image = kit.createImage(url);
 		return loadImage(image);
 	}
-	
+
 	public static BufferedImage loadImage(File file) throws Exception {
 		return loadImage(file.toURL());
 	}
@@ -215,7 +218,7 @@ public class ImageTools {
 		if (image == null) {
 			return null;
 		}
-		
+
 		JLabel l = new JLabel();
 		l.setIcon(new ImageIcon(image));
 		MediaTracker mt = new MediaTracker(l);
@@ -242,6 +245,36 @@ public class ImageTools {
 		}
 
 		return bi;
+	}
+
+	static BufferedImage ensureOpaque(BufferedImage bi) {
+		if (bi.getTransparency() == BufferedImage.OPAQUE)
+			return bi;
+		int w = bi.getWidth();
+		int h = bi.getHeight();
+		int[] pixels = new int[w * h];
+		bi.getRGB(0, 0, w, h, pixels, 0, w);
+		BufferedImage bi2 = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+		bi2.setRGB(0, 0, w, h, pixels, 0, w);
+		return bi2;
+	}
+
+	public static void saveJpeg(BufferedImage bi, OutputStream os) throws Exception {
+		if (bi == null) {
+			throw new Exception("null image");
+		}
+
+		BufferedImage opaque = ensureOpaque(bi);
+		if (!ImageIO.write(opaque, "JPEG", os)) {
+			throw new Exception("cannot save jpeg image, returned false");
+		}
+
+	}
+	
+	public static void saveJpeg(BufferedImage bi, File outFile) throws Exception {
+		try(FileOutputStream fs = new FileOutputStream(outFile)) {
+			saveJpeg(bi, fs);
+		}
 	}
 
 }

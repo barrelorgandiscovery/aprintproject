@@ -9,8 +9,8 @@ import javax.imageio.ImageIO;
 import org.barrelorgandiscovery.tools.ImageTools;
 
 /**
- * class managing a thumbnail creation for folder having images.
- * handle a resample level in the view, with folder storage
+ * class managing a thumbnail creation for folder having images. handle a
+ * resample level in the view, with folder storage
  * 
  * @author pfreydiere
  *
@@ -38,7 +38,7 @@ public class ThumbnailDatabase {
 		File tf = new File(folder, THUMBNAILFOLDER);
 		return new File(tf, name);
 	}
-	
+
 	public boolean thumbnailExists(File f) throws Exception {
 		File tf = constructThumbnailFile(f);
 
@@ -59,7 +59,7 @@ public class ThumbnailDatabase {
 		BufferedImage dest = ImageTools.loadImageAndCrop(f, width, height);
 		FileOutputStream fos = new FileOutputStream(tf);
 		try {
-			ImageIO.write(dest, "JPEG", fos);
+			ImageTools.saveJpeg(dest, fos);
 		} finally {
 			fos.close();
 		}

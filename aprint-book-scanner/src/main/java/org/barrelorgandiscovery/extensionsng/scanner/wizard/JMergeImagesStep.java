@@ -7,6 +7,7 @@ import java.io.Serializable;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.bookimage.IFamilyImageSeeker;
 import org.barrelorgandiscovery.bookimage.PerfoScanFolder;
+import org.barrelorgandiscovery.extensionsng.scanner.FFMpegVideoFamilyImageSeeker;
 import org.barrelorgandiscovery.extensionsng.scanner.Messages;
 import org.barrelorgandiscovery.extensionsng.scanner.OpenCVVideoFamilyImageSeeker;
 import org.barrelorgandiscovery.extensionsng.scanner.merge.JScannerMergePanel;
@@ -68,7 +69,9 @@ public class JMergeImagesStep extends BasePanelStep {
 		if (scanfolder.isDirectory()) {
 			imageScan = new PerfoScanFolder(scanfolder);
 		} else {
-			imageScan = new OpenCVVideoFamilyImageSeeker(scanfolder, rescaleFactor, everyFrames);
+			
+//			imageScan = new OpenCVVideoFamilyImageSeeker(scanfolder, rescaleFactor, everyFrames);
+			imageScan = new FFMpegVideoFamilyImageSeeker(scanfolder, rescaleFactor, everyFrames);
 
 		}
 		assert imageScan != null;

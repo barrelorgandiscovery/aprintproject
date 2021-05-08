@@ -128,7 +128,7 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 	private IPrefsStorage preferences;
 
 	private ExecutorService executor = Executors.newFixedThreadPool(3);
-	
+
 	private AtomicReference<ICancelTracker> currentProcessing = new AtomicReference<ICancelTracker>(null);
 
 	private Repository2 repository;
@@ -224,7 +224,7 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 
 			} catch (Exception ex) {
 				logger.error("error in saving parameters :" + ex.getMessage(), ex); //$NON-NLS-1$
-				JMessageBox.showError(this, ex);
+				JMessageBox.showError(JScannerMergePanel.this, ex);
 			}
 		});
 
@@ -259,7 +259,7 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 		PipeSetGroupLayer pipesetgroupLayer = new PipeSetGroupLayer();
 		resultPreview.addLayer(pipesetgroupLayer);
 		final JCheckBox jCheckBox = new JCheckBox("Display colors");
-		
+
 		jCheckBox.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -288,6 +288,7 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 		currentResultImageSlider.setMajorTickSpacing(150);
 		currentResultImageSlider.setMinorTickSpacing(50);
 		currentResultImageSlider.revalidate();
+
 		currentResultImageSlider.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
@@ -478,7 +479,7 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 								preferences.setFileProperty("mergescannerfolder", finalSavedFile); //$NON-NLS-1$
 							} catch (Exception ex) {
 								logger.error(ex.getMessage(), ex);
-								JMessageBox.showError(this, ex);
+								JMessageBox.showError(JScannerMergePanel.this, ex);
 							} finally {
 								infiniteEndWait();
 							}
@@ -854,7 +855,10 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 					FINAL_IMAGE_HEIGHT, FINAL_IMAGE_HEIGHT, model.overlappDistance, indexFirstImage,
 					indexFirstImage + 30, (int) ((indexFirstImage) * model.overlappDistance - l), null);
 
-			ImageIO.write(img, "JPEG", new File(destinationFolder, "" + currentimageindex + ".jpg")); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+			try (FileOutputStream fileOutputStream = new FileOutputStream(
+					new File(destinationFolder, "" + currentimageindex + ".jpg"))) {// $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				ImageTools.saveJpeg(img, fileOutputStream);
+			}
 
 			if (lastIndexImage >= perfoScanFolder.getImageCount()) {
 				endreach = true;
@@ -906,8 +910,12 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 					ZipEntry ze = new ZipEntry(ZipBookImage.constructEntryName(currentimageindex));
 					zipOutputStream.putNextEntry(ze);
 
-					ImageIO.write(img, "JPEG", zipOutputStream); //$NON-NLS-1$
+					ImageTools.saveJpeg(img, zipOutputStream);// $NON-NLS-1$
 
+					// on openjdk, transparent jpeg are not supported
+					// ImageIO.write(img, "JPEG", zipOutputStream); //$NON-NLS-1$
+
+					zipOutputStream.flush();
 					zipOutputStream.closeEntry();
 
 					int imageCount = perfoScanFolder.getImageCount();
@@ -947,7 +955,7 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 		BufferedImage img = constructMergeImage((int) model.getAngleAndImageWidthVector().norme(), width,
 				FINAL_IMAGE_HEIGHT, model.overlappDistance, 0, perfoScanFolder.getImageCount(), 0, null);
 
-		ImageIO.write(img, "JPEG", outfile); //$NON-NLS-1$
+		ImageTools.saveJpeg(img, outfile);
 	}
 
 	/**
@@ -979,7 +987,6 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 		logger.debug("save to storage " + storage); //$NON-NLS-1$
 		model.saveTo(storage);
 	}
-	
 
 	private static void testWithImageFolder() throws Exception {
 		// File scanfolder = new File("C:\\temp\\perfo20180721");

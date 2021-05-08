@@ -16,6 +16,7 @@ import org.barrelorgandiscovery.extensionsng.scanner.merge.tools.BooksImagesDisp
 import org.barrelorgandiscovery.math.MathVect;
 import org.opencv.core.Mat;
 import org.opencv.core.Size;
+import org.opencv.highgui.HighGui;
 import org.opencv.imgproc.Imgproc;
 
 /**
@@ -51,9 +52,11 @@ public class AnalyzeDisplacementTools {
 
 		Mat m1 = new Mat();
 		OpenCVJavaConverter.toOpenCV(i1, m1);
+		
+		
 		Mat rm1 = new Mat();
 		Imgproc.resize(m1, rm1, new Size(m1.width() / reductedFactor, m1.height() / reductedFactor));
-
+		
 		Mat m2 = new Mat();
 		OpenCVJavaConverter.toOpenCV(i2, m2);
 		Mat rm2 = new Mat();
@@ -65,6 +68,9 @@ public class AnalyzeDisplacementTools {
 				orientationFilter);
 
 		List<KeyPointMatch> goodMatches = displacementResult.movingKeyPointMatches;
+		if (goodMatches.size() <= 4) {
+			throw new Exception("cannot find moving points");
+		}
 
 		// knn the displacement vector, based on distance
 		KMeansPlusPlusClusterer<KeyPointMatch> kpm = new KMeansPlusPlusClusterer<KeyPointMatch>(4, 1000,

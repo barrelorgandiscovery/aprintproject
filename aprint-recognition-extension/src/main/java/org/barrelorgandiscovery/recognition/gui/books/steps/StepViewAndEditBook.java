@@ -403,7 +403,7 @@ public class StepViewAndEditBook extends BasePanelStep implements Disposable {
 							finalOriginModel.getHeight(),
 							edgesState.viewInverted != instrument.getScale().isPreferredViewedInversed());
 
-					ImageIO.write(result, "JPEG", output);
+					ImageTools.saveJpeg(result, output);
 
 					return null;
 				}
@@ -457,7 +457,7 @@ public class StepViewAndEditBook extends BasePanelStep implements Disposable {
 							finalOrigin.getHeight(), edgesState.top, edgesState.bottom, finalOrigin.getHeight(),
 							edgesState.viewInverted ^ instrument.getScale().isPreferredViewedInversed());
 
-					ImageIO.write(result, "JPEG", output);
+					ImageTools.saveJpeg(result, output);
 
 					return null;
 				}
