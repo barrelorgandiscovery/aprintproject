@@ -9,7 +9,7 @@ import org.junit.Test;
 
 public class TestReadTiffs {
 
-	@Test
+	//@Test
 	public void testReadTiff() throws Exception {
 		
 		File f = new File("/home/use/aprint_contributions/reginald/Ampico 57135 Concert Waltz.tif");
