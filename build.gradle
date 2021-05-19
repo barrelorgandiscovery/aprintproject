@@ -111,6 +111,8 @@ rootProject.ext.isApplicationRelease = {
 }
 
 rootProject.ext.currentVersion = "UNKNOWN" 
+def nsis_home = "D:\\windows\\NSIS"
+
 
 // define here the bundle project
 project(':bundle') {
@@ -149,7 +151,7 @@ project(':bundle') {
     task createAllJars(dependsOn: [copyOutputJars, copyExtensionJars]) {
     }
 
-    task createNixMacBundle(type:Zip /*, dependsOn: [createAllJars]*/) {
+    task createNixMacBundle(type:Zip , dependsOn: [createAllJars]) {
        archiveName "nix-and-macosX.zip"
        from ('build') { include 'aprint.jar' }
        from ('offlineinstall-extensions') { include '**/*' }
@@ -158,7 +160,7 @@ project(':bundle') {
 
     // create installer
     task createBundles(type: Exec, dependsOn: [copyOutputJars,copyExtensionJars] ) {
-        commandLine 'C:\\Program Files (x86)\\NSIS\\makensis.exe',
+        commandLine nsis_home + '\\makensis.exe',
            "${project.projectDir}/offlineinstall-studio/aprint_studio.nsi"
         workingDir = 'offlineinstall-studio'
     }
@@ -174,7 +176,7 @@ project(':bundle') {
 
     // create installer
     task createBundles32(type: Exec, dependsOn: [copyOutputJars,copyExtensionJars] ) {
-        commandLine 'C:\\Program Files (x86)\\NSIS\\makensis.exe',
+        commandLine nsis_home + '\\makensis.exe',
            "${project.projectDir}/offlineinstall-studio/aprint_studio_32.nsi"
         workingDir = 'offlineinstall-studio'
     }

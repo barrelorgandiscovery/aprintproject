@@ -212,6 +212,10 @@ public class ImageTools {
 	public static BufferedImage loadImage(File file) throws Exception {
 		return loadImage(file.toURL());
 	}
+	
+	public static BufferedImage loadImageWithIO(File file) throws Exception {
+		return ImageIO.read(file);
+	}
 
 	public static BufferedImage loadImage(Image image) throws Exception {
 

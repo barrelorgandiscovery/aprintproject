@@ -94,7 +94,7 @@ import com.jeta.forms.gui.form.GridView;
 
 /**
  * Panel for constructing a unique image from regular images
- *
+ *w
  * @author pfreydiere
  */
 public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implements Disposable {

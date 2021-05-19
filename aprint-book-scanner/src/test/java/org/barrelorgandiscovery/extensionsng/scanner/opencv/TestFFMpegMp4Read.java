@@ -17,7 +17,7 @@ import org.junit.Test;
 
 public class TestFFMpegMp4Read {
 
-	@Test
+	// @Test
 	public void test() throws Exception {
 
 		FrameGrabber grabber = new FFmpegFrameGrabber("/home/use/tmp/Cartonneufavecfondnoir.mp4"); // for the first

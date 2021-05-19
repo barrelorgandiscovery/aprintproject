@@ -1,18 +1,22 @@
 package org.barrelorgandiscovery.recognition.gui.disks.steps;
 
+import java.awt.AlphaComposite;
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.Serializable;
 import java.net.MalformedURLException;
-import java.net.URL;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 import org.apache.commons.vfs2.provider.AbstractFileObject;
@@ -285,14 +289,14 @@ public class StepChooseFilesAndInstrument extends BasePanelStep {
 			} else {
 
 				try {
-					bi = ImageTools.loadImage(selectedFile);
+					bi = ImageTools.loadImageWithIO(selectedFile);
 					tiledImageLayer.setVisible(false);
 					imagelayer.setVisible(true);
 					imagelayer.setImageToDisplay(bi);
+					imagelayer.setTransparency(0.5);
 				} catch (Exception ex) {
 					logger.error("error while loading the image :" + ex.getMessage(), ex); //$NON-NLS-1$
 				}
-
 			}
 
 		}

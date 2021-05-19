@@ -128,7 +128,7 @@ Section "!APrint Studio"
   ; Put file there
   File "..\build\aprint.jar"
  
-  File /r "C:\Java\jdk1.8.0_25_x86\jre"
+  File /r "D:\windows\Java\jdk1.8.0_25_x86\jre"
   File "aprinticon.ico"
   
   ; 

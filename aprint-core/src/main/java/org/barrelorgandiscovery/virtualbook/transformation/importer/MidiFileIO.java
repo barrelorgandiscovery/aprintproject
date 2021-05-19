@@ -719,7 +719,7 @@ public class MidiFileIO {
 	} // write_midi_0
 
 	/**
-	 * Create a midi sequence from midifile object
+	 * Create a midi sequence from aprint midifile object
 	 * 
 	 * @param f
 	 * @return
@@ -731,17 +731,19 @@ public class MidiFileIO {
 
 		int ticksperbeat = 384;
 
-		// Conversion factor
-		long micropertick = (long) (10000.0 / 384.0 * ticksperbeat);
-
+		int bpm = 120;
+		
+		long l = 60_000_000L / bpm;
+		
+		long micropertick = (long) ( 60_000_000L / bpm  / ticksperbeat);
+		logger.debug("micropertick " + micropertick); //$NON-NLS-1$
+		
 		logger.debug("convert"); //$NON-NLS-1$
 
 		Sequence seq = new Sequence(Sequence.PPQ, ticksperbeat);
 		Track track = seq.createTrack();
 
 		logger.debug("micropertick " + micropertick); //$NON-NLS-1$
-
-		long l = micropertick * seq.getResolution();
 
 		byte[] b = { (byte) ((l >> 16) & 0xFF), (byte) ((l >> 8) & 0xFF),
 				(byte) (l & 0xFF) };
