@@ -889,7 +889,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 			}
 		}
 
-		pianorollpanel.setBorder(new TitledBorder(Messages.getString("APrint.52"))); //$NON-NLS-1$
+		// pianorollpanel.setBorder(new TitledBorder(Messages.getString("APrint.52"))); //$NON-NLS-1$
 		pianorollpanel.setLayout(new BorderLayout());
 		pianoroll.setPreferredSize(new Dimension(700, 300));
 		pianoroll.setUseFastDrawing(true);
@@ -942,6 +942,11 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 				} else {
 
 					// normal click on the book
+					
+					// r�cup�ration du click sur le carton ...
+					pianoroll.setHightlight(pianoroll.convertScreenXToCarton(e.getX()));
+
+					pianoroll.repaint();
 
 				}
 			}
@@ -954,10 +959,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 
 				if (e.getButton() == MouseEvent.BUTTON1) {
 
-					// r�cup�ration du click sur le carton ...
-					pianoroll.setHightlight(pianoroll.convertScreenXToCarton(e.getX()));
-
-					pianoroll.repaint();
+				
 				}
 			}
 		}

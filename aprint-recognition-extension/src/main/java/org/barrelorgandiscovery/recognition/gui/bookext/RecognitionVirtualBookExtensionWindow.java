@@ -1,7 +1,9 @@
 package org.barrelorgandiscovery.recognition.gui.bookext;
 
+import java.awt.Dimension;
 import java.util.List;
 
+import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 
 import org.barrelorgandiscovery.extensions.ExtensionPoint;
@@ -11,6 +13,7 @@ import org.barrelorgandiscovery.gui.aprintng.APrintNGVirtualBookFrame;
 import org.barrelorgandiscovery.gui.aprintng.extensionspoints.VirtualBookFrameToolRegister;
 import org.barrelorgandiscovery.gui.aprintng.helper.BaseVirtualBookExtension;
 import org.barrelorgandiscovery.images.books.tools.ITiledImage;
+import org.noos.xing.mydoggy.ToolWindow;
 import org.noos.xing.mydoggy.ToolWindowAnchor;
 import org.noos.xing.mydoggy.plaf.MyDoggyToolWindowManager;
 
@@ -22,6 +25,7 @@ public class RecognitionVirtualBookExtensionWindow extends BaseVirtualBookExtens
 	public RecognitionVirtualBookExtensionWindow() throws Exception {
 		super();
 		recognitionPanel = new JRecognitionVirtualBookPanel();
+		recognitionPanel.setPreferredSize(new Dimension(300,900));
 	}
 
 	@Override
@@ -67,13 +71,18 @@ public class RecognitionVirtualBookExtensionWindow extends BaseVirtualBookExtens
 
 	@Override
 	public void registerToolWindow(MyDoggyToolWindowManager manager) {
+		
+		JScrollPane jscrollPane = new JScrollPane(recognitionPanel);
+		jscrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+		jscrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
+		
+		
 		// Register a Tool.
-		manager.registerToolWindow("Book Recognition", // Id //$NON-NLS-1$
+		ToolWindow registerToolWindow = manager.registerToolWindow("Book Recognition", // Id //$NON-NLS-1$
 				"Book recognition", // Title //$NON-NLS-1$
 				null, // Icon
-				recognitionPanel, // Component
+				jscrollPane, // Component
 				ToolWindowAnchor.LEFT); // Anchor
-
 	}
 
 }

@@ -19,14 +19,11 @@ public class SwingUtils {
 	 * @param frame
 	 */
 	public static void center(JFrame frame) {
-		GraphicsEnvironment ge = GraphicsEnvironment
-				.getLocalGraphicsEnvironment();
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		Point center = ge.getCenterPoint();
 		Rectangle bounds = ge.getMaximumWindowBounds();
-		int w = Math.max(bounds.width / 2, Math.min(frame.getWidth(),
-				bounds.width));
-		int h = Math.max(bounds.height / 2, Math.min(frame.getHeight(),
-				bounds.height));
+		int w = Math.max(bounds.width / 2, Math.min(frame.getWidth(), bounds.width));
+		int h = Math.max(bounds.height / 2, Math.min(frame.getHeight(), bounds.height));
 		int x = center.x - w / 2, y = center.y - h / 2;
 		frame.setBounds(x, y, w, h);
 		if (w == bounds.width && h == bounds.height)
@@ -36,13 +33,9 @@ public class SwingUtils {
 
 	public static void center(JInternalFrame frame, Rectangle bounds) {
 
-		
-		Point center = new Point((int) bounds.getCenterX(), (int) bounds
-				.getCenterY());
-		int w = Math.max(bounds.width / 2, Math.min(frame.getWidth(),
-				bounds.width));
-		int h = Math.max(bounds.height / 2, Math.min(frame.getHeight(),
-				bounds.height));
+		Point center = new Point((int) bounds.getCenterX(), (int) bounds.getCenterY());
+		int w = Math.max(bounds.width / 2, Math.min(frame.getWidth(), bounds.width));
+		int h = Math.max(bounds.height / 2, Math.min(frame.getHeight(), bounds.height));
 		int x = center.x - w / 2, y = center.y - h / 2;
 		frame.setBounds(x, y, w, h);
 
@@ -55,14 +48,11 @@ public class SwingUtils {
 	 * @param frame
 	 */
 	public static void center(JDialog frame) {
-		GraphicsEnvironment ge = GraphicsEnvironment
-				.getLocalGraphicsEnvironment();
+		GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		Point center = ge.getCenterPoint();
 		Rectangle bounds = frame.getBounds();
-		int w = Math.max(bounds.width / 2, Math.min(frame.getWidth(),
-				bounds.width));
-		int h = Math.max(bounds.height / 2, Math.min(frame.getHeight(),
-				bounds.height));
+		int w = Math.max(bounds.width / 2, Math.min(frame.getWidth(), bounds.width));
+		int h = Math.max(bounds.height / 2, Math.min(frame.getHeight(), bounds.height));
 		int x = center.x - w / 2, y = center.y - h / 2;
 
 		frame.setLocation(x, y);
@@ -75,15 +65,18 @@ public class SwingUtils {
 	 * @param comp
 	 * @param enable
 	 */
-	public static void recurseSetEnable(JComponent comp, boolean enable) {
+	public static void recurseSetEnable(Component comp, boolean enable) {
 		if (comp == null)
 			return;
 
 		comp.setEnabled(enable);
-		for (int i = 0; i < comp.getComponentCount(); i++) {
-			Component c = comp.getComponent(i);
-			if (c instanceof JComponent) {
-				recurseSetEnable((JComponent) c, enable);
+		if (comp instanceof JComponent) {
+			JComponent c = (JComponent) comp;
+			for (int i = 0; i < c.getComponentCount(); i++) {
+				Component child = c.getComponent(i);
+				if (child instanceof JComponent) {
+					recurseSetEnable((JComponent) child, enable);
+				}
 			}
 		}
 	}

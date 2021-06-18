@@ -13,6 +13,11 @@ import org.barrelorgandiscovery.gui.ICancelTracker;
 import org.barrelorgandiscovery.gui.ProgressIndicator;
 import org.barrelorgandiscovery.tools.ImageTools;
 
+/**
+ * Book Image Creation Tools, 
+ * @author pfreydiere
+ *
+ */
 public class BookImageIO {
 
 	private static final Logger logger = Logger.getLogger(BookImageIO.class);

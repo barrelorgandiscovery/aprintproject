@@ -2,9 +2,10 @@ package org.barrelorgandiscovery.recognition.gui.bookext;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Rectangle;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
@@ -19,17 +20,18 @@ import java.util.stream.Collectors;
 
 import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
+import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JSlider;
+import javax.swing.JSpinner;
 import javax.swing.JToggleButton;
+import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingUtilities;
-import javax.swing.border.Border;
-import javax.swing.border.CompoundBorder;
-import javax.swing.border.TitledBorder;
 
 import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
@@ -61,6 +63,8 @@ import org.barrelorgandiscovery.recognition.messages.Messages;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.tools.Disposable;
 import org.barrelorgandiscovery.tools.ImageTools;
+import org.barrelorgandiscovery.tools.JMessageBox;
+import org.barrelorgandiscovery.tools.SwingUtils;
 import org.barrelorgandiscovery.ui.tools.VFSTools;
 import org.barrelorgandiscovery.virtualbook.Hole;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
@@ -70,11 +74,9 @@ import com.jeta.forms.gui.form.FormAccessor;
 
 import ij.IJ;
 import ij.ImagePlus;
-import ij.gui.ShapeRoi;
 import ij.process.ByteProcessor;
+import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
-import trainableSegmentation.WekaSegmentation;
-import weka.core.Instances;
 
 public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, IRecognitionToolWindowCommands {
 
@@ -106,6 +108,28 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 	 */
 	ImageAndHolesVisualizationLayer bookRegionDisplay = new ImageAndHolesVisualizationLayer();
 	ImageAndHolesVisualizationLayer holeRegionDisplay = new ImageAndHolesVisualizationLayer();
+
+	WekaRecognitionStrategy wekaRecognitionStrategy;
+	IRecognitionStrategy thresholdStrategy = new IRecognitionStrategy() {
+		@Override
+		public BufferedImage apply(BufferedImage image) {
+			try {
+				ColorProcessor colorProcessor = new ColorProcessor(image);
+				ByteProcessor convertToByteProcessor = colorProcessor.convertToByteProcessor(true);
+				// convertToByteProcessor.invertLut();
+				// convertToByteProcessor.applyLut();
+				convertToByteProcessor.threshold(Integer.parseInt("" + spnthreshold.getValue()));
+				// convertToByteProcessor.autoThreshold();
+
+				return convertToByteProcessor.getBufferedImage();
+			} catch (Throwable t) {
+				logger.error(t.getMessage(), t);
+				throw new RuntimeException(t.getMessage(), t);
+			}
+		}
+	};
+
+	IRecognitionStrategy current = wekaRecognitionStrategy;
 
 	JSlider sldtransparencytraining;
 
@@ -161,6 +185,8 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 	public void setTiledImage(ITiledImage tiledImage) {
 
 		try {
+
+			// from num, tiledImage are coming with RENORMED FAMILY
 
 			if (tiledImage instanceof BookImageRecognitionTiledImage) {
 
@@ -223,7 +249,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 				bookRegionDisplay.setHoles(null);
 
 				virtualBookComponent.repaint();
-				
+
 			} catch (Throwable t) {
 				logger.error(t.getMessage(), t);
 			}
@@ -291,6 +317,9 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 
 	JCheckBox chkdisplaylayer;
 
+	JRadioButton rbthrshold;
+	JRadioButton rbIA;
+
 	protected void initComponents() throws Exception {
 
 		// init layers
@@ -307,8 +336,6 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		// labels
 		JLabel lblexecute = fa.getLabel("lblexecute");// $NON-NLS-1$ //$NON-NLS-1$
 		lblexecute.setText(Messages.getString("JRecognitionVirtualBookPanel.502")); //$NON-NLS-1$
-		JLabel lblprogresslabel = fa.getLabel("lblprogresslabel");// $NON-NLS-1$ //$NON-NLS-1$
-		lblprogresslabel.setText(Messages.getString("JRecognitionVirtualBookPanel.504")); //$NON-NLS-1$
 
 		JLabel lbltools = fa.getLabel("lbltools");// $NON-NLS-1$ //$NON-NLS-1$
 		assert lbltools != null;
@@ -318,6 +345,44 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		assert lblResultTransparency != null;
 
 		lblResultTransparency.setText(Messages.getString("JRecognitionVirtualBookPanel.11")); //$NON-NLS-1$
+
+		ButtonGroup buttonGroup = new ButtonGroup();
+
+		rbthrshold = fa.getRadioButton("rbthrshold");
+		rbthrshold.setText("Simple Color Threshold Model");
+		assert rbthrshold != null;
+		buttonGroup.add(rbthrshold);
+
+		rbIA = fa.getRadioButton("rbIA");
+		rbIA.setText("Machine Learning Recognition Model");
+
+		assert rbIA != null;
+		buttonGroup.add(rbIA);
+
+		// both forms
+		final Component iaform = fa.getComponentByName("iaform");
+		final Component thrsholdform = fa.getComponentByName("thrsholdform");
+
+		ItemListener rbitemListener = (r) -> {
+			try {
+				SwingUtils.recurseSetEnable(iaform, rbIA.isSelected());
+				SwingUtils.recurseSetEnable(thrsholdform, rbthrshold.isSelected());
+
+				if (rbIA.isSelected()) {
+					current = wekaRecognitionStrategy;
+				} else {
+					current = thresholdStrategy;
+				}
+
+			} catch (Throwable t) {
+				logger.error(t.getMessage(), t);
+			}
+		};
+
+		rbthrshold.addItemListener(rbitemListener);
+		rbIA.addItemListener(rbitemListener);
+
+		rbIA.setSelected(true);
 
 		//
 		chkdisplaylayer = fa.getCheckBox("chkdisplaylayer"); //$NON-NLS-1$
@@ -441,9 +506,17 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		btnvalidaterecognition = (JButton) fa.getButton("btnvalidaterecognition");// $NON-NLS-1$ //$NON-NLS-1$
 		btnvalidaterecognition.setText(Messages.getString("JRecognitionVirtualBookPanel.34")); //$NON-NLS-1$
 
-		Border btnBorderGetResult = btnvalidaterecognition.getBorder();
-		CompoundBorder tb = (CompoundBorder) btnBorderGetResult;
-		((TitledBorder) tb.getOutsideBorder()).setTitle(Messages.getString("JRecognitionVirtualBookPanel.10027")); //$NON-NLS-1$
+		JLabel lbldisplay = fa.getLabel("lbldisplay");
+		lbldisplay.setText("Layer Display Settings");
+
+		JLabel lblgetResult = fa.getLabel("lblgetResult");
+		lblgetResult.setText("Recognition Result into VirtualBook");
+
+		JLabel lblminwidth = fa.getLabel("lblminwidth");
+		lblminwidth.setText("Min recognition hole (mm)");
+
+		spnminwidth = fa.getSpinner("spnminwidth");
+		spnminwidth.setModel(new SpinnerNumberModel(3.0f, 0.0f, 10.0f, 0.1f));
 
 		btnvalidaterecognition.addActionListener((l) -> {
 
@@ -455,11 +528,14 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 
 			virtualBookComponent.startEventTransaction();
 			try {
+
+				double min = Double.parseDouble("" + this.spnminwidth.getValue());
+
 				VirtualBook vb = virtualBookComponent.getVirtualBook();
 				Scale scale = vb.getScale();
 
 				List<Hole> filteredHoles = recognizedHoles.stream()
-						.filter((h) -> scale.timeToMM(h.getTimeLength()) > 3.0).collect(Collectors.toList());
+						.filter((h) -> scale.timeToMM(h.getTimeLength()) >= min).collect(Collectors.toList());
 
 				UndoStack us = virtualBookComponent.getUndoStack();
 				if (us != null) {
@@ -470,6 +546,9 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 				vb.clear();
 
 				vb.addHole(filteredHoles);
+			} catch (Throwable t) {
+				logger.error(t.getMessage(), t);
+				JMessageBox.showError(this, t);
 			} finally {
 				virtualBookComponent.endEventTransaction();
 			}
@@ -484,6 +563,9 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 
 		changeTrainingExampleLabel(0, 0);
 
+		spnthreshold = fa.getSpinner("spnthreshold");
+		spnthreshold.setModel(new SpinnerNumberModel(127, 0, 255, 5));
+
 		setLayout(new BorderLayout());
 		add(fp, BorderLayout.CENTER);
 
@@ -496,6 +578,11 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 
 	private JEditableVirtualBookComponent virtualBookComponent;
 
+	/**
+	 * setup the virtualbook component
+	 * 
+	 * @param virtualBookComponent
+	 */
 	public void setVirtualBookComponent(JVirtualBookScrollableComponent virtualBookComponent) {
 		this.virtualBookComponent = (JEditableVirtualBookComponent) virtualBookComponent;
 
@@ -537,10 +624,11 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		return virtualBookComponent;
 	}
 
-	private static int BOOK_CLASS = 0;
-	private static int HOLES_CLASS = 1;
-
 	private BackgroundTileImageProcessingThread<Void> backGroundThread;
+
+	private JSpinner spnminwidth;
+
+	private JSpinner spnthreshold;
 
 	private void launchRecognition() throws Exception {
 
@@ -563,9 +651,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		} else if (imageToRecognize instanceof BookImageRecognitionTiledImage) {
 			ti = new BookImageRecognitionTiledImage(
 					((BookImageRecognitionTiledImage) imageToRecognize).getUnderlyingZipBookImage());
-		}
-
-		else {
+		} else {
 			throw new Exception("unsupported image object format"); //$NON-NLS-1$
 		}
 
@@ -575,44 +661,29 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 
 		recognitionDisplay.setTiledBackgroundimage(tiledImage);
 
-		Instances instances = null;
+		if (rbIA.isSelected()) {
 
-		assert bookHoles != null;
-		assert holesHoles != null;
+			wekaRecognitionStrategy = new WekaRecognitionStrategy(virtualBookComponent.getVirtualBook().getScale());
 
-		for (Hole h : bookHoles) {
-			instances = constructTrainingSet(instances, h, BOOK_CLASS);
+			wekaRecognitionStrategy.train(bookHoles, holesHoles, imageToRecognize);
+			current = wekaRecognitionStrategy;
+
+		} else {
+			current = thresholdStrategy;
 		}
-
-		for (Hole h : holesHoles) {
-			instances = constructTrainingSet(instances, h, HOLES_CLASS);
-		}
-
-		if (instances == null) {
-			logger.info("no training set, no recognition launched"); //$NON-NLS-1$
-			return;
-		}
-
-		WekaSegmentation ws = new WekaSegmentation();
-		updateSegmentationParameters(ws);
-		ws.setLoadedTrainingData(instances);
-
-		ws.doClassBalance();
-		// ws.selectAttributes();
-
-		ws.trainClassifier();
 
 		if (backGroundThread != null) {
 			backGroundThread.cancel();
 			backGroundThread = null;
 		}
 
+		// clear
 		recognitionDisplay.setHoles(null);
 
-		class Priority implements Comparator<Integer> {
+		class PriorityImageComparator implements Comparator<Integer> {
 			private int center;
 
-			Priority(int center) {
+			PriorityImageComparator(int center) {
 				this.center = center;
 			}
 
@@ -643,7 +714,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 					max = Math.max(visibleTiles[i], max);
 				}
 
-				backGroundThread.sortProcessingQueue(new Priority((min + max) / 2));
+				backGroundThread.sortProcessingQueue(new PriorityImageComparator((min + max) / 2));
 			}
 
 			@Override
@@ -651,36 +722,28 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 				logger.error(errormsg);
 			}
 		}, 1);
+
 		backGroundThread.start(new TileProcessing<Void>() {
 			@Override
 			public Void process(int index, BufferedImage image) throws Exception {
-				ClassLoader old = Thread.currentThread().getContextClassLoader();
 
+				logger.debug("loading image " + index);
 				BufferedImage bi = imageToRecognize.loadImage(index);
 				if (bi == null) {
 					logger.error("erroneous index, image number " + index + " cannot be loaded in " + imageToRecognize);
 					return null;
 				}
 
-				ImagePlus ip = new ImagePlus();
-				ip.setImage(bi);
-				ImagePlus result = ws.applyClassifier(ip);
-
-				ImageProcessor processor = result.getProcessor();
-				processor.multiply(250);
-
-				ByteProcessor bp = processor.convertToByteProcessor(true);
-
-				ImagePlus binary = new ImagePlus("", bp); //$NON-NLS-1$
+				BufferedImage binaryresult = current.apply(bi);
 
 				String fileName = tiledImage.constructImagePath(index, REC_INLINE_FAMILY).getAbsolutePath();
 				logger.debug("saving " + fileName); //$NON-NLS-1$
-				IJ.save(binary, fileName);
+				IJ.save(new ImagePlus("", binaryresult), fileName);
 
 				Scale scale = virtualBookComponent.getVirtualBook().getScale();
-				ReadResultBag readResult = BookReadProcessor.readResult2(binary.getBufferedImage(),
-						index * bi.getWidth(), scale.mmToTime(scale.getWidth() / imageToRecognize.getHeight()), scale,
-						null, false, 150);
+
+				ReadResultBag readResult = BookReadProcessor.readResult2(binaryresult, index * bi.getWidth(),
+						scale.mmToTime(scale.getWidth() / imageToRecognize.getHeight()), scale, null, false, 150);
 
 				ArrayList<Hole> holes = recognitionDisplay.getHoles();
 				if (holes == null) {
@@ -688,7 +751,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 				}
 
 				holes.addAll(readResult.virtualbook.getHolesCopy());
-
+				// display results
 				recognitionDisplay.setHoles(holes);
 
 				return null;
@@ -697,45 +760,8 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		});
 	}
 
-	private void updateSegmentationParameters(WekaSegmentation ws) {
-
-		// LinearRegression lr = new LinearRegression();
-//		Logistic l = new Logistic();
-//		l.setUseConjugateGradientDescent(true);
-//		
-//
-//		MultiClassClassifier mcc = new MultiClassClassifier();
-//		mcc.setClassifier(l);
-//		mcc.setLogLossDecoding(true);
-//		mcc.setNumDecimalPlaces(6);
-//		mcc.setUsePairwiseCoupling(true);
-//		
-//		ws.setClassifier(mcc);
-//		
-
-		// ws.updateClassifier(200, 6, 10);
-
-		boolean[] enabledFeatures = ws.getEnabledFeatures();
-//		for (int i = 0 ; i < enabledFeatures.length ; i ++) {
-//			enabledFeatures[i] = true;
-//		}
-		/*
-		 * enabledFeatures[FeatureStack.DERIVATIVES] = false;
-		 * 
-		 * enabledFeatures[FeatureStack.GABOR] = true;
-		 * enabledFeatures[FeatureStack.LIPSCHITZ] = true; //
-		 * enabledFeatures[FeatureStack.HESSIAN] = true;
-		 * enabledFeatures[FeatureStack.NEIGHBORS] = true;
-		 * enabledFeatures[FeatureStack.GAUSSIAN] = true;
-		 * 
-		 * enabledFeatures[FeatureStack.VARIANCE] = true;
-		 * enabledFeatures[FeatureStack.STRUCTURE] = true;
-		 * 
-		 * ws.setEnabledFeatures(enabledFeatures);
-		 */
-	}
-
 	IFamilyImageSeekerTiledImage getBackgroundImage() {
+
 		ITiledImage t = backgroundBook.getTiledBackgroundimage();
 
 		if (t == null) {
@@ -745,77 +771,8 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		}
 
 		assert t instanceof IFamilyImageSeekerTiledImage;
+
 		return (IFamilyImageSeekerTiledImage) t;
-	}
-
-	private Instances constructTrainingSet(Instances instances, Hole hole, int classNo) throws Exception {
-		Scale scale = virtualBookComponent.getVirtualBook().getScale();
-
-		IFamilyImageSeekerTiledImage zi = getBackgroundImage();
-
-		int height = zi.getHeight();
-
-		double mm = scale.timeToMM(hole.getTimestamp());
-
-		double startPercent = (scale.getFirstTrackAxis() + hole.getTrack() * scale.getIntertrackHeight()
-				- scale.getTrackWidth() / 2) / scale.getWidth();
-		double endPercent = (scale.getFirstTrackAxis() + hole.getTrack() * scale.getIntertrackHeight()
-				+ scale.getTrackWidth() / 2) / scale.getWidth();
-
-		// fix acquisition when the scale is revert
-		if (scale.isPreferredViewedInversed()) {
-			startPercent = 1.0 - startPercent;
-			endPercent = 1.0 - endPercent;
-		}
-
-		if (startPercent > endPercent) {
-			double tmp = startPercent;
-			startPercent = endPercent;
-			endPercent = tmp;
-		}
-
-		int startTrackPixel = (int) (startPercent * height);
-		int endTrackPixel = (int) (endPercent * height);
-
-		int startPixel = (int) (mm / scale.getWidth() * height);
-		int endPixel = (int) (scale.timeToMM(hole.getTimestamp() + hole.getTimeLength()) / scale.getWidth() * height);
-
-		int imageTileWidth = zi.getTileWidth();
-
-		int startImageIndex = startPixel / imageTileWidth;
-		int endImageIndex = endPixel / imageTileWidth;
-		assert startImageIndex <= endImageIndex;
-
-		Instances trainingInstances = instances;
-		for (int i = startImageIndex; i <= endImageIndex; i++) {
-			logger.debug("loading image :" + i); //$NON-NLS-1$
-			BufferedImage bi = zi.loadImage(startImageIndex);
-
-			int offsetStart = startPixel - (i * imageTileWidth);
-			int offsetEnd = endPixel - (i * imageTileWidth);
-
-			Rectangle r = new Rectangle(offsetStart, startTrackPixel, offsetEnd - offsetStart,
-					endTrackPixel - startTrackPixel);
-
-			ImagePlus ip = new ImagePlus();
-			ip.setImage(bi);
-
-			WekaSegmentation ws = new WekaSegmentation(ip);
-			updateSegmentationParameters(ws);
-
-			ws.addExample(classNo, new ShapeRoi(r), 1);
-
-			Instances t = ws.createTrainingInstances();
-			if (t != null) {
-				if (trainingInstances == null) {
-					trainingInstances = t;
-				} else {
-					ws.mergeDataInPlace(trainingInstances, t);
-				}
-			}
-		}
-
-		return trainingInstances;
 	}
 
 	private void closeBackGroundThread() {

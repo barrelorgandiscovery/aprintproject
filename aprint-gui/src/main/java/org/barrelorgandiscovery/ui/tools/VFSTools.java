@@ -1,6 +1,8 @@
 package org.barrelorgandiscovery.ui.tools;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.vfs2.FileName;
 import org.apache.commons.vfs2.FileObject;
@@ -8,6 +10,18 @@ import org.apache.commons.vfs2.VFS;
 import org.apache.commons.vfs2.provider.AbstractFileObject;
 
 public class VFSTools {
+	
+	
+	public static String decodeURIEncoding(String encodedURL) throws Exception {
+		try {
+		    String result = java.net.URLDecoder.decode(encodedURL, StandardCharsets.UTF_8.name());
+		    return result;
+		} catch (UnsupportedEncodingException e) {
+		    // not going to happen - value came from JDK's own StandardCharsets
+			return encodedURL;
+		}
+	}
+	
 
 	public static AbstractFileObject fromRegularFile(File file) throws Exception {
 		FileObject f = VFS.getManager().resolveFile(file.toURL().toString());

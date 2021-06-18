@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -171,7 +172,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 	static final Logger logger = Logger.getLogger(APrintNG.class);
 
 	// ///////////////////////////////////////////////////////////////////////////
-	// Données interne du formulaire
+	// Donnï¿½es interne du formulaire
 
 	/** Repository ... */
 	private RepositoryAdapter repository = null;
@@ -274,7 +275,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 
 		setIconImage(getAPrintApplicationIcon()); // $NON-NLS-1$
 
-		// Chargement des objets nécessaires
+		// Chargement des objets nï¿½cessaires
 
 		defineNewGammeAndTranspositionFolder(rep);
 
@@ -286,7 +287,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 
 		setName("aprint main window"); //$NON-NLS-1$
 
-		// Définir le menu
+		// Dï¿½finir le menu
 
 		setJMenuBar(constructMenu());
 
@@ -581,7 +582,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		apropos.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					// lecture du fichier de propriété
+					// lecture du fichier de propriï¿½tï¿½
 
 					AboutFrame af = new AboutFrame(APrintNG.this, Messages.getString("APrint.86"), true); //$NON-NLS-1$
 
@@ -732,7 +733,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 
 		forcedLocale.add(createLanguageMenu(Messages.getString("APrintNG.31"), null)); //$NON-NLS-1$
 		forcedLocale.add(createLanguageMenu("English", Locale.ENGLISH)); //$NON-NLS-1$
-		forcedLocale.add(createLanguageMenu("Français", Locale.FRENCH)); //$NON-NLS-1$
+		forcedLocale.add(createLanguageMenu("Franï¿½ais", Locale.FRENCH)); //$NON-NLS-1$
 		forcedLocale.add(createLanguageMenu("Deutsch", Locale.GERMAN)); //$NON-NLS-1$
 		forcedLocale.add(createLanguageMenu("Italiano", Locale.ITALIAN)); //$NON-NLS-1$
 		forcedLocale.add(createLanguageMenu("Spanish", new Locale("es"))); //$NON-NLS-1$
@@ -1325,7 +1326,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 	}
 
 	private void changeGammeFolder() throws RepositoryException, IOException {
-		// choix du répertoire de gamme ...
+		// choix du rï¿½pertoire de gamme ...
 		JDirectoryChooser dc = new JDirectoryChooser(Messages.getString("APrintApplication.2")); //$NON-NLS-1$
 
 		dc.setSelectedFile(aprintproperties.getGammeAndTranlation());
@@ -1340,7 +1341,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 
 			// rafraichissement des transpositions ...
 
-			// mémorisation du répertoire contenant le repository
+			// mï¿½morisation du rï¿½pertoire contenant le repository
 			aprintproperties.setGammeAndTranlation(repertoire);
 		}
 	}
@@ -1388,9 +1389,9 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 	private InternalRepositoryListenerClass internalRepositoryListenerClass = new InternalRepositoryListenerClass();
 
 	/**
-	 * charge les nouvelles gammes contenues dans le répertoire
+	 * charge les nouvelles gammes contenues dans le rï¿½pertoire
 	 *
-	 * @param folder le répertoire contenant des gammes
+	 * @param folder le rï¿½pertoire contenant des gammes
 	 */
 	private void defineNewGammeAndTranspositionFolder(File folder) throws RepositoryException {
 
@@ -1509,43 +1510,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		this.setVisible(false);
 	}
 
-	// private HelpBroker hb = null;
-	// private HelpSet hs = null;
-
 	private void initHelpBroker() {
-		//
-		// logger.debug("initHelpBroker"); //$NON-NLS-1$
-		//
-		// hs = null;
-		// // Find the HelpSet file and create the HelpSet object:
-		// String helpHS = "APrintHelp.hs"; //$NON-NLS-1$
-		// ClassLoader cl = this.getClass().getClassLoader();
-		// try {
-		//
-		// String localsubfolder = "en"; //$NON-NLS-1$
-		//
-		// if ("fr".equals(Locale.getDefault().getLanguage())) //$NON-NLS-1$
-		// localsubfolder = "fr"; //$NON-NLS-1$
-		//
-		// URL hsURL = HelpSet.findHelpSet(cl,
-		// "doc/" + localsubfolder + "/" + helpHS); //$NON-NLS-1$ //$NON-NLS-2$
-		// hs = new HelpSet(null, hsURL);
-		// } catch (Exception ee) {
-		// // Say what the exception really is
-		// logger.error("HelpSet " + ee.getMessage()); //$NON-NLS-1$
-		// logger.error("HelpSet " + helpHS + Messages.getString("APrint.101"));
-		// //$NON-NLS-1$ //$NON-NLS-2$
-		// return;
-		// }
-		//
-		// assert hs != null;
-		//
-		// // Create a HelpBroker object:
-		// hb = hs.createHelpBroker();
-		//
-		// hb.enableHelpKey(this.getRootPane(), "top", hs, //$NON-NLS-1$
-		// "javax.help.MainWindow", "mainSW"); //$NON-NLS-1$ //$NON-NLS-2$
-
 	}
 
 	/**
@@ -1639,7 +1604,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 				choose.setFileSelectionMode(APrintFileChooser.FILES_ONLY);
 
 				if (choose.showOpenDialog(this) == APrintFileChooser.APPROVE_OPTION) {
-					// Récupération du nom de fichier
+					// Rï¿½cupï¿½ration du nom de fichier
 					final AbstractFileObject result = choose.getSelectedFile();
 
 					if (result.exists()) {
@@ -2298,13 +2263,15 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 			DataFlavor Linux = new DataFlavor("text/uri-list;class=java.io.Reader"); //$NON-NLS-1$
 			DataFlavor Windows = DataFlavor.javaFileListFlavor;
 
+			
+			
 			// On Linux (and OS X) file DnD is a reader
 			if (flavor.equals(Linux)) {
 				dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
 
 				BufferedReader read = new BufferedReader(flavor.getReaderForText(tr));
 				// Remove 'file://' from file name
-				String fileName = read.readLine().substring(7).replace("%20", " "); //$NON-NLS-1$ //$NON-NLS-2$
+				String fileName = VFSTools.decodeURIEncoding(read.readLine().substring(7)); //$NON-NLS-1$ //$NON-NLS-2$
 				// Remove 'localhost' from OS X file names
 				if (fileName.substring(0, 9).equals("localhost")) { //$NON-NLS-1$
 					fileName = fileName.substring(9);
@@ -2352,17 +2319,21 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 
 				// internet link
 				BufferedReader read = new BufferedReader(flavor.getReaderForText(tr));
+				
 
-				StringBuffer htmlFragment = new StringBuffer();
+				StringWriter sw = new StringWriter();
 
-				String line = read.readLine();
-				while (line != null) {
-					htmlFragment.append(line);
-					logger.debug("content :" + line);
-					line = read.readLine();
+				
+				char[] buffer = new char[200];
+				int readchar = read.read(buffer, 0, buffer.length);
+				
+				while (readchar != -1) {
+					sw.write(buffer, 0, readchar);
+					logger.debug("content :" + buffer);
+					readchar = read.read(buffer, 0, buffer.length);					
 				}
 
-				String[] links = HTMLParsingTools.parseHTMLAndExtractLinks(htmlFragment.toString());
+				String[] links = HTMLParsingTools.parseHTMLAndExtractLinks(sw.getBuffer().toString());
 
 				if (links == null || links.length == 0)
 					return;

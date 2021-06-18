@@ -60,6 +60,11 @@ public class PanTool extends Tool {
 
 		logger.debug("mouse pressed :" + e.getButton()); //$NON-NLS-1$
 
+
+		// rï¿½cupï¿½ration du click sur le carton ...
+		vbc.setHightlight(vbc.convertScreenXToCarton(e.getX()));
+		vbc.repaint();
+		
 		if (e.getButton() == MouseEvent.BUTTON1) {
 			posx = e.getX();
 
@@ -82,10 +87,7 @@ public class PanTool extends Tool {
 
 		if (e.getButton() == MouseEvent.BUTTON1) {
 
-			// récupération du click sur le carton ...
-			vbc.setHightlight(vbc.convertScreenXToCarton(e.getX()));
-
-			vbc.repaint();
+			
 		}
 	}
 

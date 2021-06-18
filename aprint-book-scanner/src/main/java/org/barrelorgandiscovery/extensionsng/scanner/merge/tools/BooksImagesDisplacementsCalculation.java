@@ -17,6 +17,13 @@ import org.opencv.core.Point;
 import org.opencv.features2d.DescriptorMatcher;
 import org.opencv.xfeatures2d.SURF;
 
+
+/**
+ * tools to identify the move of book in photos or videos
+ * 
+ * @author pfreydiere
+ *
+ */
 public class BooksImagesDisplacementsCalculation {
 
 	public static class DisplacementCalculationResult {
@@ -76,8 +83,7 @@ public class BooksImagesDisplacementsCalculation {
 		try {
 			ArrayList<KeyPointMatch> result = new ArrayList<KeyPointMatch>();
 			ArrayList<KeyPointMatch> fixedPoints = new ArrayList<KeyPointMatch>();
-			
-			
+
 			for (DMatch d : listOfGoodMatches) {
 				List<KeyPoint> listOfKeypointsObject = keypointsObject.toList();
 				List<KeyPoint> listOfKeypointsScene = keypointsScene.toList();
@@ -93,9 +99,9 @@ public class BooksImagesDisplacementsCalculation {
 					keyPointMatch.displacement = new MathVect(second.x, second.y).moins(keyPointMatch.origin);
 
 					double displacementVectorNorm = keyPointMatch.displacement.norme();
-					double THRESHOLD_DISPLACEMENT =  15;
+					double THRESHOLD_DISPLACEMENT = 15;
 					Color c = Color.blue; // no displacement
-					
+
 					if (displacementVectorNorm > THRESHOLD_DISPLACEMENT) {
 						c = Color.red;
 						// filter non colinear ones
@@ -105,7 +111,7 @@ public class BooksImagesDisplacementsCalculation {
 							double angleThreashold = 5.0 / 180.0 * Math.PI;
 							if (Math.abs(colinearity) > angleThreashold) {
 								// skip
-								
+
 								continue;
 							}
 						}

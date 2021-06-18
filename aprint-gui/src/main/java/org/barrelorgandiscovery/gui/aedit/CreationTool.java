@@ -285,8 +285,10 @@ public class CreationTool extends Tool {
 			int end = c.convertCartonToScreenX(c.timestampToMM(feedbackEnd));
 
 			int y = c.convertCartonToScreenY(c.trackToMM(pistestart));
-
-			g.drawRect(start, y - 5, end - start, 10);
+			
+			int holeheight = c.MmToPixel(c.getVirtualBook().getScale().getTrackWidth())/2;
+			
+			g.drawRect(start, y - holeheight, end - start, 2*holeheight);
 
 		}
 

@@ -298,7 +298,6 @@ public class JBookRecognition extends JPanel {
 					}
 
 					// view the renormalized model
-
 					tiView.setCurrentImageFamilyDisplay("renormed");
 
 					// adjust virtualbook
