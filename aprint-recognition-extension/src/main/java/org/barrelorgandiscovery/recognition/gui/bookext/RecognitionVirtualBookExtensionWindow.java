@@ -57,6 +57,8 @@ public class RecognitionVirtualBookExtensionWindow extends BaseVirtualBookExtens
 		c.addLayer(recognitionPanel.bookRegionDisplay);
 
 		c.addLayer(recognitionPanel.holeRegionDisplay);
+		
+		c.addLayer(recognitionPanel.bookNotesOverlay);
 	}
 
 	@Override

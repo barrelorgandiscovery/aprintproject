@@ -9,6 +9,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.Stroke;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
@@ -86,6 +87,8 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 	 */
 	private Color holesColor = Color.red;
 
+	private Stroke holesStroke = null;
+
 	private String layerInternalName = null;
 
 	public void setLayerInternalName(String layerInternalName) {
@@ -103,6 +106,14 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 
 	public Color getHolesColor() {
 		return holesColor;
+	}
+
+	public void setHolesStroke(Stroke holesStroke) {
+		this.holesStroke = holesStroke;
+	}
+
+	public Stroke getHolesStroke() {
+		return holesStroke;
 	}
 
 	public void setDisableRescale(boolean disableRescale) {
@@ -382,7 +393,11 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 
 		Graphics2D g2d = (Graphics2D) g;
 
-		g2d.setStroke(new BasicStroke(2.0f));
+		Stroke stroke = new BasicStroke(2.0f);
+		if (this.holesStroke != null) {
+			stroke = this.holesStroke;
+		}
+		g2d.setStroke(stroke);
 
 		for (Iterator<Hole> iterator = holes.iterator(); iterator.hasNext();) {
 			Hole h = iterator.next();
@@ -396,7 +411,7 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 				y = scale.getWidth() - y;
 
 			y -= scale.getTrackWidth() / 2;
-			
+
 			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 0.5f));
 
 			g2d.fillRect(jbookcomponentreference.convertCartonToScreenX(xmm),
@@ -413,7 +428,7 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 				g2d.draw(s);
 			}
 			g2d.setPaintMode();
-			
+
 		} finally {
 			g2d.setTransform(oldTransform);
 		}
@@ -456,8 +471,7 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 		assert c != null;
 		return c;
 	}
-	
-	
+
 	public List<Shape> getAdditionalShapes() {
 		return this.shapes;
 	}

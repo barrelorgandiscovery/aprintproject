@@ -1,5 +1,6 @@
 package org.barrelorgandiscovery.recognition.gui.bookext;
 
+import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -40,6 +41,7 @@ import org.barrelorgandiscovery.bookimage.ZipBookImage;
 import org.barrelorgandiscovery.gui.aedit.CreationTool;
 import org.barrelorgandiscovery.gui.aedit.CurrentToolChanged;
 import org.barrelorgandiscovery.gui.aedit.GlobalVirtualBookUndoOperation;
+import org.barrelorgandiscovery.gui.aedit.HolesDisplayOverlayLayer;
 import org.barrelorgandiscovery.gui.aedit.ImageAndHolesVisualizationLayer;
 import org.barrelorgandiscovery.gui.aedit.JEditableVirtualBookComponent;
 import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
@@ -108,7 +110,13 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 	 */
 	ImageAndHolesVisualizationLayer bookRegionDisplay = new ImageAndHolesVisualizationLayer();
 	ImageAndHolesVisualizationLayer holeRegionDisplay = new ImageAndHolesVisualizationLayer();
-
+	
+	/**
+	 * Book notes overlay (in yellow to have a better view of the holes (on top of other layers)
+	 */
+	HolesDisplayOverlayLayer bookNotesOverlay = new HolesDisplayOverlayLayer();
+	
+	
 	WekaRecognitionStrategy wekaRecognitionStrategy;
 	IRecognitionStrategy thresholdStrategy = new IRecognitionStrategy() {
 		@Override
@@ -233,6 +241,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		}
 	}
 
+	/** undisplay the elements **/
 	private class RemoveImageAction extends AbstractAction {
 
 		public RemoveImageAction(String name) {
@@ -326,6 +335,11 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		bookRegionDisplay.setHolesColor(Color.red);
 		holeRegionDisplay.setHolesColor(Color.green);
 		recognitionDisplay.setHolesColor(Color.blue);
+		
+		// hole overlay
+		bookNotesOverlay.setHolesColor(Color.yellow);
+		bookNotesOverlay.setHolesStroke(new BasicStroke(0.1f));
+		bookNotesOverlay.setOpacity(1.0f);
 
 		InputStream resourceAsStream = getClass().getResourceAsStream("toolspanel.jfrm"); //$NON-NLS-1$
 		assert resourceAsStream != null;
@@ -395,6 +409,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 				holeRegionDisplay.setVisible(selected);
 				recognitionDisplay.setVisible(selected);
 				backgroundBook.setVisible(selected);
+				bookNotesOverlay.setVisible(selected);
 				virtualBookComponent.repaint();
 			}
 		});
