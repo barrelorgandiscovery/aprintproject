@@ -16,6 +16,7 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.extension.MachineExtension
 import org.barrelorgandiscovery.extensionsng.perfo.ng.panel.wizard.JMachineWithParametersChooser;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.panel.wizard.MachineParameterFactory;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.ITriggerFactory;
+import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.ITriggerFeedback;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.MachineTrigger;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.TimeTrigger;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.Trigger;
@@ -26,6 +27,11 @@ import org.barrelorgandiscovery.tools.SwingUtils;
 import com.github.sarxos.webcam.Webcam;
 import com.jeta.forms.components.panel.FormPanel;
 
+/**
+ * Component for triggering the image snapshot
+ * @author pfreydiere
+ *
+ */
 public class JTriggerComponent extends JPanel {
 
   /** */
@@ -102,13 +108,13 @@ public class JTriggerComponent extends JPanel {
    * @return
    * @throws Exception
    */
-  public ITriggerFactory createTriggerFactory() throws Exception {
+  public ITriggerFactory createTriggerFactory(ITriggerFeedback triggerFeedback) throws Exception {
     if (rdTime.isSelected()) {
       return new ITriggerFactory() {
         @Override
-        public Trigger create(Webcam webcam, IWebCamListener listener, PerfoScanFolder psf)
+        public Trigger create(Webcam webcam, IWebCamListener listener, PerfoScanFolder psf, ITriggerFeedback triggerFeedback)
             throws Exception {
-          return new TimeTrigger(webcam, listener, psf, Double.parseDouble(txtseconds.getText()));
+          return new TimeTrigger(webcam, listener, psf, Double.parseDouble(txtseconds.getText()), triggerFeedback);
         }
       };
     }
@@ -116,9 +122,9 @@ public class JTriggerComponent extends JPanel {
     // default
     return new ITriggerFactory() {
       @Override
-      public Trigger create(Webcam webcam, IWebCamListener listener, PerfoScanFolder psf)
+      public Trigger create(Webcam webcam, IWebCamListener listener, PerfoScanFolder psf, ITriggerFeedback triggerFeedback)
           throws Exception {
-        return new MachineTrigger(webcam, listener, psf, chooser.getMachineParameters());
+        return new MachineTrigger(webcam, listener, psf, chooser.getMachineParameters(), triggerFeedback);
       }
     };
   }

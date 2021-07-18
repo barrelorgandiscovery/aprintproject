@@ -4,6 +4,9 @@ import java.awt.BorderLayout;
 import java.io.InputStream;
 import java.io.Serializable;
 
+import javax.swing.JLabel;
+import javax.swing.JScrollPane;
+
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensions.IExtension;
 import org.barrelorgandiscovery.extensionsng.scanner.Messages;
@@ -12,6 +15,7 @@ import org.barrelorgandiscovery.extensionsng.scanner.scan.JChooseWebCam;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.JChooseWebCam.WebCamConfig;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.JTriggerComponent;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.ITriggerFactory;
+import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.ITriggerFeedback;
 import org.barrelorgandiscovery.gui.wizard.BasePanelStep;
 import org.barrelorgandiscovery.gui.wizard.Step;
 import org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener;
@@ -63,9 +67,16 @@ public class JScanParameterStep extends BasePanelStep implements Disposable {
 
 		fp.getFormAccessor().replaceBean("lblwebcam", webcamChooser); //$NON-NLS-1$
 		fp.getFormAccessor().replaceBean("lbltrigger", jTriggerComponent); //$NON-NLS-1$
+		
+		JLabel lclchooseTrigger = fp.getLabel("lblchooseimagetrigger");//$NON-NLS-1$
+		lclchooseTrigger.setText("Choose the trigger for taking snapshots");
 
 		setLayout(new BorderLayout());
-		add(fp, BorderLayout.CENTER);
+		
+		JScrollPane scrollPane = new JScrollPane(fp);
+		scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		
+		add(scrollPane, BorderLayout.CENTER);
 	}
 
 	@Override
@@ -73,8 +84,8 @@ public class JScanParameterStep extends BasePanelStep implements Disposable {
 		return Messages.getString("JScanParameterStep.4"); //$NON-NLS-1$
 	}
 
-	public ITriggerFactory getTriggerFactory() throws Exception {
-		return jTriggerComponent.createTriggerFactory();
+	public ITriggerFactory getTriggerFactory(ITriggerFeedback triggerFeedback) throws Exception {
+		return jTriggerComponent.createTriggerFactory(triggerFeedback);
 	}
 
 	public Webcam getOpenedWebCam() {

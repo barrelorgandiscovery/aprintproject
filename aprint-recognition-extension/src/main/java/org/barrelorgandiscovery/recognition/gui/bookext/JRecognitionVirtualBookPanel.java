@@ -338,7 +338,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		
 		// hole overlay
 		bookNotesOverlay.setHolesColor(Color.yellow);
-		bookNotesOverlay.setHolesStroke(new BasicStroke(0.1f));
+		bookNotesOverlay.setHolesStroke(new BasicStroke(1f));
 		bookNotesOverlay.setOpacity(1.0f);
 
 		InputStream resourceAsStream = getClass().getResourceAsStream("toolspanel.jfrm"); //$NON-NLS-1$

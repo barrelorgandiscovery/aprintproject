@@ -21,9 +21,13 @@ public abstract class Trigger {
 
 	private IWebCamListener listener;
 
-	public Trigger(Webcam webcam, IWebCamListener listener, PerfoScanFolder psf) {
+	private ITriggerFeedback triggerFeedback;
+
+	public Trigger(Webcam webcam, IWebCamListener listener, PerfoScanFolder psf, ITriggerFeedback triggerFeedback) {
 		this.listener = listener;
 		this.webcam = webcam;
+		this.triggerFeedback = triggerFeedback;
+
 		assert this.webcam.isOpen();
 		webCamPictureTaker = new WebCamPictureTake(webcam, new IWebCamListener() {
 			@Override
@@ -50,5 +54,15 @@ public abstract class Trigger {
 
 	protected void takePicture() {
 		webCamPictureTaker.run();
+	}
+
+	protected void giveFeedback(String message) {
+		if (triggerFeedback != null) {
+			try {
+				triggerFeedback.triggerMessage(message);
+			} catch (Throwable t) {
+				logger.error(t.getMessage(), t);
+			}
+		}
 	}
 }

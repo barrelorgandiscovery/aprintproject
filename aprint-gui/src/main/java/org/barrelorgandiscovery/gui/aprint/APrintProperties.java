@@ -182,7 +182,7 @@ public class APrintProperties {
 	}
 
 	public String getLookAndFeel() {
-		return ps.getStringProperty(LOOK_AND_FEEL, "com.birosoft.liquid.LiquidLookAndFeel"); //$NON-NLS-1$
+		return ps.getStringProperty(LOOK_AND_FEEL, null); //$NON-NLS-1$
 	}
 
 	public void setLookAndFeel(String lookandfeelclass) {

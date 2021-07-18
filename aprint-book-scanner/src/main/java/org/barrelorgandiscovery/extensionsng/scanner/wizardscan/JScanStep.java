@@ -9,6 +9,7 @@ import org.barrelorgandiscovery.bookimage.PerfoScanFolder;
 import org.barrelorgandiscovery.extensionsng.scanner.Messages;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.JScanPanel;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.ITriggerFactory;
+import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.ITriggerFeedback;
 import org.barrelorgandiscovery.extensionsng.scanner.wizard.JOutputFolderChooserStep;
 import org.barrelorgandiscovery.gui.wizard.BasePanelStep;
 import org.barrelorgandiscovery.gui.wizard.Step;
@@ -30,6 +31,7 @@ public class JScanStep extends BasePanelStep implements Disposable {
 	private JScanPanel scanPanel;
 
 	private JScanParameterStep previousScanParameterStep;
+	
 	private JOutputFolderChooserStep folderChooserStep;
 
 
@@ -68,7 +70,17 @@ public class JScanStep extends BasePanelStep implements Disposable {
 		PerfoScanFolder psf = new PerfoScanFolder(folder);
 
 		
-		ITriggerFactory triggerFactory = previousScanParameterStep.getTriggerFactory();
+		final ITriggerFeedback tfeedback = new ITriggerFeedback() {
+			
+			@Override
+			public void triggerMessage(String message) {
+				if (scanPanel != null) {
+					scanPanel.triggerFeedback.triggerMessage(message);
+				}
+			}
+		};
+		
+		ITriggerFactory triggerFactory = previousScanParameterStep.getTriggerFactory(tfeedback);
 		scanPanel = new JScanPanel(webcam, triggerFactory, psf);
 
 		setLayout(new BorderLayout());

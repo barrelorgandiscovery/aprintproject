@@ -43,6 +43,7 @@ public class JScanWizard extends JPanel {
 		wizard.toFirst();
 	}
 
+	// unit test method
 	public static void main(String[] args) throws Exception {
 
 		BasicConfigurator.configure(new LF5Appender());

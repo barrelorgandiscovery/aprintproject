@@ -17,6 +17,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 
@@ -26,6 +27,7 @@ import org.apache.log4j.lf5.LF5Appender;
 import org.barrelorgandiscovery.bookimage.PerfoScanFolder;
 import org.barrelorgandiscovery.extensionsng.scanner.Messages;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.ITriggerFactory;
+import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.ITriggerFeedback;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.TimeTrigger;
 import org.barrelorgandiscovery.extensionsng.scanner.scan.trigger.Trigger;
 import org.barrelorgandiscovery.tools.Disposable;
@@ -103,6 +105,8 @@ public class JScanPanel extends JPanel implements Disposable {
 		JLabel lblfolderLabel = fp.getLabel("lblfolderlabel");//$NON-NLS-1$
 		assert lblfolderLabel != null;
 		lblfolderLabel.setText(Messages.getString("JScanPanel.0")); //$NON-NLS-1$
+		
+		triggerFeedbackTextArea = (JTextArea)fp.getComponentByName("triggerFeedback");
 
 		btnStart = fp.getButton("btnstart");//$NON-NLS-1$
 		assert btnStart != null;
@@ -208,6 +212,18 @@ public class JScanPanel extends JPanel implements Disposable {
 
 	private AbstractButton btnStop;
 
+	private JTextArea triggerFeedbackTextArea;
+	
+	public final ITriggerFeedback triggerFeedback = new ITriggerFeedback() {
+		
+		@Override
+		public void triggerMessage(String message) {
+			triggerFeedbackTextArea.setText(
+					triggerFeedbackTextArea.getText() + "\n" + message
+					
+					);	
+		}};
+
 	public void start() throws Exception {
 
 		try {
@@ -239,7 +255,8 @@ public class JScanPanel extends JPanel implements Disposable {
 						logger.error(ex.getMessage(), ex);
 					}
 				}
-			}, perfoScanFolder);
+			}, perfoScanFolder, 
+			triggerFeedback);
 
 			trigger.start();
 
@@ -308,8 +325,8 @@ public class JScanPanel extends JPanel implements Disposable {
 
 		ITriggerFactory tf = new ITriggerFactory() {
 			@Override
-			public Trigger create(Webcam webcam, IWebCamListener listener, PerfoScanFolder psf) throws Exception {
-				return new TimeTrigger(webcam, listener, psf, 2);
+			public Trigger create(Webcam webcam, IWebCamListener listener, PerfoScanFolder psf, ITriggerFeedback triggerFeedback) throws Exception {
+				return new TimeTrigger(webcam, listener, psf, 2, triggerFeedback);
 			}
 		};
 

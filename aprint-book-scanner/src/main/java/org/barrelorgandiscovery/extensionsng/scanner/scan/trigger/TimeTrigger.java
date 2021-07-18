@@ -12,34 +12,37 @@ import com.github.sarxos.webcam.Webcam;
 
 public class TimeTrigger extends Trigger implements Disposable {
 
-  private ScheduledExecutorService e = null;
+	private ScheduledExecutorService e = null;
 
-  private double seconds = Double.NaN;
+	private double seconds = Double.NaN;
 
-  public TimeTrigger(Webcam webcam, IWebCamListener listener, PerfoScanFolder psf, double seconds) {
-    super(webcam, listener, psf);
-    this.seconds = seconds;
-  }
+	public TimeTrigger(Webcam webcam, IWebCamListener listener, PerfoScanFolder psf, double seconds,
+			ITriggerFeedback triggerFeedback) {
+		super(webcam, listener, psf, triggerFeedback);
+		this.seconds = seconds;
+	}
 
-  @Override
-  public void start() {
-    dispose();
-    e = Executors.newSingleThreadScheduledExecutor();
-    long time = (long) seconds * 1000;
-    assert time > 0;
-    e.scheduleWithFixedDelay(webCamPictureTaker, time, time, TimeUnit.MILLISECONDS);
-  }
+	@Override
+	public void start() {
+		dispose();
+		giveFeedback("New Digitalization");
+		e = Executors.newSingleThreadScheduledExecutor();
+		long time = (long) seconds * 1000;
+		assert time > 0;
+		e.scheduleWithFixedDelay(webCamPictureTaker, time, time, TimeUnit.MILLISECONDS);
+	}
 
-  @Override
-  public void stop() {
-    dispose();
-  }
+	@Override
+	public void stop() {
+		dispose();
+		giveFeedback("Stopped");
+	}
 
-  @Override
-  public void dispose() {
-    if (e != null) {
-      e.shutdownNow();
-    }
-    e = null;
-  }
+	@Override
+	public void dispose() {
+		if (e != null) {
+			e.shutdownNow();
+		}
+		e = null;
+	}
 }

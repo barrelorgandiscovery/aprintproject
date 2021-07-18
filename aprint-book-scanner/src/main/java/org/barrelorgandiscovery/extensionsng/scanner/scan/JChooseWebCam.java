@@ -166,7 +166,7 @@ public class JChooseWebCam extends JPanel implements Disposable {
 		WebCamPictureTake wt = new WebCamPictureTake(current, (i, t) -> {
 			logger.debug("image size :" + i.getWidth() + "x" + i.getHeight()); //$NON-NLS-1$ //$NON-NLS-2$
 			// thumbnail
-			final BufferedImage transformed = ImageTools.crop(300, 300, i);
+			final BufferedImage transformed = ImageTools.crop(800, 300, i);
 
 			SwingUtilities.invokeLater(() -> {
 				previewPanel.setIcon(new ImageIcon(transformed));

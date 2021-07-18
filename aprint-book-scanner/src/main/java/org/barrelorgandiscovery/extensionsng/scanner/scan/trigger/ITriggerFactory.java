@@ -15,5 +15,6 @@ public interface ITriggerFactory {
 	 * @return
 	 * @throws Exception
 	 */
-	public Trigger create(Webcam webcam, IWebCamListener listener, PerfoScanFolder psf) throws Exception;
+	public Trigger create(Webcam webcam, IWebCamListener listener, PerfoScanFolder psf,
+			ITriggerFeedback triggerFeedback) throws Exception;
 }
