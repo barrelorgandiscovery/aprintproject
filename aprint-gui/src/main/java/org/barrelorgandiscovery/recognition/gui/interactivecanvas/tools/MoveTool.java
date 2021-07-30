@@ -70,8 +70,6 @@ public class MoveTool extends Tool {
 
 	}
 
-	
-
 	private class SnapState extends State {
 
 		private SnapSelectBehaviour s;
@@ -141,7 +139,6 @@ public class MoveTool extends Tool {
 					}
 				}
 
-
 			} catch (Exception ex) {
 				logger.error("error in mouseMoved " + ex.getMessage(), ex);
 			}
@@ -164,7 +161,7 @@ public class MoveTool extends Tool {
 			try {
 				// move selection
 				// show move
-				
+
 				Set<Double> currentSelection = new HashSet(shapeLayer[shapeLayerIndex].getGraphics());
 
 				Point2D currentPos = display.getOriginPosition(e.getX(), e.getY());
@@ -255,13 +252,43 @@ public class MoveTool extends Tool {
 		super.keyPressed(e);
 
 		for (int i = 0; i < shapeLayer.length; i++) {
-			if (shapeLayer[i] != null && shapeLayer[i].getSelected() != null && e.getKeyCode() == KeyEvent.VK_DELETE) {
-				for (Rectangle2D.Double s : shapeLayer[i].getSelected()) {
-					shapeLayer[i].remove(s);
-				}
+			Set<Double> selected = shapeLayer[i].getSelected();
+			if (shapeLayer[i] != null && selected != null) {
+				if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+					for (Rectangle2D.Double s : selected) {
+						shapeLayer[i].remove(s);
+					}
 
-				shapeLayer[i].setSelected(null);
+					shapeLayer[i].setSelected(null);
+				} else {
+					// move by key
+						
 
+					      double xadder = 0.0;
+					      double yadder = 0.0;
+
+					      if (e.getKeyCode() == KeyEvent.VK_UP) {
+					        yadder -= 1.0;
+					      } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+					        yadder += 1.0;
+					      } else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+					        xadder -= 1.0;
+					      } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+					        xadder += 1.0;
+					      }
+						
+					      double fxadder = xadder;
+					      double fyadder = yadder;
+
+					      // move shapes
+					      selected.forEach( (r) -> {
+					    	  r.x += fxadder;
+					    	  r.y += fyadder; 
+					      });
+						
+						
+					
+				} // else
 			}
 		}
 		display.repaint();
@@ -285,9 +312,9 @@ public class MoveTool extends Tool {
 		sl.add(new Rectangle2D.Double(10, 10, 10, 10));
 		sl.add(new Rectangle2D.Double(100, 10, 10, 10));
 		disp.addLayer(sl);
-		
+
 		JShapeLayer<Rectangle2D.Double>[] arrayOfShapeLayer = new JShapeLayer[] { sl };
-		
+
 		disp.setCurrentTool(new MoveTool(disp, arrayOfShapeLayer));
 
 		f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

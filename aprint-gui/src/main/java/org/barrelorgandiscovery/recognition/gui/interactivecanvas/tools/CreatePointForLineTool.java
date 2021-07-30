@@ -134,7 +134,7 @@ public class CreatePointForLineTool extends Tool {
 		private SnapSelectBehaviour s;
 
 		public CreateAndSnapState() {
-			this.s = new SnapSelectBehaviour(new JShapeLayer[]{shapeLayer});
+			this.s = new SnapSelectBehaviour(new JShapeLayer[] { shapeLayer });
 		}
 
 		@Override
@@ -285,7 +285,7 @@ public class CreatePointForLineTool extends Tool {
 
 				// move selection
 				shapeLayer.setSelected(currentSelection);
-				
+
 				shapeLayer.signalLayerContentChanged();
 
 			} catch (Exception ex) {
@@ -364,20 +364,54 @@ public class CreatePointForLineTool extends Tool {
 		this.currentState.draw((Graphics2D) g);
 	}
 
+	
+	
 	@Override
 	public void keyPressed(KeyEvent e) {
 		super.keyPressed(e);
 
-		if (shapeLayer != null && shapeLayer.getSelected() != null && e.getKeyCode() == KeyEvent.VK_DELETE) {
-			for (Rectangle2D.Double s : shapeLayer.getSelected()) {
-				shapeLayer.remove(s);
-			}
+		Set<Double> selected = shapeLayer.getSelected();
+		if (shapeLayer != null && selected != null) {
+
+			if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+				for (Rectangle2D.Double s : selected) {
+					shapeLayer.remove(s);
+				}
+
+				shapeLayer.setSelected(null);
+
+				
+			} else {
 			
-			shapeLayer.setSelected(null);
+			// add move position
+			
 
-			display.repaint();
+
+			      double xadder = 0.0;
+			      double yadder = 0.0;
+
+			      if (e.getKeyCode() == KeyEvent.VK_UP) {
+			        yadder -= 1.0;
+			      } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+			        yadder += 1.0;
+			      } else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+			        xadder -= 1.0;
+			      } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+			        xadder += 1.0;
+			      }
+				
+			      double fxadder = xadder;
+			      double fyadder = yadder;
+
+			      // move shapes
+			      selected.forEach( (r) -> {
+			    	  r.x += fxadder;
+			    	  r.y += fyadder; 
+			      });
+				
+			}
 		}
-
+		display.repaint();
 		this.currentState.keyPressed(e);
 	}
 

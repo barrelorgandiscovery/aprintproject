@@ -110,13 +110,13 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 	 */
 	ImageAndHolesVisualizationLayer bookRegionDisplay = new ImageAndHolesVisualizationLayer();
 	ImageAndHolesVisualizationLayer holeRegionDisplay = new ImageAndHolesVisualizationLayer();
-	
+
 	/**
-	 * Book notes overlay (in yellow to have a better view of the holes (on top of other layers)
+	 * Book notes overlay (in yellow to have a better view of the holes (on top of
+	 * other layers)
 	 */
 	HolesDisplayOverlayLayer bookNotesOverlay = new HolesDisplayOverlayLayer();
-	
-	
+
 	WekaRecognitionStrategy wekaRecognitionStrategy;
 	IRecognitionStrategy thresholdStrategy = new IRecognitionStrategy() {
 		@Override
@@ -168,6 +168,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 					holes.add(n);
 					layer.setHoles(holes);
 					refreshTrainingLabels();
+					assert virtualBookComponent != null;
 					virtualBookComponent.repaint();
 				}
 			});
@@ -257,7 +258,9 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 				holeRegionDisplay.setHoles(null);
 				bookRegionDisplay.setHoles(null);
 
-				virtualBookComponent.repaint();
+				if (virtualBookComponent != null) {
+					virtualBookComponent.repaint();
+				}
 
 			} catch (Throwable t) {
 				logger.error(t.getMessage(), t);
@@ -303,6 +306,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 							logger.error("cannot display image " + f); //$NON-NLS-1$
 						}
 					}
+					ensureLayersVisible();
 				}
 
 			} catch (Exception ex) {
@@ -329,17 +333,20 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 	JRadioButton rbthrshold;
 	JRadioButton rbIA;
 
+	private boolean isInitializing = true;
+
 	protected void initComponents() throws Exception {
 
 		// init layers
 		bookRegionDisplay.setHolesColor(Color.red);
 		holeRegionDisplay.setHolesColor(Color.green);
 		recognitionDisplay.setHolesColor(Color.blue);
-		
+
 		// hole overlay
 		bookNotesOverlay.setHolesColor(Color.yellow);
 		bookNotesOverlay.setHolesStroke(new BasicStroke(1f));
 		bookNotesOverlay.setOpacity(1.0f);
+		bookNotesOverlay.setVisible(false);
 
 		InputStream resourceAsStream = getClass().getResourceAsStream("toolspanel.jfrm"); //$NON-NLS-1$
 		assert resourceAsStream != null;
@@ -393,6 +400,11 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 			}
 		};
 
+		
+		JLabel labelThreshold = fa.getLabel("lblThreshold");//$NON-NLS-1$
+		labelThreshold.setText("Choose grey threshold");
+		
+		
 		rbthrshold.addItemListener(rbitemListener);
 		rbIA.addItemListener(rbitemListener);
 
@@ -400,7 +412,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 
 		//
 		chkdisplaylayer = fa.getCheckBox("chkdisplaylayer"); //$NON-NLS-1$
-		chkdisplaylayer.getModel().setSelected(true);
+
 		chkdisplaylayer.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -410,10 +422,14 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 				recognitionDisplay.setVisible(selected);
 				backgroundBook.setVisible(selected);
 				bookNotesOverlay.setVisible(selected);
-				virtualBookComponent.repaint();
+				if (virtualBookComponent != null) {
+					virtualBookComponent.repaint();
+				}
+				chkdisplaylayer.repaint();
 			}
 		});
 		chkdisplaylayer.setText(Messages.getString("JRecognitionVirtualBookPanel.505")); //$NON-NLS-1$
+		chkdisplaylayer.getModel().setSelected(false);
 
 		holeCreationToolbtn = (JToggleButton) fa.getButton("toolcreatehole"); // $NON-NLS-1$ //$NON-NLS-1$
 		assert holeCreationToolbtn != null;
@@ -423,6 +439,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 					holeTool = new LayerHoleAdd(virtualBookComponent, holeRegionDisplay);
 				}
 				virtualBookComponent.setCurrentTool(holeTool);
+				ensureLayersVisible();
 			} catch (Exception ex) {
 				logger.error(ex.getMessage(), ex);
 			}
@@ -435,7 +452,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 
 		lblholecpt = fa.getLabel("lblholecpt");//$NON-NLS-1$
 
-		bookCreationToolbtn = (JToggleButton) fa.getButton("toolcreatebook");// $NON-NLS-1$ //$NON-NLS-1$
+		bookCreationToolbtn = (JToggleButton) fa.getButton("toolcreatebook");// $NON-NLS-1$ 
 		URL resource = JRecognitionVirtualBookPanel.class.getResource("pencil_red.png");// $NON-NLS-1$ //$NON-NLS-1$
 		BufferedImage pencilImage = ImageTools.loadImage(resource);
 		bookCreationToolbtn.setIcon(new ImageIcon(pencilImage));// $NON-NLS-1$
@@ -446,6 +463,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 				if (bookTool == null)
 					bookTool = new LayerHoleAdd(virtualBookComponent, bookRegionDisplay);
 				virtualBookComponent.setCurrentTool(bookTool);
+				ensureLayersVisible();
 			} catch (Exception ex) {
 				logger.error(ex.getMessage(), ex);
 			}
@@ -462,10 +480,13 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 			int transparencyValue = sldtransparencytraining.getValue();
 			float t = transparencyValue / 100.0f;
 
+			ensureLayersVisible();
 			// add transparency
 			recognitionDisplay.setOpacity(t);
 			backgroundBook.setOpacity(1.0f - t);
-			virtualBookComponent.repaint();
+			if (virtualBookComponent != null) {
+				virtualBookComponent.repaint();
+			}
 		});
 
 		sldResultTransparency = (JSlider) fa.getComponentByName("sliderTransparency"); //$NON-NLS-1$
@@ -479,7 +500,8 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 			// add transparency
 			if (virtualBookComponent != null) {
 				virtualBookComponent.setHoleTransparency(t);
-				virtualBookComponent.repaint();
+				ensureLayersVisible();
+				
 			}
 
 		});
@@ -490,7 +512,14 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		lblstoprecognition.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				closeBackGroundThread();
+				try {
+					closeBackGroundThread();
+				} catch (Throwable t) {
+					logger.debug("error in closing thread " + t.getMessage(), t);
+				}
+				if (virtualBookComponent != null) {
+					virtualBookComponent.repaint();
+				}
 			}
 
 		});
@@ -503,6 +532,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		btnlaunchrecognition.setToolTipText(Messages.getString("JRecognitionVirtualBookPanel.28")); //$NON-NLS-1$
 		btnlaunchrecognition.addActionListener((e) -> {
 			try {
+				ensureLayersVisible();
 				launchRecognition();
 			} catch (Exception ex) {
 				logger.error(ex.getMessage(), ex);
@@ -514,6 +544,9 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		btnloadbookimage.setText(Messages.getString("JRecognitionVirtualBookPanel.30")); //$NON-NLS-1$
 
 		btnloadbookimage.setAction(new SetBackGroundAction(Messages.getString("JRecognitionVirtualBookPanel.32"))); //$NON-NLS-1$
+		btnloadbookimage.addActionListener((e) -> {
+			ensureLayersVisible();
+		});
 
 		btncloseimage = (JButton) fa.getButton("btnremovelayer");//$NON-NLS-1$
 		btncloseimage.setAction(new RemoveImageAction(Messages.getString("JRecognitionVirtualBookPanel.509"))); //$NON-NLS-1$
@@ -534,6 +567,8 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		spnminwidth.setModel(new SpinnerNumberModel(3.0f, 0.0f, 10.0f, 0.1f));
 
 		btnvalidaterecognition.addActionListener((l) -> {
+
+			ensureLayersVisible();
 
 			logger.debug("get the hole copy"); //$NON-NLS-1$
 			ArrayList<Hole> recognizedHoles = recognitionDisplay.getHoles();
@@ -584,6 +619,19 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		setLayout(new BorderLayout());
 		add(fp, BorderLayout.CENTER);
 
+		// on event change, permit to not display the layers
+		isInitializing = false;
+
+	}
+
+	/**
+	 * ensure the layers are visible
+	 */
+	private void ensureLayersVisible() {
+		if (!isInitializing && virtualBookComponent != null) {
+			chkdisplaylayer.getModel().setSelected(true);
+			virtualBookComponent.repaint();
+		}
 	}
 
 	private void changeTrainingExampleLabel(int hole, int book) {
@@ -599,10 +647,11 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 	 * @param virtualBookComponent
 	 */
 	public void setVirtualBookComponent(JVirtualBookScrollableComponent virtualBookComponent) {
-		this.virtualBookComponent = (JEditableVirtualBookComponent) virtualBookComponent;
 
 		sldResultTransparency.setValue(1);
 		sldtransparencytraining.setValue(1);
+
+		this.virtualBookComponent = (JEditableVirtualBookComponent) virtualBookComponent;
 
 		this.virtualBookComponent.addCurrentToolChangedListener(new CurrentToolChanged() {
 			@Override
@@ -716,6 +765,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 			public <T> void tileProcessed(int index, T parameter) {
 
 				SwingUtilities.invokeLater(() -> {
+					assert virtualBookComponent != null;
 					virtualBookComponent.repaint();
 				});
 

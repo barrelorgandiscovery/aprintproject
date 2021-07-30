@@ -107,7 +107,7 @@ public class APrintGroovyInnerConsole extends APrintNGInternalFrame {
 	}
 
 	private void initComponents() throws Exception {
-
+	
 		this.consolePanel = new APrintGroovyConsolePanel();
 
 		JButton loadScript = new JButton(Messages.getString("APrintGroovyConsole.2")); //$NON-NLS-1$
@@ -159,7 +159,7 @@ public class APrintGroovyInnerConsole extends APrintNGInternalFrame {
 		});
 		save.setMnemonic('s');
 
-		run = new JButton(Messages.getString("APrintGroovyConsole.16"));
+		run = new JButton(Messages.getString("APrintGroovyConsole.16"));//$NON-NLS-1$
 		run.setMnemonic('r');
 		run.setIcon(new ImageIcon(getClass().getResource("misc.png")));//$NON-NLS-1$
 		run.addActionListener(new ActionListener() {
@@ -211,7 +211,7 @@ public class APrintGroovyInnerConsole extends APrintNGInternalFrame {
 								currentJob = null;
 
 							} catch (Throwable x) {
-								logger.error("Error in logging exception :" + x.getMessage(), x);
+								logger.error("Error in logging exception :" + x.getMessage(), x); //$NON-NLS-1$
 							}
 						}
 

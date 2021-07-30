@@ -530,7 +530,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 					// playsubsystem
 					// .removePlaySubSystemManagerListener(psslistener);
 
-					dispose();
+					// dispose();
 
 				} catch (Exception ex) {
 					logger.error(ex.getMessage(), ex);

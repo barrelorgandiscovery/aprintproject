@@ -296,7 +296,8 @@ public class MoveAndCreatePointForMultipleLinesTool extends Tool {
 
 	}
 
-	public MoveAndCreatePointForMultipleLinesTool(JDisplay display, JShapeLayer<Rectangle2D.Double>[] shapeLayer) throws Exception {
+	public MoveAndCreatePointForMultipleLinesTool(JDisplay display, JShapeLayer<Rectangle2D.Double>[] shapeLayer)
+			throws Exception {
 		this.display = display;
 		this.shapeLayer = shapeLayer;
 
@@ -356,13 +357,43 @@ public class MoveAndCreatePointForMultipleLinesTool extends Tool {
 		super.keyPressed(e);
 
 		for (int i = 0; i < shapeLayer.length; i++) {
-			if (shapeLayer[i] != null && shapeLayer[i].getSelected() != null && e.getKeyCode() == KeyEvent.VK_DELETE) {
-				for (Rectangle2D.Double s : shapeLayer[i].getSelected()) {
-					shapeLayer[i].remove(s);
+			Set<Double> selectedToMove = shapeLayer[i].getSelected();
+			if (shapeLayer[i] != null && selectedToMove != null) {
+
+				if (e.getKeyCode() == KeyEvent.VK_DELETE) {
+					for (Rectangle2D.Double s : selectedToMove) {
+						shapeLayer[i].remove(s);
+					}
+
+					shapeLayer[i].setSelected(null);
+
+				} else {
+				
+
+			      double xadder = 0.0;
+			      double yadder = 0.0;
+
+			      if (e.getKeyCode() == KeyEvent.VK_UP) {
+			        yadder -= 1.0;
+			      } else if (e.getKeyCode() == KeyEvent.VK_DOWN) {
+			        yadder += 1.0;
+			      } else if (e.getKeyCode() == KeyEvent.VK_LEFT) {
+			        xadder -= 1.0;
+			      } else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
+			        xadder += 1.0;
+			      }
+				
+			      double fxadder = xadder;
+			      double fyadder = yadder;
+
+			      // move shapes
+			      selectedToMove.forEach( (r) -> {
+			    	  r.x += fxadder;
+			    	  r.y += fyadder; 
+			      });
+				
 				}
-
-				shapeLayer[i].setSelected(null);
-
+				
 			}
 		}
 		display.repaint();

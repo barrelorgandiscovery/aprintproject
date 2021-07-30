@@ -67,8 +67,7 @@ public class APrintNGModelFrame extends APrintNGInternalFrame {
   /** init components */
   protected void initComponents() throws Exception {
 
-    //
-
+	  
     // add the toolbar manager
     MyDoggyToolWindowManager myDoggyToolWindowManager = new MyDoggyToolWindowManager();
     this.toolWindowManager = myDoggyToolWindowManager;

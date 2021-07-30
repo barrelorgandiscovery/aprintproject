@@ -34,6 +34,7 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.lf5.LF5Appender;
 import org.barrelorgandiscovery.bookimage.BookImage;
+import org.barrelorgandiscovery.bookimage.BookImageIO;
 import org.barrelorgandiscovery.bookimage.ZipBookImage;
 import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
@@ -158,6 +159,9 @@ public class JBookRecognition extends JPanel {
 
 				logger.debug("before step changed"); //$NON-NLS-1$
 				if (oldStep == stepChooseFilesAndInstrument) {
+
+					// end of file choosing wizard page
+
 					INumericImage numericImage = (INumericImage) wizard.getCurrentWizardState();
 					if (numericImage != null) {
 						File imageFile = numericImage.getImageFile();
@@ -166,6 +170,7 @@ public class JBookRecognition extends JPanel {
 						}
 
 						try {
+							logger.debug("reload the serialization file"); //$NON-NLS-1$
 							InputStream is = new FileInputStream(serializeFile);
 							try {
 								Serializable s = (Serializable) SerializeTools.load(is);
@@ -180,36 +185,57 @@ public class JBookRecognition extends JPanel {
 
 						if (!imageFile.getName().endsWith(BookImage.BOOKIMAGE_EXTENSION)) {
 
-							// this is an image file
-
 							try (InputStream fis = new FileInputStream(imageFile)) {
+
+								// read the image file size, without loading it,
+								// because input image may be very large
+
 								Dimension d = TiledImage.readImageSize(fis);
-								if (d.getHeight() > 800) {
-									int result = JOptionPane.showConfirmDialog(wizard,
-											"Height dimension is larger than 800 pixels \n "
-													+ "do you want to reduce the size to be more efficient ?",
-											"Reduce image size", JOptionPane.YES_NO_OPTION);
 
-									if (result == JOptionPane.YES_OPTION) {
+								// this is an image file
+								// if tiff, we have to convert it to book image
 
-										int newwidth = d.width * 800 / d.height;
+								if (imageFile.getName().endsWith(".tif") || imageFile.getName().endsWith(".tiff")) {
 
-										// move to jpeg ...
-										String rootName = imageFile.getName();
+									BufferedImage bi = ImageTools.loadImageWithIO(imageFile);
+									File destinationBookImage = new File(imageFile.getParentFile(),
+											imageFile.getName() + BookImage.BOOKIMAGE_EXTENSION);
+									BookImageIO.createBookImage(bi, destinationBookImage, true, null, null);
 
-										int extensionpoint = rootName.lastIndexOf('.');
-										if (extensionpoint != -1) {
-											rootName = rootName.substring(0, extensionpoint);
-											rootName += ".jpg"; //$NON-NLS-1$
+									// may rescale ?
+									stepChooseFilesAndInstrument.setImageFile(destinationBookImage);
+								} else {
+
+									if (d.getHeight() > 800) {
+										int result = JOptionPane.showConfirmDialog(wizard,
+												"Height dimension is larger than 800 pixels \n "
+														+ "do you want to reduce the size to be more efficient ?",
+												"Reduce image size", JOptionPane.YES_NO_OPTION);
+
+										if (result == JOptionPane.YES_OPTION) {
+
+											logger.debug("rescale the image"); //$NON-NLS-1$
+											
+											int newwidth = d.width * 800 / d.height;
+
+											// move to jpeg ...
+											String rootName = imageFile.getName();
+
+											int extensionpoint = rootName.lastIndexOf('.');
+											if (extensionpoint != -1) {
+												rootName = rootName.substring(0, extensionpoint);
+												rootName += ".jpg"; //$NON-NLS-1$
+											}
+
+											File newFileName = new File(imageFile.getParentFile(),
+													"rescaled_" + rootName);//$NON-NLS-1$
+
+											rescaleImageFile(imageFile, newwidth, newFileName);
+											stepChooseFilesAndInstrument.setImageFile(newFileName);
+											logger.debug("image resized"); //$NON-NLS-1$
 										}
 
-										File newFileName = new File(imageFile.getParentFile(), "rescaled_" + rootName);//$NON-NLS-1$
-
-										rescaleImageFile(imageFile, newwidth, newFileName);
-										stepChooseFilesAndInstrument.setImageFile(newFileName);
-										logger.debug("image resized"); //$NON-NLS-1$
 									}
-
 								}
 							}
 						} else {
@@ -221,8 +247,7 @@ public class JBookRecognition extends JPanel {
 				return true;
 			}
 
-			private void rescaleImageFile(File imageFile, int newwidth, File newFileName)
-					throws Exception {
+			private void rescaleImageFile(File imageFile, int newwidth, File newFileName) throws Exception {
 				Image loadImage = Toolkit.getDefaultToolkit().createImage(imageFile.toURL()).getScaledInstance(newwidth,
 						PREFERRED_COMPUTED_HEIGHT, 0);
 				// load image
@@ -241,7 +266,7 @@ public class JBookRecognition extends JPanel {
 
 				OutputStream outStream = new FileOutputStream(newFileName);
 				try {
-					ImageTools.saveJpeg(newImage, outStream); //$NON-NLS-1$
+					ImageTools.saveJpeg(newImage, outStream); // $NON-NLS-1$
 				} finally {
 					outStream.close();
 				}
@@ -260,14 +285,8 @@ public class JBookRecognition extends JPanel {
 		steps.add(stepChooseFilesAndInstrument);
 		stepChooseFilesAndInstrument.setDetails(Messages.getString("JDiskRecognition.0")); //$NON-NLS-1$
 
-//		chooseModelStep = new StepModelChooseChoice(STEP_CHOOSE_MODEL, stepChooseFilesAndInstrument);
-//		steps.add(chooseModelStep);
-
 		stepEdges = new StepChooseEdges(STEP_EDGES_RECOGNITION, stepChooseFilesAndInstrument, repository);
 		steps.add(stepEdges);
-
-//		stepEdit = new StepViewAndEditBook(STEP_VIEW_AND_EDIT, stepEdges, repository, waitFrame, services);
-//		steps.add(stepEdit);
 
 		// create wizard
 		wizard = new Wizard(steps, null);
@@ -298,7 +317,7 @@ public class JBookRecognition extends JPanel {
 					}
 
 					// view the renormalized model
-					tiView.setCurrentImageFamilyDisplay("renormed");
+					tiView.setCurrentImageFamilyDisplay("renormed"); //$NON-NLS-1$
 
 					// adjust virtualbook
 					VirtualBook vb = new VirtualBook(ins.getScale());
@@ -314,12 +333,13 @@ public class JBookRecognition extends JPanel {
 					JVirtualBookScrollableComponent pianoRoll = i.getPianoRoll();
 
 					processEdges.processImageEdges(origin, edgesState, vb.getScale(), tiView);
-					
-					IRecognitionToolWindowCommands[] extensionPointRecognition = i.getExtensionPoints(IRecognitionToolWindowCommands.class);
+
+					IRecognitionToolWindowCommands[] extensionPointRecognition = i
+							.getExtensionPoints(IRecognitionToolWindowCommands.class);
 					if (extensionPointRecognition == null || extensionPointRecognition.length != 1) {
-						throw new Exception("no toolwindoww found");
+						throw new Exception("no toolwindoww found"); //$NON-NLS-1$
 					}
-					
+
 					extensionPointRecognition[0].setTiledImage(tiView);
 
 					// JMessageBox.showMessage(waitFrame, "the book is ready to play and edit");
@@ -346,7 +366,7 @@ public class JBookRecognition extends JPanel {
 
 					BasicConfigurator.configure(new LF5Appender());
 
-					APrintProperties aPrintProperties = new APrintProperties("aprintstudio", false);
+					APrintProperties aPrintProperties = new APrintProperties("aprintstudio", false); //$NON-NLS-1$
 					System.out.println(aPrintProperties.getAprintFolder());
 					Repository2 rep = Repository2Factory.create(new Properties(), aPrintProperties);
 
@@ -355,7 +375,7 @@ public class JBookRecognition extends JPanel {
 					f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 					// for testing it is useful
-					FilePrefsStorage prefs = new FilePrefsStorage(new File("c:\\temp\\prefsTest.properties"));
+					FilePrefsStorage prefs = new FilePrefsStorage(new File("c:\\temp\\prefsTest.properties")); //$NON-NLS-1$
 					prefs.load();
 
 					JBookRecognition dr = new JBookRecognition(rep, prefs, null, null);
