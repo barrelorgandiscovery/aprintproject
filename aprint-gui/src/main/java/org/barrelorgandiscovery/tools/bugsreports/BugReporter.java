@@ -98,7 +98,7 @@ public class BugReporter {
 						zipos.closeEntry();
 
 						zipos.putNextEntry(new ZipEntry("version"));
-						StreamsTools.copyStream(APrintNG.class.getClassLoader().getResourceAsStream("version.properties"),
+						StreamsTools.copyStream(APrintNG.class.getClassLoader().getResourceAsStream("aprintversion.properties"),
 								zipos);
 						zipos.closeEntry();
 

@@ -4,7 +4,6 @@ import java.awt.Dimension;
 import java.io.File;
 import java.util.Locale;
 
-import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;

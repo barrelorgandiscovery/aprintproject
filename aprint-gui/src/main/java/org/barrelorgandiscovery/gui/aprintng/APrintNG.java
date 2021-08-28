@@ -1445,7 +1445,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		Properties prop = new Properties();
 
 		try {
-			prop.load(this.getClass().getClassLoader().getResourceAsStream("version.properties")); //$NON-NLS-1$
+			prop.load(this.getClass().getClassLoader().getResourceAsStream("aprintversion.properties")); //$NON-NLS-1$
 		} catch (Exception ex) {
 			return Messages.getString("APrint.115"); //$NON-NLS-1$
 		}

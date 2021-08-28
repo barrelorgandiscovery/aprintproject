@@ -82,7 +82,11 @@ public class ZipBookImage extends BookImage implements Disposable {
 		if (istream == null) {
 			return null;
 		}
+		
+		
+		
 		BufferedImage b = ImageIO.read(istream);
+		
 		lruCache.set((Integer) imageNumber, new WeakReference<BufferedImage>(b));
 		return b;
 	}

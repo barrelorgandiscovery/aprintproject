@@ -108,11 +108,11 @@ task buildSpecJar() {
 
 task changeVersion() { 
 
-	inputs.files(file("src/main/resources/version.properties"))
-	outputs.files(file("src/main/resources/version.properties"))
+	inputs.files(file("src/main/resources/aprintversion.properties"))
+	outputs.files(file("src/main/resources/aprintversion.properties"))
 	doLast {
 		def props = new Properties()
-		def f = file("src/main/resources/version.properties")
+		def f = file("src/main/resources/aprintversion.properties")
 		assert f.exists()
 		f.withInputStream { props.load(it) }
 		def storedVersion = props.getProperty("version")

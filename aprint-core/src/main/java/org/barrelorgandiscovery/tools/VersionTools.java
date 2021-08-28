@@ -8,7 +8,7 @@ public class VersionTools {
 	public static String getVersion() throws Exception {
 		
 		URL url = VersionTools.class.getClassLoader().getResource(
-				"version.properties");
+				"aprintversion.properties");
 
 		if (url == null)
 			return null;
