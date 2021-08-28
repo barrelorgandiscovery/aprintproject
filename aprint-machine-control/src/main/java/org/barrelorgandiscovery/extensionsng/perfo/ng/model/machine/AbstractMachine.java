@@ -1,4 +1,4 @@
-package org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine;
+	package org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine;
 
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.gcode.GCodeCompiler;
 

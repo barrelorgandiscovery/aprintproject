@@ -40,6 +40,7 @@ public class APrintApplicationBootStrap {
     // setQuaquaLnf();
 
     Properties sysprop = System.getProperties();
+    sysprop.store(System.out, "");
 
     Logger.getRootLogger().setLevel(Level.DEBUG);
 
