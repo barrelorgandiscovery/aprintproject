@@ -165,8 +165,25 @@ project(':bundle') {
         workingDir = 'offlineinstall-studio'
     }
 
+
+    // create installer
+    task createBundlesSimple(type: Exec, dependsOn: [copyOutputJars,copyExtensionJars] ) {
+        commandLine nsis_home + '\\makensis.exe',
+           "${project.projectDir}/offlineinstall-studio/aprint_studio_simple.nsi"
+        workingDir = 'offlineinstall-studio'
+    }
+
     // create x64 installer
     task createInstaller(dependsOn: ['createBundles']) { 
+        doLast {
+            def f = file('offlineinstall-studio/APrintStudioInstall.exe')
+            assert f.exists()
+            assert f.renameTo(new File('build_file_x64_simple_APrintStudioInstall_' + rootProject.ext.currentVersion + ".exe"))
+        }
+    }
+
+    // create x64 installer simple
+    task createInstallerSimple(dependsOn: ['createBundlesSimple']) { 
         doLast {
             def f = file('offlineinstall-studio/APrintStudioInstall.exe')
             assert f.exists()
@@ -181,12 +198,30 @@ project(':bundle') {
         workingDir = 'offlineinstall-studio'
     }
 
+
+    // create installer simple
+    task createBundles32simple(type: Exec, dependsOn: [copyOutputJars,copyExtensionJars] ) {
+        commandLine nsis_home + '\\makensis.exe',
+           "${project.projectDir}/offlineinstall-studio/aprint_studio_32_simple.nsi"
+        workingDir = 'offlineinstall-studio'
+    }
+
     // create x86 installer
     task createInstaller32(dependsOn: ['createBundles32']) { 
         doLast {
             def f = file('offlineinstall-studio/APrintStudioInstall32.exe')
             assert f.exists()
             assert f.renameTo(new File('build_file_x32_APrintStudioInstall_' + rootProject.ext.currentVersion + ".exe"))
+        }
+    }
+
+
+    // create simple x86 installer
+    task createInstallerSimple32(dependsOn: ['createBundles32simple']) { 
+        doLast {
+            def f = file('offlineinstall-studio/APrintStudioInstall32.exe')
+            assert f.exists()
+            assert f.renameTo(new File('build_file_x32_simple_APrintStudioInstall_' + rootProject.ext.currentVersion + ".exe"))
         }
     }
 
@@ -199,7 +234,7 @@ project(':bundle') {
         }
     }
 
-    task createAllInstallers(dependsOn: ['createInstaller', 'createInstaller32', 'createMacOsAndLinuxBundle']) {
+    task createAllInstallers(dependsOn: ['createInstallerSimple', 'createInstaller', 'createInstaller32','createInstallerSimple32','createMacOsAndLinuxBundle']) {
 
     }
 }
