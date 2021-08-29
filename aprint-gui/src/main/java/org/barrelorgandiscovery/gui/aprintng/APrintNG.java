@@ -1602,13 +1602,25 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 						new VFSFileNameExtensionFilter("Virtual book File", new String[] { APrintConstants.BOOK })); //$NON-NLS-1$
 
 				choose.setFileSelectionMode(APrintFileChooser.FILES_ONLY);
+				
+				File lastFileProperty = aprintproperties.getFilePrefsStorage()
+						.getFileProperty("lastOpenedBookFileLocation", null); //$NON-NLS-1$
 
+				if (lastFileProperty != null) {
+						choose.setSelectedFile(lastFileProperty);
+				}
+				
+				
 				if (choose.showOpenDialog(this) == APrintFileChooser.APPROVE_OPTION) {
 					// R�cup�ration du nom de fichier
 					final AbstractFileObject result = choose.getSelectedFile();
 
 					if (result.exists()) {
 						try {
+							
+							saveLastOpenBookLocationFile(result);
+							
+							
 							loadBookInNewFrame(result);
 						} catch (Exception ex) {
 							logger.error("error in loading book in new Frame :" + ex.getMessage(), ex); //$NON-NLS-1$
@@ -1665,6 +1677,16 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 
 			BugReporter.sendBugReport();
 			JMessageBox.showMessage(getOwnerForDialog(), Messages.getString("APrint.42") + ex.getMessage()); //$NON-NLS-1$
+		}
+	}
+
+	public void saveLastOpenBookLocationFile(final AbstractFileObject result) {
+		try {
+			File convertToFile = VFSTools.convertToFile(result);
+			aprintproperties.getFilePrefsStorage()
+			.setFileProperty("lastOpenedBookFileLocation", convertToFile); //$NON-NLS-1$
+			aprintproperties.getFilePrefsStorage().save();
+		} catch(Throwable t) {
 		}
 	}
 
@@ -2416,6 +2438,9 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 				public Boolean call() throws Exception {
 
 					loadBookInNewFrame(file);
+					
+					saveLastOpenBookLocationFile(VFSTools.fromRegularFile(file));
+					
 
 					return null;
 				}

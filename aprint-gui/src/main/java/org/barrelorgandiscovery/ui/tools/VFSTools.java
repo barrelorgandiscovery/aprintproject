@@ -9,6 +9,11 @@ import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.VFS;
 import org.apache.commons.vfs2.provider.AbstractFileObject;
 
+/**
+ * Tools for interacting between VFS and Java file API
+ * @author pfreydiere
+ *
+ */
 public class VFSTools {
 	
 	
@@ -24,12 +29,14 @@ public class VFSTools {
 	
 
 	public static AbstractFileObject fromRegularFile(File file) throws Exception {
+		
 		FileObject f = VFS.getManager().resolveFile(file.toURL().toString());
 		if (!f.exists()) {
 			throw new Exception("file " + file + " does not exists");
 		}
 		assert f.isAttached();
 		return (AbstractFileObject)f;
+		
 	}
 	
 	public static File convertToFile(FileObject fo) throws Exception {

@@ -630,6 +630,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 	private void ensureLayersVisible() {
 		if (!isInitializing && virtualBookComponent != null) {
 			chkdisplaylayer.getModel().setSelected(true);
+			bookNotesOverlay.setVisible(true);
 			virtualBookComponent.repaint();
 		}
 	}

@@ -105,17 +105,13 @@ public class APrintFileChooser {
 		}
 	}
 
-	public static AbstractFileObject convertToFileObject(File selectedFile) throws FileSystemException {
+	public static AbstractFileObject convertToFileObject(File selectedFile) throws Exception {
 		
 		if (selectedFile == null) {
 			return null;
 		}
 		
-		FileSystemManager fsManager = VFS.getManager();
-		AbstractFileObject fileObject = (AbstractFileObject) fsManager.resolveFile(selectedFile.getParentFile(),
-				selectedFile.getName());
-		
-		return fileObject;
+		return VFSTools.fromRegularFile(selectedFile);
 	}
 
 	public void setSelectedFile(AbstractFileObject selectedFile) {
