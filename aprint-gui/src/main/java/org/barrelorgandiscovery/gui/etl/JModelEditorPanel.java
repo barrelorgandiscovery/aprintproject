@@ -195,6 +195,7 @@ public class JModelEditorPanel extends JPanel {
 		} catch (Exception ex) {
 			logger.error("error when loading graph model :" + ex.getMessage(), ex); //$NON-NLS-1$
 			// ex.printStackTrace(System.err);
+			JMessageBox.showError(this, ex);
 			BugReporter.sendBugReport();
 		}
 	}
@@ -278,6 +279,8 @@ public class JModelEditorPanel extends JPanel {
 			logger.error("error when loading graph model :" + ex.getMessage(), ex); //$NON-NLS-1$
 			// ex.printStackTrace(System.err);
 			BugReporter.sendBugReport();
+			JMessageBox.showError(this, ex);
+			
 		}
 	}
 

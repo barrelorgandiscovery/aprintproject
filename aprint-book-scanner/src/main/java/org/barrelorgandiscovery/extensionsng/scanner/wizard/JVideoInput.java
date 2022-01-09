@@ -76,7 +76,7 @@ public class JVideoInput extends BasePanelStep {
 		fileChooser.addActionListener( (a) -> {
 			try {
 				
-				FileObject f = fileChooser.getSelectedFile();
+				FileObject f = fileChooser.getSelectedFileObject();
 				File file = VFSTools.convertToFile(f);
 
 				this.selectedVideoFile = file;

@@ -164,7 +164,7 @@ public class ModelRunner implements IExecute {
 			while (!isFinished()) {
 				executeCurrentStepAndMoveToNext();
 			}
-
+			logger.debug("end of all execution");
 		} finally {
 			if (modelExecutionListener != null) {
 				modelExecutionListener.endExecuteModel();

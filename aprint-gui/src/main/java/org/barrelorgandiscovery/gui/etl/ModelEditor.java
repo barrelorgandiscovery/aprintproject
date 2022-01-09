@@ -1051,6 +1051,25 @@ public class ModelEditor extends JPanel {
 			modelExecutionListener.executed(modelRunner);
 		}
 	}
+	
+	/**
+	 * Execute the current model
+	 *
+	 * @throws Exception if problem occur
+	 */
+	public Map<String, Object> executeSynchronous(Map<String, Object> terminalInputValues) throws Exception {
+		
+		logger.debug("hydrate context variables"); //$NON-NLS-1$
+
+		logger.debug("execute the current model"); //$NON-NLS-1$
+
+		ModelRunner modelRunner = createCurrentModelRunner();
+		modelRunner.getModel().hydrateContext(contextAmbiantObjects);
+		logger.debug("hydrate context variables"); //$NON-NLS-1$
+
+		modelRunner.getModel().hydrateContext(contextAmbiantObjects);
+		return modelRunner.execute(terminalInputValues, null); // no console
+	}
 
 	/**
 	 * Handling event on double click on element on the graph
