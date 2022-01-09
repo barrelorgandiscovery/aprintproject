@@ -2,6 +2,7 @@ package org.barrelorgandiscovery.ui.tools;
 
 import java.io.File;
 import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.vfs2.FileName;
@@ -21,20 +22,21 @@ import org.apache.commons.vfs2.provider.webdav4s.Webdav4sFileProvider;
  */
 public class VFSTools {
 
-	static {
-		// add webdav tools
-		try {
-			FileSystemManager fsManager = VFS.getManager();
-			System.out.println(fsManager);
-			StandardFileSystemManager sm = (StandardFileSystemManager) fsManager;
-			sm.addProvider("webdav", new Webdav4sFileProvider());
-			
-			
-			//FtpFileSystemConfigBuilder instance = FtpFileSystemConfigBuilder.getInstance();// .setPassiveMode(opts, true);
-		
-		} catch (Exception ex) {
-			ex.printStackTrace();
+
+	static StandardFileSystemManager FSMANAGER = null;
+
+	public static StandardFileSystemManager getManager() throws Exception {
+		if (FSMANAGER != null) {
+			return FSMANAGER;
 		}
+		StandardFileSystemManager fsManager = new StandardFileSystemManager();
+		URL providerResourceUrl = VFSTools.class.getClassLoader().getResource("providers.xml");
+		fsManager.setConfiguration(providerResourceUrl);
+		
+		fsManager.init();
+		FSMANAGER = fsManager;
+		VFS.setManager(FSMANAGER);
+		return FSMANAGER;
 	}
 
 	public static String decodeURIEncoding(String encodedURL) throws Exception {
@@ -49,7 +51,7 @@ public class VFSTools {
 
 	public static AbstractFileObject fromRegularFile(File file) throws Exception {
 
-		FileObject f = VFS.getManager().resolveFile(file.toURL().toString());
+		FileObject f = getManager().resolveFile(file.toURL().toString());
 		if (!f.exists()) {
 			throw new Exception("file " + file + " does not exists");
 		}

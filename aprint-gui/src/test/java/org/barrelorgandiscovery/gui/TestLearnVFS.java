@@ -32,13 +32,8 @@ public class TestLearnVFS {
 	@Test
 	public void testAccessWebDav() throws Exception {
 		
-		
-		FileSystemManager fsManager = VFS.getManager();
-		System.out.println(fsManager);
-		StandardFileSystemManager sm = (StandardFileSystemManager)fsManager;
-		sm.addProvider("webdav", new Webdav4sFileProvider());
-			
-		FileObject fo = VFS.getManager().resolveFile("webdav://localhost/test/testdir");
+				
+		FileObject fo = VFSTools.getManager().resolveFile("webdav://localhost/test/testdir");
 		//FileObject fo = VFS.getManager().resolveFile("https://www.barrel-organ-discovery.org/builds/2015/");
 		
 		
@@ -55,7 +50,7 @@ public class TestLearnVFS {
 	@Test
 	public void testFtp() throws Exception {
 		
-		FileObject fo = VFS.getManager().resolveFile("ftp://fstorage.frett27.net");
+		FileObject fo = VFSTools.getManager().resolveFile("ftp://fstorage.frett27.net");
 		
 		System.out.println(fo);
 		assert fo.exists();
@@ -70,7 +65,7 @@ public class TestLearnVFS {
 	@Test
 	public void testsFtp() throws Exception {
 		
-		FileObject fo = VFS.getManager().resolveFile("sftp://fstorage.frett27.net");
+		FileObject fo = VFSTools.getManager().resolveFile("sftp://fstorage.frett27.net");
 		
 		System.out.println(fo);
 		assert fo.exists();

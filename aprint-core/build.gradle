@@ -38,8 +38,13 @@ dependencies {
 	
 	// https://mvnrepository.com/artifact/org.apache.commons/commons-vfs2
     compile group: 'org.apache.commons', name: 'commons-vfs2', version: '2.9.0'
+    compile group: 'org.apache.commons', name: 'commons-vfs2', version: '2.9.0'
      compile group: 'org.apache.commons', name: 'commons-vfs2-jackrabbit2', version: '2.9.0'
     compile group: 'org.apache.commons', name: 'commons-vfs2-jackrabbit1', version: '2.9.0'
+   // https://mvnrepository.com/artifact/commons-net/commons-net
+compile group: 'commons-net', name: 'commons-net', version: '3.8.0'
+   // https://mvnrepository.com/artifact/org.apache.jackrabbit/jackrabbit-webdav
+compile group: 'org.apache.jackrabbit', name: 'jackrabbit-webdav', version: '2.21.9'
    
      
 	

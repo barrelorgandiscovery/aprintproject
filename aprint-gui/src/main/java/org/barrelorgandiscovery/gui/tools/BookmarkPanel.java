@@ -214,7 +214,7 @@ public class BookmarkPanel extends JComponent implements ActionListener {
 						if ((fo != null) && !fo.exists()) {
 							fo = null;
 						}
-					} catch (Exception exc) {
+					} catch (Throwable exc) {
 						fo = null;
 						failureMessage = exc.getMessage();
 					}

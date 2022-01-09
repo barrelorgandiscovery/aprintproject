@@ -207,6 +207,8 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 	public APrintNG(APrintProperties properties) throws Exception, RepositoryException {
 		super(properties.getFilePrefsStorage());
 
+		VFSTools.getManager();
+		
 		checkWebVersion();
 
 		System.out.println("ClassLoader :" + getClass().getClassLoader());

@@ -7,6 +7,7 @@ import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
+import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.ui.tools.VFSTools;
@@ -76,7 +77,7 @@ public class APrintFileChooser {
 	 */
 	public static final int ERROR_OPTION = -1;
 
-	VFSJFileChooser fileChooser = new VFSJFileChooser();
+	VFSJFileChooser fileChooser = null;
 
 	public APrintFileChooser() {
 		this.fileChooser = new VFSJFileChooser();
