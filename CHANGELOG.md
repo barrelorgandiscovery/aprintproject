@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## APrint 2022-01
+
+* bug Fixes
+
+
 ## APrint 2020-Q2
 
 Functionnalities :
