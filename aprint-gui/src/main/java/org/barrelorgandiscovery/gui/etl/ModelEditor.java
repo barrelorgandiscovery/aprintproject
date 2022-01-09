@@ -70,7 +70,6 @@ import org.barrelorgandiscovery.model.steps.scripts.GroovyScriptModelStep;
 import org.barrelorgandiscovery.model.type.JavaType;
 import org.barrelorgandiscovery.repository.Repository2;
 import org.barrelorgandiscovery.repository.Repository2Factory;
-import org.barrelorgandiscovery.tools.BeanAsk;
 import org.barrelorgandiscovery.tools.SwingUtils;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 import org.barrelorgandiscovery.virtualbook.transformation.importer.MidiEventGroup;
@@ -100,6 +99,12 @@ import com.mxgraph.util.mxUtils;
 import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxMultiplicity;
 
+/**
+ * Model editor component 
+ * 
+ * @author pfreydiere
+ *
+ */
 public class ModelEditor extends JPanel {
 
 	/**
@@ -153,12 +158,12 @@ public class ModelEditor extends JPanel {
 	 * async jobs handling
 	 */
 	private AsyncJobsManager asyncJobsManager;
-	
+
 	/**
 	 * owner frame for dialogs
 	 */
 	private Object owner;
-	
+
 	public void defineOwner(Object owner) {
 		this.owner = owner;
 	}
@@ -819,6 +824,7 @@ public class ModelEditor extends JPanel {
 
 	/**
 	 * load a graph from file
+	 * 
 	 * @param file
 	 * @throws Exception
 	 */
@@ -1051,24 +1057,84 @@ public class ModelEditor extends JPanel {
 			modelExecutionListener.executed(modelRunner);
 		}
 	}
-	
+
 	/**
-	 * Execute the current model
+	 * Execute the current model in the current thread, this permit to script mdel
+	 * editor launch This function return the terminals and result of execution, (if
+	 * any)
 	 *
 	 * @throws Exception if problem occur
 	 */
 	public Map<String, Object> executeSynchronous(Map<String, Object> terminalInputValues) throws Exception {
-		
-		logger.debug("hydrate context variables"); //$NON-NLS-1$
 
 		logger.debug("execute the current model"); //$NON-NLS-1$
 
 		ModelRunner modelRunner = createCurrentModelRunner();
-		modelRunner.getModel().hydrateContext(contextAmbiantObjects);
+		modelRunner.setModelExecutionListener(new IModelExecutionListener() {
+
+			long start;
+
+			@Override
+			public void stepExecuting(ModelStep step) {
+				try {
+					if (console != null) {
+
+						console.appendOutputNl(Messages.getString("ModelEditor.64") + step.getLabel(), null); //$NON-NLS-1$
+
+					}
+				} catch (Exception ex) {
+					logger.error(ex);
+				}
+			}
+
+			@Override
+			public void stepExecuted(ModelStep step) {
+				try {
+					if (console != null) {
+						console.appendOutputNl(Messages.getString("ModelEditor.65") + step.getLabel() //$NON-NLS-1$
+								+ Messages.getString("ModelEditor.66"), null); //$NON-NLS-1$
+
+					}
+				} catch (Exception ex) {
+					logger.error(ex);
+				}
+			}
+
+			@Override
+			public void startExecuteModel() {
+				try {
+					start = System.currentTimeMillis();
+					if (console != null) {
+						console.appendOutputNl(Messages.getString("ModelEditor.67"), null); //$NON-NLS-1$
+
+					}
+				} catch (Exception ex) {
+					logger.error(ex);
+				}
+			}
+
+			@Override
+			public void endExecuteModel() {
+				try {
+					if (console != null) {
+						console.appendOutputNl(Messages.getString("ModelEditor.68"), null); //$NON-NLS-1$
+						console.appendOutputNl(String.format(Messages.getString("ModelEditor.69"), //$NON-NLS-1$
+								(System.currentTimeMillis() - start) / 1000.0), null);
+					}
+				} catch (Exception ex) {
+					logger.error(ex);
+				}
+			}
+		});
 		logger.debug("hydrate context variables"); //$NON-NLS-1$
 
 		modelRunner.getModel().hydrateContext(contextAmbiantObjects);
-		return modelRunner.execute(terminalInputValues, null); // no console
+		logger.debug("execute"); //$NON-NLS-1$
+
+		Map<String, Object> r = modelRunner.execute(terminalInputValues, null); // no console
+
+		logger.debug("execution ended");
+		return r;
 	}
 
 	/**
@@ -1105,10 +1171,7 @@ public class ModelEditor extends JPanel {
 
 		final JConfigurePanel panel = GuiConfigureModelStepRegistry.getUIToConfigureStep(ms, env);
 
-		JDialog d = new JDialog((Frame)owner);
-		
-//		final BeanAsk parameterDialog = new BeanAsk((Frame) null, Messages.getString("ModelEditor.74") + ms.getLabel(), //$NON-NLS-1$
-//				true);
+		JDialog d = new JDialog((Frame) owner);
 
 		Container contentPane = d.getContentPane();
 		contentPane.setLayout(new BorderLayout());
@@ -1171,11 +1234,11 @@ public class ModelEditor extends JPanel {
 
 		ModelRunner modelRunner = new ModelRunner(m);
 		this.currentModelRunner = modelRunner;
-		
+
 		if (modelRunner.getModel().schedule().size() == 0) {
 			console.appendOutput("No scheduled processor", null);
 		}
-		
+
 		return modelRunner;
 	}
 
@@ -1188,8 +1251,11 @@ public class ModelEditor extends JPanel {
 	protected void invalidateCurrentModelRunner() {
 		currentModelRunner = null;
 	}
-	
-	
+
+	/**
+	 * is the current model runner, running ?
+	 * @return
+	 */
 	public boolean isRunning() {
 		if (currentModelRunner == null) {
 			return false;
@@ -1214,6 +1280,14 @@ public class ModelEditor extends JPanel {
 		};
 	}
 
+	/**
+	 * bind action to graph component source, using iconUrl
+	 *
+	 * @param name
+	 * @param action
+	 * @param iconUrl
+	 * @return
+	 */
 	public Action bind(String shortDescription, final Action action, Icon iconUrl) {
 		AbstractAction aa = new AbstractAction("", (iconUrl != null) ? iconUrl : null) { //$NON-NLS-1$
 			public void actionPerformed(ActionEvent e) {
