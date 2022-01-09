@@ -16,16 +16,22 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextPane;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.AttributeSet;
+import javax.swing.text.DefaultEditorKit;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
+import javax.swing.text.DefaultEditorKit.CopyAction;
+import javax.swing.text.DefaultEditorKit.CutAction;
+import javax.swing.text.DefaultEditorKit.PasteAction;
 
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.groovy.APrintGroovyShell;
@@ -90,6 +96,9 @@ public class APrintGroovyConsolePanel extends JPanel implements IScriptConsole,
 						toggleDirty();
 					}
 				});
+		
+		cte.getTextEditor().setComponentPopupMenu(createPopupMenu());
+		
 
 		binding = new Binding();
 		// binding for the output in the console ...
@@ -123,6 +132,7 @@ public class APrintGroovyConsolePanel extends JPanel implements IScriptConsole,
 		outputArea = new JTextPane();
 		JScrollPane sp = new JScrollPane(outputArea);
 		outputArea.setEditable(false);
+		outputArea.setComponentPopupMenu(createPopupMenu());
 
 		console = new ASyncConsoleOutput(outputArea,
 				new IScriptContentGetter() {
@@ -140,6 +150,27 @@ public class APrintGroovyConsolePanel extends JPanel implements IScriptConsole,
 		splitPane.setDividerLocation(200);
 
 	}
+	
+	/* Methode de construction du menu contextuel */
+	private JPopupMenu createPopupMenu() {
+		JPopupMenu popupMenu = new JPopupMenu();
+		
+		CopyAction actCopy = new DefaultEditorKit.CopyAction();
+		actCopy.putValue(Action.NAME, "Copy");
+		
+		CutAction actCut = new DefaultEditorKit.CutAction();
+		actCut.putValue(Action.NAME, "Cut");
+		
+		PasteAction actPaste = new DefaultEditorKit.PasteAction();
+		actPaste.putValue(Action.NAME, "Paste");
+		
+		popupMenu.add(actCopy);
+		popupMenu.add(actCut);
+		popupMenu.add(actPaste);
+
+		return popupMenu;
+	}
+
 
 	/**
 	 * Set script content

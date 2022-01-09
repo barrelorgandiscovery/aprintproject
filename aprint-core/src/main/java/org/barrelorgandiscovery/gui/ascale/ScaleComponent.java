@@ -158,22 +158,20 @@ public class ScaleComponent extends JComponent {
 	private int dpi = -1;
 
 	private Dimension preferredSize = null;
-	
+
 	private VirtualBookRendering rendering = null;
 
 	private boolean preferredViewedInverted = false;
 
 	private TexturePaint cartontrame = null;
-	
+
 	/**
 	 * Constructeur par défaut ...
 	 */
 	public ScaleComponent() {
 
-		renderHints = new RenderingHints(RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_ON);
-		renderHints.put(RenderingHints.KEY_RENDERING,
-				RenderingHints.VALUE_RENDER_QUALITY);
+		renderHints = new RenderingHints(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+		renderHints.put(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
 		addMouseListener(new MouseListener() {
 
@@ -225,16 +223,14 @@ public class ScaleComponent extends JComponent {
 				int x = e.getX();
 				int y = e.getY();
 
-				if (x > MmToPixel(largeur_gamme / 2)
-						&& x < MmToPixel(largeur_gamme)) {
+				if (x > MmToPixel(largeur_gamme / 2) && x < MmToPixel(largeur_gamme)) {
 
 					double mousey = pixelToMm(y);
 
 					double ref;
 
 					if (preferredViewedInverted) {
-						ref = -premierepiste + entrepiste / 2
-								+ (largeur_carton - mousey);
+						ref = -premierepiste + entrepiste / 2 + (largeur_carton - mousey);
 					} else {
 						ref = entrepiste / 2 - premierepiste + mousey;
 					}
@@ -260,8 +256,7 @@ public class ScaleComponent extends JComponent {
 					} else {
 						if (highligthed_track != evaluatedtrack) {
 							highligthed_track = evaluatedtrack;
-							fireHighlightTrackDef(notedefs
-									.get(highligthed_track));
+							fireHighlightTrackDef(notedefs.get(highligthed_track));
 							repaint();
 						}
 
@@ -341,8 +336,7 @@ public class ScaleComponent extends JComponent {
 				g2d.setPaint(cartontrame);
 			}
 
-			g.fillRect(0, 0, MmToPixel(largeur_gamme),
-					MmToPixel(largeur_carton));
+			g.fillRect(0, 0, MmToPixel(largeur_gamme), MmToPixel(largeur_carton));
 
 		} finally {
 			g2d.setPaint(lastpaint);
@@ -358,8 +352,7 @@ public class ScaleComponent extends JComponent {
 
 			g2d.setStroke(bs);
 
-			g.drawRect(0, 0, MmToPixel(largeur_gamme),
-					MmToPixel(largeur_carton));
+			g.drawRect(0, 0, MmToPixel(largeur_gamme), MmToPixel(largeur_carton));
 
 			int firsttrack = 0;
 
@@ -379,8 +372,7 @@ public class ScaleComponent extends JComponent {
 
 				double correctfontsize = (double) entrepistepixel / fontheight;
 
-				Font newfont = f.deriveFont(
-						(float) (f.getSize() * correctfontsize * 0.80))
+				Font newfont = f.deriveFont((float) (f.getSize() * correctfontsize * 0.80))
 						.deriveFont(Font.ITALIC + Font.BOLD);
 
 				g.setFont(newfont);
@@ -409,7 +401,7 @@ public class ScaleComponent extends JComponent {
 				drawReference(g);
 
 				// draw book moving direction
-				
+
 				drawDirection(g);
 
 				// Dessin des pistes des gammes
@@ -418,15 +410,13 @@ public class ScaleComponent extends JComponent {
 					int yscreen;
 
 					if (preferredViewedInverted) {
-						yscreen = convertCartonToScreenY(largeur_carton
-								- (1.0 * i * entrepiste + premierepiste - entrepiste / 2));
+						yscreen = convertCartonToScreenY(
+								largeur_carton - (1.0 * i * entrepiste + premierepiste - entrepiste / 2));
 					} else {
-						yscreen = convertCartonToScreenY(1.0 * i * entrepiste
-								+ premierepiste - entrepiste / 2);
+						yscreen = convertCartonToScreenY(1.0 * i * entrepiste + premierepiste - entrepiste / 2);
 					}
 
-					g.drawLine(MmToPixel(largeur_gamme / 2), yscreen,
-							MmToPixel(largeur_gamme), yscreen);
+					g.drawLine(MmToPixel(largeur_gamme / 2), yscreen, MmToPixel(largeur_gamme), yscreen);
 
 					// affichage de la définition de la piste ...
 
@@ -439,14 +429,13 @@ public class ScaleComponent extends JComponent {
 
 					if (preferredViewedInverted) {
 
-						ybasetexte = convertCartonToScreenY(largeur_carton
-								- ((double) i * entrepiste + premierepiste - entrepiste / 2 * 0.75));
+						ybasetexte = convertCartonToScreenY(
+								largeur_carton - ((double) i * entrepiste + premierepiste - entrepiste / 2 * 0.75));
 
 					} else {
 
-						ybasetexte = convertCartonToScreenY((double) i
-								* entrepiste + premierepiste + entrepiste / 2
-								* 0.75);
+						ybasetexte = convertCartonToScreenY(
+								(double) i * entrepiste + premierepiste + entrepiste / 2 * 0.75);
 					}
 
 					String libelle = "" + (i + 1) + " - "; //$NON-NLS-1$ //$NON-NLS-2$
@@ -454,8 +443,7 @@ public class ScaleComponent extends JComponent {
 					if (td != null)
 						libelle += getTrackLibelle(td);
 
-					g.drawString(libelle, MmToPixel(largeur_gamme / 2),
-							ybasetexte);
+					g.drawString(libelle, MmToPixel(largeur_gamme / 2), ybasetexte);
 
 				}
 
@@ -463,16 +451,14 @@ public class ScaleComponent extends JComponent {
 				int yscreen;
 				if (preferredViewedInverted) {
 
-					yscreen = convertCartonToScreenY(largeur_carton
-							- (1.0 * (lasttrack + 1) * entrepiste
-									+ premierepiste - entrepiste / 2));
+					yscreen = convertCartonToScreenY(
+							largeur_carton - (1.0 * (lasttrack + 1) * entrepiste + premierepiste - entrepiste / 2));
 				} else {
-					yscreen = convertCartonToScreenY(1.0 * (lasttrack + 1)
-							* entrepiste + premierepiste - entrepiste / 2);
+					yscreen = convertCartonToScreenY(
+							1.0 * (lasttrack + 1) * entrepiste + premierepiste - entrepiste / 2);
 				}
 
-				g.drawLine(MmToPixel(largeur_gamme / 2), yscreen,
-						MmToPixel(largeur_gamme), yscreen);
+				g.drawLine(MmToPixel(largeur_gamme / 2), yscreen, MmToPixel(largeur_gamme), yscreen);
 
 				// dessin du nom de la gamme ...
 
@@ -510,9 +496,7 @@ public class ScaleComponent extends JComponent {
 
 				String infosgamme = createInfoText();
 
-				Point2D.Float pen = new Point2D.Float(
-						MmToPixel(largeur_gamme / 25),
-						MmToPixel(largeur_gamme / 20));
+				Point2D.Float pen = new Point2D.Float(MmToPixel(largeur_gamme / 25), MmToPixel(largeur_gamme / 20));
 
 				String lines[] = infosgamme.split("\n"); //$NON-NLS-1$
 
@@ -527,24 +511,19 @@ public class ScaleComponent extends JComponent {
 
 					AttributedString as = new AttributedString(lines[i]);
 					// as.addAttribute(TextAttribute.SIZE, 24f);
-					as.addAttribute(TextAttribute.FONT,
-							Font.decode("Arial-BOLD-12")); //$NON-NLS-1$
+					as.addAttribute(TextAttribute.FONT, Font.decode("Arial-BOLD-12")); //$NON-NLS-1$
 
 					if (i == 0) {
-						as.addAttribute(TextAttribute.FONT,
-								Font.decode("Arial-BOLD-24")); //$NON-NLS-1$
-						as.addAttribute(TextAttribute.WEIGHT,
-								TextAttribute.WEIGHT_ULTRABOLD);
+						as.addAttribute(TextAttribute.FONT, Font.decode("Arial-BOLD-24")); //$NON-NLS-1$
+						as.addAttribute(TextAttribute.WEIGHT, TextAttribute.WEIGHT_ULTRABOLD);
 
 					} else {
 
-						as.addAttribute(TextAttribute.POSTURE,
-								TextAttribute.POSTURE_OBLIQUE);
+						as.addAttribute(TextAttribute.POSTURE, TextAttribute.POSTURE_OBLIQUE);
 					}
 
 					AttributedCharacterIterator it = as.getIterator();
-					LineBreakMeasurer measurer = new LineBreakMeasurer(it,
-							BreakIterator.getWordInstance(), frc);
+					LineBreakMeasurer measurer = new LineBreakMeasurer(it, BreakIterator.getWordInstance(), frc);
 					float wrappingWidth = (float) MmToPixel(largeur_gamme / 2.5);
 
 					while (measurer.getPosition() < lines[i].length()) {
@@ -552,8 +531,7 @@ public class ScaleComponent extends JComponent {
 						TextLayout layout = measurer.nextLayout(wrappingWidth);
 
 						pen.y += layout.getAscent();
-						float dx = layout.isLeftToRight() ? 0
-								: (wrappingWidth - layout.getAdvance());
+						float dx = layout.isLeftToRight() ? 0 : (wrappingWidth - layout.getAdvance());
 
 						layout.draw(g2d, pen.x + dx, pen.y);
 						pen.y += layout.getDescent() + layout.getLeading();
@@ -575,27 +553,22 @@ public class ScaleComponent extends JComponent {
 	/**
 	 * internal method for drawing an arrow
 	 * 
-	 * @param g
-	 *            the graphic context for the draw
-	 * @param origine
-	 *            the base point of the arrow
-	 * @param vector
-	 *            the direction of the vector
-	 * @param arrowwidth
-	 *            the width of the arrow
+	 * @param g          the graphic context for the draw
+	 * @param origine    the base point of the arrow
+	 * @param vector     the direction of the vector
+	 * @param arrowwidth the width of the arrow
 	 */
-	private void drawArrow(Graphics g, Point2D.Double origine, MathVect vector,
-			double arrowwidth) {
+	private void drawArrow(Graphics g, Point2D.Double origine, MathVect vector, double arrowwidth) {
 
 		assert g != null;
 		assert origine != null;
 		assert vector != null;
-		
+
 		Point2D.Double coordsOrigine = new Point2D.Double(MmToPixel(origine.getX()), MmToPixel(origine.getY()));
 
 		Graphics2D g2d = (Graphics2D) g;
-		
-		vector = vector.scale( MmToPixel( 1.0/vector.norme()  * arrowwidth) ); // normalise vector
+
+		vector = vector.scale(MmToPixel(1.0 / vector.norme() * arrowwidth)); // normalise vector
 
 		// end point
 		Point2D.Double end = vector.plus(coordsOrigine);
@@ -619,24 +592,22 @@ public class ScaleComponent extends JComponent {
 	 * @param g
 	 */
 	private void drawDirection(Graphics g) {
-		
+
 		double width = 40; // 3cm for the arrow
-		
+
 		Point2D.Double d = new Point2D.Double(5.0, largeur_carton - 10.0);
-		
+
 		// by default, arrow from left to right
 		MathVect v = new MathVect(1, 0);
-		
-		if (bookMoveRightToLeft)
-		{
+
+		if (bookMoveRightToLeft) {
 			// draw arrow in direction of 9h
 			v = new MathVect(-1, 0);
 			d = new Point2D.Double(d.getX() + width, d.getY());
-			
+
 		}
-		
+
 		drawArrow(g, d, v, width);
-		
 
 	}
 
@@ -665,8 +636,7 @@ public class ScaleComponent extends JComponent {
 
 		}
 
-		g.drawString(
-				Messages.getString("ScaleComponent.0"), x_reference + 10, y_reference); //$NON-NLS-1$
+		g.drawString(Messages.getString("ScaleComponent.0"), x_reference + 10, y_reference); //$NON-NLS-1$
 
 		g.drawLine(x_reference, yline1, x_reference, yline2);
 		g.drawLine(x_reference, yline1, x_reference + 10, yline2);
@@ -675,8 +645,7 @@ public class ScaleComponent extends JComponent {
 
 	@SuppressWarnings(value = "unchecked")
 	private String createInfoText() {
-		String infosgamme = /* Messages.getString("GammeComponent.4") + */name
-				+ "\n\n\n"; //$NON-NLS-1$
+		String infosgamme = /* Messages.getString("GammeComponent.4") + */name + "\n\n\n"; //$NON-NLS-1$
 		infosgamme += Messages.getString("GammeComponent.9") + largeur_carton + " (mm)" + "\n"; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 		infosgamme += Messages.getString("GammeComponent.12") + nbpistes + "\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		infosgamme += Messages.getString("GammeComponent.14") + premierepiste //$NON-NLS-1$
@@ -747,22 +716,20 @@ public class ScaleComponent extends JComponent {
 		int yscreen;
 
 		if (preferredViewedInverted) {
-			yscreen = convertCartonToScreenY(largeur_carton
-					- ((trackno + 1) * entrepiste + premierepiste - entrepiste / 2));
+			yscreen = convertCartonToScreenY(
+					largeur_carton - ((trackno + 1) * entrepiste + premierepiste - entrepiste / 2));
 		} else {
-			yscreen = convertCartonToScreenY(trackno * entrepiste
-					+ premierepiste - entrepiste / 2);
+			yscreen = convertCartonToScreenY(trackno * entrepiste + premierepiste - entrepiste / 2);
 		}
 
-		return new Rectangle(convertCartonToScreenX(largeur_gamme / 2),
-				yscreen, convertCartonToScreenX(largeur_gamme / 2),
-				MmToPixel(entrepiste));
+		return new Rectangle(convertCartonToScreenX(largeur_gamme / 2), yscreen,
+				convertCartonToScreenX(largeur_gamme / 2), MmToPixel(entrepiste));
 
 	}
 
 	/**
-	 * Récupération du facteur d'échelle, par exemple 2 pour voir la gamme en 2
-	 * fois plus gros
+	 * Récupération du facteur d'échelle, par exemple 2 pour voir la gamme en 2 fois
+	 * plus gros
 	 * 
 	 * @return
 	 */
@@ -771,8 +738,8 @@ public class ScaleComponent extends JComponent {
 	}
 
 	/**
-	 * Définition du facteur d'échelle, par exemple 2 pour voir la gamme en 2
-	 * fois plus gros
+	 * Définition du facteur d'échelle, par exemple 2 pour voir la gamme en 2 fois
+	 * plus gros
 	 * 
 	 * @param scale
 	 */
@@ -781,8 +748,8 @@ public class ScaleComponent extends JComponent {
 	}
 
 	/**
-	 * Cette méthode converti la coordonnée de l'espace carton vers les
-	 * coordonnées écran.
+	 * Cette méthode converti la coordonnée de l'espace carton vers les coordonnées
+	 * écran.
 	 */
 	private int convertCartonToScreenX(double x) {
 		double d = x;
@@ -831,8 +798,7 @@ public class ScaleComponent extends JComponent {
 	/**
 	 * Converti une distance de pixel en mm
 	 * 
-	 * @param x
-	 *            le nombre de pixel
+	 * @param x le nombre de pixel
 	 * @return la distance en mm
 	 */
 	public double pixelToMm(int x) {
@@ -860,17 +826,14 @@ public class ScaleComponent extends JComponent {
 			StringBuffer sb = new StringBuffer();
 
 			if (nd.getRegisterSetName() != null) {
-				sb.append(PipeStopListReference.getLocalizedPipeStopGroup(nd
-						.getRegisterSetName()));
+				sb.append(PipeStopListReference.getLocalizedPipeStopGroup(nd.getRegisterSetName()));
 				sb.append(" - "); //$NON-NLS-1$
 			}
 			sb.append(MidiHelper.localizedMidiLibelle(nd.getMidiNote()));
 
 			if (showHertz) {
 				sb.append(" - ").append( //$NON-NLS-1$
-								NumberFormat.getNumberInstance().format(
-										MidiHelper.hertz(nd.getMidiNote())))
-						.append(" Hz"); //$NON-NLS-1$
+						NumberFormat.getNumberInstance().format(MidiHelper.hertz(nd.getMidiNote()))).append(" Hz"); //$NON-NLS-1$
 			}
 			return sb.toString();
 		} else if (td instanceof PercussionDef) {
@@ -879,8 +842,7 @@ public class ScaleComponent extends JComponent {
 			StringBuilder sb = new StringBuilder();
 			sb.append(Messages.getString("GammeComponent.5")); //$NON-NLS-1$ //$NON-NLS-2$
 
-			ReferencedPercussion p = ReferencedPercussionList
-					.findReferencedPercussionByMidiCode(pd.getPercussion());
+			ReferencedPercussion p = ReferencedPercussionList.findReferencedPercussionByMidiCode(pd.getPercussion());
 			if (p != null) {
 				sb.append(" - "); //$NON-NLS-1$
 				sb.append(ReferencedPercussion.getLocalizedDrumLabel(p)); // $NON-NLS-1$
@@ -903,8 +865,7 @@ public class ScaleComponent extends JComponent {
 		} else if (td instanceof RegisterSetCommandResetDef) {
 			RegisterSetCommandResetDef r = (RegisterSetCommandResetDef) td;
 
-			StringBuilder sb = new StringBuilder(
-					Messages.getString("GammeComponent.39")); //$NON-NLS-1$
+			StringBuilder sb = new StringBuilder(Messages.getString("GammeComponent.39")); //$NON-NLS-1$
 
 			sb.append(" - "); //$NON-NLS-1$
 			if (r.getRegisterSet() == "ALL") { //$NON-NLS-1$
@@ -917,8 +878,7 @@ public class ScaleComponent extends JComponent {
 		} else if (td instanceof RegisterCommandStartDef) {
 			RegisterCommandStartDef r = (RegisterCommandStartDef) td;
 
-			StringBuilder sb = new StringBuilder(
-					Messages.getString("GammeComponent.43")).append(" "); //$NON-NLS-1$ //$NON-NLS-2$
+			StringBuilder sb = new StringBuilder(Messages.getString("GammeComponent.43")).append(" "); //$NON-NLS-1$ //$NON-NLS-2$
 			sb.append(r.getRegisterInRegisterSet());
 			sb.append(" ").append(Messages.getString("GammeComponent.46")).append(" ").append(r.getRegisterSetName()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 
@@ -930,8 +890,7 @@ public class ScaleComponent extends JComponent {
 	}
 
 	private Dimension getComponentInternalSize() {
-		return new Dimension(MmToPixel(largeur_gamme),
-				MmToPixel(largeur_carton));
+		return new Dimension(MmToPixel(largeur_gamme), MmToPixel(largeur_carton));
 
 	}
 
@@ -961,8 +920,7 @@ public class ScaleComponent extends JComponent {
 		return default_selecttrack_if_no_listener;
 	}
 
-	public void setDefaultSelectTrackIfNoListener(
-			boolean default_selecttrack_if_no_listener) {
+	public void setDefaultSelectTrackIfNoListener(boolean default_selecttrack_if_no_listener) {
 		this.default_selecttrack_if_no_listener = default_selecttrack_if_no_listener;
 	}
 
@@ -1000,8 +958,7 @@ public class ScaleComponent extends JComponent {
 
 		try {
 			BufferedImage bi = ImageIO.read(rendering.getBackgroundImage());
-			this.cartontrame = new TexturePaint(bi, new Rectangle2D.Double(0,
-					0, bi.getWidth(), bi.getHeight()));
+			this.cartontrame = new TexturePaint(bi, new Rectangle2D.Double(0, 0, bi.getWidth(), bi.getHeight()));
 		} catch (Exception ex) {
 			logger.error("setcarton", ex); //$NON-NLS-1$
 			this.cartontrame = null;
@@ -1052,8 +1009,9 @@ public class ScaleComponent extends JComponent {
 
 			try {
 				BufferedImage bi = ImageIO.read(rendering.getBackgroundImage());
-				cartontrame = new TexturePaint(bi, new Rectangle2D.Double(0, 0,
-						bi.getWidth(), bi.getHeight()));
+				if (bi != null) {
+					cartontrame = new TexturePaint(bi, new Rectangle2D.Double(0, 0, bi.getWidth(), bi.getHeight()));
+				}
 			} catch (Exception ex) {
 				logger.error("loadscale", ex); //$NON-NLS-1$
 				cartontrame = null;
@@ -1101,10 +1059,9 @@ public class ScaleComponent extends JComponent {
 
 		}
 
-		return new Scale(name, largeur_carton, entrepiste, largeurpiste,
-				premierepiste, nbpistes, tds, registersets, speed,
-				constraintList, infos, scalestate, contact, rendering,
-				preferredViewedInverted, bookMoveRightToLeft, properties );
+		return new Scale(name, largeur_carton, entrepiste, largeurpiste, premierepiste, nbpistes, tds, registersets,
+				speed, constraintList, infos, scalestate, contact, rendering, preferredViewedInverted,
+				bookMoveRightToLeft, properties);
 	}
 
 	/**
@@ -1182,12 +1139,10 @@ public class ScaleComponent extends JComponent {
 	/**
 	 * Change the track def
 	 * 
-	 * @param track
-	 *            the track index
-	 * @param td
-	 *            the track def
+	 * @param track the track index
+	 * @param td    the track def
 	 * 
-	 *            if the track index is not in the range, nothing is done
+	 *              if the track index is not in the range, nothing is done
 	 */
 	public void changePisteDef(int track, AbstractTrackDef td) {
 		if (track >= 0 && track < notedefs.size()) {
@@ -1296,8 +1251,7 @@ public class ScaleComponent extends JComponent {
 		sc.setSize(size);
 
 		// Create a picture of the scale ...
-		BufferedImage bi = new BufferedImage(size.width, size.height,
-				BufferedImage.TYPE_4BYTE_ABGR);
+		BufferedImage bi = new BufferedImage(size.width, size.height, BufferedImage.TYPE_4BYTE_ABGR);
 		Graphics2D g = bi.createGraphics();
 		try {
 			sc.paint(g);
@@ -1319,8 +1273,7 @@ public class ScaleComponent extends JComponent {
 
 	@SuppressWarnings(value = "unchecked")
 	protected void fireHighlightTrackDef(AbstractTrackDef td) {
-		for (Iterator iterator = this.hightlightListener.iterator(); iterator
-				.hasNext();) {
+		for (Iterator iterator = this.hightlightListener.iterator(); iterator.hasNext();) {
 			ScaleHighlightListener l = (ScaleHighlightListener) iterator.next();
 			l.trackIsHighlighted(td);
 		}
@@ -1328,8 +1281,7 @@ public class ScaleComponent extends JComponent {
 
 	@SuppressWarnings(value = "unchecked")
 	protected void fireResetHightLight() {
-		for (Iterator iterator = this.hightlightListener.iterator(); iterator
-				.hasNext();) {
+		for (Iterator iterator = this.hightlightListener.iterator(); iterator.hasNext();) {
 			ScaleHighlightListener l = (ScaleHighlightListener) iterator.next();
 			l.hightlightReseted();
 		}

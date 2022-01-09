@@ -93,8 +93,8 @@ import com.jeta.forms.gui.form.FormAccessor;
 import com.jeta.forms.gui.form.GridView;
 
 /**
- * Panel for constructing a unique image from regular images
- *w
+ * Panel for constructing a unique image from regular images w
+ * 
  * @author pfreydiere
  */
 public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implements Disposable {
@@ -777,10 +777,17 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 			 */
 
 			if (j >= imageCount) {
+				// no further images, skip
 				continue;
 			}
 
-			BufferedImage current = perfoScanFolder.loadImage(j);
+			BufferedImage current = null;
+			try {
+				current = perfoScanFolder.loadImage(j);
+			} catch (Throwable t) {
+				logger.error(t.getMessage(), t);
+				continue; // skip
+			}
 
 			BufferedImage newImage = innerModel.createSlice(current, pixelsForEachImage, output_imageheight);
 
@@ -856,7 +863,8 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 					indexFirstImage + 30, (int) ((indexFirstImage) * model.overlappDistance - l), null);
 
 			try (FileOutputStream fileOutputStream = new FileOutputStream(
-					new File(destinationFolder, "" + currentimageindex + ".jpg"))) {// $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					new File(destinationFolder, "" + currentimageindex + ".jpg"))) {// $NON-NLS-1$ //$NON-NLS-2$
+																					// //$NON-NLS-3$
 				ImageTools.saveJpeg(img, fileOutputStream);
 			}
 
@@ -896,7 +904,9 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 
 					int indexFirstImage = (int) Math.ceil(initialPixelOfGeneratedImage / overlappDistance);
 					indexFirstImage = Math.max(indexFirstImage - 1, 0);
-					int lastIndexImage = (int) Math.floor((initialPixelOfGeneratedImage + height) / overlappDistance);
+
+					int lastIndexImage = (int) Math
+							.floor((initialPixelOfGeneratedImage + height) / overlappDistance * 2);
 
 					BufferedImage img = constructMergeImage(sliceWidth, height, height, overlappDistance,
 							indexFirstImage, lastIndexImage,
@@ -927,7 +937,7 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 						logger.error(t.getMessage(), t);
 					}
 
-					if (lastIndexImage >= imageCount) {
+					if (indexFirstImage >= imageCount) {
 						endreach = true;
 					}
 					currentimageindex++;

@@ -10,7 +10,7 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 
 /**
- * Modeling a model step
+ * Modeling a model editor step
  * 
  * @author pfreydiere
  * 

@@ -15,8 +15,7 @@ import com.l2fprod.common.propertysheet.DefaultProperty;
 import com.l2fprod.common.propertysheet.Property;
 
 /**
- * Panneau contenant une ihm de saisie de la configuration, Cette classe est
- * abstraite
+ * Panneau contenant une ihm de saisie de la configuration,
  * 
  * @author pfreydiere
  * 

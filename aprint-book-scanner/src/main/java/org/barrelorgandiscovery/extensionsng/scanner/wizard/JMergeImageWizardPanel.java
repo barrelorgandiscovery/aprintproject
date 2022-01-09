@@ -19,6 +19,11 @@ import org.barrelorgandiscovery.repository.Repository2Factory;
 
 public class JMergeImageWizardPanel extends JPanel {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -7134277700122168020L;
+
 	private IPrefsStorage ps;
 
 	private Wizard wizard;
@@ -46,11 +51,15 @@ public class JMergeImageWizardPanel extends JPanel {
 		wizard.toFirst();
 	}
 
+	// Test method to play with the panel and functionnalities
 	public static void main(String[] args) throws Exception {
 
 		BasicConfigurator.configure(new LF5Appender());
+		
+		File tmpfile = File.createTempFile("test", "");
+		tmpfile.delete();
 
-		FilePrefsStorage p = new FilePrefsStorage(new File("c:\\temp\\preferencesStorage.properties"));
+		FilePrefsStorage p = new FilePrefsStorage(new File(tmpfile.getParentFile(), "preferencesStorage.properties"));
 		p.load();
 
 		APrintProperties aPrintProperties = new APrintProperties(false);

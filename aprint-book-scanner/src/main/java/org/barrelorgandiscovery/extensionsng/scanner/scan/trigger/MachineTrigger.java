@@ -2,6 +2,7 @@ package org.barrelorgandiscovery.extensionsng.scanner.scan.trigger;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.swing.SwingUtilities;
 
@@ -48,12 +49,17 @@ public class MachineTrigger extends Trigger implements Disposable {
 			mc = machine.open(parameters);
 			logger.debug("machine opened");//$NON-NLS-1$
 			giveFeedback("Machine Opened !, well sending homing command");
+			
 			Thread.sleep(3000);
+			
 			logger.debug("homing ...");//$NON-NLS-1$
 			mc.sendCommand(new HomingCommand());
+			
 			giveFeedback("Homing sent");
+			
 			logger.debug("... homing done");//$NON-NLS-1$
-			Thread.sleep(3000);
+			
+			Thread.sleep(10_000);
 
 			MachineStatus machineStatus = mc.getStatus();
 			if (!(machineStatus == MachineStatus.IDLE)) {
@@ -73,15 +79,17 @@ public class MachineTrigger extends Trigger implements Disposable {
 				public void run() {
 					try {
 						double y = 0.0;
+						AtomicLong picture_count = new AtomicLong();
 						while (!cancelTracker.isCanceled()) {
 							final double finaly = y;
 							SwingUtilities.invokeAndWait(() -> {
 								giveFeedback("Moving to " + finaly);
 							});
-							y += 30;
+							y += 30; // every 30 mm
 							mc.sendCommand(new DisplacementCommand(y, 0));
+							
 
-							Thread.sleep(200); // for hi res ...
+							Thread.sleep(1_000); // for hi res ...
 
 							MachineStatus machineRunningStatus;
 							do {
@@ -90,13 +98,13 @@ public class MachineTrigger extends Trigger implements Disposable {
 							} while (machineRunningStatus != MachineStatus.IDLE);
 
 							SwingUtilities.invokeAndWait(() -> {
-								giveFeedback("take picture");
+								giveFeedback("Take picture" + picture_count.incrementAndGet());
 							});
 
 							takePicture();
-							logger.debug("picture taken");
+							logger.debug("picture taken");  //$NON-NLS-1$
 						}
-						logger.debug("advance ended"); //$NON-NLS-1$
+						giveFeedback("End");
 					} catch (Throwable ex) {
 						logger.error("error while scanning :" + ex.getMessage(), ex); //$NON-NLS-1$
 						dispose();

@@ -37,7 +37,11 @@ dependencies {
 	compile group: 'log4j', name: 'log4j', version: '1.2.14'
 	
 	// https://mvnrepository.com/artifact/org.apache.commons/commons-vfs2
-    compile group: 'org.apache.commons', name: 'commons-vfs2', version: '2.6.0'
+    compile group: 'org.apache.commons', name: 'commons-vfs2', version: '2.9.0'
+     compile group: 'org.apache.commons', name: 'commons-vfs2-jackrabbit2', version: '2.9.0'
+    compile group: 'org.apache.commons', name: 'commons-vfs2-jackrabbit1', version: '2.9.0'
+   
+     
 	
 	
 	compile group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.6.4'

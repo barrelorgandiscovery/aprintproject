@@ -1,20 +1,20 @@
 package org.barrelorgandiscovery.gui;
 
-import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
 
 import org.apache.commons.vfs2.Capability;
 import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
+import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 import org.apache.commons.vfs2.provider.AbstractFileObject;
+import org.apache.commons.vfs2.provider.webdav4s.Webdav4sFileProvider;
 import org.barrelorgandiscovery.gui.tools.BookmarkPanel;
-import org.junit.Test;
 
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser.RETURN_TYPE;
@@ -39,40 +39,47 @@ public class TestImprovedFileChooser {
 
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 
-		
+		FileSystemManager fsManager = VFS.getManager();
+		System.out.println(fsManager);
+		StandardFileSystemManager sm = (StandardFileSystemManager) fsManager;
+		sm.addProvider("webdav", new Webdav4sFileProvider());
+
 		JFrame frame = new JFrame();
 		JButton btn = new JButton("open");
-		
+
 		frame.getContentPane().add(btn);
-		
-		
-		
+
 		btn.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				VFSJFileChooser fileChooser = new VFSJFileChooser();
-				 //  final Frame ancestor = (Frame) SwingUtilities.getWindowAncestor(fileChooser);
-				BookmarksDialog dialog = new BookmarksDialog(null, fileChooser);
+				try {
+					VFSJFileChooser fileChooser = new VFSJFileChooser(
+							VFS.getManager().resolveFile("webdav://localhost/test/testdir/"));
+					// final Frame ancestor = (Frame) SwingUtilities.getWindowAncestor(fileChooser);
+					BookmarksDialog dialog = new BookmarksDialog(null, fileChooser);
 
-				BookmarkPanel p = new BookmarkPanel(fileChooser);
+					BookmarkPanel p = new BookmarkPanel(fileChooser);
 
-				DefaultAccessoriesPanel d = new DefaultAccessoriesPanel(fileChooser);
-				fileChooser.setAccessory(p);
+					DefaultAccessoriesPanel d = new DefaultAccessoriesPanel(fileChooser);
+					fileChooser.setAccessory(p);
 
-				RETURN_TYPE r = fileChooser.showSaveDialog(null);
+					RETURN_TYPE r = fileChooser.showSaveDialog(null);
 
-				FileObject selectedFile = fileChooser.getSelectedFile();
-				if (selectedFile instanceof AbstractFileObject) {
-					AbstractFileObject f = (AbstractFileObject) selectedFile;
-					System.out
-							.println("is list children capable ?" + f.getFileSystem().hasCapability(Capability.LIST_CHILDREN));
+					FileObject selectedFile = fileChooser.getSelectedFileObject();
+					if (selectedFile instanceof AbstractFileObject) {
+						AbstractFileObject f = (AbstractFileObject) selectedFile;
+						System.out.println("is list children capable ?"
+								+ f.getFileSystem().hasCapability(Capability.LIST_CHILDREN));
+					}
+				} catch (Exception ex) {
+					ex.printStackTrace();
 				}
 			}
 		});
-		
+
 		frame.setSize(200, 300);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setVisible(true);

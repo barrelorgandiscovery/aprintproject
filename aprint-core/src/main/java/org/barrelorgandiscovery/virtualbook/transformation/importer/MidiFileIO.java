@@ -347,11 +347,15 @@ public class MidiFileIO {
 		// tableau contenant l'état des différentes notes ....
 		// le premier index contient le track, le second, la note
 		long[][][] alltracks = new long[128][16][128];
+		Integer[][][] velocityOn = new Integer[128][16][128];
+		
 
 		for (int k = 0; k < alltracks.length; k++)
 			for (int m = 0; m < 16; m++)
-				for (int l = 0; l < alltracks.length; l++)
+				for (int l = 0; l < alltracks.length; l++) {
 					alltracks[k][m][l] = -1; // initialisation ...
+					velocityOn[k][m][l] = null;
+				}
 
 		logger.debug("iterate on the privateTrackedMidiEvents"); //$NON-NLS-1$
 		for (Iterator<PrivateTrackedMidiEvent> it = allevents.iterator(); it
@@ -383,6 +387,7 @@ public class MidiFileIO {
 					// System.out.println("Note Off");
 
 					int note = (extractFirst(message));
+					int velOff = extractSecond(message);
 
 					if (logger.isDebugEnabled())
 						logger.debug("Time :" + currenttime + "Note Off :" //$NON-NLS-1$ //$NON-NLS-2$
@@ -406,10 +411,12 @@ public class MidiFileIO {
 
 						assert currenttime - alltracks[notetrack][canal][note] >= 0;
 
+						Integer velOn = velocityOn[notetrack][canal][note];
+						
 						MidiNote m = new MidiNote(
 								alltracks[notetrack][canal][note], currenttime
 										- alltracks[notetrack][canal][note],
-								note, notetrack, canal);
+								note, notetrack, canal, velOn, velOff);
 
 						
 						if (logger.isDebugEnabled())
@@ -424,14 +431,17 @@ public class MidiFileIO {
 						}
 						
 						alltracks[notetrack][canal][note] = -1;
+						velocityOn[notetrack][canal][note] = 127; // reset
 					}
 
 				} else if (cmd == 9) {
 
 					// note on
 					int note = (extractFirst(message));
+					
+					int velOnInMidi = extractSecond(message); 
 
-					if (extractSecond(message) == 0) {
+					if (velOnInMidi == 0) {
 						// note on but velocity is equals 0
 						// so this is a note off, same as above
 						if (logger.isDebugEnabled())
@@ -440,19 +450,25 @@ public class MidiFileIO {
 									+ " from vel 0 "
 									+ ",Tick :" + me.getTick() + " track :" + notetrack); //$NON-NLS-1$
 
+						Integer velOff = null;
+						Integer velOn = velocityOn[notetrack][canal][note];
+						
 						if (alltracks[notetrack][canal][note] != -1) {
 
 							assert currenttime
 									- alltracks[notetrack][canal][note] >= 0;
-
+									
 							MidiNote m = new MidiNote(
 									alltracks[notetrack][canal][note],
 									currenttime
 											- alltracks[notetrack][canal][note],
-									note, notetrack, canal);
+									note, notetrack, canal, velOn, velOff);
+							
 							midifile.add(m);
 							assert m.getLength() != 0;
 							alltracks[notetrack][canal][note] = -1;
+							velocityOn[notetrack][canal][note] = null;
+							
 						} else {
 
 							MidiFileReadError e = new MidiFileReadError();
@@ -469,6 +485,9 @@ public class MidiFileIO {
 									+ " not beginned"); //$NON-NLS-1$
 						}
 					} else {
+						
+						assert velOnInMidi > 0;
+						
 						// note on
 						if (logger.isDebugEnabled())
 							logger.debug("Time :" + currenttime + " Note On :" //$NON-NLS-1$ //$NON-NLS-2$
@@ -485,16 +504,20 @@ public class MidiFileIO {
 									- alltracks[notetrack][canal][note] >= 0;
 
 							logger.debug("already active, create the note");
+							
+							Integer velOn = velocityOn[notetrack][canal][note];
 
 							MidiNote m = new MidiNote(
 									alltracks[notetrack][canal][note],
 									currenttime
 											- alltracks[notetrack][canal][note],
-									note, notetrack, canal);
+									note, notetrack, canal, velOn, null); // no informations about the closing
+							
 							midifile.add(m);
 
 						}
 						alltracks[notetrack][canal][note] = currenttime;
+						velocityOn[notetrack][canal][note] = velOnInMidi;
 
 					}
 
@@ -771,14 +794,23 @@ public class MidiFileIO {
 							/ micropertick;
 					ShortMessage mm = new ShortMessage();
 
-					mm.setMessage(0x90, mn.getChannel(), mn.getMidiNote(), 127);
+					int vel = 127;
+					if (mn.getVelocityOn() != null) {
+						vel = mn.getVelocityOn();
+					}
+					mm.setMessage(0x90, mn.getChannel(), mn.getMidiNote(), vel);
 					MidiEvent me = new MidiEvent(mm, tick);
 
 					track.add(me);
 
 					tick = (mn.getTimeStamp() + mn.getLength()) / micropertick;
 					mm = new ShortMessage();
-					mm.setMessage(0x80, mn.getChannel(), mn.getMidiNote(), 127);
+					
+					int velOff = 127;
+					if (mn.getVelocityOn() != null) {
+						velOff = mn.getVelocityOn();
+					}
+					mm.setMessage(0x80, mn.getChannel(), mn.getMidiNote(), velOff);
 
 					me = new MidiEvent(mm, tick);
 					track.add(me);

@@ -18,6 +18,12 @@ import org.barrelorgandiscovery.virtualbook.Hole;
  */
 public abstract class ModelGroovyScript {
 
+	
+	public String getLabel() {
+		return "Script box";
+	}
+	
+	
 	/**
 	 * configure stage parameters
 	 * 

@@ -55,8 +55,16 @@ public class JModelEditorPanel extends JPanel {
 	private IPrefsStorage prefs;
 
 	private ModelEditor modelEditor;
+	
+	private Object owner;
+	
+	public void defineOwner(Object owner) {
+		this.owner = owner;
+		modelEditor.defineOwner(owner);
+	}
+	
 	private AsyncJobsManager asyncJobManager;
-
+	
 	public JModelEditorPanel(ModelStepRegistry registry, Repository2 repository2, AsyncJobsManager asyncJobManager,
 			Map<String, Object> context, IPrefsStorage prefs) throws Exception {
 

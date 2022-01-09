@@ -14,6 +14,7 @@ import org.barrelorgandiscovery.ui.tools.VFSTools;
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser.RETURN_TYPE;
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser.SELECTION_MODE;
+import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileSystemView;
 
 /**
  * contain the JFileChooser, to permit bootstrap file selection and creation
@@ -116,7 +117,7 @@ public class APrintFileChooser {
 
 	public void setSelectedFile(AbstractFileObject selectedFile) {
 		// tolerant to null
-		this.fileChooser.setSelectedFile(selectedFile);
+		this.fileChooser.setSelectedFileObject(selectedFile);
 	}
 
 	public void setCurrentDirectory(File currentDirectory) {
@@ -132,7 +133,7 @@ public class APrintFileChooser {
 			
 			FileObject fo = VFSTools.fromRegularFile(currentDirectory);
 			
-			this.fileChooser.setCurrentDirectory(fo);
+			this.fileChooser.setCurrentDirectoryObject(fo);
 		} catch (Exception ex) {
 			throw new RuntimeException(ex.getMessage(), ex);
 		}
@@ -218,7 +219,7 @@ public class APrintFileChooser {
 
 	public AbstractFileObject getSelectedFile() {
 
-		FileObject selectedFile = fileChooser.getSelectedFile();
+		FileObject selectedFile = fileChooser.getSelectedFileObject();
 		if (selectedFile == null) {
 			return null;
 		}
@@ -231,7 +232,7 @@ public class APrintFileChooser {
 	}
 
 	public FileObject[] getSelectedFiles() {
-		FileObject[] selectedFiles = fileChooser.getSelectedFiles();
+		FileObject[] selectedFiles = fileChooser.getSelectedFileObjects();
 		return selectedFiles;
 	}
 

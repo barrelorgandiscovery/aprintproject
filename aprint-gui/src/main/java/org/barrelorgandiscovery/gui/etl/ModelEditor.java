@@ -25,6 +25,7 @@ import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -152,6 +153,15 @@ public class ModelEditor extends JPanel {
 	 * async jobs handling
 	 */
 	private AsyncJobsManager asyncJobsManager;
+	
+	/**
+	 * owner frame for dialogs
+	 */
+	private Object owner;
+	
+	public void defineOwner(Object owner) {
+		this.owner = owner;
+	}
 
 	/**
 	 * Connectivity helper
@@ -1076,10 +1086,12 @@ public class ModelEditor extends JPanel {
 
 		final JConfigurePanel panel = GuiConfigureModelStepRegistry.getUIToConfigureStep(ms, env);
 
-		final BeanAsk parameterDialog = new BeanAsk((Frame) null, Messages.getString("ModelEditor.74") + ms.getLabel(), //$NON-NLS-1$
-				true);
+		JDialog d = new JDialog((Frame)owner);
+		
+//		final BeanAsk parameterDialog = new BeanAsk((Frame) null, Messages.getString("ModelEditor.74") + ms.getLabel(), //$NON-NLS-1$
+//				true);
 
-		Container contentPane = parameterDialog.getContentPane();
+		Container contentPane = d.getContentPane();
 		contentPane.setLayout(new BorderLayout());
 		contentPane.add(panel, BorderLayout.CENTER);
 
@@ -1094,9 +1106,9 @@ public class ModelEditor extends JPanel {
 							return;
 						}
 
-						parameterDialog.setVisible(false);
+						d.setVisible(false);
 						logger.debug(" - OK parameters modified - "); //$NON-NLS-1$
-						parameterDialog.dispose();
+						d.dispose();
 
 					} catch (Exception ex) {
 						logger.error("error in editing configure parameters :" + ex.getMessage(), ex); //$NON-NLS-1$
@@ -1117,11 +1129,11 @@ public class ModelEditor extends JPanel {
 		});
 
 		contentPane.add(ok, BorderLayout.SOUTH);
-		parameterDialog.setSize(400, 300);
-		SwingUtils.center(parameterDialog);
+		d.setSize(400, 300);
+		SwingUtils.center(d);
 
-		parameterDialog.setModal(true);
-		parameterDialog.setVisible(true);
+		d.setModal(true);
+		d.setVisible(true);
 	}
 
 	/** Current executor of the model */

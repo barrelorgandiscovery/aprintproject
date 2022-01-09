@@ -22,13 +22,16 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemManager;
+import org.apache.commons.vfs2.FileSystemOptions;
+import org.apache.commons.vfs2.VFS;
+import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder;
 import org.jdesktop.swingx.HorizontalLayout;
 
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import com.googlecode.vfsjfilechooser2.accessories.bookmarks.Bookmarks;
 import com.googlecode.vfsjfilechooser2.accessories.bookmarks.BookmarksDialog;
 import com.googlecode.vfsjfilechooser2.accessories.bookmarks.TitledURLEntry;
-import com.googlecode.vfsjfilechooser2.utils.VFSUtils;
 
 /**
  * panel for showing the bookmarks
@@ -152,7 +155,7 @@ public class BookmarkPanel extends JComponent implements ActionListener {
 			String name = JOptionPane.showInputDialog("Bookmark Name");
 			if (name != null && !"".equals(name)) {
 				try {
-					FileObject currentDirectory = chooser.getCurrentDirectory();
+					FileObject currentDirectory = chooser.getCurrentDirectoryObject();
 					URL url = currentDirectory.getURL();
 					TitledURLEntry entry = new TitledURLEntry(name, url.toString());
 					model.add(entry);
@@ -181,13 +184,12 @@ public class BookmarkPanel extends JComponent implements ActionListener {
 					}
 				}
 			}
-
 		}
 	}
 
 	private void gotoSelectedBookMark(final int row) {
 		if (row != NO_BOOKMARK_SELECTION_INDEX) {
-			Thread worker = new Thread() {
+			Runnable worker = new Runnable() {
 				@Override
 				public void run() {
 					setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -195,15 +197,26 @@ public class BookmarkPanel extends JComponent implements ActionListener {
 					TitledURLEntry aTitledURLEntry = model.getEntry(row);
 
 					FileObject fo = null;
-
+					String failureMessage = null;
 					try {
-						fo = VFSUtils.resolveFileObject(aTitledURLEntry.getURL());
+//						if(aTitledURLEntry.getURL().startsWith("ftp")) {
+//							 FileSystemOptions opts = new FileSystemOptions();
+//
+//						        FtpFileSystemConfigBuilder.getInstance().setPassiveMode(opts, true);
+//						        FileSystemManager manager = VFS.getManager();
+//fo = manager.resolveFile(aTitledURLEntry.getURL(), opts);
+//						} else {
+//							
+						
+						fo = VFS.getManager().resolveFile(aTitledURLEntry.getURL());
+						//}
 
 						if ((fo != null) && !fo.exists()) {
 							fo = null;
 						}
 					} catch (Exception exc) {
 						fo = null;
+						failureMessage = exc.getMessage();
 					}
 
 					setCursor(Cursor.getDefaultCursor());
@@ -213,10 +226,11 @@ public class BookmarkPanel extends JComponent implements ActionListener {
 						msg.append("Failed to connect to ");
 						msg.append(aTitledURLEntry.getURL());
 						msg.append("\n");
+						msg.append(failureMessage).append("\n");
 						msg.append("Please check URL entry and try again.");
 						JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
 					} else {
-						chooser.setCurrentDirectory(fo);
+						chooser.setCurrentDirectoryObject(fo);
 						if (dialog != null) {
 							dialog.setVisible(false);
 						}
@@ -224,7 +238,7 @@ public class BookmarkPanel extends JComponent implements ActionListener {
 				}
 			};
 
-			worker.setPriority(Thread.MIN_PRIORITY);
+			// worker.setPriority(Thread.MIN_PRIORITY);
 			SwingUtilities.invokeLater(worker);
 		}
 	}

@@ -9,11 +9,14 @@ import java.util.Map;
 
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
+import javax.swing.JToolBar;
 
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
@@ -40,211 +43,210 @@ import org.noos.xing.mydoggy.plaf.MyDoggyToolWindowManager;
  */
 public class APrintNGModelFrame extends APrintNGInternalFrame {
 
-  /** */
-  private static final long serialVersionUID = 4580244042129834261L;
+	/** */
+	private static final long serialVersionUID = 4580244042129834261L;
 
-  private static Logger logger = Logger.getLogger(APrintNGModelFrame.class);
+	private static Logger logger = Logger.getLogger(APrintNGModelFrame.class);
 
-  private APrintNGGeneralServices services;
+	private APrintNGGeneralServices services;
 
-  private JModelEditorPanel modeleditor;
+	private JModelEditorPanel modeleditor;
 
-  private MyDoggyToolWindowManager toolWindowManager;
+	private MyDoggyToolWindowManager toolWindowManager;
 
-  private ASyncConsoleOutput aSyncConsoleOutput;
+	private ASyncConsoleOutput aSyncConsoleOutput;
 
-  private ToolWindow tConsolewindow;
+	private ToolWindow tConsolewindow;
 
-  public APrintNGModelFrame(APrintProperties aprintproperties, APrintNGGeneralServices services)
-      throws Exception {
-    super(aprintproperties.getFilePrefsStorage(), "Model Editor", true, true, true, true); //$NON-NLS-1$
-    assert services != null;
-    this.services = services;
-    setIconImage(ImageTools.loadImage(JModelEditorPanel.class, "model-editor.png")); //$NON-NLS-1$
-    initComponents();
-  }
+	public APrintNGModelFrame(APrintProperties aprintproperties, APrintNGGeneralServices services) throws Exception {
+		super(aprintproperties.getFilePrefsStorage(), "Model Editor", true, true, true, true); //$NON-NLS-1$
+		assert services != null;
+		this.services = services;
+		setIconImage(ImageTools.loadImage(JModelEditorPanel.class, "model-editor.png")); //$NON-NLS-1$
+		initComponents();
+	}
 
-  /** init components */
-  protected void initComponents() throws Exception {
+	/** init components */
+	protected void initComponents() throws Exception {
 
-	  
-    // add the toolbar manager
-    MyDoggyToolWindowManager myDoggyToolWindowManager = new MyDoggyToolWindowManager();
-    this.toolWindowManager = myDoggyToolWindowManager;
+		// add the toolbar manager
+		MyDoggyToolWindowManager myDoggyToolWindowManager = new MyDoggyToolWindowManager();
+		this.toolWindowManager = myDoggyToolWindowManager;
 
-    JTextPane textArea = new JTextPane();
-    JScrollPane textScrollPane = new JScrollPane(textArea);
-    aSyncConsoleOutput = new ASyncConsoleOutput(textArea, null);
+		JPanel outputOfScript = new JPanel();
+		outputOfScript.setLayout(new BorderLayout());
 
-    tConsolewindow=toolWindowManager.registerToolWindow(
-      "console", // Id //$NON-NLS-1$
-      "Execution Console", // Title //$NON-NLS-1$
-      null, // Icon
-      textScrollPane, // Component
-      ToolWindowAnchor.BOTTOM);
+		JTextPane textArea = new JTextPane();
+		JScrollPane textScrollPane = new JScrollPane(textArea);
 
-    
-    
-    Map<String, Object> context = new HashMap<String, Object>();
-    context.put(ContextVariables.CONTEXT_SERVICES, services);
-    context.put(ContextVariables.CONTEXT_CONSOLE, aSyncConsoleOutput);
+		aSyncConsoleOutput = new ASyncConsoleOutput(textArea, null);
 
-    modeleditor =
-        new JModelEditorPanel(
-            new ModelStepRegistry() {
-              public List<ModelStep> getRegisteredModelStepList() throws Exception {
-                try {
-                  DefaultModelStepRegistry reg = new DefaultModelStepRegistry();
-                  return reg.getRegisteredModelStepList();
-                } catch (Exception ex) {
-                  logger.error("error in creating steps :" + ex.getMessage(), ex); //$NON-NLS-1$
-                  BugReporter.sendBugReport();
-                  throw new RuntimeException(ex.getMessage(), ex);
-                }
-              }
-            },
-            services.getRepository(),
-            services.getAsyncJobs(),
-            context,
-            prefixedNamePrefsStorage);
+		outputOfScript.add(textScrollPane, BorderLayout.CENTER);
+		JButton clearConsoleBtn = new JButton("clear console");
+		clearConsoleBtn.addActionListener((action) -> {
+			aSyncConsoleOutput.clearConsole();
+		});
+		JToolBar tbScriptOutputConsole = new JToolBar(JToolBar.HORIZONTAL);
+		tbScriptOutputConsole.add(clearConsoleBtn);
+		outputOfScript.add(tbScriptOutputConsole, BorderLayout.NORTH);
 
-    modeleditor.setConsole(aSyncConsoleOutput);
-    modeleditor.setConsoleShowListener(new IConsoleShowListener(){
-  
-    @Override
-    public void showConsole() {
-    	try {
-    		tConsolewindow.setVisible(true);
-    	}catch(Exception ex) {
-    		logger.error(ex.getMessage(), ex);
-    	}
-      
-    }
-  });
+		tConsolewindow = toolWindowManager.registerToolWindow("console", // Id //$NON-NLS-1$
+				"Execution Console", // Title //$NON-NLS-1$
+				null, // Icon
+				outputOfScript, // Component
+				ToolWindowAnchor.BOTTOM);
 
-    getContentPane().setLayout(new BorderLayout());
+		Map<String, Object> context = new HashMap<String, Object>();
+		context.put(ContextVariables.CONTEXT_SERVICES, services);
+		context.put(ContextVariables.CONTEXT_CONSOLE, aSyncConsoleOutput);
 
-    // Made all tools available
-    for (ToolWindow window : toolWindowManager.getToolWindows()) {
-      window.setAvailable(true);
-    }
+		modeleditor = new JModelEditorPanel(new ModelStepRegistry() {
+			public List<ModelStep> getRegisteredModelStepList() throws Exception {
+				try {
+					DefaultModelStepRegistry reg = new DefaultModelStepRegistry();
+					return reg.getRegisteredModelStepList();
+				} catch (Exception ex) {
+					logger.error("error in creating steps :" + ex.getMessage(), ex); //$NON-NLS-1$
+					BugReporter.sendBugReport();
+					throw new RuntimeException(ex.getMessage(), ex);
+				}
+			}
+		}, services.getRepository(), services.getAsyncJobs(), context, prefixedNamePrefsStorage);
 
-    toolWindowManager
-        .getContentManager()
-        .addContent(
-            "Main", //$NON-NLS-1$
-            null, null, modeleditor);
+		modeleditor.defineOwner(this);
 
-    getContentPane().add(toolWindowManager, BorderLayout.CENTER);
+		modeleditor.setConsole(aSyncConsoleOutput);
+		modeleditor.setConsoleShowListener(new IConsoleShowListener() {
 
-    JMenuBar menu = new JMenuBar();
+			@Override
+			public void showConsole() {
+				try {
+					tConsolewindow.setVisible(true);
+				} catch (Exception ex) {
+					logger.error(ex.getMessage(), ex);
+				}
 
-    JMenu jFileMenu = new JMenu(Messages.getString("APrintNGModelFrame.3")); //$NON-NLS-1$
+			}
+		});
 
-    JMenu newMene = new JMenu(Messages.getString("APrintNGModelFrame.4")); //$NON-NLS-1$
-    newMene.setIcon(new ImageIcon(APrintNGModelFrame.class.getResource("ark_new.png"))); //$NON-NLS-1$
+		getContentPane().setLayout(new BorderLayout());
 
-    JMenuItem blank = new JMenuItem(new NewAction(Messages.getString("APrintNGModelFrame.6"), null)); //$NON-NLS-1$
-    newMene.add(blank);
+		// Made all tools available
+		for (ToolWindow window : toolWindowManager.getToolWindows()) {
+			window.setAvailable(true);
+		}
 
-    newMene.addSeparator();
+		toolWindowManager.getContentManager().addContent("Main", //$NON-NLS-1$
+				null, null, modeleditor);
 
-    JMenuItem loadMidi =
-        new JMenuItem(
-            new NewAction(
-                Messages.getString("APrintNGModelFrame.7"), //$NON-NLS-1$
-                ModelTemplateMarker.class.getResource("MidiLoadTemplate.model"))); //$NON-NLS-1$
-    newMene.add(loadMidi);
+		getContentPane().add(toolWindowManager, BorderLayout.CENTER);
 
-    JMenuItem transformTemplate =
-        new JMenuItem(new NewAction(Messages.getString("APrintNGModelFrame.9"), //$NON-NLS-1$
-        		ModelTemplateMarker.class.getResource("VirtualBookChange.model"))); //$NON-NLS-1$
-    newMene.add(transformTemplate);
+		JMenuBar menu = new JMenuBar();
 
-    jFileMenu.add(newMene);
+		JMenu jFileMenu = new JMenu(Messages.getString("APrintNGModelFrame.3")); //$NON-NLS-1$
 
-    jFileMenu.addSeparator();
+		JMenu newMene = new JMenu(Messages.getString("APrintNGModelFrame.4")); //$NON-NLS-1$
+		newMene.setIcon(new ImageIcon(APrintNGModelFrame.class.getResource("ark_new.png"))); //$NON-NLS-1$
 
-    JMenuItem openMenuItem = new JMenuItem(new LoadAction());
+		JMenuItem blank = new JMenuItem(new NewAction(Messages.getString("APrintNGModelFrame.6"), null)); //$NON-NLS-1$
+		newMene.add(blank);
 
-    jFileMenu.add(openMenuItem);
-    JMenuItem saveMenuItem = new JMenuItem(new SaveAction());
-    jFileMenu.add(saveMenuItem);
+		newMene.addSeparator();
 
-    jFileMenu.addSeparator();
-    jFileMenu.add(Messages.getString("APrintNGModelFrame.10")); //$NON-NLS-1$
+		JMenuItem loadMidi = new JMenuItem(new NewAction(Messages.getString("APrintNGModelFrame.7"), //$NON-NLS-1$
+				ModelTemplateMarker.class.getResource("MidiLoadTemplate.model"))); //$NON-NLS-1$
+		newMene.add(loadMidi);
 
-    menu.add(jFileMenu);
+		JMenuItem transformTemplate = new JMenuItem(new NewAction(Messages.getString("APrintNGModelFrame.9"), //$NON-NLS-1$
+				ModelTemplateMarker.class.getResource("VirtualBookChange.model"))); //$NON-NLS-1$
+		newMene.add(transformTemplate);
 
-    add(menu, BorderLayout.NORTH);
-  }
+		jFileMenu.add(newMene);
 
-  class SaveAction extends AbstractAction {
+		jFileMenu.addSeparator();
 
-    public SaveAction() {
-      super(Messages.getString("APrintNGModelFrame.11"), new ImageIcon(APrintNGModelFrame.class.getResource("filesave.png"))); //$NON-NLS-1$ //$NON-NLS-2$
-    }
+		JMenuItem openMenuItem = new JMenuItem(new LoadAction());
 
-    @Override
-    public boolean isEnabled() {
-      return true;
-    }
+		jFileMenu.add(openMenuItem);
+		JMenuItem saveMenuItem = new JMenuItem(new SaveAction());
+		jFileMenu.add(saveMenuItem);
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      //
-      modeleditor.save();
-    }
-  }
+		jFileMenu.addSeparator();
+		jFileMenu.add(Messages.getString("APrintNGModelFrame.10")); //$NON-NLS-1$
 
-  class LoadAction extends AbstractAction {
-    /** */
-    private static final long serialVersionUID = -1697497407011133001L;
+		menu.add(jFileMenu);
 
-    public LoadAction() {
-      super(Messages.getString("APrintNGModelFrame.13"), new ImageIcon(APrintNGModelFrame.class.getResource("fileopen.png"))); //$NON-NLS-1$ //$NON-NLS-2$
-    }
+		add(menu, BorderLayout.NORTH);
+	}
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      modeleditor.load();
-    }
-  }
+	class SaveAction extends AbstractAction {
 
-  class NewAction extends AbstractAction {
+		public SaveAction() {
+			super(Messages.getString("APrintNGModelFrame.11"), //$NON-NLS-1$
+					new ImageIcon(APrintNGModelFrame.class.getResource("filesave.png"))); //$NON-NLS-1$
+		}
 
-    /** */
-    private static final long serialVersionUID = -5727684345592418371L;
+		@Override
+		public boolean isEnabled() {
+			return true;
+		}
 
-    private URL initialContent = null;
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			//
+			modeleditor.save();
+		}
+	}
 
-    public NewAction(String label, URL initialContent) {
-      super(label, new ImageIcon(APrintNGModelFrame.class.getResource("ark_new.png"))); //$NON-NLS-1$
-      this.initialContent = initialContent;
-    }
+	class LoadAction extends AbstractAction {
+		/** */
+		private static final long serialVersionUID = -1697497407011133001L;
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-      try {
-        logger.debug("create an empty model"); //$NON-NLS-1$
-        modeleditor.newFromTemplate(initialContent);
+		public LoadAction() {
+			super(Messages.getString("APrintNGModelFrame.13"), //$NON-NLS-1$
+					new ImageIcon(APrintNGModelFrame.class.getResource("fileopen.png"))); //$NON-NLS-1$
+		}
 
-        // lunch the model check to show the user actions
-        // to make for having a fully functionnal element
-        logger.debug("validate the constraints to show the elements"); //$NON-NLS-1$
-        List<String> errors = modeleditor.validateState();
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			modeleditor.load();
+		}
+	}
 
-        if (errors != null && errors.size() > 0) {
-          JMessageBox.showMessage(APrintNGModelFrame.this, Messages.getString("APrintNGModelFrame.18")); //$NON-NLS-1$
-        }
+	class NewAction extends AbstractAction {
 
-        logger.debug("end of validation"); //$NON-NLS-1$
+		/** */
+		private static final long serialVersionUID = -5727684345592418371L;
 
-      } catch (Exception ex) {
-    	  logger.error(ex.getMessage(), ex);
-        JMessageBox.showError(APrintNGModelFrame.this, ex);
-        BugReporter.sendBugReport();
-      }
-    }
-  }
+		private URL initialContent = null;
+
+		public NewAction(String label, URL initialContent) {
+			super(label, new ImageIcon(APrintNGModelFrame.class.getResource("ark_new.png"))); //$NON-NLS-1$
+			this.initialContent = initialContent;
+		}
+
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			try {
+				logger.debug("create an empty model"); //$NON-NLS-1$
+				modeleditor.newFromTemplate(initialContent);
+
+				// lunch the model check to show the user actions
+				// to make for having a fully functionnal element
+				logger.debug("validate the constraints to show the elements"); //$NON-NLS-1$
+				List<String> errors = modeleditor.validateState();
+
+				if (errors != null && errors.size() > 0) {
+					JMessageBox.showMessage(APrintNGModelFrame.this, Messages.getString("APrintNGModelFrame.18")); //$NON-NLS-1$
+				}
+
+				logger.debug("end of validation"); //$NON-NLS-1$
+
+			} catch (Exception ex) {
+				logger.error(ex.getMessage(), ex);
+				JMessageBox.showError(APrintNGModelFrame.this, ex);
+				BugReporter.sendBugReport();
+			}
+		}
+	}
 }

@@ -316,7 +316,7 @@ public class JVirtualBookComponent extends JComponent {
 	 * @return the mm distance representing the time
 	 */
 	public double timeToMM(long time) {
-		return ((double) time) / 1000000 * virtualbook.getScale().getSpeed();
+		return ((double) time) / 1_000_000.0d * virtualbook.getScale().getSpeed();
 	}
 
 	/**
@@ -326,7 +326,7 @@ public class JVirtualBookComponent extends JComponent {
 	 * @return the time in microseconds
 	 */
 	public long MMToTime(double mm) {
-		return (long) ((mm / virtualbook.getScale().getSpeed()) * 1000000);
+		return (long) ((mm / virtualbook.getScale().getSpeed()) * 1_000_000);
 	}
 
 	public Position queryWithExtraMargin(int x, int y) {
@@ -588,6 +588,12 @@ public class JVirtualBookComponent extends JComponent {
 		double d = -xoffset + margin + x;
 		return MmToPixel(d);
 	}
+	
+	
+	public double convertCartonToScreenXDecimal(double x) {
+		double d = -xoffset + margin + x;
+		return MmToPixelDecimal(d);
+	}
 
 	/**
 	 * convert the y coordinate from the book space to the screen space
@@ -645,11 +651,20 @@ public class JVirtualBookComponent extends JComponent {
 	 * @return the converted pixels number
 	 */
 	public int MmToPixel(double x) {
-
-		double pts_par_mm = (screendpi * 1.0) / 25.4;
-		return (int) (x / xfactor * pts_par_mm);
+		return (int) MmToPixelDecimal(x);
 	}
 
+	/**
+	 * mm to pixel decimal, used in graphics transforms
+	 * @param x
+	 * @return
+	 */
+	public double MmToPixelDecimal(double x) {
+		double pts_par_mm = (screendpi * 1.0d) / 25.4;
+		return (int) (x / xfactor * pts_par_mm);
+	}
+	
+	
 	/**
 	 * get the track axis in mm, this take into account the book orientation
 	 */

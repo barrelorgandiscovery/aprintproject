@@ -336,7 +336,7 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 			t.concatenate(translateInstance);
 		}
 
-		double factor = (1.0 * component.MmToPixel(dimensionOnBook) / dimensionInOrigin);
+		double factor = (1.0d * component.MmToPixel(dimensionOnBook) / dimensionInOrigin);
 //				int iwidth = (int) (factor
 //						* imageToDisplay.getWidth());
 //				int iheight = component.MmToPixel(width);
@@ -344,7 +344,7 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 		if (disableRescale) {
 //					iwidth = imageToDisplay.getWidth();
 //					iheight = imageToDisplay.getHeight();
-			factor = 1.0;
+			factor = 1.0d;
 		}
 
 		AffineTransform display = AffineTransform.getScaleInstance(factor, factor);

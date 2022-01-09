@@ -20,6 +20,11 @@ import org.barrelorgandiscovery.repository.Repository2;
 
 public class JMergeImagesStep extends BasePanelStep {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6584793224515671313L;
+
 	private static Logger logger = Logger.getLogger(JMergeImagesStep.class);
 
 	public static int rescaleFactor = 1;

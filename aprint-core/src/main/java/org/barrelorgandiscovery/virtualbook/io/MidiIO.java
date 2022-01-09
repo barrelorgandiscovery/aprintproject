@@ -128,7 +128,6 @@ public class MidiIO {
 			if (e == null)
 				continue;
 			result.issues.add(e.toIssue());
-
 		}
 
 		return result;

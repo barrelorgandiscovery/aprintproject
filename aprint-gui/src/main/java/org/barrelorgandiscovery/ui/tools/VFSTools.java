@@ -6,39 +6,58 @@ import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.vfs2.FileName;
 import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
+import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 import org.apache.commons.vfs2.provider.AbstractFileObject;
+import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder;
+import org.apache.commons.vfs2.provider.webdav4s.Webdav4sFileProvider;
 
 /**
  * Tools for interacting between VFS and Java file API
+ * 
  * @author pfreydiere
  *
  */
 public class VFSTools {
-	
-	
+
+	static {
+		// add webdav tools
+		try {
+			FileSystemManager fsManager = VFS.getManager();
+			System.out.println(fsManager);
+			StandardFileSystemManager sm = (StandardFileSystemManager) fsManager;
+			sm.addProvider("webdav", new Webdav4sFileProvider());
+			
+			
+			//FtpFileSystemConfigBuilder instance = FtpFileSystemConfigBuilder.getInstance();// .setPassiveMode(opts, true);
+		
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+
 	public static String decodeURIEncoding(String encodedURL) throws Exception {
 		try {
-		    String result = java.net.URLDecoder.decode(encodedURL, StandardCharsets.UTF_8.name());
-		    return result;
+			String result = java.net.URLDecoder.decode(encodedURL, StandardCharsets.UTF_8.name());
+			return result;
 		} catch (UnsupportedEncodingException e) {
-		    // not going to happen - value came from JDK's own StandardCharsets
+			// not going to happen - value came from JDK's own StandardCharsets
 			return encodedURL;
 		}
 	}
-	
 
 	public static AbstractFileObject fromRegularFile(File file) throws Exception {
-		
+
 		FileObject f = VFS.getManager().resolveFile(file.toURL().toString());
 		if (!f.exists()) {
 			throw new Exception("file " + file + " does not exists");
 		}
 		assert f.isAttached();
-		return (AbstractFileObject)f;
-		
+		return (AbstractFileObject) f;
+
 	}
-	
+
 	public static File convertToFile(FileObject fo) throws Exception {
 		if (fo == null) {
 			return null;

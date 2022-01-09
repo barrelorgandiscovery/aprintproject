@@ -8,6 +8,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.Stroke;
+import java.awt.Toolkit;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
@@ -40,7 +41,7 @@ public class HolesDisplayOverlayLayer implements VirtualBookComponentBackgroundL
 	 */
 	private double xoffset = 0;
 
-	private double xscale = 1.0;
+	private double xscale = 1.0d;
 
 	/**
 	 * flip the image display
@@ -127,25 +128,17 @@ public class HolesDisplayOverlayLayer implements VirtualBookComponentBackgroundL
 			AffineTransform translateInstance = AffineTransform.getTranslateInstance(0, dimensionInOrigin);
 
 			translateInstance.concatenate(scaleTransform);
-			// imageToDisplay = reverseImage(backgroundimage);
 			t.concatenate(translateInstance);
 		}
 
-		double factor = (1.0 * component.MmToPixel(dimensionOnBook) / dimensionInOrigin);
-//				int iwidth = (int) (factor
-//						* imageToDisplay.getWidth());
-//				int iheight = component.MmToPixel(width);
-
-		if (disableRescale) {
-//					iwidth = imageToDisplay.getWidth();
-//					iheight = imageToDisplay.getHeight();
-			factor = 1.0;
-		}
+		Toolkit kit = Toolkit.getDefaultToolkit();
+		double screendpi = kit.getScreenResolution();
+		double factor = 1.0 / component.getXfactor() * (screendpi * 1.0d) / 25.4;
 
 		AffineTransform display = AffineTransform.getScaleInstance(factor, factor);
 		display.concatenate(t);
 
-		AffineTransform shift = AffineTransform.getTranslateInstance(component.convertCartonToScreenX(xoffset),
+		AffineTransform shift = AffineTransform.getTranslateInstance(component.convertCartonToScreenXDecimal(xoffset),
 				component.convertCartonToScreenY(0));
 		shift.concatenate(display);
 		return shift;
@@ -204,10 +197,7 @@ public class HolesDisplayOverlayLayer implements VirtualBookComponentBackgroundL
 
 				g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, this.opacity));
 
-				Rectangle2D r = new Rectangle2D.Double(xmm,
-						y,
-						widthmm,
-						scale.getTrackWidth());
+				Rectangle2D r = new Rectangle2D.Double(xmm, y, widthmm, scale.getTrackWidth());
 				g2d.draw(r);
 			}
 
@@ -281,7 +271,7 @@ public class HolesDisplayOverlayLayer implements VirtualBookComponentBackgroundL
 
 	@Override
 	public void drawBackground(Graphics g, JVirtualBookComponent component) {
-		
+
 	}
 
 }

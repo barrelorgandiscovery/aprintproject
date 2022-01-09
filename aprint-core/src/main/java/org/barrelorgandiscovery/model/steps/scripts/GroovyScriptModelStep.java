@@ -48,6 +48,16 @@ public class GroovyScriptModelStep extends ModelStep implements IModelStepContex
 
 	@Override
 	public String getLabel() {
+		
+		if (compiledScript != null) {
+			try {
+				return compiledScript.getLabel();
+			} catch (Exception e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
+
+		// otherwise, default script box
 		return "Script Box";
 	}
 
