@@ -12,6 +12,7 @@ import org.barrelorgandiscovery.virtualbook.Hole;
 
 import ij.IJ;
 import ij.ImagePlus;
+import ij.Prefs;
 import ij.gui.ShapeRoi;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
@@ -73,6 +74,8 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 
 		ImagePlus ip = new ImagePlus();
 		ip.setImage(image);
+		
+		Prefs.setThreads(1);
 		ImagePlus result = ws.applyClassifier(ip);
 
 		ImageProcessor processor = result.getProcessor();

@@ -787,7 +787,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 			public void errorInProcessingTile(String errormsg) {
 				logger.error(errormsg);
 			}
-		}, 1);
+		}, 1); // one thread
 
 		backGroundThread.start(new TileProcessing<Void>() {
 			@Override
