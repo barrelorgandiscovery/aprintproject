@@ -18,18 +18,25 @@ public class CADParametersBeanInfo extends BaseBeanInfo {
 
 		ExtendedPropertyDescriptor startBookAdjustementFromBeginning = addProperty("startBookAdjustementFromBeginning");
 		startBookAdjustementFromBeginning
-				.setShortDescription("Définition de la marge entre le premier trou du carton et le debut, en mm");
+				.setShortDescription("Dï¿½finition de la marge entre le premier trou du carton et le debut, en mm");
 		startBookAdjustementFromBeginning.setDisplayName("Marge de debut du carton (mm)");
 		startBookAdjustementFromBeginning.setPropertyEditorClass(DoublePropertyEditor.class);
 		startBookAdjustementFromBeginning.setCategory("Carton");
 
 		ExtendedPropertyDescriptor nombreDePlisAAjouterAuDebut = addProperty("nombreDePlisAAjouterAuDebut");
 		nombreDePlisAAjouterAuDebut
-				.setShortDescription("Plis supplémentaires à ajouter avant le debut du carton (nombre de plis)");
-		nombreDePlisAAjouterAuDebut.setDisplayName("Nombre de plis supplémentaires de debut de carton");
+				.setShortDescription("Plis supplï¿½mentaires ï¿½ ajouter avant le debut du carton (nombre de plis)");
+		nombreDePlisAAjouterAuDebut.setDisplayName("Nombre de plis supplï¿½mentaires de debut de carton");
 		nombreDePlisAAjouterAuDebut.setPropertyEditorClass(IntegerPropertyEditor.class);
 		nombreDePlisAAjouterAuDebut.setCategory("Carton");
 
+		ExtendedPropertyDescriptor nombreDePlisAAjouterFin = addProperty("nombreDePlisAAjouterFin");
+		nombreDePlisAAjouterFin
+				.setShortDescription("Plis supplï¿½mentaires ï¿½ ajouter en fin de carton (nombre de plis)");
+		nombreDePlisAAjouterFin.setDisplayName("Nombre de plis supplï¿½mentaires en fin de carton");
+		nombreDePlisAAjouterFin.setPropertyEditorClass(IntegerPropertyEditor.class);
+		nombreDePlisAAjouterFin.setCategory("Carton");
+		
 		ExtendedPropertyDescriptor typeTrous = addProperty("typeTrous");
 		typeTrous.setShortDescription("Type de trous");
 		typeTrous.setDisplayName("Types de trous");
@@ -38,8 +45,8 @@ public class CADParametersBeanInfo extends BaseBeanInfo {
 
 		ExtendedPropertyDescriptor taillTrous = addProperty("tailleTrous");
 		taillTrous.setShortDescription(
-				"Taille Maximum des trous créés, si le trou est plus grand, un pont est créé.\nSi vous ne souhaitez pas de ponts, mettez un grand nombre ici");
-		taillTrous.setDisplayName("Taille Maximum des découpes (mm)");
+				"Taille Maximum des trous crï¿½ï¿½s, si le trou est plus grand, un pont est crï¿½ï¿½.\nSi vous ne souhaitez pas de ponts, mettez un grand nombre ici");
+		taillTrous.setDisplayName("Taille Maximum des dï¿½coupes (mm)");
 		taillTrous.setPropertyEditorClass(DoublePropertyEditor.class);
 		taillTrous.setCategory("Trous");
 
@@ -57,7 +64,7 @@ public class CADParametersBeanInfo extends BaseBeanInfo {
 
 		ExtendedPropertyDescriptor silreste = addProperty("pasDePontSiIlReste");
 		silreste.setShortDescription(
-				"On abandonne le dernier pont s'il reste un petite distance intérieure à la valeure saisie (en mm)");
+				"On abandonne le dernier pont s'il reste un petite distance intï¿½rieure ï¿½ la valeure saisie (en mm)");
 		silreste.setPropertyEditorClass(DoublePropertyEditor.class);
 		silreste.setDisplayName("Pas de pont s'il reste (mm)");
 		silreste.setCategory("Trous");
@@ -65,13 +72,13 @@ public class CADParametersBeanInfo extends BaseBeanInfo {
 
 		ExtendedPropertyDescriptor surchargeLargeurTrous = addProperty("surchargeLargeurTrous");
 		surchargeLargeurTrous.setShortDescription(
-				"Utiliser le paramètre Largeur Trous, ici au lieu de l'utilisation des métriques dans la gamme");
+				"Utiliser le paramï¿½tre Largeur Trous, ici au lieu de l'utilisation des mï¿½triques dans la gamme");
 		surchargeLargeurTrous.setDisplayName("Surcharge de largeur des trous (activation)");
 		surchargeLargeurTrous.setCategory("Trous");
 		
 		ExtendedPropertyDescriptor hauteurDesTrous = addProperty("largeurTrous");
 		hauteurDesTrous.setShortDescription(
-				"Largeur des trous spécifiée si la surcharge par rapport à la gamme est activée");
+				"Largeur des trous spï¿½cifiï¿½e si la surcharge par rapport ï¿½ la gamme est activï¿½e");
 		hauteurDesTrous.setDisplayName("Surcharge de largeur des trous (mm)");
 		hauteurDesTrous.setPropertyEditorClass(DoublePropertyEditor.class);
 		hauteurDesTrous.setCategory("Trous");
@@ -85,19 +92,19 @@ public class CADParametersBeanInfo extends BaseBeanInfo {
 
 		ExtendedPropertyDescriptor taillePage = addProperty("taillePagePourPliure");
 		taillePage.setShortDescription(
-				"Si les pliures sont sélectionnées, Taille de la page du carton pour réaliser les pliures en mm");
+				"Si les pliures sont sï¿½lectionnï¿½es, Taille de la page du carton pour rï¿½aliser les pliures en mm");
 		taillePage.setPropertyEditorClass(DoublePropertyEditor.class);
 		taillePage.setDisplayName("Taille page carton (mm)");
 		taillePage.setCategory("Pliures");
 
 		ExtendedPropertyDescriptor typePliure = addProperty("typePliure");
-		typePliure.setShortDescription("Dessin des pliures (continue, ou pointillé)");
+		typePliure.setShortDescription("Dessin des pliures (continue, ou pointillï¿½)");
 		typePliure.setPropertyEditorClass(TypePliuresComboBoxPropertyEditor.class);
 		typePliure.setDisplayName("Type de pliures");
 		typePliure.setCategory("Pliures");
 
 		ExtendedPropertyDescriptor exportDecoupeDesBords = addProperty("exportDecoupeDesBords");
-		exportDecoupeDesBords.setShortDescription("Export de la découpe des bords");
+		exportDecoupeDesBords.setShortDescription("Export de la dï¿½coupe des bords");
 		exportDecoupeDesBords.setDisplayName("Export Bords du carton");
 		exportDecoupeDesBords.setCategory("Export");
 

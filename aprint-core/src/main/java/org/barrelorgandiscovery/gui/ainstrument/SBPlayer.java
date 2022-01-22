@@ -64,6 +64,12 @@ public class SBPlayer {
 
 	public void changeCurrentSoundBank(Soundbank soundBank) throws Exception {
 
+		if (synth == null) {
+			logger.info("no synth");
+			return;
+		}
+		
+		assert synth != null;
 		assert synth.isOpen();
 
 		if (lastplayedinstrument != null) {

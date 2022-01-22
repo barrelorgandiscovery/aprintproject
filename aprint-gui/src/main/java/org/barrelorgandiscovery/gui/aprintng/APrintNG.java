@@ -1625,7 +1625,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 							
 							loadBookInNewFrame(result);
 						} catch (Exception ex) {
-							logger.error("error in loading book in new Frame :" + ex.getMessage(), ex); //$NON-NLS-1$
+							logger.error("error in loading book :" + ex.getMessage(), ex); //$NON-NLS-1$
 							JMessageBox.showMessage(getOwnerForDialog(), Messages.getString("APrintNG.400")); //$NON-NLS-1$
 						}
 					}

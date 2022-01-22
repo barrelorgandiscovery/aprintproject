@@ -70,7 +70,7 @@ public class CADVirtualBookExporter {
 	/**
 	 * Exporte un carton en fichier DXF
 	 * 
-	 * @param vb          le carton à exporter
+	 * @param vb          le carton ï¿½ exporter
 	 * @param mecanique   booleen indiquant si le type est mecanique
 	 * @param tailleTrous taille des trous dans le cas du pneumatique
 	 * @param ponts       taille des ponts pour le pneumatique
@@ -109,9 +109,12 @@ public class CADVirtualBookExporter {
 		// startBook can be negative ...
 
 		double vbend = vb.getLength() * xratio;
+		
+		double endPageSize = p.getNombreDePlisAAjouterFin() * p.getTaillePagePourPliure();
+		
 		// round the end to a integer value of the page size
-		vbend = (Math.ceil((vbend - startBook) / p.getTaillePagePourPliure()) + 1) * p.getTaillePagePourPliure()
-				+ startBook;
+		vbend = (Math.ceil((vbend - startBook) / p.getTaillePagePourPliure()) + p.getNombreDePlisAAjouterFin()) * p.getTaillePagePourPliure()
+				 + startBook;
 
 		if (p.isExportDecoupeDesBords()) {
 
@@ -198,7 +201,7 @@ public class CADVirtualBookExporter {
 					}
 				} else if (p.getTypePliure() == TypePliure.ALTERNE_CONTINU_POINTILLEE) {
 
-					// pointillés avec non déoupe au bord des deux cotés, sur 5mm (sinon,
+					// pointillï¿½s avec non dï¿½oupe au bord des deux cotï¿½s, sur 5mm (sinon,
 					// fragilise carton)
 					double startNoDots = 5.0;
 					double endDotsWidth = scale.getWidth() - 5.0;
@@ -215,7 +218,7 @@ public class CADVirtualBookExporter {
 				start += p.getTaillePagePourPliure() * 2;
 			}
 
-			// fin d'écriture des pliures dans la layer concernée
+			// fin d'ï¿½criture des pliures dans la layer concernï¿½e
 
 			start = startBook + p.getTaillePagePourPliure();
 			while (start <= vbend + 1) {
@@ -317,7 +320,7 @@ public class CADVirtualBookExporter {
 
 		BasicConfigurator.configure(new ConsoleAppender(new PatternLayout()));
 		MidiFile midiFile = MidiFileIO
-				.read(new File("C:/Projets/APrintPerfoExtension/doc/Perçage_Lazer/BEER essai.mid"));
+				.read(new File("C:/Projets/APrintPerfoExtension/doc/Perï¿½age_Lazer/BEER essai.mid"));
 
 		Properties properties = new Properties();
 		properties.setProperty("folder", "C:/Projets/APrint/gammes");

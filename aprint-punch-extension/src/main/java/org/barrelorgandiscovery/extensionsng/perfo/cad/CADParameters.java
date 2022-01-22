@@ -9,7 +9,7 @@ import java.io.Serializable;
 public class CADParameters implements Serializable, Externalizable {
 
 	/**
-	 * Formes de trous pour les trous généraux
+	 * Formes de trous pour les trous gï¿½nï¿½raux
 	 */
 	private TrouType typeTrous = TrouType.TROUS_RECTANGULAIRES;
 
@@ -31,6 +31,8 @@ public class CADParameters implements Serializable, Externalizable {
 	private double startBookAdjustementFromBeginning = 80; // 80mm by default
 
 	private int nombreDePlisAAjouterAuDebut = 0;
+	
+	private int nombreDePlisAAjouterFin = 0;
 
 	private TypePliure typePliure = TypePliure.CONTINUE;
 
@@ -46,6 +48,14 @@ public class CADParameters implements Serializable, Externalizable {
 
 	public int getNombreDePlisAAjouterAuDebut() {
 		return nombreDePlisAAjouterAuDebut;
+	}
+	
+	public void setNombreDePlisAAjouterFin(int nombreDePlisAAjouterFin) {
+		this.nombreDePlisAAjouterFin = nombreDePlisAAjouterFin;
+	}
+	
+	public int getNombreDePlisAAjouterFin() {
+		return nombreDePlisAAjouterFin;
 	}
 
 	public void setStartBookAdjustementFromBeginning(double startBookAdjustementFromBeginning) {
@@ -170,6 +180,7 @@ public class CADParameters implements Serializable, Externalizable {
 		tailleTrous = in.readDouble();
 		typePliure = TypePliure.valueOf(in.readUTF());
 		startBookAdjustementFromBeginning = in.readDouble();
+		
 		nombreDePlisAAjouterAuDebut = in.readInt();
 		try {
 			exportDecoupeDesBords = in.readBoolean();
@@ -182,7 +193,6 @@ public class CADParameters implements Serializable, Externalizable {
 			
 		}
 		
-
 		try {
 			surchargeLargeurTrous = in.readBoolean();
 		} catch (Exception ex) {
@@ -191,6 +201,11 @@ public class CADParameters implements Serializable, Externalizable {
 		try {
 			largeurTrous = in.readDouble();
 		} catch (Exception ex) {
+		}
+		
+		try {
+			nombreDePlisAAjouterFin = in.readInt();
+		}catch(Exception ex) {
 		}
 
 	}
@@ -211,6 +226,8 @@ public class CADParameters implements Serializable, Externalizable {
 		out.writeBoolean(exportTrous);
 		out.writeBoolean(surchargeLargeurTrous);
 		out.writeDouble(largeurTrous);
+		out.writeInt(nombreDePlisAAjouterFin);
+		
 	}
 
 }

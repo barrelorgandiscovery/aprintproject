@@ -958,7 +958,9 @@ public class ScaleComponent extends JComponent {
 
 		try {
 			BufferedImage bi = ImageIO.read(rendering.getBackgroundImage());
-			this.cartontrame = new TexturePaint(bi, new Rectangle2D.Double(0, 0, bi.getWidth(), bi.getHeight()));
+			if (bi != null) {
+				this.cartontrame = new TexturePaint(bi, new Rectangle2D.Double(0, 0, bi.getWidth(), bi.getHeight()));
+			}
 		} catch (Exception ex) {
 			logger.error("setcarton", ex); //$NON-NLS-1$
 			this.cartontrame = null;

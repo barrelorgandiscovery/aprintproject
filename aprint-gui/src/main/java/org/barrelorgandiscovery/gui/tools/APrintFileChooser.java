@@ -103,22 +103,26 @@ public class APrintFileChooser {
 			AbstractFileObject fileObject = convertToFileObject(selectedFile);
 			setSelectedFile(fileObject);
 		} catch (Exception ex) {
-			throw new RuntimeException(ex.getMessage(), ex);
+			logger.error("cannot set selected file :" + selectedFile, ex);
 		}
 	}
 
 	public static AbstractFileObject convertToFileObject(File selectedFile) throws Exception {
-		
+
 		if (selectedFile == null) {
 			return null;
 		}
-		
+
 		return VFSTools.fromRegularFile(selectedFile);
 	}
 
 	public void setSelectedFile(AbstractFileObject selectedFile) {
 		// tolerant to null
-		this.fileChooser.setSelectedFileObject(selectedFile);
+		try {
+			this.fileChooser.setSelectedFileObject(selectedFile);
+		} catch (Throwable t) {
+			logger.error(t.getMessage(), t);
+		}
 	}
 
 	public void setCurrentDirectory(File currentDirectory) {
@@ -131,12 +135,12 @@ public class APrintFileChooser {
 			if (currentDirectory != null && currentDirectory.getParentFile() == null) {
 				return;
 			}
-			
+
 			FileObject fo = VFSTools.fromRegularFile(currentDirectory);
-			
+
 			this.fileChooser.setCurrentDirectoryObject(fo);
 		} catch (Exception ex) {
-			throw new RuntimeException(ex.getMessage(), ex);
+			logger.error(ex.getMessage(), ex);
 		}
 	}
 

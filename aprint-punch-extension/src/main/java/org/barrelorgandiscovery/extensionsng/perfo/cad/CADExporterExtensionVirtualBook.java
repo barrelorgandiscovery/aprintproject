@@ -75,7 +75,7 @@ public class CADExporterExtensionVirtualBook extends BaseVirtualBookExtension
 	private GraphicsLayer graphicLayer;
 
 	public CADExporterExtensionVirtualBook() throws Exception {
-		graphicLayer = new GraphicsLayer("Tracé Vectoriel");
+		graphicLayer = new GraphicsLayer("Tracï¿½ Vectoriel");
 		defaultAboutAuthor = "Patrice Freydiere";
 		defaultAboutVersion = "2020.12.12";
 		createParametersPanel();
@@ -147,7 +147,7 @@ public class CADExporterExtensionVirtualBook extends BaseVirtualBookExtension
 
 						AbstractFileObject savedfile = choose.getSelectedFile();
 						if (savedfile == null) {
-							JMessageBox.showMessage(currentFrame.getOwnerForDialog(), "pas de fichier sélectionné");
+							JMessageBox.showMessage(currentFrame.getOwnerForDialog(), "pas de fichier sï¿½lectionnï¿½");
 							return;
 						}
 
@@ -304,6 +304,9 @@ public class CADExporterExtensionVirtualBook extends BaseVirtualBookExtension
 
 			ps.setIntegerProperty("nombrepageavant", //$NON-NLS-1$
 					dxfParameters.getNombreDePlisAAjouterAuDebut());
+			
+			ps.setIntegerProperty("nombrepageapres", //$NON-NLS-1$
+					dxfParameters.getNombreDePlisAAjouterFin());
 
 			ps.setDoubleProperty("margindebut", //$NON-NLS-1$
 					dxfParameters.getStartBookAdjustementFromBeginning());
@@ -341,6 +344,9 @@ public class CADExporterExtensionVirtualBook extends BaseVirtualBookExtension
 
 			dxfParameters.setNombreDePlisAAjouterAuDebut(ps.getIntegerProperty("nombrepageavant", //$NON-NLS-1$
 					dxfParameters.getNombreDePlisAAjouterAuDebut()));
+			
+			dxfParameters.setNombreDePlisAAjouterFin(ps.getIntegerProperty("nombrepageapres",//$NON-NLS-1$ 
+					dxfParameters.getNombreDePlisAAjouterFin()));
 
 			dxfParameters.setStartBookAdjustementFromBeginning(ps.getDoubleProperty("margindebut", dxfParameters //$NON-NLS-1$
 					.getStartBookAdjustementFromBeginning()));
