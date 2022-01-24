@@ -45,6 +45,7 @@ import org.barrelorgandiscovery.repository.Repository2;
 import org.barrelorgandiscovery.repository.Repository2Collection;
 import org.barrelorgandiscovery.repository.Repository2Factory;
 import org.barrelorgandiscovery.tools.JMessageBox;
+import org.barrelorgandiscovery.ui.tools.VFSTools;
 import org.barrelorgandiscovery.virtualbook.Fragment;
 import org.barrelorgandiscovery.virtualbook.Hole;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
@@ -284,13 +285,14 @@ public class AEdit extends JFrame implements ActionListener {
 	
 	private void saveCarton(AbstractFileObject vfsFile) {
 		try {
-			OutputStream fos = vfsFile.getOutputStream();
+			OutputStream fos = VFSTools.transactionalWrite(vfsFile);
+			
 			ObjectOutputStream oos = new ObjectOutputStream(fos);
 
 			oos.writeObject(jcarton.getVirtualBook());
-		} catch (IOException ex) {
+		} catch (Exception ex) {
+			logger.error(ex.getMessage(), ex);
 			JMessageBox.showMessage(this, ex.getMessage());
-			logger.error(ex);
 		}		
 	}
 

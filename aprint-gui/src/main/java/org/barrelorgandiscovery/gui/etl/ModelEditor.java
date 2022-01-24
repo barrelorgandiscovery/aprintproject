@@ -71,6 +71,7 @@ import org.barrelorgandiscovery.model.type.JavaType;
 import org.barrelorgandiscovery.repository.Repository2;
 import org.barrelorgandiscovery.repository.Repository2Factory;
 import org.barrelorgandiscovery.tools.SwingUtils;
+import org.barrelorgandiscovery.ui.tools.VFSTools;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 import org.barrelorgandiscovery.virtualbook.transformation.importer.MidiEventGroup;
 import org.w3c.dom.Document;
@@ -880,7 +881,7 @@ public class ModelEditor extends JPanel {
 		t.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
 		t.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		OutputStream outputStream = file.getOutputStream();
+		OutputStream outputStream = VFSTools.transactionalWrite(file);
 		try {
 			t.transform(new DOMSource(n), new StreamResult(outputStream));
 		} finally {

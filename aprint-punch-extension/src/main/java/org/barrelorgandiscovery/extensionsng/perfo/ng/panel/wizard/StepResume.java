@@ -215,7 +215,7 @@ public class StepResume extends JPanel implements Step {
 						return 0.0;
 					}).reduce((a, b) -> Math.max(a, b)).get();
 
-					OutputStream os = fileToSave.getOutputStream();
+					OutputStream os = VFSTools.transactionalWrite(fileToSave);
 					try {
 						OutputStreamWriter w = new OutputStreamWriter(os);
 						try {

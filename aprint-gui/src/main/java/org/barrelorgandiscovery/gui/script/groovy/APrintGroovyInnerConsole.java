@@ -36,6 +36,7 @@ import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.tools.FileNameExtensionFilter;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.StringTools;
+import org.barrelorgandiscovery.ui.tools.VFSTools;
 
 import groovy.lang.Binding;
 
@@ -295,7 +296,7 @@ public class APrintGroovyInnerConsole extends APrintNGInternalFrame {
 				return;
 			}
 
-			OutputStream ostream = openedFile.getOutputStream();
+			OutputStream ostream = VFSTools.transactionalWrite(openedFile);
 			try {
 				Writer w = new OutputStreamWriter(ostream, Charset.forName("UTF-8")); //$NON-NLS-1$
 				try {
@@ -337,7 +338,7 @@ public class APrintGroovyInnerConsole extends APrintNGInternalFrame {
 						return;
 					}
 				}
-				OutputStream ostream = f.getOutputStream();
+				OutputStream ostream = VFSTools.transactionalWrite(f);
 				try {
 					Writer w = new OutputStreamWriter(ostream, Charset.forName("UTF-8")); //$NON-NLS-1$
 					try {

@@ -41,13 +41,14 @@ import org.barrelorgandiscovery.repository.Repository;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
+import org.barrelorgandiscovery.ui.tools.VFSTools;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 import org.barrelorgandiscovery.virtualbook.transformation.AbstractMidiImporter;
 import org.barrelorgandiscovery.virtualbook.transformation.AbstractTransformation;
 import org.barrelorgandiscovery.virtualbook.transformation.LinearTransposition;
 
 /**
- * Extension de perçage pour la machine à percer de gérard
+ * Extension de perï¿½age pour la machine ï¿½ percer de gï¿½rard
  * 
  * @author Freydiere Patrice
  * 
@@ -124,9 +125,9 @@ public class PerfoExtension implements IExtension, InitExtensionPoint,
 	private JButton mi = null;
 
 	private JButton createOptionButton() {
-		mi = new JButton("Options de perçage ...");
-		// largeur du poinçon ...
-		// hauteur du poinçon ...
+		mi = new JButton("Options de perï¿½age ...");
+		// largeur du poinï¿½on ...
+		// hauteur du poinï¿½on ...
 		mi.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
@@ -161,7 +162,7 @@ public class PerfoExtension implements IExtension, InitExtensionPoint,
 
 		this.currentVirtualBook = vb;
 
-		// Vérification des contraintes ...
+		// Vï¿½rification des contraintes ...
 		perfoconverter = new PerfoPunchConverter(vb);
 
 		perfoconverter.convertToPunchPage(parameters.poinconsize,
@@ -198,7 +199,7 @@ public class PerfoExtension implements IExtension, InitExtensionPoint,
 			if (perfoconverter.hasErrors()) {
 				JMessageBox
 						.showMessage(aprintref,
-								"des erreurs subsistes dans le carton, le perçage ne reflete pas l'écoute");
+								"des erreurs subsistes dans le carton, le perï¿½age ne reflete pas l'ï¿½coute");
 			}
 
 			// lancement de l'optimisation ...
@@ -208,7 +209,7 @@ public class PerfoExtension implements IExtension, InitExtensionPoint,
 				public void run() {
 
 					CancelTracker ct = new CancelTracker();
-					aprintref.infiniteStartWait("Optimisation du tracé", ct);
+					aprintref.infiniteStartWait("Optimisation du tracï¿½", ct);
 					try {
 
 						perfoconverter.optimize(aprintref, ct);
@@ -243,8 +244,8 @@ public class PerfoExtension implements IExtension, InitExtensionPoint,
 				return;
 			}
 
-			// Sélection du fichier ..
-			// demande du fichier à sauvegarder ...
+			// Sï¿½lection du fichier ..
+			// demande du fichier ï¿½ sauvegarder ...
 			APrintFileChooser choose = new APrintFileChooser();
 
 			choose.setFileSelectionMode(APrintFileChooser.FILES_ONLY);
@@ -257,13 +258,13 @@ public class PerfoExtension implements IExtension, InitExtensionPoint,
 				AbstractFileObject savedfile = choose.getSelectedFile();
 				if (savedfile == null) {
 					JMessageBox.showMessage(aprintref,
-							"pas de fichier sélectionné");
+							"pas de fichier sï¿½lectionnï¿½");
 					return;
 				}
 
 				try {
 
-					OutputStream outStream = savedfile.getOutputStream();
+					OutputStream outStream = VFSTools.transactionalWrite( savedfile);
 					Writer fw = new OutputStreamWriter(outStream);
 					try {
 						// Ecriture de l'entete ...
@@ -313,7 +314,7 @@ public class PerfoExtension implements IExtension, InitExtensionPoint,
 						fw.close();
 					}
 
-					JMessageBox.showMessage(aprintref, "Fichier sauvegardé");
+					JMessageBox.showMessage(aprintref, "Fichier sauvegardï¿½");
 
 				} catch (Throwable ex) {
 					JMessageBox.showMessage(aprintref,
@@ -349,7 +350,7 @@ public class PerfoExtension implements IExtension, InitExtensionPoint,
 	private JButton savedxf = null;
 
 	private void addPerfoButtonsInToolBar(JToolBar tb) {
-		optimize = new JButton("Optimiser le tracé");
+		optimize = new JButton("Optimiser le tracï¿½");
 		optimize.setIcon(new ImageIcon(getClass().getResource("misc.png")));
 		optimize.setToolTipText("Optimisation du parcours du poincons pour l'extention perfo");
 		optimize.setActionCommand("OPTIMIZE");
@@ -385,7 +386,7 @@ public class PerfoExtension implements IExtension, InitExtensionPoint,
 
 		savedxf = new JButton("exporter en DXF");
 		savedxf.setIcon(new ImageIcon(getClass().getResource("misc.png")));
-		savedxf.setToolTipText("Exporter le carton dans un fichier DXF pour perçage laser");
+		savedxf.setToolTipText("Exporter le carton dans un fichier DXF pour perï¿½age laser");
 		savedxf.setActionCommand("SAVEDXF");
 		savedxf.addActionListener(this);
 

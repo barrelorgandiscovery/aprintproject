@@ -1,18 +1,16 @@
 package org.barrelorgandiscovery.ui.tools;
 
 import java.io.File;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 import org.apache.commons.vfs2.FileName;
 import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 import org.apache.commons.vfs2.provider.AbstractFileObject;
-import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder;
-import org.apache.commons.vfs2.provider.webdav4s.Webdav4sFileProvider;
 
 /**
  * Tools for interacting between VFS and Java file API
@@ -88,4 +86,18 @@ public class VFSTools {
 		}
 	}
 
+	
+	public static OutputStream transactionalWrite(AbstractFileObject file) throws Exception {
+		
+		FileName fileName = file.getName() ;
+		String relname = fileName.getBaseName() + ".bak";
+		
+		AbstractFileObject bakFile = (AbstractFileObject)file.getParent().resolveFile(relname);
+		file.moveTo(bakFile);
+		
+		return file.getOutputStream();
+		
+	}
+	
+	
 }

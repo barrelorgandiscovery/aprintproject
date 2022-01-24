@@ -87,6 +87,7 @@ import org.barrelorgandiscovery.tools.ImageTools;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.SwingUtils;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
+import org.barrelorgandiscovery.ui.tools.VFSTools;
 
 import com.jeta.forms.components.image.ImageComponent;
 import com.jeta.forms.components.panel.FormPanel;
@@ -1251,7 +1252,7 @@ public class JInstrumentEditorPanel extends JPanel {
 
 					lastOpenedSoundSampleFile = result;
 
-					OutputStream fos = result.getOutputStream();
+					OutputStream fos = VFSTools.transactionalWrite(result);
 					try {
 						ssio.saveSample(ss, null, fos);
 

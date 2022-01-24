@@ -39,6 +39,7 @@ import org.barrelorgandiscovery.scale.io.ScaleIO;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
 import org.barrelorgandiscovery.tools.streamstorage.FolderStreamStorage;
+import org.barrelorgandiscovery.ui.tools.VFSTools;
 
 import com.birosoft.liquid.LiquidLookAndFeel;
 
@@ -390,7 +391,7 @@ public class JInstrumentEditor extends JFrame {
 								+ StreamStorageEditableInstrumentManager.EDITABLE_INSTRUMENT_TYPE);
 			}
 
-			OutputStream fileOutputStream = selectedFile.getOutputStream();
+			OutputStream fileOutputStream = VFSTools.transactionalWrite(selectedFile);
 			is.save(instrumentEditor.getModel(), fileOutputStream);
 
 			fileOutputStream.close();

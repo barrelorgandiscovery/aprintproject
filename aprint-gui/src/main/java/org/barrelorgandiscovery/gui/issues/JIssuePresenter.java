@@ -33,6 +33,7 @@ import org.barrelorgandiscovery.scale.AbstractScaleConstraint;
 import org.barrelorgandiscovery.scale.ConstraintList;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
+import org.barrelorgandiscovery.ui.tools.VFSTools;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 import org.barrelorgandiscovery.virtualbook.checker.Checker;
 import org.barrelorgandiscovery.virtualbook.checker.CheckerFactory;
@@ -191,8 +192,7 @@ public class JIssuePresenter extends JPanel {
 
 						logger.debug(Messages.getString("JIssuePresenter.15")); //$NON-NLS-1$
 
-						OutputStream fos = 
-								selectedFile.getOutputStream();
+						OutputStream fos = VFSTools.transactionalWrite(selectedFile);
 						try {
 
 							OutputStreamWriter osw = new OutputStreamWriter(fos);

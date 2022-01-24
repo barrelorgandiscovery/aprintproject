@@ -47,6 +47,7 @@ import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
+import org.barrelorgandiscovery.ui.tools.VFSTools;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 import org.noos.xing.mydoggy.ToolWindowAnchor;
 import org.noos.xing.mydoggy.plaf.MyDoggyToolWindowManager;
@@ -314,7 +315,7 @@ public class PerfoExtensionVirtualBook
 
 				try {
 
-					OutputStream os = savedfile.getOutputStream();
+					OutputStream os = VFSTools.transactionalWrite(savedfile);
 					try {
 						OutputStreamWriter oswriter = new OutputStreamWriter(os);
 						try {

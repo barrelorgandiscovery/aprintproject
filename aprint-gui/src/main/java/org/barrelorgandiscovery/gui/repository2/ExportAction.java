@@ -20,6 +20,7 @@ import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
+import org.barrelorgandiscovery.ui.tools.VFSTools;
 
 public class ExportAction extends RepositoryAbstractAction {
 
@@ -81,7 +82,7 @@ public class ExportAction extends RepositoryAbstractAction {
 
 							EditableInstrumentStorage editableInstrumentStorage = new EditableInstrumentStorage();
 
-							OutputStream fos = f.getOutputStream();
+							OutputStream fos = VFSTools.transactionalWrite(f);
 							try {
 
 								editableInstrumentStorage.save(editableInstrument, fos);

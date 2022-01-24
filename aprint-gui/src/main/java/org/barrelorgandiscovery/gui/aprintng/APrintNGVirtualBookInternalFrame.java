@@ -889,7 +889,8 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 			}
 		}
 
-		// pianorollpanel.setBorder(new TitledBorder(Messages.getString("APrint.52"))); //$NON-NLS-1$
+		// pianorollpanel.setBorder(new TitledBorder(Messages.getString("APrint.52")));
+		// //$NON-NLS-1$
 		pianorollpanel.setLayout(new BorderLayout());
 		pianoroll.setPreferredSize(new Dimension(700, 300));
 		pianoroll.setUseFastDrawing(true);
@@ -942,7 +943,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 				} else {
 
 					// normal click on the book
-					
+
 					// r�cup�ration du click sur le carton ...
 					pianoroll.setHightlight(pianoroll.convertScreenXToCarton(e.getX()));
 
@@ -959,7 +960,6 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 
 				if (e.getButton() == MouseEvent.BUTTON1) {
 
-				
 				}
 			}
 		}
@@ -1972,7 +1972,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 				result = (AbstractFileObject) result.getFileSystem()
 						.resolveFile(result.getName().toString() + "." + APrintConstants.BOOK); //$NON-NLS-1$
 
-			OutputStream stream = result.getOutputStream();
+			OutputStream stream = VFSTools.transactionalWrite(result);
 			VirtualBookXmlIO.write_2010(stream, getVirtualBook(), instrument.getName());
 
 			logger.debug("virtual book 2010 written"); //$NON-NLS-1$
@@ -2010,7 +2010,8 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 	}
 
 	private void saveBook(AbstractFileObject result) throws Exception {
-		OutputStream outputStream = result.getOutputStream();
+
+		OutputStream outputStream = VFSTools.transactionalWrite(result);
 		assert outputStream != null;
 		try {
 			// ensure properties are properly getted
@@ -2318,7 +2319,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 													.resolveFile(selfile.getName().toString() + ".mid"); //$NON-NLS-1$
 										}
 
-										OutputStream midi0outputStream = selfile.getOutputStream();
+										OutputStream midi0outputStream = VFSTools.transactionalWrite(selfile);
 										try {
 											MidiFileIO.write_midi_0((MidiFile) result, midi0outputStream);
 										} finally {
@@ -2362,7 +2363,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 						.resolveFile(selfile.getName().toString() + ".mid"); //$NON-NLS-1$
 			}
 
-			OutputStream midioutputStream = selfile.getOutputStream();
+			OutputStream midioutputStream = VFSTools.transactionalWrite(selfile);
 			try {
 				MidiFileIO.writeMidi(seq, 0, midioutputStream);
 			} finally {
@@ -2419,7 +2420,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 					VirtualBookToMidiConverter converter = new VirtualBookToMidiConverter(instrument);
 					final Sequence seq = converter.convert(getVirtualBook());
 
-					OutputStream os = finalChoosenFile.getOutputStream();
+					OutputStream os = VFSTools.transactionalWrite(finalChoosenFile);
 					try {
 						SequencerTools.render(sbfinal, seq, os, false);
 					} finally {
@@ -2862,7 +2863,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		JDialog groovyFrame = new VirtualBookScriptConsole((Frame) this,
 				Messages.getString("APrintNGVirtualBookInternalFrame.17") //$NON-NLS-1$
 						+ pianoroll.getVirtualBook().getName(),
-				pianoroll, toolbarPanel , asyncJobsManager, services, instrument, aprintproperties, scriptManager);
+				pianoroll, toolbarPanel, asyncJobsManager, services, instrument, aprintproperties, scriptManager);
 
 		groovyFrame.setModal(false);
 

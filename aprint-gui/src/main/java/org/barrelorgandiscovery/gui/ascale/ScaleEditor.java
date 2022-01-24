@@ -29,6 +29,7 @@ import org.barrelorgandiscovery.repository.Repository2;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
+import org.barrelorgandiscovery.ui.tools.VFSTools;
 import org.barrelorgandiscovery.virtualbook.transformation.LinearTransposition;
 import org.barrelorgandiscovery.virtualbook.transformation.TranspositionIO;
 
@@ -175,7 +176,7 @@ public class ScaleEditor extends JFrame {
 								logger.debug("saving file :" //$NON-NLS-1$
 										+ f.getName().toString());
 
-								OutputStream fileOutputStream = f.getOutputStream();
+								OutputStream fileOutputStream = VFSTools.transactionalWrite(f);
 								try {
 									ImageIO.write(scalePicture, "PNG", fileOutputStream); //$NON-NLS-1$
 								} finally {

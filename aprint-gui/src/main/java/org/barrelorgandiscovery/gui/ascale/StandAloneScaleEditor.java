@@ -32,6 +32,7 @@ import org.barrelorgandiscovery.scale.importer.MidiBoekGammeImporter;
 import org.barrelorgandiscovery.scale.io.ScaleIO;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
+import org.barrelorgandiscovery.ui.tools.VFSTools;
 
 /**
  * Standalone scale editor, for file based scales
@@ -183,7 +184,7 @@ public class StandAloneScaleEditor extends JFrame {
 								logger.debug("saving file :" //$NON-NLS-1$
 										+ f.getName().toString());
 
-								OutputStream outputStream = f.getOutputStream();
+								OutputStream outputStream = VFSTools.transactionalWrite(f);
 								try {
 									ImageIO.write(scalePicture, "PNG", outputStream); //$NON-NLS-1$
 								} finally {
@@ -374,7 +375,7 @@ public class StandAloneScaleEditor extends JFrame {
 
 			Scale g = scaleEditorPanel.getScale();
 
-			OutputStream istream = choosedFile.getOutputStream();
+			OutputStream istream = VFSTools.transactionalWrite(choosedFile);
 			try {
 				ScaleIO.writeGamme(g, istream);
 			} finally {
@@ -415,7 +416,7 @@ public class StandAloneScaleEditor extends JFrame {
 
 			Scale g = scaleEditorPanel.getScale();
 
-			OutputStream outputStream = lastLoadedOrSavedFile.getOutputStream();
+			OutputStream outputStream = VFSTools.transactionalWrite(lastLoadedOrSavedFile);
 			try {
 				ScaleIO.writeGamme(g, outputStream);
 			} finally {

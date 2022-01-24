@@ -27,6 +27,7 @@ import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.scale.io.ScaleIO;
 import org.barrelorgandiscovery.tools.JMessageBox;
+import org.barrelorgandiscovery.ui.tools.VFSTools;
 
 /**
  * This class permit to modify an instrument
@@ -133,7 +134,7 @@ public class JRepositoryInstrumentEditorPanel extends JPanel {
 						IEditableInstrument ei = editorPanel.getModel();
 						EditableInstrumentStorage editableInstrumentStorage = new EditableInstrumentStorage();
 
-						OutputStream fos = choosenFile.getOutputStream();
+						OutputStream fos = VFSTools.transactionalWrite( choosenFile);
 						try {
 
 							editableInstrumentStorage.save(ei, fos);
@@ -223,7 +224,7 @@ public class JRepositoryInstrumentEditorPanel extends JPanel {
 					IEditableInstrument m = editorPanel.getModel();
 					Scale instrumentScale = m.getScale();
 
-					OutputStream ostream = selected.getOutputStream();
+					OutputStream ostream = VFSTools.transactionalWrite(selected);
 					try {
 						ScaleIO.writeGamme(instrumentScale, ostream);
 					} finally {

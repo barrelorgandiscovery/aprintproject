@@ -167,7 +167,7 @@ public class CADExporterExtensionVirtualBook extends BaseVirtualBookExtension
 						}
 
 						try {
-							java.io.OutputStream os = savedfile.getOutputStream();
+							java.io.OutputStream os = VFSTools.transactionalWrite(savedfile);
 							try {
 								drawToDrawing(current);
 								current.write(os, CADVirtualBookExporter.LAYERS);

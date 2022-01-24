@@ -654,7 +654,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 					if (fc.showSaveDialog(APrintNG.this) == APrintFileChooser.APPROVE_OPTION) {
 						AbstractFileObject sel = fc.getSelectedFile();
 						if (sel != null) {
-							OutputStream os = sel.getOutputStream();
+							OutputStream os = VFSTools.transactionalWrite(sel);
 							try {
 								BugReporter.saveBugReport(os);
 							} finally {
