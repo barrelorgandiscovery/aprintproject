@@ -20,7 +20,6 @@ import org.apache.commons.vfs2.provider.AbstractFileObject;
  */
 public class VFSTools {
 
-
 	static StandardFileSystemManager FSMANAGER = null;
 
 	public static StandardFileSystemManager getManager() throws Exception {
@@ -30,7 +29,7 @@ public class VFSTools {
 		StandardFileSystemManager fsManager = new StandardFileSystemManager();
 		URL providerResourceUrl = VFSTools.class.getClassLoader().getResource("providers.xml");
 		fsManager.setConfiguration(providerResourceUrl);
-		
+
 		fsManager.init();
 		FSMANAGER = fsManager;
 		VFS.setManager(FSMANAGER);
@@ -86,18 +85,22 @@ public class VFSTools {
 		}
 	}
 
-	
 	public static OutputStream transactionalWrite(AbstractFileObject file) throws Exception {
-		
-		FileName fileName = file.getName() ;
+
+		FileName fileName = file.getName();
 		String relname = fileName.getBaseName() + ".bak";
-		
-		AbstractFileObject bakFile = (AbstractFileObject)file.getParent().resolveFile(relname);
-		file.moveTo(bakFile);
-		
+
+		try {
+			AbstractFileObject bakFile = (AbstractFileObject) file.getParent().resolveFile(relname);
+			// delete old bak
+			bakFile.delete();
+			file.moveTo(bakFile);
+		} catch (Exception ex) {
+			// could not rename .bak
+		}
+
 		return file.getOutputStream();
-		
+
 	}
-	
-	
+
 }
