@@ -17,12 +17,12 @@ import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
-import org.apache.lucene.store.RAMDirectory;
 import org.apache.lucene.util.Version;
 import org.barrelorgandiscovery.gui.APrintConstants;
 import org.barrelorgandiscovery.gui.ProgressIndicator;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
 import org.barrelorgandiscovery.tools.Disposable;
+import org.barrelorgandiscovery.tools.StringTools;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 import org.barrelorgandiscovery.virtualbook.VirtualBookMetadata;
 import org.barrelorgandiscovery.xml.VirtualBookXmlIO;
@@ -51,6 +51,8 @@ public class BookIndexing implements Disposable {
 	public static final String NAME_FIELD = "name";
 
 	public static final String SCALE_FIELD = "scale";
+
+	public static final String ALL = "all";
 
 	private static Logger logger = Logger.getLogger(BookIndexing.class);
 
@@ -82,8 +84,7 @@ public class BookIndexing implements Disposable {
 
 	private VirtualBookResult readVirtualBook(File file) throws Exception {
 
-		BufferedInputStream bufferedInputStream = new BufferedInputStream(
-				new FileInputStream(file));
+		BufferedInputStream bufferedInputStream = new BufferedInputStream(new FileInputStream(file));
 		try {
 			return VirtualBookXmlIO.read(bufferedInputStream);
 		} finally {
@@ -91,8 +92,8 @@ public class BookIndexing implements Disposable {
 		}
 	}
 
-	private int recurseIndexFiles(File f, IndexWriter index,
-			ProgressIndicator indicator, int nbindexedFile) throws Exception {
+	private int recurseIndexFiles(File f, IndexWriter index, ProgressIndicator indicator, int nbindexedFile)
+			throws Exception {
 
 		if (logger.isDebugEnabled()) {
 			logger.debug("file examined :" + f.getAbsolutePath());
@@ -103,8 +104,7 @@ public class BookIndexing implements Disposable {
 			File[] subFiles = f.listFiles();
 			for (int i = 0; i < subFiles.length; i++) {
 				File file = subFiles[i];
-				nbindexedFile = recurseIndexFiles(file, index, indicator,
-						nbindexedFile + 1);
+				nbindexedFile = recurseIndexFiles(file, index, indicator, nbindexedFile + 1);
 			}
 
 		} else {
@@ -124,45 +124,59 @@ public class BookIndexing implements Disposable {
 
 						logger.debug("adding file :" + f.getAbsolutePath());
 
-						doc.add(new Field(SCALE_FIELD, vb.getScale().getName(),
-								Field.Store.YES, Field.Index.ANALYZED));
-						if (vb.getName() != null)
-							doc.add(new Field(NAME_FIELD, vb.getName(),
-									Field.Store.YES, Field.Index.ANALYZED));
+						StringBuilder all = new StringBuilder();
 
-						if (m.getGenre() != null)
-							doc.add(new Field(GENRE_FIELD, m.getGenre(),
-									Field.Store.YES, Field.Index.ANALYZED));
+						doc.add(new Field(SCALE_FIELD, vb.getScale().getName(), Field.Store.YES, Field.Index.ANALYZED));
+						all.append(vb.getScale().getName()).append(" ");
 
-						doc.add(new Field(FILEREF_FIELD, f.toURL().toString(),
-								Field.Store.YES, Field.Index.NO));
+						if (vb.getName() != null) {
+							doc.add(new Field(NAME_FIELD, vb.getName(), Field.Store.YES, Field.Index.ANALYZED));
+							all.append(vb.getName()).append(" ");
+						}
 
-						if (m.getAuthor() != null)
-							doc.add(new Field(AUTHOR_FIELD, m.getAuthor(),
-									Field.Store.YES, Field.Index.ANALYZED));
+						if (m.getGenre() != null) {
+							doc.add(new Field(GENRE_FIELD, m.getGenre(), Field.Store.YES, Field.Index.ANALYZED));
+							all.append(m.getGenre()).append(" ");
+						}
 
-						if (m.getArranger() != null)
-							doc.add(new Field(ARRANGER_FIELD, m.getArranger(),
-									Field.Store.YES, Field.Index.ANALYZED));
+						doc.add(new Field(FILEREF_FIELD, f.toURL().toString(), Field.Store.YES, Field.Index.NO));
 
-						if (m.getDescription() != null)
-							doc.add(new Field(DESCRIPTION_FIELD, m
-									.getDescription(), Field.Store.YES,
+						String prepare = f.getAbsolutePath();
+						prepare = StringTools.join(prepare.split("_"), " ");
+						prepare = StringTools.join(prepare.split("-"), " ");
+
+						all.append(f.getAbsolutePath()).append(" ").append(prepare).append(" ");
+
+						if (m.getAuthor() != null) {
+							doc.add(new Field(AUTHOR_FIELD, m.getAuthor(), Field.Store.YES, Field.Index.ANALYZED));
+							all.append(m.getAuthor()).append(" ");
+
+						}
+						if (m.getArranger() != null) {
+							doc.add(new Field(ARRANGER_FIELD, m.getArranger(), Field.Store.YES, Field.Index.ANALYZED));
+							all.append(m.getArranger()).append(" ");
+						}
+						if (m.getDescription() != null) {
+							doc.add(new Field(DESCRIPTION_FIELD, m.getDescription(), Field.Store.YES,
 									Field.Index.ANALYZED));
+							all.append(m.getDescription()).append(" ");
 
-						if (vbr.preferredInstrumentName != null)
-							doc.add(new Field(INSTRUMENT_FIELD,
-									vbr.preferredInstrumentName,
-									Field.Store.YES, Field.Index.ANALYZED));
+						}
+						if (vbr.preferredInstrumentName != null) {
+							doc.add(new Field(INSTRUMENT_FIELD, vbr.preferredInstrumentName, Field.Store.YES,
+									Field.Index.ANALYZED));
+							all.append(vbr.preferredInstrumentName).append(" ");
 
+						}
+
+						doc.add(new Field(ALL, all.toString(), Field.Store.YES, Field.Index.ANALYZED));
 						index.addDocument(doc);
 
 					} else {
 						logger.debug("no metadata for " + f.getAbsolutePath());
 					}
 				} catch (Throwable t) {
-					logger.warn("file :" + f.getAbsolutePath()
-							+ " cannot be indexed");
+					logger.warn("file :" + f.getAbsolutePath() + " cannot be indexed");
 				}
 			}
 		}
@@ -171,17 +185,15 @@ public class BookIndexing implements Disposable {
 
 	}
 
-	public void index(File directory, ProgressIndicator indicator)
-			throws Exception {
+	public void index(File directory, ProgressIndicator indicator) throws Exception {
 
 		if (directory == null || !directory.isDirectory()) {
 			return;
 		}
-		
+
 		// To store an index on disk, use this instead:
 		// Directory directory = FSDirectory.open("/tmp/testindex");
-		IndexWriter iwriter = new IndexWriter(luceneDirectory, analyzer, true,
-				new IndexWriter.MaxFieldLength(25000));
+		IndexWriter iwriter = new IndexWriter(luceneDirectory, analyzer, true, new IndexWriter.MaxFieldLength(25000));
 		try {
 
 			recurseIndexFiles(directory, iwriter, indicator, 0);
@@ -191,29 +203,27 @@ public class BookIndexing implements Disposable {
 		}
 	}
 
-
-	public Document[] search(String search) throws Exception {
+	public ScoredDocument[] search(String search) throws Exception {
 
 		if (search == null || "".equals(search))
-			return new Document[0];
+			return new ScoredDocument[0];
 
 		// Now search the index:
 		IndexSearcher isearcher = new IndexSearcher(luceneDirectory, true); // read-only=true
 		try {
 			// Parse a simple query that searches for "text":
-			QueryParser parser = new QueryParser(Version.LUCENE_30, NAME_FIELD,
-					analyzer);
+			QueryParser parser = new QueryParser(Version.LUCENE_30, ALL, analyzer);
 			Query query = parser.parse(search);
 
-			ScoreDoc[] hits = isearcher.search(query, null, 1000).scoreDocs;
+			ScoreDoc[] hits = isearcher.search(query, null, 500).scoreDocs;
 
 			// Iterate through the results:
-			ArrayList<Document> retvalue = new ArrayList<Document>();
+			ArrayList<ScoredDocument> retvalue = new ArrayList<>();
 			for (int i = 0; i < hits.length; i++) {
-				retvalue.add(isearcher.doc(hits[i].doc));
+				retvalue.add(new ScoredDocument(isearcher.doc(hits[i].doc), hits[i].score));
 			}
 
-			return retvalue.toArray(new Document[0]);
+			return retvalue.toArray(new ScoredDocument[0]);
 
 		} finally {
 			isearcher.close();

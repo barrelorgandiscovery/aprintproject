@@ -23,6 +23,11 @@ import org.barrelorgandiscovery.tools.JMessageBox;
 
 public class APrintNGSearchInternalFrame extends APrintNGInternalFrame {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8736227553831150386L;
+
 	private static Logger logger = Logger
 			.getLogger(APrintNGSearchInternalFrame.class);
 
@@ -89,9 +94,10 @@ public class APrintNGSearchInternalFrame extends APrintNGInternalFrame {
 				} catch (Exception ex) {
 					logger.error(
 							"error while searching ... " + ex.getMessage(), ex); //$NON-NLS-1$
-					JMessageBox.showMessage(
-							services.getOwnerForDialog(),
-							Messages.getString("APrintNGSearchInternalFrame.3") + ex.getMessage()); //$NON-NLS-1$
+					JMessageBox.showError(services.getOwnerForDialog(), ex);
+//					JMessageBox.showMessage(
+//							services.getOwnerForDialog(),
+//							Messages.getString("APrintNGSearchInternalFrame.3") + ex.getMessage()); //$NON-NLS-1$
 				}
 			}
 		});

@@ -39,6 +39,7 @@ import org.barrelorgandiscovery.gui.aprint.APrintProperties;
 import org.barrelorgandiscovery.gui.aprintng.IAPrintWait;
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.search.BookIndexing;
+import org.barrelorgandiscovery.search.ScoredDocument;
 import org.barrelorgandiscovery.tools.JMessageBox;
 
 import com.jeta.forms.components.panel.FormPanel;
@@ -160,13 +161,13 @@ public class SearchPanel extends JPanel implements ActionListener {
 		assert searchfield != null;
 
 		KeyAdapter searchAdapterForTextField = new KeyAdapter() {
-			public void keyPressed(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					search();
-				}
+			@Override
+			public void keyReleased(KeyEvent e) {
+				search();
 			}
 		};
 		searchfield.addKeyListener(searchAdapterForTextField);
+
 
 		searchbutton = (JButton) sp.getButton("searchbutton"); //$NON-NLS-1$
 		assert searchbutton != null;
@@ -272,6 +273,7 @@ public class SearchPanel extends JPanel implements ActionListener {
 		// searchcomponent.setAutoCreateRowSorter(true); // JDK 6
 
 		ReadOnlyDefaultTableModel dm = new ReadOnlyDefaultTableModel();
+		dm.addColumn("score"); //$NON-NLS-1$
 		dm.addColumn("name"); //$NON-NLS-1$
 		dm.addColumn("scale"); //$NON-NLS-1$
 		dm.addColumn("instrument"); //$NON-NLS-1$
@@ -280,28 +282,39 @@ public class SearchPanel extends JPanel implements ActionListener {
 		dm.addColumn("fileref"); //$NON-NLS-1$
 
 		DefaultTableColumnModel tcm = new DefaultTableColumnModel();
+		
+		
 		TableColumn tc = new TableColumn(0);
+		
+		tc.setHeaderValue("Score");
+		tcm.addColumn(tc);
+		
+		tc = new TableColumn(1);
 		tc.setHeaderValue(Messages.getString("SearchPanel.53")); //$NON-NLS-1$
 		tc.setMinWidth(300);
+		
 		tcm.addColumn(tc);
-		tc = new TableColumn(1);
+		tc = new TableColumn(2);
 		tc.setHeaderValue(Messages.getString("SearchPanel.54")); //$NON-NLS-1$
 		tcm.addColumn(tc);
 
-		tc = new TableColumn(2);
+		tc = new TableColumn(3);
 		tc.setHeaderValue(Messages.getString("SearchPanel.55")); //$NON-NLS-1$
 		tcm.addColumn(tc);
 
-		tc = new TableColumn(3);
-		tc.setHeaderValue(Messages.getString("SearchPanel.56")); //$NON-NLS-1$
-		tcm.addColumn(tc);
-
+		// instrument
 		tc = new TableColumn(4);
-		tc.setHeaderValue(Messages.getString("SearchPanel.57")); //$NON-NLS-1$
+		tc.setHeaderValue(Messages.getString("SearchPanel.56")); //$NON-NLS-1$
+		tc.setMinWidth(300);
 		tcm.addColumn(tc);
 
 		tc = new TableColumn(5);
+		tc.setHeaderValue(Messages.getString("SearchPanel.57")); //$NON-NLS-1$
+		tcm.addColumn(tc);
+
+		tc = new TableColumn(6);
 		tc.setHeaderValue(Messages.getString("SearchPanel.58")); //$NON-NLS-1$
+		tc.setMinWidth(1000);
 		tcm.addColumn(tc);
 
 		searchcomponent.setModel(dm);
@@ -430,7 +443,7 @@ public class SearchPanel extends JPanel implements ActionListener {
 
 			logger.debug("search :" + searchText); //$NON-NLS-1$
 
-			Document[] search = bi.search(searchText);
+			ScoredDocument[] search = bi.search(searchText);
 
 			logger.debug("search done"); //$NON-NLS-1$
 
@@ -440,7 +453,9 @@ public class SearchPanel extends JPanel implements ActionListener {
 				model.removeRow(0);
 
 			for (int i = 0; i < search.length; i++) {
-				Document document = search[i];
+				ScoredDocument sdocument = search[i];
+				double score = sdocument.score;
+				Document document = sdocument.document;
 
 				String name = document.get("name"); //$NON-NLS-1$
 				String scale = document.get("scale"); //$NON-NLS-1$
@@ -448,8 +463,9 @@ public class SearchPanel extends JPanel implements ActionListener {
 				String genre = document.get("genre"); //$NON-NLS-1$
 				String description = document.get("description"); //$NON-NLS-1$
 				String fileref = document.get("fileref"); //$NON-NLS-1$
+				String all = document.get("all");
 
-				model.addRow(new Object[] { name, scale, genre, instrument, description, fileref });
+				model.addRow(new Object[] {"" + score, name, scale, genre, instrument, description, fileref });
 			}
 
 			DateFormatter df = new DateFormatter();
@@ -462,7 +478,10 @@ public class SearchPanel extends JPanel implements ActionListener {
 
 		} catch (Exception ex) {
 			logger.error("error while searching :" + ex.getMessage(), ex); //$NON-NLS-1$
-			JMessageBox.showMessage(owner, Messages.getString("SearchPanel.81") + ex.getMessage()); //$NON-NLS-1$
+			
+			resultnumberlabel.setText("Error in query :" + ex.getMessage());
+			
+			// JMessageBox.showMessage(owner, Messages.getString("SearchPanel.81") + ex.getMessage()); //$NON-NLS-1$
 		}
 
 	}
@@ -517,7 +536,7 @@ public class SearchPanel extends JPanel implements ActionListener {
 
 		for (int i = 0; i < selectedRows.length; i++) {
 
-			String fileref = (String) tm.getValueAt(selectedRows[i], 5);
+			String fileref = (String) tm.getValueAt(selectedRows[i], 6);
 			retvalue.add(new URL(fileref));
 		}
 
