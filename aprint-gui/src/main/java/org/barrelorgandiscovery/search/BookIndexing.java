@@ -13,6 +13,7 @@ import org.apache.lucene.document.Field;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.queryParser.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
+import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.store.Directory;
@@ -205,16 +206,20 @@ public class BookIndexing implements Disposable {
 
 	public ScoredDocument[] search(String search) throws Exception {
 
-		if (search == null || "".equals(search))
+		/* if (search == null || "".equals(search))
 			return new ScoredDocument[0];
-
+	*/
 		// Now search the index:
 		IndexSearcher isearcher = new IndexSearcher(luceneDirectory, true); // read-only=true
 		try {
 			// Parse a simple query that searches for "text":
 			QueryParser parser = new QueryParser(Version.LUCENE_30, ALL, analyzer);
-			Query query = parser.parse(search);
-
+			Query query = null;
+			if ("".equals(search) || search == null) {
+				query = new MatchAllDocsQuery();
+			} else {
+				query = parser.parse(search);
+			}
 			ScoreDoc[] hits = isearcher.search(query, null, 500).scoreDocs;
 
 			// Iterate through the results:

@@ -1874,7 +1874,8 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 
 							} catch (Throwable ex) {
 								logger.error(ex.getMessage(), ex);
-								JMessageBox.showMessage(APrintNG.this.getOwnerForDialog(), ex.getMessage());
+								JMessageBox.showError(APrintNG.this.getOwnerForDialog(), ex);
+								// JMessageBox.showMessage(APrintNG.this.getOwnerForDialog(), ex.getMessage());
 							}
 
 						} else {

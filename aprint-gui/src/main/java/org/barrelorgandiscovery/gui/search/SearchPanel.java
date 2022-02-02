@@ -26,6 +26,7 @@ import javax.swing.JTextField;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
 import javax.swing.text.DateFormatter;
 
 import org.apache.log4j.BasicConfigurator;
@@ -99,6 +100,8 @@ public class SearchPanel extends JPanel implements ActionListener {
 		this.waitInterface = waitInterface;
 		this.owner = owner;
 		initComponents();
+		
+		search();
 	}
 
 	private ISearchPanelListener searchPanelListener = null;
@@ -258,7 +261,6 @@ public class SearchPanel extends JPanel implements ActionListener {
 			public void actionPerformed(ActionEvent e) {
 				advancedsearchcomponent.setVisible(!advancedsearchcomponent.isVisible());
 				invalidate();
-
 			}
 		});
 
@@ -443,6 +445,7 @@ public class SearchPanel extends JPanel implements ActionListener {
 
 			logger.debug("search :" + searchText); //$NON-NLS-1$
 
+			
 			ScoredDocument[] search = bi.search(searchText);
 
 			logger.debug("search done"); //$NON-NLS-1$
@@ -484,6 +487,10 @@ public class SearchPanel extends JPanel implements ActionListener {
 			// JMessageBox.showMessage(owner, Messages.getString("SearchPanel.81") + ex.getMessage()); //$NON-NLS-1$
 		}
 
+	}
+	
+	public TableModel getLatestResults() {
+		return (DefaultTableModel) searchcomponent.getModel();
 	}
 
 	private void addField(StringBuilder sb, String fieldname, boolean strict, JTextField field) {
