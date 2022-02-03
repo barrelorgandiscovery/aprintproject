@@ -3,7 +3,7 @@
 !include "x64.nsh"
 !include "logiclib.nsh"
 
-Name "APrint Studio"
+Name "APrint Studio $$$$VERSION$$$$"
 
 Icon "aprinticon.ico"
 OutFile "APrintStudioInstall.exe"
