@@ -2,7 +2,7 @@
 
 !include "logiclib.nsh"
 
-Name "APrint Studio $$$$VERSION$$$$"
+Name "APrint Studio UNKNOWN"
 
 Icon "aprinticon.ico"
 OutFile "APrintStudioInstall32.exe"
@@ -75,7 +75,7 @@ InstallDir "$PROGRAMFILES\APrint Studio"
 Var APRINTDATAS
 Page custom AskCustomFolder CheckFolder
 Function AskCustomFolder
-  !insertmacro MUI_HEADER_TEXT "Choix Folder des donnees" "Selectionnez le repertoire dans lequel seront sauvegardés les fichiers"
+  !insertmacro MUI_HEADER_TEXT "Choix Folder des donnees" "Selectionnez le repertoire dans lequel seront sauvegardï¿½s les fichiers"
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY "customfolder.ini"
 FunctionEnd
 

@@ -3,7 +3,7 @@
 !include "x64.nsh"
 !include "logiclib.nsh"
 
-Name "APrint Studio UNKNOWN"
+Name "APrint Studio ____VERSION____"
 
 Icon "aprinticon.ico"
 OutFile "APrintStudioInstall.exe"
@@ -55,7 +55,7 @@ FunctionEnd
 RequestExecutionLevel admin
 
 ; The default installation directory
-InstallDir "$PROGRAMFILES64\APrint Studio"
+InstallDir "C:\APrintStudio"
 
 ;-----------------------------------
 
@@ -83,32 +83,9 @@ InstallDir "$PROGRAMFILES64\APrint Studio"
 
 !insertmacro MUI_PAGE_DIRECTORY
 
-Var APRINTDATAS
-Page custom AskCustomFolder CheckFolder
-Function AskCustomFolder
-  !insertmacro MUI_HEADER_TEXT "Choix Folder des donnees" "Selectionnez le repertoire dans lequel seront sauvegardï¿½s les fichiers"
-  !insertmacro MUI_INSTALLOPTIONS_DISPLAY "customfolder.ini"
-FunctionEnd
-
-Function CheckFolder
-   !insertmacro INSTALLOPTIONS_READ $R0 "customfolder.ini" "Field 1" "State" 
-   StrCmp $R0 "" 0 +3
-      MessageBox MB_ICONEXCLAMATION|MB_OK "Veuillez indiquer le repertoire"
-      Abort
-   IfFileExists $R0 +4 +3
-      MessageBox  MB_ICONEXCLAMATION|MB_OK "Le repertoire n'existe pas"
-      Abort
-   ; create folder
-   CreateDirectory $R0
-
-   ; all ok
-   StrCpy $APRINTDATAS $R0
-
-FunctionEnd
-
 Page custom AskAppName CheckAppName
 Function AskAppName
-  !insertmacro MUI_HEADER_TEXT "Application Name" "Nom utilisï¿½ pour la crï¿½ation des raccourcis du menu demarrer"
+  !insertmacro MUI_HEADER_TEXT "Application Name" "Nom utilisé pour la création des raccourcis du menu demarrer"
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY "customappname.ini"
 FunctionEnd
 
@@ -156,18 +133,18 @@ Section "!APrint Studio"
   
   CreateDirectory "$SMPROGRAMS\$APPNAME"
   CreateShortCut "$SMPROGRAMS\$APPNAME\$APPNAME.lnk" "$INSTDIR\jre\bin\javaw.exe" \
-  '-Xmx4g -server -Dmainfolder="$APRINTDATAS" -cp aprint.jar org.barrelorgandiscovery.gui.aprintng.APrintApplicationBootStrap' "$INSTDIR\aprinticon.ico" 0 SW_SHOWMAXIMIZED
+  '-Xmx4g -server -Dmainfolder="$INSTDIR" -cp aprint.jar org.barrelorgandiscovery.gui.aprintng.APrintApplicationBootStrap' "$INSTDIR\aprinticon.ico" 0 SW_SHOWMAXIMIZED
   CreateDirectory "$SMPROGRAMS\$APPNAME\uninstall"
    CreateShortCut "$SMPROGRAMS\$APPNAME\uninstall\Uninstall.lnk" "$INSTDIR\ap-uninst.exe" ; use defaults for parameters, icon, etc.
   ; this one will use notepad's icon, start it minimized, and give it a hotkey (of Ctrl+Shift+Q)
   WriteUninstaller "ap-uninst.exe"
   
   ; purge the instrument cache directory
-  RMDir /r "$APRINTDATAS\aprintstudio\private.cache"
+  RMDir /r "$INSTDIR\aprintstudio\private.cache"
   
   ; remove old extensions
-  Delete   "$APRINTDATAS\aprintstudio\*.extension"
-  Delete   "$APRINTDATAS\aprintstudio\*.extensionlazy"
+  Delete   "$INSTDIR\aprintstudio\*.extension"
+  Delete   "$INSTDIR\aprintstudio\*.extensionlazy"
   
   
 SectionEnd ; end the section
@@ -188,22 +165,22 @@ SectionEnd ; end the section
 
 
 Section /o "Extension - Reconnaissance de disques et cartons"
-    CreateDirectory "$APRINTDATAS\aprintstudio"
-	SetOutPath "$APRINTDATAS\aprintstudio"
+    CreateDirectory "$INSTDIR\aprintstudio"
+	SetOutPath "$INSTDIR\aprintstudio"
 	File /r "..\offlineinstall-extensions\DiskAndBookRecognition\*.*"
 	
 SectionEnd ; end the section
 
 Section /o "Extension - Percage de cartons"
-    CreateDirectory "$APRINTDATAS"
-	SetOutPath "$APRINTDATAS\aprintstudio"
+    CreateDirectory "$INSTDIR"
+	SetOutPath "$INSTDIR\aprintstudio"
 	File /r "..\offlineinstall-extensions\Punch\*.*"
 	
 SectionEnd ; end the section
 
 Section /o "Extension - Scan de cartons"
-    CreateDirectory "$APRINTDATAS"
-	SetOutPath "$APRINTDATAS\aprintstudio"
+    CreateDirectory "$INSTDIR"
+	SetOutPath "$INSTDIR\aprintstudio"
 	File /r "..\offlineinstall-extensions\Scan\*.*"
 	
 SectionEnd ; end the section
@@ -211,15 +188,15 @@ SectionEnd ; end the section
 
 
 Section /o "Scripts"
-    CreateDirectory "$APRINTDATAS\aprintstudio\quickscripts"
-	SetOutPath "$APRINTDATAS\aprintstudio\quickscripts"
+    CreateDirectory "$INSTDIR\aprintstudio\quickscripts"
+	SetOutPath "$INSTDIR\aprintstudio\quickscripts"
 	File "officialscripts\*.aprintbookgroovyscript"
 
 SectionEnd
 
 Section /o "Scripts sample development (learning)"
-    CreateDirectory "$APRINTDATAS\aprintstudio\quickscripts"
-	SetOutPath "$APRINTDATAS\aprintstudio\quickscripts"
+    CreateDirectory "$INSTDIR\aprintstudio\quickscripts"
+	SetOutPath "$INSTDIR\aprintstudio\quickscripts"
 	File "officialscriptsdev\*.aprintbookgroovyscript"
 
 SectionEnd
@@ -230,8 +207,10 @@ SectionEnd
 
 Section "Uninstall"
 
-  RMDir /r "$INSTDIR"
- 
+  Delete "$INSTDIR\*.*"
+
+  RMDir /r "$INSTDIR\jre"
+  
  
   Delete "$SMPROGRAMS\$APPNAME\*.*"
   RMDir /r "$SMPROGRAMS\$APPNAME"

@@ -3,7 +3,7 @@
 !include "x64.nsh"
 !include "logiclib.nsh"
 
-Name "APrint Studio $$$$VERSION$$$$"
+Name "APrint Studio UNKNOWN"
 
 Icon "aprinticon.ico"
 OutFile "APrintStudioInstall.exe"
@@ -85,7 +85,7 @@ InstallDir "C:\APrintStudio"
 
 Page custom AskAppName CheckAppName
 Function AskAppName
-  !insertmacro MUI_HEADER_TEXT "Application Name" "Nom utilisé pour la création des raccourcis du menu demarrer"
+  !insertmacro MUI_HEADER_TEXT "Application Name" "Nom utilisï¿½ pour la crï¿½ation des raccourcis du menu demarrer"
   !insertmacro MUI_INSTALLOPTIONS_DISPLAY "customappname.ini"
 FunctionEnd
 

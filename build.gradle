@@ -158,18 +158,28 @@ project(':bundle') {
        from ('maxosx-bundle') { include '**/*' }
     }
 
+
+    task generateSources(type: Copy) {
+	    outputs.upToDateWhen { false }
+	    from ('offlineinstall-studio/templates_installer')  { 
+		include '*.nsi' 
+	    }
+	    into "offlineinstall-studio"
+	    filter { line ->  line.replaceAll('____VERSION____', '' + rootProject.ext.currentVersion) }
+    }
+
     // create installer
-    task createBundles(type: Exec, dependsOn: [copyOutputJars,copyExtensionJars] ) {
+    task createBundles(type: Exec, dependsOn: [copyOutputJars,copyExtensionJars,generateSources] ) {
         commandLine nsis_home + '\\makensis.exe',
-           "${project.projectDir}/$buildDir/generated-nsis/aprint_studio.nsi"
+           "${project.projectDir}/offlineinstall-studio/aprint_studio.nsi"
         workingDir = 'offlineinstall-studio'
     }
 
 
     // create installer
-    task createBundlesSimple(type: Exec, dependsOn: [copyOutputJars,copyExtensionJars] ) {
+    task createBundlesSimple(type: Exec, dependsOn: [copyOutputJars,copyExtensionJars,generateSources] ) {
         commandLine nsis_home + '\\makensis.exe',
-           "${project.projectDir}/$buildDir/generated-nsis/aprint_studio_simple.nsi"
+           "${project.projectDir}/offlineinstall-studio/aprint_studio_simple.nsi"
         workingDir = 'offlineinstall-studio'
     }
 
@@ -191,25 +201,20 @@ project(':bundle') {
         }
     }
 
-    task generateSources(type: Copy) {
-	    from 'bundle/offlineinstall-studio/*.nsi'
-	    into "$buildDir/generated-nsis"
-	    filter { line -> line.replaceAll('$$$$VERSION$$$$', '' + rootProject.ext.currentVersion) }
-    }
 
 
     // create installer
-    task createBundles32(type: Exec, dependsOn: [copyOutputJars,copyExtensionJars] ) {
+    task createBundles32(type: Exec, dependsOn: [copyOutputJars,copyExtensionJars, generateSources] ) {
         commandLine nsis_home + '\\makensis.exe',
-           "${project.projectDir}/$buildDir/generated-nsis/aprint_studio_32.nsi"
+           "${project.projectDir}/offlineinstall-studio/aprint_studio_32.nsi"
         workingDir = 'offlineinstall-studio'
     }
 
 
     // create installer simple
-    task createBundles32simple(type: Exec, dependsOn: [copyOutputJars,copyExtensionJars] ) {
+    task createBundles32simple(type: Exec, dependsOn: [copyOutputJars,copyExtensionJars,generateSources] ) {
         commandLine nsis_home + '\\makensis.exe',
-           "${project.projectDir}/$buildDir/generated-nsis/aprint_studio_32_simple.nsi"
+           "${project.projectDir}/offlineinstall-studio/aprint_studio_32_simple.nsi"
         workingDir = 'offlineinstall-studio'
     }
 
