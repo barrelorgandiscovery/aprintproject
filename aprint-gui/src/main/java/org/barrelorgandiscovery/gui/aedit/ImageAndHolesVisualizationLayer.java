@@ -337,13 +337,8 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 		}
 
 		double factor = (1.0d * component.MmToPixel(dimensionOnBook) / dimensionInOrigin);
-//				int iwidth = (int) (factor
-//						* imageToDisplay.getWidth());
-//				int iheight = component.MmToPixel(width);
 
 		if (disableRescale) {
-//					iwidth = imageToDisplay.getWidth();
-//					iheight = imageToDisplay.getHeight();
 			factor = 1.0d;
 		}
 
@@ -379,14 +374,12 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 		if (!isVisible())
 			return;
 
-		if (holes == null)
-			return;
-
 		VirtualBook vb = jbookcomponentreference.getVirtualBook();
 		if (vb == null)
 			return;
 
 		Scale scale = vb.getScale();
+		assert scale != null;
 
 		g.setColor(holesColor);
 		g.setPaintMode();
@@ -399,38 +392,41 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 		}
 		g2d.setStroke(stroke);
 
-		for (Iterator<Hole> iterator = holes.iterator(); iterator.hasNext();) {
-			Hole h = iterator.next();
+		if (holes != null) {
+			for (Iterator<Hole> iterator = holes.iterator(); iterator.hasNext();) {
+				Hole h = iterator.next();
 
-			double xmm = xoffset + jbookcomponentreference.timestampToMM(h.getTimestamp()) * xscale;
-			double widthmm = jbookcomponentreference.timeToMM(h.getTimeLength()) * xscale;
+				double xmm = xoffset + jbookcomponentreference.timestampToMM(h.getTimestamp()) * xscale;
+				double widthmm = jbookcomponentreference.timeToMM(h.getTimeLength()) * xscale;
 
-			double y = scale.getFirstTrackAxis() + scale.getIntertrackHeight() * h.getTrack();
+				double y = scale.getFirstTrackAxis() + scale.getIntertrackHeight() * h.getTrack();
 
-			if (scale.isPreferredViewedInversed())
-				y = scale.getWidth() - y;
+				if (scale.isPreferredViewedInversed())
+					y = scale.getWidth() - y;
 
-			y -= scale.getTrackWidth() / 2;
+				y -= scale.getTrackWidth() / 2;
 
-			g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 0.5f));
+				g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 0.5f));
 
-			g2d.fillRect(jbookcomponentreference.convertCartonToScreenX(xmm),
-					jbookcomponentreference.convertCartonToScreenY(y), jbookcomponentreference.MmToPixel(widthmm),
-					jbookcomponentreference.MmToPixel(scale.getTrackWidth()));
+				g2d.fillRect(jbookcomponentreference.convertCartonToScreenX(xmm),
+						jbookcomponentreference.convertCartonToScreenY(y), jbookcomponentreference.MmToPixel(widthmm),
+						jbookcomponentreference.MmToPixel(scale.getTrackWidth()));
+			}
 		}
 
-		AffineTransform a = constructAffineTransformForDisplay(jbookcomponentreference, scale.getWidth(),
-				scale.getWidth());
-		AffineTransform oldTransform = g2d.getTransform();
-		try {
-			g2d.setTransform(a);
-			for (Shape s : shapes) {
-				g2d.draw(s);
+		if (shapes != null && shapes.size() > 0) {
+			AffineTransform a = constructAffineTransformForDisplay(jbookcomponentreference, scale.getWidth(),
+					scale.getWidth());
+			AffineTransform oldTransform = g2d.getTransform();
+			try {
+				g2d.setTransform(a);
+				for (Shape s : shapes) {
+					g2d.draw(s);
+				}
+				
+			} finally {
+				g2d.setTransform(oldTransform);
 			}
-			g2d.setPaintMode();
-
-		} finally {
-			g2d.setTransform(oldTransform);
 		}
 
 	}
@@ -472,6 +468,11 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 		return c;
 	}
 
+	/**
+	 * by reference
+	 * 
+	 * @return
+	 */
 	public List<Shape> getAdditionalShapes() {
 		return this.shapes;
 	}

@@ -39,7 +39,8 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 		ws = new WekaSegmentation();
 	}
 
-	public void train(List<Hole> bookHoles, List<Hole> holesHoles, IFamilyImageSeekerTiledImage familyTiledImage) throws Exception {
+	public void train(List<Hole> bookHoles, List<Rectangle2D.Double> freeBookRects, List<Hole> holesHoles,
+			List<Rectangle2D.Double> freeHolesRects, IFamilyImageSeekerTiledImage familyTiledImage) throws Exception {
 
 		Instances instances = null;
 
@@ -52,6 +53,20 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 
 		for (Hole h : holesHoles) {
 			instances = constructTrainingSet(instances, h, HOLES_CLASS, familyTiledImage);
+		}
+
+		if (freeBookRects != null) {
+			logger.debug("add book zones");
+			for (Rectangle2D.Double r : freeBookRects) {
+				instances = constructTrainingSet(instances, BOOK_CLASS, familyTiledImage, r);
+			}
+		}
+
+		if (freeHolesRects != null) {
+			logger.debug("add holes zones");
+			for (Rectangle2D.Double r : freeHolesRects) {
+				instances = constructTrainingSet(instances, HOLES_CLASS, familyTiledImage, r);
+			}
 		}
 
 		if (instances == null) {
@@ -74,7 +89,7 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 
 		ImagePlus ip = new ImagePlus();
 		ip.setImage(image);
-		
+
 		Prefs.setThreads(1);
 		ImagePlus result = ws.applyClassifier(ip);
 
@@ -126,9 +141,24 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 		 */
 	}
 
-	private Instances constructTrainingSet(Instances instances, Hole hole, int classNo, IFamilyImageSeekerTiledImage familyTiledImage) throws Exception {
+	private Instances constructTrainingSet(Instances instances, int classNo,
+			IFamilyImageSeekerTiledImage familyTiledImage, Rectangle2D.Double rectangle) throws Exception {
 
-	
+		int height = familyTiledImage.getHeight();
+
+		int startTrackPixel = (int) (rectangle.getY() / scale.getWidth() * height);
+		int endTrackPixel = (int) ((rectangle.getY() + rectangle.getHeight()) / scale.getWidth() * height);
+
+		int startPixel = (int) (rectangle.getX() / scale.getWidth() * height);
+		int endPixel = (int) ((rectangle.getX() + rectangle.getWidth()) / scale.getWidth() * height);
+
+		return addPixelsToInstances(instances, classNo, familyTiledImage, startTrackPixel, endTrackPixel, startPixel,
+				endPixel);
+	}
+
+	private Instances constructTrainingSet(Instances instances, Hole hole, int classNo,
+			IFamilyImageSeekerTiledImage familyTiledImage) throws Exception {
+
 		int height = familyTiledImage.getHeight();
 
 		double mm = scale.timeToMM(hole.getTimestamp());

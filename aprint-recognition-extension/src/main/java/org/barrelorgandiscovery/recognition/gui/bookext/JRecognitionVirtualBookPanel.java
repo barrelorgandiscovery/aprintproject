@@ -4,15 +4,18 @@ import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -45,6 +48,7 @@ import org.barrelorgandiscovery.gui.aedit.HolesDisplayOverlayLayer;
 import org.barrelorgandiscovery.gui.aedit.ImageAndHolesVisualizationLayer;
 import org.barrelorgandiscovery.gui.aedit.JEditableVirtualBookComponent;
 import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
+import org.barrelorgandiscovery.gui.aedit.RectSelectTool;
 import org.barrelorgandiscovery.gui.aedit.Tool;
 import org.barrelorgandiscovery.gui.aedit.UndoStack;
 import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
@@ -78,7 +82,6 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
-import ij.process.ImageProcessor;
 
 public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, IRecognitionToolWindowCommands {
 
@@ -97,6 +100,10 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 
 	JToggleButton holeCreationToolbtn;
 	JToggleButton bookCreationToolbtn;
+
+	// create button on rect shapes
+	JToggleButton rectHoleCreationToolbtn;
+	JToggleButton rectbookCreationToolbtn;
 
 	ImageAndHolesVisualizationLayer backgroundBook = new ImageAndHolesVisualizationLayer();
 
@@ -155,6 +162,10 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 
 	ScheduledExecutorService processingGuiLabel = Executors.newSingleThreadScheduledExecutor();
 
+	/**
+	 * add hole in layer, for recognition
+	 *
+	 */
 	private class LayerHoleAdd extends CreationTool {
 		public LayerHoleAdd(JEditableVirtualBookComponent virtualBookComponent, ImageAndHolesVisualizationLayer layer)
 				throws Exception {
@@ -167,6 +178,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 					}
 					holes.add(n);
 					layer.setHoles(holes);
+					layer.setVisible(true);
 					refreshTrainingLabels();
 					assert virtualBookComponent != null;
 					virtualBookComponent.repaint();
@@ -175,9 +187,38 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		}
 	}
 
+	// create select tool
+	/**
+	 * select rect in book, for recognition
+	 *
+	 */
+	private class RectHoleAdd extends RectSelectTool {
+		public RectHoleAdd(JEditableVirtualBookComponent virtualBookComponent, ImageAndHolesVisualizationLayer layer)
+				throws Exception {
+			super(virtualBookComponent, null, new RectSelectTool.RectSelectToolListener() {
+
+				@Override
+				public void rectDrawn(double xmin, double ymin, double xmax, double ymax) {
+					double w = xmax - xmin;
+					double h = ymax - ymin;
+					if (w < 0 || h < 0) {
+						// skip
+						return;
+					}
+					layer.setVisible(true);
+					layer.getAdditionalShapes().add(new Rectangle2D.Double(xmin, ymin, w, h));
+					virtualBookComponent.repaint();
+				}
+			});
+
+		}
+
+	}
+
 	private void refreshTrainingLabels() {
 		Scale scale = virtualBookComponent.getVirtualBook().getScale();
 
+		// compute the number of elements in training samples
 		int b = 0;
 		if (bookRegionDisplay.getHoles() != null) {
 			b = (int) bookRegionDisplay.getHoles().stream().mapToDouble((h) -> scale.timeToMM(h.getTimeLength())).sum();
@@ -255,8 +296,11 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 				recognitionDisplay.setTiledBackgroundimage(null);
 				backgroundBook.setTiledBackgroundimage(null);
 				backgroundBook.setBackgroundimage(null);
+
 				holeRegionDisplay.setHoles(null);
+				holeRegionDisplay.getAdditionalShapes().clear();
 				bookRegionDisplay.setHoles(null);
+				bookRegionDisplay.getAdditionalShapes().clear();
 
 				if (virtualBookComponent != null) {
 					virtualBookComponent.repaint();
@@ -325,6 +369,9 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 	 */
 	LayerHoleAdd bookTool;
 
+	RectHoleAdd rectHoleTool;
+	RectHoleAdd rectBookTool;
+
 	JLabel lblholecpt;
 	JLabel lblbookcpt;
 
@@ -334,6 +381,8 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 	JRadioButton rbIA;
 
 	private boolean isInitializing = true;
+
+	HashMap<Tool, JToggleButton> toolButtonAssociation = new HashMap<>();
 
 	protected void initComponents() throws Exception {
 
@@ -400,11 +449,9 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 			}
 		};
 
-		
 		JLabel labelThreshold = fa.getLabel("lblThreshold");//$NON-NLS-1$
 		labelThreshold.setText("Choose grey threshold");
-		
-		
+
 		rbthrshold.addItemListener(rbitemListener);
 		rbIA.addItemListener(rbitemListener);
 
@@ -437,6 +484,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 			try {
 				if (holeTool == null) {
 					holeTool = new LayerHoleAdd(virtualBookComponent, holeRegionDisplay);
+					toolButtonAssociation.put(holeTool, holeCreationToolbtn);
 				}
 				virtualBookComponent.setCurrentTool(holeTool);
 				ensureLayersVisible();
@@ -452,7 +500,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 
 		lblholecpt = fa.getLabel("lblholecpt");//$NON-NLS-1$
 
-		bookCreationToolbtn = (JToggleButton) fa.getButton("toolcreatebook");// $NON-NLS-1$ 
+		bookCreationToolbtn = (JToggleButton) fa.getButton("toolcreatebook");// $NON-NLS-1$
 		URL resource = JRecognitionVirtualBookPanel.class.getResource("pencil_red.png");// $NON-NLS-1$ //$NON-NLS-1$
 		BufferedImage pencilImage = ImageTools.loadImage(resource);
 		bookCreationToolbtn.setIcon(new ImageIcon(pencilImage));// $NON-NLS-1$
@@ -460,8 +508,10 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		assert bookCreationToolbtn != null;
 		bookCreationToolbtn.addActionListener((e) -> {
 			try {
-				if (bookTool == null)
+				if (bookTool == null) {
 					bookTool = new LayerHoleAdd(virtualBookComponent, bookRegionDisplay);
+					toolButtonAssociation.put(bookTool, bookCreationToolbtn);
+				}
 				virtualBookComponent.setCurrentTool(bookTool);
 				ensureLayersVisible();
 			} catch (Exception ex) {
@@ -470,6 +520,43 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		});
 		bookCreationToolbtn.setText(""); //$NON-NLS-1$
 		bookCreationToolbtn.setToolTipText(Messages.getString("JRecognitionVirtualBookPanel.20")); // $NON-NL)S-1$ //$NON-NLS-1$
+
+		////////////////////////////////////////////////////////////////////////////////
+		// rect
+
+		rectbookCreationToolbtn = (JToggleButton) fa.getButton("recttoolcreatebook");
+		assert rectbookCreationToolbtn != null;
+		rectbookCreationToolbtn.addActionListener((e) -> {
+			try {
+				if (rectBookTool == null) {
+					rectBookTool = new RectHoleAdd(virtualBookComponent, bookRegionDisplay);
+					toolButtonAssociation.put(rectBookTool, rectbookCreationToolbtn);
+				}
+				virtualBookComponent.setCurrentTool(rectBookTool);
+				ensureLayersVisible();
+			} catch (Exception ex) {
+				logger.error(ex.getMessage(), ex);
+			}
+		});
+
+		rectHoleCreationToolbtn = (JToggleButton) fa.getButton("recttoolcreatehole");
+		assert rectHoleCreationToolbtn != null;
+		rectHoleCreationToolbtn.addActionListener((e) -> {
+			try {
+				if (rectHoleTool == null) {
+					rectHoleTool = new RectHoleAdd(virtualBookComponent, holeRegionDisplay);
+					toolButtonAssociation.put(rectHoleTool, rectHoleCreationToolbtn);
+				}
+				virtualBookComponent.setCurrentTool(rectHoleTool);
+				ensureLayersVisible();
+
+			} catch (Exception ex) {
+				logger.error(ex.getMessage(), ex);
+			}
+
+		});
+
+		//////////////////////////////////////////////////////////////////////
 
 		lblbookcpt = fa.getLabel("lblbookcpt"); //$NON-NLS-1$
 
@@ -501,7 +588,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 			if (virtualBookComponent != null) {
 				virtualBookComponent.setHoleTransparency(t);
 				ensureLayersVisible();
-				
+
 			}
 
 		});
@@ -655,15 +742,22 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		this.virtualBookComponent = (JEditableVirtualBookComponent) virtualBookComponent;
 
 		this.virtualBookComponent.addCurrentToolChangedListener(new CurrentToolChanged() {
+
+			void resetAllBut(Tool newTool) {
+
+				toolButtonAssociation.keySet().stream().forEach((tool) -> {
+					if (tool != newTool) {
+						toolButtonAssociation.get(tool).setSelected(false);
+					}
+
+				});
+
+			}
+
 			@Override
 			public void currentToolChanged(Tool oldTool, Tool newTool) {
 				// un select the tools
-				if (oldTool == holeTool) {
-					holeCreationToolbtn.setSelected(false);
-				}
-				if (oldTool == bookTool) {
-					bookCreationToolbtn.setSelected(false);
-				}
+				resetAllBut(newTool);
 
 				logger.debug("current tool :" + newTool + " old one :" + oldTool); //$NON-NLS-1$ //$NON-NLS-2$
 			}
@@ -695,10 +789,29 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 
 	private JSpinner spnthreshold;
 
+	List<Rectangle2D.Double> convertToRectangleDouble(List<Shape> s) {
+		ArrayList<java.awt.geom.Rectangle2D.Double> result = new ArrayList<Rectangle2D.Double>();
+		if (s == null) {
+			return result;
+		}
+
+		for (Shape shape : s) {
+			if (!(shape instanceof Rectangle2D.Double)) {
+				logger.warn("implementation error, some zones are not of the proper type");
+				continue;
+			}
+			result.add((Rectangle2D.Double) s);
+		}
+		return result;
+	}
+
 	private void launchRecognition() throws Exception {
 
 		ArrayList<Hole> bookHoles = bookRegionDisplay.getHoles();
 		ArrayList<Hole> holesHoles = holeRegionDisplay.getHoles();
+
+		List<Rectangle2D.Double> freeBookRects = convertToRectangleDouble(bookRegionDisplay.getAdditionalShapes());
+		List<Rectangle2D.Double> freeHoleRects = convertToRectangleDouble(holeRegionDisplay.getAdditionalShapes());
 
 		// classify holes into training set
 		IFamilyImageSeekerTiledImage imageToRecognize = (IFamilyImageSeekerTiledImage) getBackgroundImage();
@@ -728,12 +841,15 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 
 		if (rbIA.isSelected()) {
 
+			logger.debug("AI, strategy");
+
 			wekaRecognitionStrategy = new WekaRecognitionStrategy(virtualBookComponent.getVirtualBook().getScale());
 
-			wekaRecognitionStrategy.train(bookHoles, holesHoles, imageToRecognize);
+			wekaRecognitionStrategy.train(bookHoles, freeBookRects, holesHoles, freeHoleRects, imageToRecognize);
 			current = wekaRecognitionStrategy;
 
 		} else {
+			logger.debug("threshold strategy");
 			current = thresholdStrategy;
 		}
 
@@ -745,6 +861,12 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		// clear
 		recognitionDisplay.setHoles(null);
 
+		/**
+		 * ordering the task queue depending on the user point of view
+		 * 
+		 * @author pfreydiere
+		 *
+		 */
 		class PriorityImageComparator implements Comparator<Integer> {
 			private int center;
 
