@@ -47,12 +47,16 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 		assert bookHoles != null;
 		assert holesHoles != null;
 
-		for (Hole h : bookHoles) {
-			instances = constructTrainingSet(instances, h, BOOK_CLASS, familyTiledImage);
+		if (bookHoles != null) {
+			for (Hole h : bookHoles) {
+				instances = constructTrainingSet(instances, h, BOOK_CLASS, familyTiledImage);
+			}
 		}
 
-		for (Hole h : holesHoles) {
-			instances = constructTrainingSet(instances, h, HOLES_CLASS, familyTiledImage);
+		if (holesHoles != null) {
+			for (Hole h : holesHoles) {
+				instances = constructTrainingSet(instances, h, HOLES_CLASS, familyTiledImage);
+			}
 		}
 
 		if (freeBookRects != null) {

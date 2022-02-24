@@ -622,7 +622,9 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 				ensureLayersVisible();
 				launchRecognition();
 			} catch (Exception ex) {
+
 				logger.error(ex.getMessage(), ex);
+				JMessageBox.showError(this, ex);
 			}
 		});
 
@@ -800,7 +802,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 				logger.warn("implementation error, some zones are not of the proper type");
 				continue;
 			}
-			result.add((Rectangle2D.Double) s);
+			result.add((Rectangle2D.Double) shape);
 		}
 		return result;
 	}
