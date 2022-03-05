@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemListener;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
@@ -70,6 +71,7 @@ import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.tools.Disposable;
 import org.barrelorgandiscovery.tools.ImageTools;
 import org.barrelorgandiscovery.tools.JMessageBox;
+import org.barrelorgandiscovery.tools.StreamsTools;
 import org.barrelorgandiscovery.tools.SwingUtils;
 import org.barrelorgandiscovery.ui.tools.VFSTools;
 import org.barrelorgandiscovery.virtualbook.Hole;
@@ -157,6 +159,8 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 	JButton btncloseimage;
 
 	JButton btnvalidaterecognition;
+
+	JButton btnchoosemodel;
 
 	JLabel lblprogress;
 
@@ -337,7 +341,9 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 
 				int returnedValue = aPrintFileChooser.showOpenDialog(virtualBookComponent);
 				if (returnedValue == APrintFileChooser.APPROVE_OPTION) {
+
 					AbstractFileObject selectedFile = aPrintFileChooser.getSelectedFile();
+
 					if (selectedFile != null) {
 						File f = VFSTools.convertToFile(selectedFile);
 
@@ -350,6 +356,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 							logger.error("cannot display image " + f); //$NON-NLS-1$
 						}
 					}
+
 					ensureLayersVisible();
 				}
 
@@ -379,6 +386,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 
 	JRadioButton rbthrshold;
 	JRadioButton rbIA;
+	JRadioButton rbexistingmodel;
 
 	private boolean isInitializing = true;
 
@@ -418,16 +426,34 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 
 		ButtonGroup buttonGroup = new ButtonGroup();
 
-		rbthrshold = fa.getRadioButton("rbthrshold");
+		rbthrshold = fa.getRadioButton("rbthrshold");//$NON-NLS-1$
 		rbthrshold.setText("Simple Color Threshold Model");
 		assert rbthrshold != null;
 		buttonGroup.add(rbthrshold);
 
-		rbIA = fa.getRadioButton("rbIA");
+		rbIA = fa.getRadioButton("rbIA");//$NON-NLS-1$
 		rbIA.setText("Machine Learning Recognition Model");
+
+		assert rbexistingmodel != null;
+		rbexistingmodel = fa.getRadioButton("rbexistingmodel");//$NON-NLS-1$
+		rbexistingmodel.setText("Pretrained Model");
+
+		btnchoosemodel = (JButton) fa.getButton("btnchoosemodel");//$NON-NLS-1$
+		btnchoosemodel.addActionListener((e) -> {
+			try {
+
+				loadPretrainedModel();
+
+			} catch (Throwable t) {
+				logger.error(t.getMessage(), t);
+				JMessageBox.showError(this, t);
+			}
+
+		});
 
 		assert rbIA != null;
 		buttonGroup.add(rbIA);
+		buttonGroup.add(rbexistingmodel);
 
 		// both forms
 		final Component iaform = fa.getComponentByName("iaform");
@@ -588,7 +614,6 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 			if (virtualBookComponent != null) {
 				virtualBookComponent.setHoleTransparency(t);
 				ensureLayersVisible();
-
 			}
 
 		});
@@ -643,16 +668,16 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		btnvalidaterecognition = (JButton) fa.getButton("btnvalidaterecognition");// $NON-NLS-1$ //$NON-NLS-1$
 		btnvalidaterecognition.setText(Messages.getString("JRecognitionVirtualBookPanel.34")); //$NON-NLS-1$
 
-		JLabel lbldisplay = fa.getLabel("lbldisplay");
+		JLabel lbldisplay = fa.getLabel("lbldisplay");//$NON-NLS-1$
 		lbldisplay.setText("Layer Display Settings");
 
-		JLabel lblgetResult = fa.getLabel("lblgetResult");
+		JLabel lblgetResult = fa.getLabel("lblgetResult");//$NON-NLS-1$
 		lblgetResult.setText("Recognition Result into VirtualBook");
 
-		JLabel lblminwidth = fa.getLabel("lblminwidth");
+		JLabel lblminwidth = fa.getLabel("lblminwidth");//$NON-NLS-1$
 		lblminwidth.setText("Min recognition hole (mm)");
 
-		spnminwidth = fa.getSpinner("spnminwidth");
+		spnminwidth = fa.getSpinner("spnminwidth"); //$NON-NLS-1$
 		spnminwidth.setModel(new SpinnerNumberModel(3.0f, 0.0f, 10.0f, 0.1f));
 
 		btnvalidaterecognition.addActionListener((l) -> {
@@ -730,6 +755,36 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 	}
 
 	private JEditableVirtualBookComponent virtualBookComponent;
+
+	private byte[] currentPretrainedModel = null;
+
+	/**
+	 * loading pretrained model
+	 * 
+	 * @throws Exception
+	 */
+	private void loadPretrainedModel() throws Exception {
+
+		APrintFileChooser aPrintFileChooser = new APrintFileChooser();
+		aPrintFileChooser.addFileFilter(new VFSFileNameExtensionFilter("pretrained model", "model"));
+
+		int showOpenDialog = aPrintFileChooser.showOpenDialog(this);
+		if (showOpenDialog == aPrintFileChooser.APPROVE_OPTION) {
+
+			AbstractFileObject selectedFile = aPrintFileChooser.getSelectedFile();
+
+			if (selectedFile != null) {
+				logger.debug("loading the pretrained model :" + selectedFile);
+
+				ByteArrayOutputStream baos = new ByteArrayOutputStream();
+				StreamsTools.copyStream(selectedFile.getInputStream(), baos);
+
+				currentPretrainedModel = baos.toByteArray();
+
+			}
+
+		}
+	}
 
 	/**
 	 * setup the virtualbook component
@@ -842,7 +897,6 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		recognitionDisplay.setTiledBackgroundimage(tiledImage);
 
 		if (rbIA.isSelected()) {
-
 			logger.debug("AI, strategy");
 
 			wekaRecognitionStrategy = new WekaRecognitionStrategy(virtualBookComponent.getVirtualBook().getScale());
@@ -851,8 +905,16 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 			current = wekaRecognitionStrategy;
 
 		} else {
-			logger.debug("threshold strategy");
-			current = thresholdStrategy;
+
+			if (rbexistingmodel.isSelected()) {
+				if (currentPretrainedModel != null) {
+					logger.debug("create pretrained model");
+					current = new WekaWithPreTrainedModel(currentPretrainedModel);
+				}
+			} else {
+				logger.debug("threshold strategy");
+				current = thresholdStrategy;
+			}
 		}
 
 		if (backGroundThread != null) {
@@ -932,8 +994,11 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 
 				Scale scale = virtualBookComponent.getVirtualBook().getScale();
 
+				// manage the threshold
+				int decision_threashold = 50;
+				
 				ReadResultBag readResult = BookReadProcessor.readResult2(binaryresult, index * bi.getWidth(),
-						scale.mmToTime(scale.getWidth() / imageToRecognize.getHeight()), scale, null, false, 150);
+						scale.mmToTime(scale.getWidth() / imageToRecognize.getHeight()), scale, null, false, decision_threashold);
 
 				ArrayList<Hole> holes = recognitionDisplay.getHoles();
 				if (holes == null) {

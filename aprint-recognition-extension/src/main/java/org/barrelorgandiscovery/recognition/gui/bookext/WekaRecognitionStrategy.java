@@ -3,27 +3,28 @@ package org.barrelorgandiscovery.recognition.gui.bookext;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.images.books.tools.IFamilyImageSeekerTiledImage;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.virtualbook.Hole;
 
-import ij.IJ;
 import ij.ImagePlus;
 import ij.Prefs;
 import ij.gui.ShapeRoi;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import trainableSegmentation.WekaSegmentation;
+import weka.core.Instance;
 import weka.core.Instances;
 
 public class WekaRecognitionStrategy implements IRecognitionStrategy {
 
 	private static Logger logger = Logger.getLogger(WekaRecognitionStrategy.class);
-
-	WekaSegmentation ws = null;
 
 	private static int BOOK_CLASS = 0;
 	private static int HOLES_CLASS = 1;
@@ -36,9 +37,35 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 	}
 
 	public void reset() {
-		ws = new WekaSegmentation();
+		models.clear();
 	}
 
+	private Map<Integer, WekaSegmentation> models = new HashMap<>();
+
+	private static class ModelEvaluation {
+		public ModelEvaluation(int n0, int n1, WekaSegmentation ws) {
+			this.nb0 = n0;
+			this.nb1 = n1;
+			this.ws = ws;
+		}
+
+		final int nb1;
+		final int nb0;
+		final WekaSegmentation ws;
+	}
+	
+	WekaSegmentation currentlyUsed = null;
+
+	/**
+	 * train the model
+	 * 
+	 * @param bookHoles
+	 * @param freeBookRects
+	 * @param holesHoles
+	 * @param freeHolesRects
+	 * @param familyTiledImage
+	 * @throws Exception
+	 */
 	public void train(List<Hole> bookHoles, List<Rectangle2D.Double> freeBookRects, List<Hole> holesHoles,
 			List<Rectangle2D.Double> freeHolesRects, IFamilyImageSeekerTiledImage familyTiledImage) throws Exception {
 
@@ -49,43 +76,63 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 
 		if (bookHoles != null) {
 			for (Hole h : bookHoles) {
-				instances = constructTrainingSet(instances, h, BOOK_CLASS, familyTiledImage);
+				constructTrainingSet(h, BOOK_CLASS, familyTiledImage);
 			}
 		}
 
 		if (holesHoles != null) {
 			for (Hole h : holesHoles) {
-				instances = constructTrainingSet(instances, h, HOLES_CLASS, familyTiledImage);
+				constructTrainingSet(h, HOLES_CLASS, familyTiledImage);
 			}
 		}
 
 		if (freeBookRects != null) {
 			logger.debug("add book zones");
 			for (Rectangle2D.Double r : freeBookRects) {
-				instances = constructTrainingSet(instances, BOOK_CLASS, familyTiledImage, r);
+				constructTrainingSet(instances, BOOK_CLASS, familyTiledImage, r);
 			}
 		}
 
 		if (freeHolesRects != null) {
 			logger.debug("add holes zones");
 			for (Rectangle2D.Double r : freeHolesRects) {
-				instances = constructTrainingSet(instances, HOLES_CLASS, familyTiledImage, r);
+				constructTrainingSet(instances, HOLES_CLASS, familyTiledImage, r);
 			}
 		}
 
-		if (instances == null) {
-			logger.info("no training set, no recognition launched"); //$NON-NLS-1$
-			return;
-		}
+	
+		// ws.setLoadedTrainingData(instances);
 
-		reset();
-
-		updateSegmentationParameters(ws);
-		ws.setLoadedTrainingData(instances);
-
-		ws.doClassBalance();
+		// ws.doClassBalance();
 		// ws.selectAttributes();
-		ws.trainClassifier();
+
+		// choose best models
+
+		Optional<ModelEvaluation> bestOption = models.values().stream().map(model -> {
+
+			Instances modelinstances = model.createTrainingInstances();
+			int nb0 = 0;
+			int nb1 = 0;
+			if (modelinstances.size() == 2) {
+				Instance first = modelinstances.get(0);
+				nb0 = first.numValues();
+				Instance second = modelinstances.get(1);
+				nb1 = second.numValues();
+
+			} else {
+				logger.debug("skip model");
+			}
+
+			return new ModelEvaluation(nb0, nb1, model);
+		}).sorted( (m1,m2) -> Integer.compare(m1.nb0+m1.nb1, m2.nb0 + m2.nb1)).findFirst();
+
+		if (!bestOption.isPresent()) {
+			throw new Exception("no training set given");
+		}
+		
+		currentlyUsed = bestOption.get().ws;
+		
+		currentlyUsed.trainClassifier();
 	}
 
 	@Override
@@ -95,7 +142,7 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 		ip.setImage(image);
 
 		Prefs.setThreads(1);
-		ImagePlus result = ws.applyClassifier(ip);
+		ImagePlus result = currentlyUsed.applyClassifier(ip);
 
 		ImageProcessor processor = result.getProcessor();
 		processor.multiply(250);
@@ -123,30 +170,34 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 //		ws.setClassifier(mcc);
 //		
 
-		// ws.updateClassifier(200, 6, 10);
+//		ws.setClassBalance(false);
 
-		boolean[] enabledFeatures = ws.getEnabledFeatures();
+//		boolean[] enabledFeatures = ws.getEnabledFeatures();
 //		for (int i = 0 ; i < enabledFeatures.length ; i ++) {
-//			enabledFeatures[i] = true;
-//		}
-		/*
-		 * enabledFeatures[FeatureStack.DERIVATIVES] = false;
-		 * 
-		 * enabledFeatures[FeatureStack.GABOR] = true;
-		 * enabledFeatures[FeatureStack.LIPSCHITZ] = true; //
-		 * enabledFeatures[FeatureStack.HESSIAN] = true;
-		 * enabledFeatures[FeatureStack.NEIGHBORS] = true;
-		 * enabledFeatures[FeatureStack.GAUSSIAN] = true;
-		 * 
-		 * enabledFeatures[FeatureStack.VARIANCE] = true;
-		 * enabledFeatures[FeatureStack.STRUCTURE] = true;
-		 * 
-		 * ws.setEnabledFeatures(enabledFeatures);
-		 */
+//		 	enabledFeatures[i] = true;
+//		 }
+//		
+//		  enabledFeatures[FeatureStack.DERIVATIVES] = false;
+//		 
+//		  enabledFeatures[FeatureStack.GABOR] = true;
+//		  enabledFeatures[FeatureStack.LIPSCHITZ] = true; //
+//		  enabledFeatures[FeatureStack.HESSIAN] = true;
+//		  enabledFeatures[FeatureStack.SOBEL] = true;
+//		  enabledFeatures[FeatureStack.NEIGHBORS] = true;
+//		  enabledFeatures[FeatureStack.GAUSSIAN] = true;
+//		  
+//		  enabledFeatures[FeatureStack.VARIANCE] = true;
+//		  enabledFeatures[FeatureStack.STRUCTURE] = true;
+
+//		  
+//		  ws.setEnabledFeatures(enabledFeatures);
+//		 
+//		ws.updateClassifier(200, 6, 10);
+
 	}
 
-	private Instances constructTrainingSet(Instances instances, int classNo,
-			IFamilyImageSeekerTiledImage familyTiledImage, Rectangle2D.Double rectangle) throws Exception {
+	private void constructTrainingSet(Instances instances, int classNo, IFamilyImageSeekerTiledImage familyTiledImage,
+			Rectangle2D.Double rectangle) throws Exception {
 
 		int height = familyTiledImage.getHeight();
 
@@ -156,12 +207,11 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 		int startPixel = (int) (rectangle.getX() / scale.getWidth() * height);
 		int endPixel = (int) ((rectangle.getX() + rectangle.getWidth()) / scale.getWidth() * height);
 
-		return addPixelsToInstances(instances, classNo, familyTiledImage, startTrackPixel, endTrackPixel, startPixel,
-				endPixel);
+		addPixelsToInstances(classNo, familyTiledImage, startTrackPixel, endTrackPixel, startPixel, endPixel);
 	}
 
-	private Instances constructTrainingSet(Instances instances, Hole hole, int classNo,
-			IFamilyImageSeekerTiledImage familyTiledImage) throws Exception {
+	private void constructTrainingSet(Hole hole, int classNo, IFamilyImageSeekerTiledImage familyTiledImage)
+			throws Exception {
 
 		int height = familyTiledImage.getHeight();
 
@@ -190,8 +240,7 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 		int startPixel = (int) (mm / scale.getWidth() * height);
 		int endPixel = (int) (scale.timeToMM(hole.getTimestamp() + hole.getTimeLength()) / scale.getWidth() * height);
 
-		return addPixelsToInstances(instances, classNo, familyTiledImage, startTrackPixel, endTrackPixel, startPixel,
-				endPixel);
+		addPixelsToInstances(classNo, familyTiledImage, startTrackPixel, endTrackPixel, startPixel, endPixel);
 	}
 
 	/**
@@ -204,15 +253,15 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 	 * @return
 	 * @throws Exception
 	 */
-	private Instances addPixelsToInstances(Instances instances, int classNo,
-			IFamilyImageSeekerTiledImage familyTiledImage, Rectangle2D rectangle) throws Exception {
+	private void addPixelsToInstances(int classNo, IFamilyImageSeekerTiledImage familyTiledImage, Rectangle2D rectangle)
+			throws Exception {
 
 		int x = (int) rectangle.getX();
 		int y = (int) rectangle.getY();
 		int width = (int) rectangle.getWidth();
 		int height = (int) rectangle.getHeight();
 
-		return addPixelsToInstances(instances, classNo, familyTiledImage, y, y + height, x, x + width);
+		addPixelsToInstances(classNo, familyTiledImage, y, y + height, x, x + width);
 	}
 
 	/**
@@ -228,19 +277,32 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 	 * @return
 	 * @throws Exception
 	 */
-	private Instances addPixelsToInstances(Instances instances, int classNo,
-			IFamilyImageSeekerTiledImage familyTiledImage, int startTrackPixel, int endTrackPixel, int startPixel,
-			int endPixel) throws Exception {
+	private void addPixelsToInstances(int classNo, IFamilyImageSeekerTiledImage familyTiledImage, int startTrackPixel,
+			int endTrackPixel, int startPixel, int endPixel) throws Exception {
+
 		int imageTileWidth = familyTiledImage.getTileWidth();
 
 		int startImageIndex = startPixel / imageTileWidth;
+
 		int endImageIndex = endPixel / imageTileWidth;
 		assert startImageIndex <= endImageIndex;
 
-		Instances trainingInstances = instances;
 		for (int i = startImageIndex; i <= endImageIndex; i++) {
 			logger.debug("loading image :" + i); //$NON-NLS-1$
 			BufferedImage bi = familyTiledImage.loadImage(startImageIndex);
+
+			// get associated WekeSegmentation
+			WekaSegmentation wekaSegmentation = models.get(startImageIndex);
+			if (wekaSegmentation == null) {
+				logger.debug("create new model for " + startImageIndex);
+				ImagePlus ip = new ImagePlus();
+				ip.setImage(bi);
+
+				wekaSegmentation = new WekaSegmentation(ip);
+				updateSegmentationParameters(wekaSegmentation);
+				models.put(startImageIndex, wekaSegmentation);
+
+			}
 
 			int offsetStart = startPixel - (i * imageTileWidth);
 			int offsetEnd = endPixel - (i * imageTileWidth);
@@ -248,24 +310,19 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 			Rectangle r = new Rectangle(offsetStart, startTrackPixel, offsetEnd - offsetStart,
 					endTrackPixel - startTrackPixel);
 
-			ImagePlus ip = new ImagePlus();
-			ip.setImage(bi);
+			wekaSegmentation.addExample(classNo, new ShapeRoi(r), 1);
 
-			WekaSegmentation ws = new WekaSegmentation(ip);
-			updateSegmentationParameters(ws);
+//			Instances t = ws.createTrainingInstances();
+//			if (t != null) {
+//				if (trainingInstances == null) {
+//					trainingInstances = t;
+//				} else {
+//					ws.mergeDataInPlace(trainingInstances, t);
+//				}
+//			}
 
-			ws.addExample(classNo, new ShapeRoi(r), 1);
-
-			Instances t = ws.createTrainingInstances();
-			if (t != null) {
-				if (trainingInstances == null) {
-					trainingInstances = t;
-				} else {
-					ws.mergeDataInPlace(trainingInstances, t);
-				}
-			}
 		}
-		return trainingInstances;
+		// return trainingInstances;
 	}
 
 }

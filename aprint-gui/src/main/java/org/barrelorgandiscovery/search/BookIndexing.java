@@ -145,13 +145,14 @@ public class BookIndexing implements Disposable {
 						String prepare = f.getAbsolutePath();
 						prepare = StringTools.join(prepare.split("_"), " ");
 						prepare = StringTools.join(prepare.split("-"), " ");
+						prepare = StringTools.join(prepare.split("."), " ");
+						
 
 						all.append(f.getAbsolutePath()).append(" ").append(prepare).append(" ");
 
 						if (m.getAuthor() != null) {
 							doc.add(new Field(AUTHOR_FIELD, m.getAuthor(), Field.Store.YES, Field.Index.ANALYZED));
 							all.append(m.getAuthor()).append(" ");
-
 						}
 						if (m.getArranger() != null) {
 							doc.add(new Field(ARRANGER_FIELD, m.getArranger(), Field.Store.YES, Field.Index.ANALYZED));
