@@ -1,12 +1,19 @@
 package org.barrelorgandiscovery.recognition.gui.bookext;
 
+import java.awt.BorderLayout;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
+import java.util.Map.Entry;
+
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
 
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.images.books.tools.IFamilyImageSeekerTiledImage;
@@ -19,7 +26,6 @@ import ij.gui.ShapeRoi;
 import ij.process.ByteProcessor;
 import ij.process.ImageProcessor;
 import trainableSegmentation.WekaSegmentation;
-import weka.core.Instance;
 import weka.core.Instances;
 
 public class WekaRecognitionStrategy implements IRecognitionStrategy {
@@ -37,10 +43,22 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 	}
 
 	public void reset() {
-		models.clear();
+		currentlyUsed = null;
+		
 	}
 
-	private Map<Integer, WekaSegmentation> models = new HashMap<>();
+	private Map<Integer, List<ClassROI>> perTileShapes = new HashMap<>();
+
+	private static class ClassROI {
+
+		public final int classe;
+		public final ShapeRoi shape;
+
+		public ClassROI(int classe, ShapeRoi shape) {
+			this.classe = classe;
+			this.shape = shape;
+		}
+	}
 
 	private static class ModelEvaluation {
 		public ModelEvaluation(int n0, int n1, WekaSegmentation ws) {
@@ -53,7 +71,7 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 		final int nb0;
 		final WekaSegmentation ws;
 	}
-	
+
 	WekaSegmentation currentlyUsed = null;
 
 	/**
@@ -69,6 +87,8 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 	public void train(List<Hole> bookHoles, List<Rectangle2D.Double> freeBookRects, List<Hole> holesHoles,
 			List<Rectangle2D.Double> freeHolesRects, IFamilyImageSeekerTiledImage familyTiledImage) throws Exception {
 
+		perTileShapes.clear();
+		
 		Instances instances = null;
 
 		assert bookHoles != null;
@@ -100,38 +120,63 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 			}
 		}
 
-	
-		// ws.setLoadedTrainingData(instances);
+		// create a hole image with all the tiles, horizontally
 
-		// ws.doClassBalance();
-		// ws.selectAttributes();
+		if (perTileShapes.size() == 0) {
+			throw new Exception("no training set");
+		}
+		Integer it = perTileShapes.keySet().iterator().next();
+		BufferedImage bufferedImage = familyTiledImage.loadImage(it);
+		int tileWidth = bufferedImage.getWidth();
+		BufferedImage whole = new BufferedImage(tileWidth * perTileShapes.keySet().size(), bufferedImage.getHeight(),
+				bufferedImage.getType());
 
-		// choose best models
-
-		Optional<ModelEvaluation> bestOption = models.values().stream().map(model -> {
-
-			Instances modelinstances = model.createTrainingInstances();
-			int nb0 = 0;
-			int nb1 = 0;
-			if (modelinstances.size() == 2) {
-				Instance first = modelinstances.get(0);
-				nb0 = first.numValues();
-				Instance second = modelinstances.get(1);
-				nb1 = second.numValues();
-
-			} else {
-				logger.debug("skip model");
+		int cpt = 0;
+		Graphics2D g2d = whole.createGraphics();
+		try {
+			for (Entry<Integer, List<ClassROI>> e : perTileShapes.entrySet()) {
+				g2d.drawImage(familyTiledImage.loadImage(e.getKey()), tileWidth * cpt++, 0, null);
 			}
 
-			return new ModelEvaluation(nb0, nb1, model);
-		}).sorted( (m1,m2) -> Integer.compare(m1.nb0+m1.nb1, m2.nb0 + m2.nb1)).findFirst();
-
-		if (!bestOption.isPresent()) {
-			throw new Exception("no training set given");
+		} finally {
+			g2d.dispose();
 		}
+
+		ImagePlus trainingImage = new ImagePlus();
+		trainingImage.setImage(whole);
+//		
+//		JFrame t = new JFrame();
+//		t.getContentPane()
+//		.setLayout(new BorderLayout());
+//		t.getContentPane()
+//		.add(new JLabel(new ImageIcon(whole)), BorderLayout.CENTER);
+//		t.pack();
+//		t.setVisible(true);
 		
-		currentlyUsed = bestOption.get().ws;
-		
+		WekaSegmentation ws = new WekaSegmentation(trainingImage);
+
+		cpt = 0;
+		for (Entry<Integer, List<ClassROI>> e : perTileShapes.entrySet()) {
+			int offset = tileWidth * cpt++;
+
+			List<ClassROI> l = e.getValue();
+			for (ClassROI r : l) {
+
+				Rectangle rectangle2d = (Rectangle) r.shape.getBoundingRect();
+				rectangle2d.translate(offset, 0);
+
+				ShapeRoi newShapeRoi = new ShapeRoi(rectangle2d);
+				ws.addExample(r.classe, newShapeRoi, 1);
+			}
+
+		}
+
+		// wekaSegmentation.addExample(classNo, sr, 1);
+
+		updateSegmentationParameters(ws);
+
+		currentlyUsed = ws;
+
 		currentlyUsed.trainClassifier();
 	}
 
@@ -170,7 +215,7 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 //		ws.setClassifier(mcc);
 //		
 
-//		ws.setClassBalance(false);
+	ws.setClassBalance(true);
 
 //		boolean[] enabledFeatures = ws.getEnabledFeatures();
 //		for (int i = 0 ; i < enabledFeatures.length ; i ++) {
@@ -289,19 +334,14 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 
 		for (int i = startImageIndex; i <= endImageIndex; i++) {
 			logger.debug("loading image :" + i); //$NON-NLS-1$
-			BufferedImage bi = familyTiledImage.loadImage(startImageIndex);
 
 			// get associated WekeSegmentation
-			WekaSegmentation wekaSegmentation = models.get(startImageIndex);
-			if (wekaSegmentation == null) {
-				logger.debug("create new model for " + startImageIndex);
-				ImagePlus ip = new ImagePlus();
-				ip.setImage(bi);
 
-				wekaSegmentation = new WekaSegmentation(ip);
-				updateSegmentationParameters(wekaSegmentation);
-				models.put(startImageIndex, wekaSegmentation);
+			List<ClassROI> l = perTileShapes.get(startImageIndex);
 
+			if (l == null) {
+				l = new ArrayList<>();
+				perTileShapes.put(startImageIndex, l);
 			}
 
 			int offsetStart = startPixel - (i * imageTileWidth);
@@ -310,19 +350,11 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 			Rectangle r = new Rectangle(offsetStart, startTrackPixel, offsetEnd - offsetStart,
 					endTrackPixel - startTrackPixel);
 
-			wekaSegmentation.addExample(classNo, new ShapeRoi(r), 1);
+			ShapeRoi sr = new ShapeRoi(r);
 
-//			Instances t = ws.createTrainingInstances();
-//			if (t != null) {
-//				if (trainingInstances == null) {
-//					trainingInstances = t;
-//				} else {
-//					ws.mergeDataInPlace(trainingInstances, t);
-//				}
-//			}
+			l.add(new ClassROI(classNo, sr));
 
 		}
-		// return trainingInstances;
 	}
 
 }
