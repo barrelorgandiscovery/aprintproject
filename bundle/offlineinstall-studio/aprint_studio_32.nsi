@@ -137,6 +137,8 @@ Section "!APrint Studio"
   CreateDirectory "$SMPROGRAMS\APrint Studio"
   CreateShortCut "$SMPROGRAMS\APrint Studio\APrint Studio.lnk" "$INSTDIR\jre\bin\javaw.exe" \
   '-Xmx1000m -server -Dmainfolder="$APRINTDATAS" -cp aprint.jar org.barrelorgandiscovery.gui.aprintng.APrintApplicationBootStrap' "$INSTDIR\aprinticon.ico" 0 SW_SHOWMAXIMIZED
+  CreateShortCut "APrint Studio.lnk" "$INSTDIR\jre\bin\javaw.exe" \
+  '-Xmx1000m -server -Dmainfolder="$APRINTDATAS" -cp aprint.jar org.barrelorgandiscovery.gui.aprintng.APrintApplicationBootStrap' "$INSTDIR\aprinticon.ico" 0 SW_SHOWMAXIMIZED
   CreateDirectory "$SMPROGRAMS\APrint Studio\uninstall"
    CreateShortCut "$SMPROGRAMS\APrint Studio\uninstall\Uninstall.lnk" "$INSTDIR\ap-uninst.exe" ; use defaults for parameters, icon, etc.
   ; this one will use notepad's icon, start it minimized, and give it a hotkey (of Ctrl+Shift+Q)

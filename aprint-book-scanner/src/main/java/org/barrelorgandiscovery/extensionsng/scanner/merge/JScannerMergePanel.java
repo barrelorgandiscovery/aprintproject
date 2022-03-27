@@ -158,9 +158,10 @@ public class JScannerMergePanel extends JPanelWaitableInJFrameWaitable implement
 
 	protected void initComponent() throws Exception {
 		setLayout(new BorderLayout());
-
+		logger.debug("loading opencv");
 		Loader.load(opencv_java.class);
 
+		logger.debug("opencv loaded");
 		FormPanel fp = new FormPanel(getClass().getResourceAsStream("mergepanel.jfrm")); //$NON-NLS-1$
 
 		fp.getLabel("positionning").setText(Messages.getString("JScannerMergePanel.2")); //$NON-NLS-1$ //$NON-NLS-2$

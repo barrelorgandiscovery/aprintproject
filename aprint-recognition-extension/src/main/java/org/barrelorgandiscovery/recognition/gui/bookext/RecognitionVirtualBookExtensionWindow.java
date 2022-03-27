@@ -13,8 +13,11 @@ import org.barrelorgandiscovery.gui.aprintng.APrintNGVirtualBookFrame;
 import org.barrelorgandiscovery.gui.aprintng.extensionspoints.VirtualBookFrameToolRegister;
 import org.barrelorgandiscovery.gui.aprintng.helper.BaseVirtualBookExtension;
 import org.barrelorgandiscovery.images.books.tools.ITiledImage;
+import org.barrelorgandiscovery.ui.tools.ToolWindowTools;
+import org.noos.xing.mydoggy.DockedTypeDescriptor;
 import org.noos.xing.mydoggy.ToolWindow;
 import org.noos.xing.mydoggy.ToolWindowAnchor;
+import org.noos.xing.mydoggy.ToolWindowType;
 import org.noos.xing.mydoggy.plaf.MyDoggyToolWindowManager;
 
 public class RecognitionVirtualBookExtensionWindow extends BaseVirtualBookExtension
@@ -26,6 +29,7 @@ public class RecognitionVirtualBookExtensionWindow extends BaseVirtualBookExtens
 		super();
 		recognitionPanel = new JRecognitionVirtualBookPanel();
 		recognitionPanel.setPreferredSize(new Dimension(300,900));
+		
 	}
 
 	@Override
@@ -80,11 +84,18 @@ public class RecognitionVirtualBookExtensionWindow extends BaseVirtualBookExtens
 		
 		
 		// Register a Tool.
-		ToolWindow registerToolWindow = manager.registerToolWindow("Book Recognition", // Id //$NON-NLS-1$
+		ToolWindow registeredToolWindow = manager.registerToolWindow("Book Recognition", // Id //$NON-NLS-1$
 				"Book recognition", // Title //$NON-NLS-1$
 				null, // Icon
 				jscrollPane, // Component
 				ToolWindowAnchor.LEFT); // Anchor
+		
+
+		ToolWindowTools.defineProperties(registeredToolWindow);
+		
+		// change width
+		DockedTypeDescriptor desc = (DockedTypeDescriptor) registeredToolWindow.getTypeDescriptor(ToolWindowType.DOCKED);
+		desc.setDockLength(550);
 	}
 
 }

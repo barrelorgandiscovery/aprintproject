@@ -29,6 +29,11 @@ import org.barrelorgandiscovery.xml.VirtualBookXmlIO.VirtualBookResult;
 
 public class JPunchWizard extends JPanel implements Disposable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -8947295311313910947L;
+
 	private ProcessingOptimizerEngine engine;
 
 	private IPrefsStorage ps;

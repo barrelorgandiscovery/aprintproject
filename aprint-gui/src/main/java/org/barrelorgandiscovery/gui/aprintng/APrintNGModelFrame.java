@@ -82,7 +82,7 @@ public class APrintNGModelFrame extends APrintNGInternalFrame {
 		aSyncConsoleOutput = new ASyncConsoleOutput(textArea, null);
 
 		outputOfScript.add(textScrollPane, BorderLayout.CENTER);
-		JButton clearConsoleBtn = new JButton("clear console");
+		JButton clearConsoleBtn = new JButton("Clear");
 		clearConsoleBtn.addActionListener((action) -> {
 			aSyncConsoleOutput.clearConsole();
 		});
@@ -90,6 +90,7 @@ public class APrintNGModelFrame extends APrintNGInternalFrame {
 		tbScriptOutputConsole.add(clearConsoleBtn);
 		outputOfScript.add(tbScriptOutputConsole, BorderLayout.NORTH);
 
+		// add console window
 		tConsolewindow = toolWindowManager.registerToolWindow("console", // Id //$NON-NLS-1$
 				"Execution Console", // Title //$NON-NLS-1$
 				null, // Icon
@@ -172,14 +173,20 @@ public class APrintNGModelFrame extends APrintNGInternalFrame {
 		jFileMenu.add(saveMenuItem);
 
 		jFileMenu.addSeparator();
-		jFileMenu.add(Messages.getString("APrintNGModelFrame.10")); //$NON-NLS-1$
-
+		JMenuItem closeOption = jFileMenu.add(Messages.getString("APrintNGModelFrame.10")); //$NON-NLS-1$
+		closeOption.addActionListener( (e) -> { dispose();} );
+		
 		menu.add(jFileMenu);
 
 		add(menu, BorderLayout.NORTH);
 	}
 
 	class SaveAction extends AbstractAction {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1905861931062174374L;
 
 		public SaveAction() {
 			super(Messages.getString("APrintNGModelFrame.11"), //$NON-NLS-1$

@@ -20,6 +20,7 @@ public class ScannerLazyLoad {
 	public static void lazyLoadScanner(IPrefsStorage extensionPreferences, Repository2 repository, APrintNG application)
 			throws Exception {
 
+
 		JScanOrMergeWizard jScanOrMergeWizard = new JScanOrMergeWizard(extensionPreferences, repository,
 				application.getCurrentExtensions());
 		APrintNGInternalFrame frame = new APrintNGInternalFrame(extensionPreferences);

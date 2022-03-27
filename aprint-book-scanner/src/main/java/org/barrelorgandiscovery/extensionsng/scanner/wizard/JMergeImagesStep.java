@@ -17,6 +17,7 @@ import org.barrelorgandiscovery.gui.wizard.StepStatusChangedListener;
 import org.barrelorgandiscovery.gui.wizard.WizardStates;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.repository.Repository2;
+import org.barrelorgandiscovery.tools.JMessageBox;
 
 public class JMergeImagesStep extends BasePanelStep {
 
@@ -29,7 +30,7 @@ public class JMergeImagesStep extends BasePanelStep {
 
 	public static int rescaleFactor = 1;
 	public static int everyFrames = 5;
-	
+
 	private JScannerMergePanel mergePanel;
 
 	private IPrefsStorage ps;
@@ -57,40 +58,47 @@ public class JMergeImagesStep extends BasePanelStep {
 	public void activate(Serializable state, WizardStates allStepsStates, StepStatusChangedListener stepListener)
 			throws Exception {
 
-		File passedFolder = allStepsStates.getPreviousStateImplementing(this, File.class);
+		try {
 
-		assert passedFolder != null;
+			File passedFolder = allStepsStates.getPreviousStateImplementing(this, File.class);
 
-		if (mergePanel != null) {
-			mergePanel.dispose();
-			remove(mergePanel);
-		}
+			assert passedFolder != null;
 
-		// there might have video files !
-
-		File scanfolder = passedFolder;
-		IFamilyImageSeeker imageScan = null;
-
-		if (scanfolder.isDirectory()) {
-			imageScan = new PerfoScanFolder(scanfolder);
-		} else {
-			
-//			imageScan = new OpenCVVideoFamilyImageSeeker(scanfolder, rescaleFactor, everyFrames);
-			imageScan = new FFMpegVideoFamilyImageSeeker(scanfolder, rescaleFactor, everyFrames);
-
-		}
-		assert imageScan != null;
-		mergePanel = new JScannerMergePanel(imageScan, ps, repository);
-
-		if (imageScan instanceof PerfoScanFolder) {
-			int firstIndex = ((PerfoScanFolder) imageScan).getFirstImageIndex();
-			if (firstIndex != -1) {
-				logger.warn("no images in the folder"); //$NON-NLS-1$
-				mergePanel.setCurrentImage(firstIndex);
+			if (mergePanel != null) {
+				mergePanel.dispose();
+				remove(mergePanel);
 			}
-		}
 
-		add(mergePanel, BorderLayout.CENTER);
+			// there might have video files !
+
+			File scanfolder = passedFolder;
+			IFamilyImageSeeker imageScan = null;
+
+			if (scanfolder.isDirectory()) {
+				imageScan = new PerfoScanFolder(scanfolder);
+			} else {
+
+//			imageScan = new OpenCVVideoFamilyImageSeeker(scanfolder, rescaleFactor, everyFrames);
+				imageScan = new FFMpegVideoFamilyImageSeeker(scanfolder, rescaleFactor, everyFrames);
+
+			}
+			assert imageScan != null;
+			mergePanel = new JScannerMergePanel(imageScan, ps, repository);
+
+			if (imageScan instanceof PerfoScanFolder) {
+				int firstIndex = ((PerfoScanFolder) imageScan).getFirstImageIndex();
+				if (firstIndex != -1) {
+					logger.warn("no images in the folder"); //$NON-NLS-1$
+					mergePanel.setCurrentImage(firstIndex);
+				}
+			}
+
+			add(mergePanel, BorderLayout.CENTER);
+
+		} catch (Throwable t) {
+			logger.error(t.getMessage(), t);
+			JMessageBox.showError(this, t);
+		}
 	}
 
 	@Override
