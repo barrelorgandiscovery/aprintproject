@@ -55,8 +55,10 @@ public class JVideoInput extends BasePanelStep {
 		setLayout(new BorderLayout());
 
 		this.fileChooser = new VFSJFileChooser();
+		// add panel
 		BookmarkPanel p = new BookmarkPanel(fileChooser);
 		fileChooser.setAccessory(p);
+		fileChooser.setControlButtonsAreShown(false);
 		add(fileChooser, BorderLayout.CENTER);
 
 		fileChooser.addPropertyChangeListener(VFSJFileChooserConstants.SELECTED_FILES_CHANGED_PROPERTY, (s) -> {
