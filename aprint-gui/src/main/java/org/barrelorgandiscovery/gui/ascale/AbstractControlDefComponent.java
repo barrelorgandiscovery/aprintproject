@@ -40,11 +40,7 @@ public abstract class AbstractControlDefComponent extends
 		layoutComponent();
 	}
 
-	/**
-	 * Appelée par la classe AbstractControlDefComponent pour initialiser les
-	 * composants du panneau cette méthode peut être surchargée par les classes
-	 * dérivées
-	 */
+
 	protected void initComponent() {
 
 		logger.debug("initComponent"); //$NON-NLS-1$
@@ -120,7 +116,7 @@ public abstract class AbstractControlDefComponent extends
 	}
 
 	/**
-	 * Méthode interne pour envoyer les changements sur l'élément ...
+	 * MÃ©thode interne pour envoyer les changements sur l'Ã©lÃ©ment ...
 	 */
 	protected abstract void sendControlDef();
 

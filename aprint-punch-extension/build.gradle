@@ -19,6 +19,17 @@ compileJava {
 	options.compilerArgs << "-XDignore.symbol.file"
 }
 
+
+processResources {
+	duplicatesStrategy(DuplicatesStrategy.EXCLUDE) 
+}
+
+sourcesJar {
+	duplicatesStrategy(DuplicatesStrategy.EXCLUDE) 
+}
+
+
+
 // In this section you declare the dependencies for your production and test code
 dependencies {
 	// The production code uses the SLF4J logging API at compile time
@@ -29,10 +40,10 @@ dependencies {
 	// testCompile dependency to testCompile 'org.testng:testng:6.8.1' and add
 	// 'test.useTestNG()' to your build script.
 
-	compile project(':aprint-gui')
-	compile project(':aprint-machine-control')
-	compile files(fileTree(dir:"${projectDir}/libs" , include:['**/*.jar']).toList())
-	testCompile 'junit:junit:4.12'
+	implementation project(':aprint-gui')
+	implementation project(':aprint-machine-control')
+	implementation files(fileTree(dir:"${projectDir}/libs" , include:['**/*.jar']).toList())
+	testImplementation 'junit:junit:4.12'
 }
 
 sourceSets {
@@ -67,7 +78,7 @@ task listJars() {
 task fatJar(type: Jar, dependsOn: jar) {
   baseName = project.name + '-all'
   extension="extension"
-  def conf = configurations.runtime
+  def conf = configurations.runtimeClasspath
   def l = conf.findAll { ! (it.name.toLowerCase().startsWith("aprint-core") || it.name.toLowerCase().startsWith("aprint-gui")) }
   def deps = l.collect { it.isDirectory() ? it : zipTree(it) }
   from(deps) { 
@@ -78,6 +89,7 @@ task fatJar(type: Jar, dependsOn: jar) {
     exclude 'extensions.properties'
     exclude 'extensionng.properties'
   } with jar
+  duplicatesStrategy(DuplicatesStrategy.EXCLUDE) 
 }
 
 

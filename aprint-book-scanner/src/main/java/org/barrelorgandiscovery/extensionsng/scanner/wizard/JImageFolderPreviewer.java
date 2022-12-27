@@ -138,9 +138,9 @@ public class JImageFolderPreviewer extends JPanel implements Disposable {
 		// System.out.println("typical cell value :" +
 		// l.getPrototypeCellValue());
 
-		// récupération de la dimension d'un élément (en largeur)
-		// preferred Size est calculée en fonction des éléments à l'intérieur
-		// on récupère (aux inset près), la taille en largeur
+		// rÃ©cupÃ©ration de la dimension d'un Ã©lÃ©ment (en largeur)
+		// preferred Size est calculÃ©e en fonction des Ã©lÃ©ments Ã  l'intÃ©rieur
+		// on rÃ©cupÃ¨re (aux inset prÃ¨s), la taille en largeur
 		// d'une element pour ajuster le nombre de colonnes
 
 		if (list != null && list.getModel() != null) {

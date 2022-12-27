@@ -10,7 +10,7 @@ import org.apache.commons.vfs2.VFS;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
-import org.barrelorgandiscovery.ui.tools.VFSTools;
+import org.barrelorgandiscovery.tools.VFSTools;
 
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser.RETURN_TYPE;

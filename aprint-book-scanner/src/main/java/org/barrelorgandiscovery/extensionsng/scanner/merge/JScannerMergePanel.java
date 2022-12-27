@@ -83,7 +83,7 @@ import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.tools.Disposable;
 import org.barrelorgandiscovery.tools.ImageTools;
 import org.barrelorgandiscovery.tools.JMessageBox;
-import org.barrelorgandiscovery.ui.tools.VFSTools;
+import org.barrelorgandiscovery.tools.VFSTools;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.opencv.opencv_java;

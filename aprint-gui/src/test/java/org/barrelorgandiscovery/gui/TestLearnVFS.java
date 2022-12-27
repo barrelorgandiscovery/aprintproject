@@ -3,12 +3,8 @@ package org.barrelorgandiscovery.gui;
 import java.io.File;
 
 import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
-import org.apache.commons.vfs2.impl.StandardFileSystemManager;
-import org.apache.commons.vfs2.provider.webdav.WebdavFileProvider;
-import org.apache.commons.vfs2.provider.webdav4s.Webdav4sFileProvider;
-import org.barrelorgandiscovery.ui.tools.VFSTools;
+import org.barrelorgandiscovery.tools.VFSTools;
 import org.junit.Test;
 
 public class TestLearnVFS {
@@ -17,7 +13,6 @@ public class TestLearnVFS {
 	
 	// @Test
 	public void testConvertToFile() throws Exception {
-		
 		
 		FileObject fo = VFS.getManager().resolveFile("c:\\");
 		System.out.println(fo);
@@ -32,10 +27,8 @@ public class TestLearnVFS {
 	@Test
 	public void testAccessWebDav() throws Exception {
 		
-				
-		FileObject fo = VFSTools.getManager().resolveFile("webdav://localhost/test/testdir");
+		FileObject fo = VFSTools.getManager().resolveFile("webdav://localhost:80/");
 		//FileObject fo = VFS.getManager().resolveFile("https://www.barrel-organ-discovery.org/builds/2015/");
-		
 		
 		System.out.println(fo);
 		assert fo.exists();

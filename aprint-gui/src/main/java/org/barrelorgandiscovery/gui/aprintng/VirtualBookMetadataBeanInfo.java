@@ -23,13 +23,13 @@ public class VirtualBookMetadataBeanInfo extends BaseBeanInfo {
 
 		ExtendedPropertyDescriptor name = addProperty("name");
 		name.setDisplayName("Nom du carton");
-		name.setShortDescription("Nom long du carton, indépendamment du nom de fichier");
+		name.setShortDescription("Nom long du carton, indÃ©pendamment du nom de fichier");
 		// creationDate.setPropertyEditorClass(JCalendarDatePropertyEditor.class);
 		name.setCategory("General");
 
 		ExtendedPropertyDescriptor creationDate = addProperty("creationDate");
-		creationDate.setDisplayName("Date de création");
-		creationDate.setShortDescription("Date de création du morceau");
+		creationDate.setDisplayName("Date de crÃ©ation");
+		creationDate.setShortDescription("Date de crÃ©ation du morceau");
 		creationDate
 				.setPropertyEditorClass(DateStringConverterPropertyEditor.class);
 		creationDate.setCategory("General");

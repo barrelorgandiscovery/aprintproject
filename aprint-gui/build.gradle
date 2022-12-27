@@ -2,19 +2,18 @@ import java.text.*
 
 buildscript {
     repositories {
-	maven {
-	 url "https://plugins.gradle.org/m2/"
-	}
+		maven {
+		 url "https://plugins.gradle.org/m2/"
+		}
     }
     dependencies {
-	 classpath "com.github.jengelman.gradle.plugins:shadow:5.2.0"
+	  classpath "gradle.plugin.com.github.johnrengelman:shadow:7.1.2"
     }
 }
 
 // Apply the java plugin to add support for Java
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'groovy'
-apply plugin: 'com.github.johnrengelman.shadow'
 
 
 // In this section you declare where to find the dependencies of your project
@@ -31,20 +30,24 @@ compileJava {
         options.compilerArgs << "-XDignore.symbol.file"
 }
 
+sourcesJar {
+	duplicatesStrategy(DuplicatesStrategy.EXCLUDE) 
+}
+
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    compile project(':aprint-core')
-    compile files(fileTree(dir:"${projectDir}/libs" , include:['**/*.jar']).toList())
+    api project(':aprint-core')
+    api files(fileTree(dir:"${projectDir}/libs" , include:['**/*.jar']).toList())
     
     // https://mvnrepository.com/artifact/org.anarres.vfsjfilechooser/filechooser-core
 	// compile group: 'org.anarres.vfsjfilechooser', name: 'filechooser-core', version: '1.0.0'
     
     // https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml
-    compile group: 'org.apache.poi', name: 'poi-ooxml', version: '5.2.0'
+    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '5.2.0'
     
+    implementation 'com.formdev:flatlaf:2.6'
     
-    
-    testCompile 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
 }
 
 sourceSets {
@@ -104,30 +107,17 @@ task fatJar(type: com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar, de
 	exclude 'META-INF/dmginfo'
         exclude 'META-INF/INDEX.LIST'
 
-  configurations = [project.configurations.compile] 
+  configurations = [project.configurations.compileClasspath] 
   
   manifest {
 	  attributes 'Implementation-Title': 'APrint Studio',
 	     'Main-Class': 'org.barrelorgandiscovery.gui.aprintng.APrintApplicationBootStrap'
   }
+  duplicatesStrategy(DuplicatesStrategy.EXCLUDE) 
 }
 
+test {
 
-task oldfatJar(type: Jar, dependsOn: jar) {
-  baseName = "aprint"
-  def conf = configurations.runtime
-  def l = conf.findAll { !it.name.startsWith("aprint.jar") }
-  def deps = l.collect { it.isDirectory() ? it : zipTree(it) }
-  from(deps) {
-	exclude 'META-INF/MANIFEST.MF'
-	exclude 'META-INF/*.RSA'
-	exclude 'META-INF/*.PF'
-  } with jar
-  
-  
-  manifest {
-	  attributes 'Implementation-Title': 'APrint Studio',
-	  'Main-Class': 'org.barrelorgandiscovery.gui.aprintng.APrintApplicationBootStrap'
-  }
+ useJUnitPlatform()
+
 }
-

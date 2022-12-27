@@ -46,7 +46,7 @@ import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.SerializeTools;
-import org.barrelorgandiscovery.ui.tools.VFSTools;
+import org.barrelorgandiscovery.tools.VFSTools;
 import org.barrelorgandiscovery.virtualbook.Hole;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 

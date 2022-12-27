@@ -33,13 +33,13 @@ public abstract class AbstractGlobalTrackDefComponent extends JComponent {
 
 		setLayout(new BorderLayout());
 
-		// Création des tabs ...
+		// CrÃ©ation des tabs ...
 		for (int i = 0; i < editedtrackedtabbed.length; i++) {
 			try {
 				AbstractTrackDefComponent c = (AbstractTrackDefComponent) editedtrackedtabbed[i]
 						.newInstance();
 
-				// Ajout de l'écouteur ...
+				// Ajout de l'Ã©couteur ...
 
 				tdc.add(c);
 
@@ -55,7 +55,7 @@ public abstract class AbstractGlobalTrackDefComponent extends JComponent {
 					}
 				});
 
-				// informe du composant d'édition des registres ...
+				// informe du composant d'Ã©dition des registres ...
 
 				c.informRegisterSetComponent(registersetcomponent);
 
@@ -86,13 +86,13 @@ public abstract class AbstractGlobalTrackDefComponent extends JComponent {
 	}
 
 	/**
-	 * Edite l'élément donné
+	 * Edite l'Ã©lÃ©ment donnÃ©
 	 * 
 	 * @param td
 	 */
 	public void edit(AbstractTrackDef td) {
 
-		// Recherche du tab éditant l'élément ...
+		// Recherche du tab Ã©ditant l'Ã©lÃ©ment ...
 
 		logger.debug("edit " + td); //$NON-NLS-1$
 

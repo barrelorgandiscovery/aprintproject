@@ -39,9 +39,9 @@ public abstract class JConfigurePanel extends JPanel {
 	}
 
 	/**
-	 * Cette méthode applique de façon transactionnelle la configuration sur les
-	 * paramètres de configuration, si les paramètres sont incorrects une
-	 * exception est levée et la valeur des paramètres ne doit pas être prise en
+	 * Cette methode applique de facon transactionnelle la configuration sur les
+	 * parametres de configuration, si les parametres sont incorrects une
+	 * exception est levee et la valeur des parametres ne doit pas etre prise en
 	 * compte
 	 * 
 	 * @throws Exception

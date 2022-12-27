@@ -33,7 +33,7 @@ import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
 import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.tools.JMessageBox;
-import org.barrelorgandiscovery.ui.tools.VFSTools;
+import org.barrelorgandiscovery.tools.VFSTools;
 
 import groovy.lang.Binding;
 

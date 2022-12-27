@@ -26,8 +26,8 @@ import org.barrelorgandiscovery.prefs.IPrefsStorage;
 import org.barrelorgandiscovery.repository.Repository2;
 import org.barrelorgandiscovery.tools.ImageTools;
 import org.barrelorgandiscovery.tools.JMessageBox;
+import org.barrelorgandiscovery.tools.VFSTools;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
-import org.barrelorgandiscovery.ui.tools.VFSTools;
 
 import com.mxgraph.swing.util.mxGraphActions;
 

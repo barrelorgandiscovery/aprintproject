@@ -41,7 +41,7 @@ import org.barrelorgandiscovery.recognition.messages.Messages;
 import org.barrelorgandiscovery.repository.Repository2;
 import org.barrelorgandiscovery.tools.ImageTools;
 import org.barrelorgandiscovery.tools.JMessageBox;
-import org.barrelorgandiscovery.ui.tools.VFSTools;
+import org.barrelorgandiscovery.tools.VFSTools;
 
 import com.jeta.forms.components.panel.FormPanel;
 import com.jeta.forms.gui.form.FormAccessor;

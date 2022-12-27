@@ -15,7 +15,7 @@ import java.util.TreeSet;
 import java.util.Vector;
 
 import org.apache.log4j.Logger;
-import org.apache.xmlbeans.impl.util.Base64;
+import org.barrelorgandiscovery.tools.Base64Tools;
 import org.barrelorgandiscovery.tools.FileTools;
 import org.barrelorgandiscovery.tools.StreamsTools;
 import org.barrelorgandiscovery.tools.StringTools;
@@ -149,7 +149,7 @@ public class FolderStreamStorage implements StreamStorage {
 				md.update(c, 0, cpt);
 			}
 
-			byte[] digest = Base64.encode(md.digest());
+			byte[] digest = Base64Tools.encodeToBytes(md.digest());
 
 			try {
 

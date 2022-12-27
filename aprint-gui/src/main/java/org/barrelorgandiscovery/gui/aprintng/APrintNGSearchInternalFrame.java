@@ -28,7 +28,7 @@ import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.search.BookIndexing;
 import org.barrelorgandiscovery.tools.JMessageBox;
-import org.barrelorgandiscovery.ui.tools.VFSTools;
+import org.barrelorgandiscovery.tools.VFSTools;
 
 public class APrintNGSearchInternalFrame extends APrintNGInternalFrame {
 

@@ -164,12 +164,7 @@ public class JScaleEditorPanel extends JPanel {
 		Component oldComp = leftPanel.getComponentByName("generalProperties"); //$NON-NLS-1$
 
 		oldComp.getParent().add(generalProperties);
-
-		// leftPanel.getFormAccessor().replaceBean(oldComp, generalProperties);
-
-		// generalProperties =
-		// (FormPanel)generalProperties.getComponentByName("generalProperties");
-
+		
 		scalePanel = new FormPanel(getClass().getResourceAsStream(
 				"scaleEditorScaleEdit.jfrm")); //$NON-NLS-1$
 
@@ -418,7 +413,7 @@ public class JScaleEditorPanel extends JPanel {
 
 		// new TrackDefTabbedPane(registrecomponent);
 
-		// Comportement, lien entre l'édition de note et le carton ...
+		// Comportement, lien entre l'Ã©dition de note et le carton ...
 
 		scalecomponent.setGammeListener(new ScaleComponentListener() {
 			public void trackClicked(int trackclicked) {
@@ -836,7 +831,7 @@ public class JScaleEditorPanel extends JPanel {
 	}
 
 	/**
-	 * MAJ du composant de gamme à partir des autres composants
+	 * MAJ du composant de gamme Ã  partir des autres composants
 	 */
 	private void updateGammeComponent() {
 

@@ -150,9 +150,9 @@ import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.StreamsTools;
 import org.barrelorgandiscovery.tools.StringTools;
 import org.barrelorgandiscovery.tools.SwingUtils;
+import org.barrelorgandiscovery.tools.VFSTools;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
 import org.barrelorgandiscovery.tools.html.HTMLParsingTools;
-import org.barrelorgandiscovery.ui.tools.VFSTools;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 import org.barrelorgandiscovery.virtualbook.transformation.TransformationManager;
 import org.barrelorgandiscovery.xml.VirtualBookXmlIO;
@@ -289,7 +289,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 
 		setName("aprint main window"); //$NON-NLS-1$
 
-		// D�finir le menu
+		// Définir le menu
 
 		setJMenuBar(constructMenu());
 
@@ -471,8 +471,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		JMenuBar menu = new JMenuBar();
 
 		constructMenuFile(menu);
-		constructMenuGamme(menu);
-
+		
 		// constructInternetRepositoryMenu(menu);
 
 		constructMenuOutils(menu);
@@ -498,7 +497,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 	private void constructMenuOutils(JMenuBar menu) {
 
 		JMenu toolsMenu = new JMenu(Messages.getString("APrint.316")); //$NON-NLS-1$
-		toolsMenu.setIcon(new ImageIcon(getClass().getResource("ark_options.png"))); //$NON-NLS-1$
+		// toolsMenu.setIcon(new ImageIcon(getClass().getResource("ark_options.png"))); //$NON-NLS-1$
 
 		// Editeur de gamme ...
 
@@ -544,6 +543,10 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		modelEditor.setEnabled(ENABLE_MODELEDITOR);
 		toolsMenu.add(modelEditor);
 
+		constructMenuGamme(toolsMenu);
+
+		
+		
 		menu.add(toolsMenu);
 
 		// call extensions
@@ -683,7 +686,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 	private void constructMenuOptions(JMenuBar menu) {
 
 		JMenu m_Options = new JMenu(Messages.getString("APrint.144")); //$NON-NLS-1$
-		m_Options.setIcon(new ImageIcon(getClass().getResource("package_settings.png"))); //$NON-NLS-1$
+		// m_Options.setIcon(new ImageIcon(getClass().getResource("package_settings.png"))); //$NON-NLS-1$
 		m_Options.setMnemonic('o');
 
 		// JMenu repositoryMenu = constructMenuRepository(m_Options);
@@ -1133,11 +1136,11 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 	 *
 	 * @param menu
 	 */
-	private void constructMenuGamme(JMenuBar menu) {
+	private void constructMenuGamme(JMenu menu) {
 
 		JMenu m_gamme = new JMenu(Messages.getString("APrint.287")); //$NON-NLS-1$
 		m_gamme.setMnemonic('i');
-		m_gamme.setIcon(new ImageIcon(APrintNG.getAPrintApplicationIcon()));
+		// m_gamme.setIcon(new ImageIcon(APrintNG.getAPrintApplicationIcon()));
 
 		m_gamme.add(popupmenuImprimerGamme);
 
@@ -1201,7 +1204,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 	private void constructMenuFile(JMenuBar menu) {
 
 		JMenu m_fichier = new JMenu(Messages.getString("APrint.34")); //$NON-NLS-1$
-		m_fichier.setIcon(new ImageIcon(getClass().getResource("filesave.png"))); //$NON-NLS-1$
+		// m_fichier.setIcon(new ImageIcon(getClass().getResource("filesave.png"))); //$NON-NLS-1$
 		m_fichier.setMnemonic('f');
 
 		JMenuItem ouvrirvb = m_fichier.add(Messages.getString("APrintNG.10")); //$NON-NLS-1$

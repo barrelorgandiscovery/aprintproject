@@ -1,6 +1,6 @@
 
 
-apply plugin: 'java'
+apply plugin: 'java-library'
 
 repositories {
     jcenter()
@@ -15,15 +15,20 @@ compileJava {
         options.compilerArgs << "-XDignore.symbol.file"
 }
 
+
+sourcesJar {
+	duplicatesStrategy(DuplicatesStrategy.EXCLUDE) 
+}
+
 dependencies {
-    compileOnly project(":aprint-core")
+    implementation project(":aprint-core")
 
     	// https://mvnrepository.com/artifact/log4j/log4j
-	compile group: 'log4j', name: 'log4j', version: '1.2.14'
+	implementation group: 'log4j', name: 'log4j', version: '1.2.14'
     
-    compile files(fileTree(dir:"${projectDir}/libs" , include:['**/*.jar']).toList())
+    api files(fileTree(dir:"${projectDir}/libs" , include:['**/*.jar']).toList())
     print("${projectDir}")
-    testCompile 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
 }
 
 sourceSets {

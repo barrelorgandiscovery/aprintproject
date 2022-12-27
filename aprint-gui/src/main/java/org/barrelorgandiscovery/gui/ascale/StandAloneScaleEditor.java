@@ -31,8 +31,8 @@ import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.scale.importer.MidiBoekGammeImporter;
 import org.barrelorgandiscovery.scale.io.ScaleIO;
 import org.barrelorgandiscovery.tools.JMessageBox;
+import org.barrelorgandiscovery.tools.VFSTools;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
-import org.barrelorgandiscovery.ui.tools.VFSTools;
 
 /**
  * Standalone scale editor, for file based scales
@@ -366,7 +366,7 @@ public class StandAloneScaleEditor extends JFrame {
 				choosedFile = (AbstractFileObject) choosedFile.getFileSystem()
 						.resolveFile(choosedFile.getName().toString() + "." + ScaleIO.SCALE_FILE_EXTENSION); //$NON-NLS-1$
 			}
-			logger.debug("vérification de la gamme ..."); //$NON-NLS-1$
+			logger.debug("scale check ..."); //$NON-NLS-1$
 			String checkGamme = scaleEditorPanel.checkScale();
 			if (checkGamme != null) {
 				JMessageBox.showMessage(this, checkGamme);
@@ -407,7 +407,7 @@ public class StandAloneScaleEditor extends JFrame {
 				return;
 			}
 
-			logger.debug("vérification de la gamme ..."); //$NON-NLS-1$
+			logger.debug("scale check ..."); //$NON-NLS-1$
 			String checkGamme = scaleEditorPanel.checkScale();
 			if (checkGamme != null) {
 				JMessageBox.showMessage(this, checkGamme);
@@ -465,7 +465,7 @@ public class StandAloneScaleEditor extends JFrame {
 	private void previewGamme() {
 		try {
 
-			logger.debug("vérification de la gamme ..."); //$NON-NLS-1$
+			logger.debug("Scale check ..."); //$NON-NLS-1$
 
 			String checkGamme = scaleEditorPanel.checkScale();
 
@@ -476,7 +476,7 @@ public class StandAloneScaleEditor extends JFrame {
 
 			Scale g = scaleEditorPanel.getScale();
 
-			// prévisualisation de la gamme ...
+			// prÃ©visualisation de la gamme ...
 			new PrintPreview(new ScalePrintDocument(g));
 
 		} catch (Exception ex) {
@@ -486,7 +486,7 @@ public class StandAloneScaleEditor extends JFrame {
 
 	private void printGamme() {
 		try {
-			logger.debug("vérification de la gamme ..."); //$NON-NLS-1$
+			logger.debug("scale check ..."); //$NON-NLS-1$
 			String checkGamme = scaleEditorPanel.checkScale();
 			if (checkGamme != null) {
 				JMessageBox.showMessage(this, checkGamme);

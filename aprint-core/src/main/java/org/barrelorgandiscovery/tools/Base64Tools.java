@@ -30,4 +30,13 @@ public class Base64Tools {
 		return new String(encoder.encode(bytes), "UTF-8");
 	}
 
+	public static byte[] encodeToBytes(byte[] bytes) throws Exception {
+		if (bytes == null || bytes.length == 0) {
+			return new byte[0];
+		}
+		Encoder encoder = Base64.getMimeEncoder();
+
+		return encoder.encode(bytes);
+	}
+
 }

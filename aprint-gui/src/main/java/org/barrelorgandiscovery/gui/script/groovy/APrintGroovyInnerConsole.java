@@ -36,7 +36,7 @@ import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.tools.FileNameExtensionFilter;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.StringTools;
-import org.barrelorgandiscovery.ui.tools.VFSTools;
+import org.barrelorgandiscovery.tools.VFSTools;
 
 import groovy.lang.Binding;
 

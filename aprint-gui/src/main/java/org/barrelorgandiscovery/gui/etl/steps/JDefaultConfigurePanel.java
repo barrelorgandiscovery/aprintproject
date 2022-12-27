@@ -29,8 +29,8 @@ import com.l2fprod.common.propertysheet.PropertyRendererRegistry;
 import com.l2fprod.common.propertysheet.PropertySheetPanel;
 
 /**
- * Panneau de configuration par défaut, permettant la saisie des paramètres en
- * utilisant les propriétés Property lnf
+ * Panneau de configuration par defaut, permettant la saisie des parametres en
+ * utilisant les proprietes Property lnf
  * 
  * @author pfreydiere
  * 
@@ -91,7 +91,7 @@ public class JDefaultConfigurePanel extends JConfigurePanel {
 	}
 
 	/**
-	 * Cree un tableau de property associé aux paramètres de configuration
+	 * Cree un tableau de property associe aux parametres de configuration
 	 * 
 	 * @param ms
 	 * @return

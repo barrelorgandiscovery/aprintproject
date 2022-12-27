@@ -21,7 +21,6 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.testser
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.testserialport.NoOpSerialPort;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.DisplacementCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchCommand;
-import org.junit.Test;
 
 public class TestMachineDefectsBehaviour {
 

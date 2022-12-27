@@ -66,7 +66,7 @@ public class PropertyHashEditor extends JPanel {
 
 				if (e.getButton() == MouseEvent.BUTTON3) {
 					JPopupMenu p = new JPopupMenu();
-					JMenuItem add = new JMenuItem("Ajouter une propriété");
+					JMenuItem add = new JMenuItem("Ajouter une propriÃ©tÃ©");
 					add.addActionListener(new ActionListener() {
 						@SuppressWarnings(value = "unchecked")
 						public void actionPerformed(ActionEvent e) {
@@ -77,7 +77,7 @@ public class PropertyHashEditor extends JPanel {
 					p.add(add);
 
 					JMenuItem remove = new JMenuItem(
-							"Supprimer la propriété sélectionnée");
+							"Supprimer la propriÃ©tÃ© sÃ©lectionnÃ©e");
 					remove.addActionListener(new ActionListener() {
 						public void actionPerformed(ActionEvent e) {
 							int selectedRow = table.getSelectedRow();

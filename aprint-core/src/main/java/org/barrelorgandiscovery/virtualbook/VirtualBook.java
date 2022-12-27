@@ -171,7 +171,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 			throw new RuntimeException("for hole " + hole + " track number " + hole.getTrack() + " is out of scope (" + trackIndex.length + ") for the scale :" + bookscale);
 		}
 		
-		// Vérification de la note associée au carton ..
+		// Vï¿½rification de la note associï¿½e au carton ..
 		notes.add(hole);
 		// notesorderedbyend.add(n);
 		si.add(hole);
@@ -837,10 +837,10 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 
 
 	// ///////////////////////////////////////////////////////////////////////////
-	// methodes associées à la registration
+	// methodes associï¿½es ï¿½la registration
 
 	/**
-	 * Propriété mémorisant la liste des sections associées
+	 * Propriï¿½tï¿½ mï¿½morisant la liste des sections associï¿½es
 	 */
 	private RegistrationSection[] rsections = null;
 

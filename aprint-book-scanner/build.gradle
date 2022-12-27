@@ -26,47 +26,32 @@ compileJava {
                 options.compilerArgs << "-XDignore.symbol.file"
 }
 
+
+processResources {
+	duplicatesStrategy(DuplicatesStrategy.EXCLUDE) 
+}
+sourcesJar {
+	duplicatesStrategy(DuplicatesStrategy.EXCLUDE) 
+}
+
 // In this section you declare the dependencies for your production and test code
 dependencies {
 
-    compile project(':aprint-machine-control')
+    implementation project(':aprint-machine-control')
 	
-	// see if 
-	// compile project(':aprint-punch-extension')
 	
-	compileOnly project(':aprint-gui')
+	implementation project(':aprint-gui')
 	
-    compile files(fileTree(dir:"${projectDir}/libs" , 
+    implementation files(fileTree(dir:"${projectDir}/libs" , 
                     include:['**/*.jar']).toList())
 
- //	 compile (group: 'org.bytedeco', name: 'opencv-platform', version: '4.5.1-1.5.5') 
-//	 compile (group: 'org.bytedeco', name: 'ffmpeg-platform', version: '4.3.2-1.5.5') 
 
-
- compile group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.5'
+	implementation group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.8'
  
-//compile (group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.4')
-
-/*
- 	compile (group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.4') {
- 	 	exclude group: 'org.bytedeco', module: 'tesseract-plateform'
- 	 	exclude group: 'org.bytedeco', module: 'freenect-plateform'
- 	 	exclude group: 'org.bytedeco', module: 'freenect2-plateform'
- 	 	exclude group: 'org.bytedeco', module: 'realsense-plateform'
- 	 	exclude group: 'org.bytedeco', module: 'flycapture-plateform'
- 	 	exclude group: 'org.bytedeco', module: 'openblas-plateform'
- 	 	exclude group: 'org.bytedeco', module: 'ffmpeg-plateform'
- 	 	exclude group: 'org.bytedeco', module: 'flandmark-plateform'
- 	 	exclude group: 'org.bytedeco', module: 'videoinput-plateform'
- 	 	exclude group: 'org.bytedeco', module: 'libdc1394-plateform'
- 	  	exclude group: 'org.bytedeco', module: 'leptonica-plateform' 	 	
- 	}
-*/
-
 	// https://mvnrepository.com/artifact/org.apache.commons/commons-math3
-	compile group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
+	implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.6.1'
                     
-    testCompile 'junit:junit:4.12'
+    testImplementation 'junit:junit:4.12'
 }
 
 sourceSets {
@@ -100,11 +85,10 @@ task bootstrapJar(type: Jar, dependsOn: jar) {
   with jar
 }
 
-
 task fatJar(type: Jar, dependsOn: [jar, bootstrapJar]) {
   baseName = project.name + '-all'
   extension="extensionlazy"
-  def conf = configurations.runtime
+  def conf = configurations.runtimeClasspath
   def l = conf.findAll { ! (it.name.toLowerCase().startsWith("aprint-core") || it.name.toLowerCase().startsWith("aprint-gui")) }
   def deps = l.collect { it.isDirectory() ? it : zipTree(it) }
   from(deps) { 
@@ -115,6 +99,5 @@ task fatJar(type: Jar, dependsOn: [jar, bootstrapJar]) {
     exclude 'extensions.properties'
     exclude 'extensionng.properties'
   } with jar
+  duplicatesStrategy(DuplicatesStrategy.EXCLUDE) 
 }
-
-

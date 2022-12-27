@@ -9,4 +9,14 @@ allprojects {
         options.encoding = "UTF-8"
         options.forkOptions.executable = 'javac'
     }
+
+
+    plugins.withType(JavaPlugin).configureEach {
+        java {
+            modularity.inferModulePath = true
+            sourceCompatibility = JavaVersion.VERSION_11
+            targetCompatibility = JavaVersion.VERSION_11
+        }
+    }
+
 }

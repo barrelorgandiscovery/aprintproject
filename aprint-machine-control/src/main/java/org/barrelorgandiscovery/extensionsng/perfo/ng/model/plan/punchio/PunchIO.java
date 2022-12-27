@@ -15,9 +15,9 @@ import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.DisplacementCom
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.HomingCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchPlan;
-import org.barrelorgandiscovery.punch.x2016.Punch;
-import org.barrelorgandiscovery.punch.x2016.PunchDisplacement;
-import org.barrelorgandiscovery.punch.x2016.PunchplanDocument;
+import org.barrelorgandiscovery.punch.x2020.Punch;
+import org.barrelorgandiscovery.punch.x2020.PunchDisplacement;
+import org.barrelorgandiscovery.punch.x2020.PunchplanDocument;
 import org.barrelorgandiscovery.punch.x2020.CutTo;
 import org.barrelorgandiscovery.tools.StreamsTools;
 import org.barrelorgandiscovery.tools.streamstorage.FolderStreamStorage;
@@ -32,7 +32,7 @@ public class PunchIO {
 
 	private static final String VIRTUALBOOK_BOOK = "virtualbook.book";
 	private static final String PUNCHPLAN_PUNCH = "punchplan.punch";
-	
+
 	public PunchIO() {
 	}
 
@@ -90,12 +90,12 @@ public class PunchIO {
 	 * @return
 	 * @throws Exception
 	 */
-	public static PunchPlan fromPunchPlanx2016(org.barrelorgandiscovery.punch.x2016.PunchPlan xmlPunch)
+	public static PunchPlan fromPunchPlanx2016(org.barrelorgandiscovery.punch.x2020.PunchPlan xmlPunch)
 			throws Exception {
 		logger.debug("from punch plan " + xmlPunch);
 		PunchPlan p = new PunchPlan();
-		org.barrelorgandiscovery.punch.x2016.PunchCommand[] pcs = xmlPunch.getPunchcommandArray();
-		for (org.barrelorgandiscovery.punch.x2016.PunchCommand pc : pcs) {
+		org.barrelorgandiscovery.punch.x2020.PunchCommand[] pcs = xmlPunch.getPunchcommandArray();
+		for (org.barrelorgandiscovery.punch.x2020.PunchCommand pc : pcs) {
 			logger.debug("element " + pc);
 			if (pc instanceof Punch) {
 				Punch punch = (Punch) pc;
@@ -134,8 +134,8 @@ public class PunchIO {
 
 			} else if (pc instanceof org.barrelorgandiscovery.punch.x2020.CutTo) {
 				org.barrelorgandiscovery.punch.x2020.CutTo cutcommand = (org.barrelorgandiscovery.punch.x2020.CutTo) pc;
-				CutToCommand cutToCommand = new CutToCommand(cutcommand.getX(), cutcommand.getY(), cutcommand.getPowerfactor(),
-						cutcommand.getSpeedfactor());
+				CutToCommand cutToCommand = new CutToCommand(cutcommand.getX(), cutcommand.getY(),
+						cutcommand.getPowerfactor(), cutcommand.getSpeedfactor());
 				p.getCommandsByRef().add(cutToCommand);
 			} else {
 				throw new Exception("unknown element " + pc);
@@ -223,7 +223,7 @@ public class PunchIO {
 
 				pp = sz.openStream(PUNCHPLAN_PUNCH);
 
-				org.barrelorgandiscovery.punch.x2016.PunchplanDocument d = org.barrelorgandiscovery.punch.x2016.PunchplanDocument.Factory
+				org.barrelorgandiscovery.punch.x2020.PunchplanDocument d = org.barrelorgandiscovery.punch.x2020.PunchplanDocument.Factory
 						.parse(pp, new XmlOptions());
 				punchplan = fromPunchPlanx2016(d.getPunchplan());
 				logger.debug("sucessfully read in 2016 format");

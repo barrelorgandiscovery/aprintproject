@@ -33,6 +33,7 @@ import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
 
 import com.birosoft.liquid.LiquidLookAndFeel;
 import com.easynth.lookandfeel.EaSynthLookAndFeel;
+import com.formdev.flatlaf.FlatLightLaf;
 import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
 /**
@@ -149,7 +150,7 @@ public class APrintApplication {
 
 			initLanguageWithProperties(prop);
 
-			// Vérification du répertoire de gammes ...
+			// Verification du repertoire de gammes ...
 			File f = prop.getGammeAndTranlation();
 			if (f != null && !f.exists()) {
 				JMessageBox.showMessage(
@@ -183,6 +184,12 @@ public class APrintApplication {
 					if (!isLookAndFeelInstalled(easynthlnf)) {
 						javax.swing.UIManager.installLookAndFeel(
 								"EaSynth Look And Feel", easynthlnf); //$NON-NLS-1$
+					}
+					
+					String flatlaf = FlatLightLaf.class.getName();
+					if (!isLookAndFeelInstalled(flatlaf)) {
+						javax.swing.UIManager.installLookAndFeel(
+								"FlatLaf And Feel", flatlaf); //$NON-NLS-1$
 					}
 
 					LiquidLookAndFeel.setLiquidDecorations(true, "mac"); //$NON-NLS-1$
@@ -331,13 +338,7 @@ public class APrintApplication {
 	}
 
 	private static void setQuaquaLnf() {
-		// set system properties here that affect Quaqua
-		// for example the default layout policy for tabbed
-		// panes:
-		// System.setProperty(
-		// "Quaqua.tabLayoutPolicy","wrap"
-		//
-		// );
+		
 
 		// set the Quaqua Look and Feel in the UIManager
 		try {
@@ -393,10 +394,10 @@ public class APrintApplication {
 	}
 
 	/**
-	 * Ajoute un nouveau répertoire dans le java.library.path.
+	 * Ajoute un nouveau repertoire dans le java.library.path.
 	 * 
 	 * @param dir
-	 *            Le nouveau répertoire à ajouter.
+	 *            Le nouveau repertoire a ajouter.
 	 */
 	private static void addToJavaLibraryPath(File dir) {
 		final String LIBRARY_PATH = "java.library.path";
@@ -415,10 +416,10 @@ public class APrintApplication {
 	}
 
 	/**
-	 * Supprime le cache du "java.library.path". Cela forcera le classloader à
-	 * revérifier sa valeur lors du prochaine chargement de librairie.
+	 * Supprime le cache du "java.library.path". Cela forcera le classloader a
+	 * reverifier sa valeur lors du prochaine chargement de librairie.
 	 * 
-	 * Attention : ceci est spécifique à la JVM de Sun et pourrait ne pas
+	 * Attention : ceci est specifique a la JVM de Sun et pourrait ne pas
 	 * fonctionner sur une autre JVM...
 	 */
 	/*

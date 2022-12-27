@@ -13,7 +13,7 @@ import java.util.TreeSet;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.apache.xmlbeans.impl.util.Base64;
+import org.barrelorgandiscovery.tools.Base64Tools;
 import org.barrelorgandiscovery.tools.NotImplementedException;
 
 
@@ -91,7 +91,7 @@ public class ReadOnlyOptimizedZipStream implements StreamStorage {
 		md.reset();
 		md.update(content);
 		
-		return new String(Base64.encode(md.digest()), "UTF-8");
+		return Base64Tools.encode(md.digest());
 	}
 
 	public InputStream openStream(String stream) throws IOException {

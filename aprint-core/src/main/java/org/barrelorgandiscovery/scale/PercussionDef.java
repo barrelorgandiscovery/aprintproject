@@ -35,7 +35,7 @@ public class PercussionDef extends ControlTrackDef implements
 	}
 
 	/**
-	 * Récupére la définition midi de la percussion
+	 * RÃ©cupÃ¨re la dÃ©finition midi de la percussion
 	 * 
 	 * @return
 	 */

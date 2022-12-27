@@ -5,7 +5,7 @@ import org.barrelorgandiscovery.instrument.Instrument;
 public interface IInstrumentChoiceListener {
 
 	/**
-	 * Message pour indiquant que l'instrument a changé
+	 * Message pour indiquant que l'instrument a changÃ©
 	 * 
 	 * @param newInstrument
 	 */

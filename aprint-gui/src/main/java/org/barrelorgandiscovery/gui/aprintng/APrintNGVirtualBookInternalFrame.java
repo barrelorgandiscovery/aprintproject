@@ -163,9 +163,9 @@ import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.MP3Tools;
 import org.barrelorgandiscovery.tools.OGGTools;
 import org.barrelorgandiscovery.tools.SwingUtils;
+import org.barrelorgandiscovery.tools.VFSTools;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
 import org.barrelorgandiscovery.ui.tools.ToolWindowTools;
-import org.barrelorgandiscovery.ui.tools.VFSTools;
 import org.barrelorgandiscovery.virtualbook.Hole;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 import org.barrelorgandiscovery.virtualbook.VirtualBookMetadata;
@@ -318,7 +318,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 	/** Virtual book component rendering */
 	private JEditableVirtualBookComponent pianoroll = new JEditableVirtualBookComponent();
 
-	/** Layer contenant les probl�mes de transposition */
+	/** Layer contenant les problemes de transposition */
 	private IssueLayer il = new IssueLayer();
 
 	private TimeBookLayer tbl = new TimeBookLayer();
@@ -1071,7 +1071,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		bookPropertiesPanel.add(bookPropertiesPropertySheetPanel, BorderLayout.CENTER);
 
 		logger.debug("register book properties window");
-		tw = toolWindowManager.registerToolWindow("Propri�t�s du carton", "Propri�t�s du carton", null,
+		tw = toolWindowManager.registerToolWindow("Propriétés du carton", "Propriétés du carton", null,
 				bookPropertiesPanel, ToolWindowAnchor.LEFT);
 
 		// change width
@@ -1439,7 +1439,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 			nf.setMaximumFractionDigits(2); // la tu auras au plus 2 chiffres
 			// apres la virgule
 			nf.setMinimumFractionDigits(2); // maintenant tout tes nombres
-			// auront 2 chiffres apr�s la
+			// auront 2 chiffres après la
 			// virgule
 
 			caption += nf.format(timeToMM) + " m"; //$NON-NLS-1$
@@ -1907,7 +1907,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		if (pianoroll.hasHightlight()) {
 
 			startPlayPos = pianoroll.MMToTime(pianoroll.getHightlight());
-			// si on est � la fin, on red�marre
+			// si on est à la fin, on redémarre
 
 			if (startPlayPos - 10000 >= stop)
 				startPlayPos = 0;
@@ -1965,7 +1965,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		}
 
 		if (choose.showSaveDialog((Component) this) == APrintFileChooser.APPROVE_OPTION) {
-			// R�cup�ration du nom de fichier
+			// Récupération du nom de fichier
 			AbstractFileObject result = choose.getSelectedFile();
 			String filename = result.getName().getBaseName();
 			if (!filename.toLowerCase().endsWith("." + APrintConstants.BOOK)) //$NON-NLS-1$
@@ -1998,7 +1998,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		}
 
 		if (choose.showSaveDialog((Component) this) == APrintFileChooser.APPROVE_OPTION) {
-			// R�cup�ration du nom de fichier
+			// Récupération du nom de fichier
 			AbstractFileObject result = choose.getSelectedFile();
 			String filename = result.getName().getBaseName();
 			if (!filename.toLowerCase().endsWith("." + APrintConstants.BOOK)) //$NON-NLS-1$
@@ -2024,12 +2024,6 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 			logger.debug("virtual book written"); //$NON-NLS-1$
 
 			currentSavedFile = result;
-
-			// JMessageBox.showMessage(this,
-			// Messages.getString("APrintNGVirtualBookInternalFrame.44") + result.getName()
-			// // $NON-NLS-1$
-			// + Messages.getString("APrintNGVirtualBookInternalFrame.45")); //$NON-NLS-1$
-
 			clearDirty();
 			clearVirtualBookState();
 			updateTitle();
@@ -2041,7 +2035,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 	/** Launch the print preview */
 	private void launchPrintPreview() {
 
-		// pr�visualisation ...
+		// prévisualisation ...
 		try {
 
 			CartonVirtuelPrintDocument d = new CartonVirtuelPrintDocument(getVirtualBook(), 72);
@@ -2070,7 +2064,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 
 			// pb avec les 300 dpi, si l'on met 300 dpi, ca devrai passer avec
 			// les imprimantes ... non actuellement
-			// test�, mais en PDF, c'est pas bon !!
+			// testé, mais en PDF, c'est pas bon !!
 
 			CartonVirtuelPrintDocument d = new CartonVirtuelPrintDocument(getVirtualBook(), 72);
 
@@ -2088,7 +2082,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 				// HashPrintRequestAttributeSet as = new
 				// HashPrintRequestAttributeSet();
 
-				// cette propri�t� ne fonctionne pas sur toutes les imprimantes
+				// cette propriété ne fonctionne pas sur toutes les imprimantes
 				// ...
 				// as.add(new PrinterResolution(300, 300,
 				// PrinterResolution.DPI));
@@ -2300,7 +2294,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 							public void jobFinished(APrintGroovyConsolePanel p, Object result) throws Exception {
 
 								if (result != null && result instanceof MidiFile) {
-									// demande du fichier � sauvegarder ...
+									// demande du fichier à sauvegarder ...
 									APrintFileChooser choose = new APrintFileChooser();
 
 									choose.setFileSelectionMode(APrintFileChooser.FILES_ONLY);
@@ -2343,7 +2337,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 
 		logger.debug("default save ..."); //$NON-NLS-1$
 
-		// demande du fichier � sauvegarder ...
+		// demande du fichier à sauvegarder ...
 		APrintFileChooser choose = new APrintFileChooser();
 
 		choose.setFileSelectionMode(APrintFileChooser.FILES_ONLY);
@@ -2376,7 +2370,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 
 	private void saveWAV() throws InvalidMidiDataException, IOException, Exception {
 
-		// demande du fichier � sauvegarder ...
+		// demande du fichier à sauvegarder ...
 		APrintFileChooser choose = new APrintFileChooser();
 
 		choose.setFileSelectionMode(APrintFileChooser.FILES_ONLY);

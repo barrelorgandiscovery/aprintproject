@@ -20,7 +20,6 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.lf5.LF5Appender;
 import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
 import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
-import org.barrelorgandiscovery.ui.tools.VFSTools;
 
 import com.l2fprod.common.beans.editor.AbstractPropertyEditor;
 import com.l2fprod.common.beans.editor.FilePropertyEditor;

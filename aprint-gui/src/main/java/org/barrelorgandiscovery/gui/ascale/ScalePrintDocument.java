@@ -23,7 +23,7 @@ public class ScalePrintDocument implements Printable {
 			.getLogger(ScalePrintDocument.class);
 
 	/**
-	 * Gamme à imprimer
+	 * Gamme Ã  imprimer
 	 */
 	private Scale gamme;
 
@@ -31,7 +31,7 @@ public class ScalePrintDocument implements Printable {
 	 * Constructeur
 	 * 
 	 * @param gamme
-	 *            la gamme à imprimer
+	 *            la gamme Ã  imprimer
 	 */
 	public ScalePrintDocument(Scale gamme) {
 		super();
@@ -64,7 +64,7 @@ public class ScalePrintDocument implements Printable {
 		
 		logger.debug("print gamme ..."); //$NON-NLS-1$
 
-		// Création du composant ...
+		// CrÃ©ation du composant ...
 		ScaleComponent c = new ScaleComponent();
 
 		// chargement de la gamme ...

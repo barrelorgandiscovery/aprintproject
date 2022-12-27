@@ -202,7 +202,7 @@ public class MachineCommandStream {
 									@Override
 									public void run() {
 										JMessageBox.showError(null, new Exception(
-												"une erreur a été rencontrée lors du perçage :" + ft.getMessage(), ft));
+												"error has been encountered on punching :" + ft.getMessage(), ft)); 
 									}
 
 								});

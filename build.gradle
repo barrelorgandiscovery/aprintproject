@@ -1,14 +1,12 @@
 import java.text.*
 
 
+
 subprojects {
 
     apply plugin: 'eclipse'
     apply plugin: 'java'
     apply plugin: 'jacoco' 
-
-
-
     task sourcesJar(type: Jar, dependsOn: classes) {
        classifier = 'sources'
        from sourceSets.main.allSource
@@ -28,7 +26,9 @@ subprojects {
     // put sources into jar
     jar {
         from sourceSets.main.allSource
+	duplicatesStrategy(DuplicatesStrategy.EXCLUDE) 
     }
+
 
     artifacts {
         archives sourcesJar

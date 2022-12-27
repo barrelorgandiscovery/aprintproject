@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import org.apache.commons.vfs2.FileName;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.provider.AbstractFileObject;
+import org.barrelorgandiscovery.tools.VFSTools;
 import org.junit.Test;
 
 public class TestVFSOutputStream {

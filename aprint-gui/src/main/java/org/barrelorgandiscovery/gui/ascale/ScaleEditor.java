@@ -28,8 +28,8 @@ import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.repository.Repository2;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.tools.JMessageBox;
+import org.barrelorgandiscovery.tools.VFSTools;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
-import org.barrelorgandiscovery.ui.tools.VFSTools;
 import org.barrelorgandiscovery.virtualbook.transformation.LinearTransposition;
 import org.barrelorgandiscovery.virtualbook.transformation.TranspositionIO;
 
@@ -342,43 +342,7 @@ public class ScaleEditor extends JFrame {
 			BugReporter.sendBugReport();
 		}
 
-		// try {
-		//
-		// // s'il n'y a pas de fichier courant .. saveas ..
-		// if (currentfile == null) {
-		// saveAsGamme();
-		// return;
-		// }
-		//
-		// logger.debug("vérification de la gamme ..."); //$NON-NLS-1$
-		// String checkGamme = gammecomponent.checkGamme();
-		// if (checkGamme != null) {
-		// JMessageBox.showMessage(this, checkGamme);
-		// return; // fin ..
-		// }
-		//
-		// Scale g = gammecomponent.constructGamme();
-		//
-		// ScaleIO.writeGamme(g, currentfile);
-		//
-		// // sauvegarde du fichier de transposition ...
-		// LinearTransposition lt = TranspositionIO
-		// .createDefaultMidiTranspositionForGamme(g);
-		// File defaulttranspositionfile = new File(currentfile
-		// .getAbsolutePath()
-		// + ".transposition"); //$NON-NLS-1$
-		//
-		// TranspositionIO.writeLinearTransposition(lt,
-		// defaulttranspositionfile);
-		//
-		// JMessageBox.showMessage(this, Messages.getString("GammeEditor.31")
-		// //$NON-NLS-1$
-		// + currentfile.getName()
-		// + Messages.getString("GammeEditor.32")); //$NON-NLS-1$
-		//
-		// } catch (Exception ex) {
-		// logger.error("saveGamme", ex); //$NON-NLS-1$
-		// }
+	
 	}
 
 	private void rememberDefaultFolderForFile(File selectedFile) {
@@ -395,7 +359,7 @@ public class ScaleEditor extends JFrame {
 	private void previewGamme() {
 		try {
 
-			logger.debug("vérification de la gamme ..."); //$NON-NLS-1$
+			logger.debug("scal check ..."); //$NON-NLS-1$
 
 			String checkGamme = scaleEditorPanel.checkScale();
 
@@ -406,7 +370,7 @@ public class ScaleEditor extends JFrame {
 
 			Scale g = scaleEditorPanel.getScale();
 
-			// prévisualisation de la gamme ...
+			// prÃ©visualisation de la gamme ...
 			new PrintPreview(new ScalePrintDocument(g));
 
 		} catch (Exception ex) {
@@ -416,7 +380,7 @@ public class ScaleEditor extends JFrame {
 
 	private void printGamme() {
 		try {
-			logger.debug("vérification de la gamme ..."); //$NON-NLS-1$
+			logger.debug("scale check ..."); //$NON-NLS-1$
 			String checkGamme = scaleEditorPanel.checkScale();
 			if (checkGamme != null) {
 				JMessageBox.showMessage(this, checkGamme);

@@ -12,7 +12,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.apache.log4j.Logger;
-import org.apache.xmlbeans.impl.util.Base64;
+import org.barrelorgandiscovery.tools.Base64Tools;
 import org.barrelorgandiscovery.tools.NotImplementedException;
 
 
@@ -214,7 +214,7 @@ public class ZipStreamStorage implements StreamStorage {
 						md.update(buffer, 0, cpt);
 					}
 
-					return new String(Base64.encode(md.digest()), "UTF-8");
+					return Base64Tools.encode(md.digest());
 				}
 			}
 		} catch (IOException ex) {

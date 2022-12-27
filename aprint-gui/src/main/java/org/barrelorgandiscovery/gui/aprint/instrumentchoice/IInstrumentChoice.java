@@ -25,7 +25,7 @@ public interface IInstrumentChoice {
 	public abstract void setInstrumentFilter(String filter);
 
 	/**
-	 * Retourne l'instrument sélectionné
+	 * Retourne l'instrument sÃ©lectionnÃ©
 	 * 
 	 * @return
 	 */

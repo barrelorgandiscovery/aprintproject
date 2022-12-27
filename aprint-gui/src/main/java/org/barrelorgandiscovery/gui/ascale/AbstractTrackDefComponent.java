@@ -25,8 +25,8 @@ public abstract class AbstractTrackDefComponent extends JComponent {
 	}
 
 	/**
-	 * permet aux classes dérivées de d'envoyer un évenement de changement de
-	 * définition de piste (pour le composant de gamme)
+	 * permet aux classes dÃ©rivÃ©es de d'envoyer un Ã©venement de changement de
+	 * dÃ©finition de piste (pour le composant de gamme)
 	 * 
 	 * @param td
 	 */
@@ -40,10 +40,10 @@ public abstract class AbstractTrackDefComponent extends JComponent {
 	}
 
 	/**
-	 * Cette méthode est appelée pour informer le composant du composant de
-	 * définition des registres
+	 * Cette mÃ©thode est appelÃ©e pour informer le composant du composant de
+	 * dÃ©finition des registres
 	 * 
-	 * Les composants client peuvent s'enregistrer pour être au courant des
+	 * Les composants client peuvent s'enregistrer pour Ãªtre au courant des
 	 * modifications
 	 * 
 	 * @param registercomponent
@@ -54,7 +54,7 @@ public abstract class AbstractTrackDefComponent extends JComponent {
 	}
 
 	/**
-	 * Récupère la classe de l'objet edité ..
+	 * RÃ©cupÃ¨re la classe de l'objet editÃ© ..
 	 * 
 	 * @return
 	 */
@@ -62,14 +62,14 @@ public abstract class AbstractTrackDefComponent extends JComponent {
 	public abstract Class getEditedTrackDef();
 
 	/**
-	 * Récupère le titre du composant
+	 * RÃ©cupÃ¨re le titre du composant
 	 * 
 	 * @return
 	 */
 	public abstract String getTitle();
 
 	/**
-	 * Demande l'émission d'un message de modification de l'élément
+	 * Demande l'Ã©mission d'un message de modification de l'Ã©lÃ©ment
 	 */
 	public abstract void sendTrackDef();
 

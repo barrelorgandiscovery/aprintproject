@@ -61,10 +61,10 @@ public class SerializeTools {
 	/**
 	 * Clone en profondeur de l'objet
 	 * 
-	 * si l'objet passé en paramètre est null, null est retourné
+	 * si l'objet passÃ© en paramÃ¨tre est null, null est retournÃ©
 	 * 
 	 * @param object
-	 *            l'objet à cloner
+	 *            l'objet Ã  cloner
 	 * @return la copie de l'objet
 	 */
 	public static Object deepClone(Serializable object) {

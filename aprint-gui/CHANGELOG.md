@@ -1,5 +1,10 @@
 # Changelog
 
+## 2022 Decembre
+
+- switch to java 17 
+
+
 ## 2021 December
 
 - Add Velocity On and Off in MidiNote event (for model editor, preserve theses elements)

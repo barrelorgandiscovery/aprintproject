@@ -19,8 +19,8 @@ import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.tools.JMessageBox;
+import org.barrelorgandiscovery.tools.VFSTools;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
-import org.barrelorgandiscovery.ui.tools.VFSTools;
 
 public class ExportAction extends RepositoryAbstractAction {
 

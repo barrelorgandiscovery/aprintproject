@@ -18,7 +18,7 @@ public class MeasureLayer implements VirtualBookComponentLayer {
 	 */
 	public void draw(Graphics g, JVirtualBookComponent jcarton) {
 
-		// Récupération de l'étendue à afficher ...
+		// Recuperation de l'etendue a afficher ...
 		Rectangle rect = g.getClipBounds(new Rectangle());
 
 		double start = jcarton.convertScreenXToCarton(rect.x);

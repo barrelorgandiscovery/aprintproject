@@ -60,7 +60,7 @@ public class RegisterResetDefComponent extends AbstractControlDefComponent {
 			}
 		});
 
-		cbRegisterSet.addItem("ALL"); // tous les jeux sont arretés //$NON-NLS-1$
+		cbRegisterSet.addItem("ALL"); // tous les jeux sont arretes //$NON-NLS-1$
 										// //$NON-NLS-1$
 
 		cbRegisterSet.setRenderer(new ListCellRenderer() {
@@ -189,7 +189,7 @@ public class RegisterResetDefComponent extends AbstractControlDefComponent {
 
 		cbRegisterSet.removeAllItems();
 
-		cbRegisterSet.addItem("ALL"); // tous les jeux sont arretés //$NON-NLS-1$
+		cbRegisterSet.addItem("ALL"); // tous les jeux sont arretes //$NON-NLS-1$
 										// //$NON-NLS-1$
 		for (PipeStopGroup s : list) {
 			cbRegisterSet.addItem(s.getName());

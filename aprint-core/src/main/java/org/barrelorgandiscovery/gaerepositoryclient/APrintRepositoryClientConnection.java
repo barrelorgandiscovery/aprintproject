@@ -21,7 +21,7 @@ import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
-import org.apache.xmlbeans.impl.util.Base64;
+import org.barrelorgandiscovery.tools.Base64Tools;
 import org.barrelorgandiscovery.tools.StreamsTools;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -114,7 +114,7 @@ public class APrintRepositoryClientConnection {
 					md5digest.update(buffer, 0, cpt);
 				}
 
-				md5 = new String(Base64.encode(md5digest.digest()));
+				md5 = new String(Base64Tools.encode(md5digest.digest()));
 
 				logger.debug("md5 :" + md5); //$NON-NLS-1$
 

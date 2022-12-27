@@ -20,7 +20,7 @@ public class JFrameWaitable extends JFrame implements IAPrintWait{
 	private static Logger logger = Logger.getLogger(JFrameWaitable.class);
 	
 	/**
-	 * sequencer utilisé pour jouer le morceau
+	 * sequencer utilise pour jouer le morceau
 	 */
 	private InfiniteProgressPanel infiniteprogresspanel = new InfiniteProgressPanel(
 				null, 20, 0.5f, 0.5f);

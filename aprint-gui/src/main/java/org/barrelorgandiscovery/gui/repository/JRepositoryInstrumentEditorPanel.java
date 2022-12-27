@@ -27,7 +27,7 @@ import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.scale.io.ScaleIO;
 import org.barrelorgandiscovery.tools.JMessageBox;
-import org.barrelorgandiscovery.ui.tools.VFSTools;
+import org.barrelorgandiscovery.tools.VFSTools;
 
 /**
  * This class permit to modify an instrument

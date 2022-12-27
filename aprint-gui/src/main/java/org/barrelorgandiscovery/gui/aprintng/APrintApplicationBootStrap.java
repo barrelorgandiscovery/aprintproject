@@ -17,6 +17,11 @@ import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensions.ChildFirstClassLoader;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
 
+/**
+ * boot strap the application
+ * @author patrice
+ *
+ */
 public class APrintApplicationBootStrap {
 
   public static final String MAINFOLDER_SYSPROP = "mainfolder";
@@ -38,6 +43,10 @@ public class APrintApplicationBootStrap {
     }
 
     // setQuaquaLnf();
+    
+    // implementation 'com.formdev:flatlaf:2.6'
+    
+    
 
     Properties sysprop = System.getProperties();
     sysprop.store(System.out, "");

@@ -76,7 +76,7 @@ public class CartonVirtuelPrintDocument implements Printable {
 	}
 
 	/**
-	 * Converti des secondes en mm par rapport à l'avancée du carton
+	 * Converti des secondes en mm par rapport Ã  l'avancÃ©e du carton
 	 * 
 	 * @param secondes
 	 * @return
@@ -86,7 +86,7 @@ public class CartonVirtuelPrintDocument implements Printable {
 	}
 
 	/**
-	 * converti des mm en secondes par rapport à l'avancée du carton
+	 * convertie des mm en secondes par rapport Ã  l'avancÃ©e du carton
 	 * 
 	 * @param mm
 	 * @return
@@ -118,7 +118,7 @@ public class CartonVirtuelPrintDocument implements Printable {
 
 		logger.debug("printing page :" + pageIndex);
 
-		// on regarde si l'on est à la fin du carton
+		// on regarde si l'on est Ã  la fin du carton
 
 		if (toSeconds(pageIndex * 1.0
 				* inchesTomm(pageFormat.getImageableWidth())) > (1.0 * carton
@@ -227,7 +227,7 @@ public class CartonVirtuelPrintDocument implements Printable {
 		FontMetrics newFontMetrics = g.getFontMetrics();
 		try {
 
-			// Récupération des notes dans le carton
+			// RÃ©cupÃ©ration des notes dans le carton
 			ArrayList<Hole> notes = carton.findHoles(
 					(long) (startPageSecond * 1000000),
 					(long) ((endPageSecond - startPageSecond) * 1000000));

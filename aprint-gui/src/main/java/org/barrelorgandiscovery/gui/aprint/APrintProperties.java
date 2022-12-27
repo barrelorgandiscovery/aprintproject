@@ -9,7 +9,7 @@ import org.barrelorgandiscovery.prefs.FilePrefsStorage;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 
 /**
- * Classe contenant les propriétés associées au programme APrint
+ * Classe contenant les propriÃ©tÃ©s associÃ©es au programme APrint
  * 
  * 
  * @author Freydiere Patrice
@@ -75,7 +75,7 @@ public class APrintProperties {
 	}
 
 	public APrintProperties(String softwareName, boolean isbeta, String mainFolder) throws Exception {
-		// Récupération de l'emplacement du répertoire de l'utilisateur ...
+		// Rï¿½cupï¿½ration de l'emplacement du rï¿½pertoire de l'utilisateur ...
 
 		this.isbeta = isbeta;
 
@@ -109,8 +109,8 @@ public class APrintProperties {
 	}
 
 	/**
-	 * Construction de l'objet, en prenant pour fichier de propriété le fichier
-	 * aprint.properties dans le répertoire de l'utilisateur
+	 * Construction de l'objet, en prenant pour fichier de propriÃ©tÃ© le fichier
+	 * aprint.properties dans le rÃ©pertoire de l'utilisateur
 	 */
 	public APrintProperties(boolean isbeta) throws Exception {
 		this("aprint", isbeta);
@@ -121,7 +121,7 @@ public class APrintProperties {
 	}
 
 	/**
-	 * Récupère le répertoire de gammes et de fichiers de transposition
+	 * RÃ©cupÃ¨re le rÃ©pertoire de gammes et de fichiers de transposition
 	 * 
 	 * @return
 	 */

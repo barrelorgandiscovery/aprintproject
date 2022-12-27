@@ -125,219 +125,7 @@ public class IssueLayer implements VirtualBookComponentLayer,
 
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * fr.freydierepatrice.aedit.ComponentCartonLayer#draw(java.awt.Graphics,
-	 * fr.freydierepatrice.aedit.JComponentCarton)
-	 */
-	// public void draw_old(Graphics g, JVirtualBookComponent jcarton) {
-	//
-	// if (!visible || issueCollection == null || issueCollection.size() <= 0)
-	// return;
-	//
-	// Scale gamme = jcarton.getVirtualBook().getScale();
-	//
-	// Rectangle r = g.getClipBounds();
-	// long start = gamme.mmToTime(jcarton.convertScreenXToCarton(r.x));
-	// long end = gamme
-	// .mmToTime(jcarton.convertScreenXToCarton(r.x + r.width));
-	//
-	// // logger.debug("start " + start);
-	// // logger.debug("end " + end);
-	//
-	// Set<AbstractSpatialIssue> s = issueCollection.find(start, end);
-	//
-	// // la couche est visible et il y a des choses à afficher ...
-	// Graphics2D g2d = (Graphics2D) g;
-	//
-	// Color lastcolor = g.getColor();
-	// g.setColor(colorissue);
-	// try {
-	//
-	// Composite lastcomposite = g2d.getComposite();
-	// try {
-	// g2d.setComposite(AlphaComposite.getInstance(
-	// AlphaComposite.SRC_OVER, 0.2f)); // transparence ...
-	//
-	// for (Iterator<AbstractSpatialIssue> iterator = s.iterator(); iterator
-	// .hasNext();) {
-	// AbstractSpatialIssue abstractSpatialIssue = (AbstractSpatialIssue)
-	// iterator
-	// .next();
-	//
-	// AbstractIssue ai = abstractSpatialIssue;
-	//
-	// if (ai instanceof IssueHole) {
-	//
-	// IssueHole ih = (IssueHole) ai;
-	// Hole[] holes = ih.getNotes();
-	// if (holes != null && holes.length > 0) {
-	// // dessin des problèmes ...
-	//
-	// for (int j = 0; j < holes.length; j++) {
-	// Hole h = holes[j];
-	//
-	// int x = jcarton.convertCartonToScreenX(jcarton
-	// .timestampToMM(h.getTimestamp()));
-	//
-	// int y;
-	//
-	// if (gamme.isPreferredViewedInversed()) {
-	//
-	// y = jcarton
-	// .convertCartonToScreenY(gamme
-	// .getWidth()
-	// - (gamme
-	// .getFirstTrackAxis()
-	// + gamme
-	// .getIntertrackHeight()
-	// * h.getPiste() - gamme
-	// .getIntertrackHeight() / 2.0));
-	//
-	// } else {
-	//
-	// y = jcarton
-	// .convertCartonToScreenY(gamme
-	// .getFirstTrackAxis()
-	// + gamme
-	// .getIntertrackHeight()
-	// * h.getPiste()
-	// - gamme
-	// .getIntertrackHeight()
-	// / 2.0);
-	// }
-	//
-	// g.setColor(Color.red);
-	// Composite oldcomposite = g2d.getComposite();
-	// g2d.setComposite(AlphaComposite.Src);
-	// try {
-	// Stroke old = g2d.getStroke();
-	// g2d.setStroke(new BasicStroke(3.0f));
-	// try {
-	//
-	// g.drawOval(x, y, jcarton
-	// .MmToPixel(jcarton.timeToMM(h
-	// .getLength())), jcarton
-	// .MmToPixel(gamme
-	// .getTrackWidth()));
-	//
-	// } finally {
-	// g2d.setStroke(old);
-	// }
-	// } finally {
-	// g.setColor(colorissue);
-	// g2d.setComposite(oldcomposite);
-	// }
-	// }
-	//
-	// }
-	//
-	// } else if (ai instanceof IssueRegion) {
-	//
-	// IssueRegion ir = (IssueRegion) ai;
-	//
-	// int xstart = jcarton.convertCartonToScreenX(jcarton
-	// .timestampToMM(ir.getStart()));
-	// int xend = jcarton.convertCartonToScreenX(jcarton
-	// .timestampToMM(ir.getStart() + ir.getLength()));
-	//
-	// int ystart;
-	// int yend;
-	// if (gamme.isPreferredViewedInversed()) {
-	// yend = jcarton.convertCartonToScreenY(gamme
-	// .getWidth()
-	// - (gamme.getFirstTrackAxis()
-	// + gamme.getIntertrackHeight()
-	// * ir.getBegintrack() - gamme
-	// .getIntertrackHeight() / 2));
-	//
-	// ystart = jcarton.convertCartonToScreenY(gamme
-	// .getWidth()
-	// - (gamme.getFirstTrackAxis()
-	// + gamme.getIntertrackHeight()
-	// * ir.getEndtrack() + gamme
-	// .getIntertrackHeight() / 2));
-	// } else {
-	// ystart = jcarton.convertCartonToScreenY(gamme
-	// .getFirstTrackAxis()
-	// + gamme.getIntertrackHeight()
-	// * ir.getBegintrack()
-	// - gamme.getIntertrackHeight() / 2);
-	//
-	// yend = jcarton.convertCartonToScreenY(gamme
-	// .getFirstTrackAxis()
-	// + gamme.getIntertrackHeight()
-	// * ir.getEndtrack()
-	// + gamme.getIntertrackHeight() / 2);
-	// }
-	// g
-	// .drawRect(xstart, ystart, xend - xstart, yend
-	// - ystart);
-	//
-	// } else if (ai instanceof IssueMissing) {
-	//
-	// IssueMissing im = (IssueMissing) ai;
-	//
-	// int xstart = jcarton.convertCartonToScreenX(jcarton
-	// .timestampToMM(im.getStart()));
-	// int xend = jcarton.convertCartonToScreenX(jcarton
-	// .timestampToMM(im.getStart() + im.getLength()));
-	//
-	// // int ypos = jcarton.convertCartonToScreenY(gamme
-	// // .getWidth());
-	//
-	// int ypos = jcarton.convertCartonToScreenY(gamme
-	// .getWidth());
-	//
-	// int issueposition = im.getInterpolatePos();
-	// if (issueposition >= 0) {
-	// if (gamme.isPreferredViewedInversed()) {
-	// ypos = jcarton
-	// .convertCartonToScreenY(gamme
-	// .getWidth()
-	// - (gamme.getFirstTrackAxis() + issueposition
-	// * gamme
-	// .getIntertrackHeight()));
-	// } else {
-	//
-	// ypos = jcarton.convertCartonToScreenY(gamme
-	// .getFirstTrackAxis()
-	// + issueposition
-	// * gamme.getIntertrackHeight());
-	// }
-	// }
-	//
-	// g.fillRoundRect(xstart, ypos, xend - xstart, jcarton
-	// .MmToPixel(5.0), 2, 2);
-	// g.setColor(Color.gray);
-	// g.drawRoundRect(xstart, ypos, xend - xstart, jcarton
-	// .MmToPixel(5.0), 2, 2);
-	//
-	// // dessin des lignes ...
-	//
-	// int ycarton = jcarton
-	// .convertCartonToScreenY(0.0 + jcarton
-	// .getYoffset());
-	// int yfin = jcarton.convertCartonToScreenY(gamme
-	// .getWidth());
-	// g.drawLine(xstart, ycarton, xstart, yfin);
-	// g.drawLine(xend, ycarton, xend, yfin);
-	//
-	// g.setColor(colorissue);
-	// } else {
-	// logger.warn("issue " + ai + " not drawn"); //$NON-NLS-1$ //$NON-NLS-2$
-	// }
-	//
-	// }
-	// } finally {
-	// g2d.setComposite(lastcomposite);
-	// }
-	// } finally {
-	// g.setColor(lastcolor);
-	// }
-	// }
+
 	private class IssueRepresentation {
 		public ArrayList<Shape> issueShape;
 	}
@@ -380,7 +168,7 @@ public class IssueLayer implements VirtualBookComponentLayer,
 					Hole[] holes = ih.getNotes();
 
 					if (holes != null && holes.length > 0) {
-						// dessin des problèmes ...
+						// dessin des problemes ...
 
 						for (int j = 0; j < holes.length; j++) {
 							Hole h = holes[j];
@@ -537,7 +325,7 @@ public class IssueLayer implements VirtualBookComponentLayer,
 	}
 
 	// ///////////////////////////////////////////////////////////////////////////
-	// Gestion des problèmes ...
+	// Gestion des problemes ...
 
 	public IssueCollection getIssueCollection() {
 		return issueCollection;
@@ -579,7 +367,7 @@ public class IssueLayer implements VirtualBookComponentLayer,
 	}
 
 	// ///////////////////////////////////////////////////////////////////////////
-	// Gestion de la visibilité des couches ...
+	// Gestion de la visibilite des couches ...
 
 	private boolean visible = true;
 

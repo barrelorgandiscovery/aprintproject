@@ -274,16 +274,6 @@ public class JInstrumentTileViewer extends JPanel {
 	@Override
 	public void doLayout() {
 
-		// System.out.println("Width :" + getWidth());
-		// System.out.println("Height :" + getHeight());
-		//
-		// System.out.println("typical cell value :" +
-		// l.getPrototypeCellValue());
-
-		// récupération de la dimension d'un élément (en largeur)
-		// preferred Size est calculée en fonction des éléments à l'intérieur
-		// on récupère (aux inset près), la taille en largeur
-		// d'une element pour ajuster le nombre de colonnes
 
 		int instrumentNumber = l.getModel().getSize();
 		if (instrumentNumber > 0) {

@@ -5,7 +5,7 @@ import java.io.File;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
-import org.barrelorgandiscovery.ui.tools.VFSTools;
+import org.barrelorgandiscovery.tools.VFSTools;
 
 public class TestAPrintFileChooser {
 

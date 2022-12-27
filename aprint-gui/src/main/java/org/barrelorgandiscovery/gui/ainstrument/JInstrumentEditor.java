@@ -37,9 +37,9 @@ import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.scale.importer.MidiBoekGammeImporter;
 import org.barrelorgandiscovery.scale.io.ScaleIO;
 import org.barrelorgandiscovery.tools.JMessageBox;
+import org.barrelorgandiscovery.tools.VFSTools;
 import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
 import org.barrelorgandiscovery.tools.streamstorage.FolderStreamStorage;
-import org.barrelorgandiscovery.ui.tools.VFSTools;
 
 import com.birosoft.liquid.LiquidLookAndFeel;
 

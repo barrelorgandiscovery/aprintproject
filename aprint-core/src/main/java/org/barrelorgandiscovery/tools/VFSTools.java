@@ -1,4 +1,4 @@
-package org.barrelorgandiscovery.ui.tools;
+package org.barrelorgandiscovery.tools;
 
 import java.io.File;
 import java.io.OutputStream;

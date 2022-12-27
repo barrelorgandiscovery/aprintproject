@@ -81,10 +81,10 @@ public class BugReporter {
 
 					FileOutputStream fos = new FileOutputStream(tempfile);
 
-					// compactage des éléments dans un fichier zip ...
+					// compactage des elements dans un fichier zip ...
 					ZipOutputStream zipos = new ZipOutputStream(fos);
 					try {
-						// écriture du log d'erreurs pour la session en cours
+						// ecriture du log d'erreurs pour la session en cours
 						// ...
 						zipos.putNextEntry(new ZipEntry("logreport.log"));
 

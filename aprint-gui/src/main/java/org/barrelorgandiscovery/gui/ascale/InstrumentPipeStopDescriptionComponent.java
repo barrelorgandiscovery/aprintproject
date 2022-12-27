@@ -218,7 +218,7 @@ public class InstrumentPipeStopDescriptionComponent extends JComponent {
 				p.getComponentByName("organcomposition"), registertree); //$NON-NLS-1$
 
 
-		// Définition du rendu ...
+		// DÃ©finition du rendu ...
 		registertree.setCellRenderer(new TreeCellRenderer() {
 
 			private Hashtable<Object, JLabel> labelhash = new Hashtable<Object, JLabel>();
@@ -424,16 +424,9 @@ public class InstrumentPipeStopDescriptionComponent extends JComponent {
 
 							}
 						});
-
 						popup.add(midelete);
-
 					}
-
-					//					
-					// Point p = ((JComponent)e.getSource()).getLocation();
-					// p.move(e.getX(), e.getY());
-					// popup.setLocation(p);
-
+					
 					popup.show((JComponent) e.getSource(), e.getX(), e.getY());
 
 				}
@@ -458,7 +451,7 @@ public class InstrumentPipeStopDescriptionComponent extends JComponent {
 	}
 
 	/**
-	 * Redéfini la liste des registres
+	 * RedÃ©fini la liste des registres
 	 * 
 	 * @param newlist
 	 */
@@ -487,7 +480,7 @@ public class InstrumentPipeStopDescriptionComponent extends JComponent {
 	}
 
 	/**
-	 * ajoute un écouteur de changement
+	 * ajoute un Ã©couteur de changement
 	 */
 	public void addRegisterSetListChangeListener(
 			RegisterSetListChangeListener listener) {
@@ -496,7 +489,7 @@ public class InstrumentPipeStopDescriptionComponent extends JComponent {
 	}
 
 	/**
-	 * supprime un écouteur de changement
+	 * supprime un Ã©couteur de changement
 	 */
 	public void removeRegisterSetListChangeListener(
 			RegisterSetListChangeListener listener) {
@@ -507,7 +500,7 @@ public class InstrumentPipeStopDescriptionComponent extends JComponent {
 	private Vector<RegisterSetListChangeListener> listeners = new Vector<RegisterSetListChangeListener>();
 
 	/**
-	 * Déclenche le changement de jeu de registres
+	 * DÃ©clenche le changement de jeu de registres
 	 */
 	private void fireRegisterSetListChanged() {
 		if (listeners.size() != 0) {

@@ -3,6 +3,7 @@ package org.barrelorgandiscovery.ui.tools;
 import java.io.File;
 
 import org.apache.commons.vfs2.provider.AbstractFileObject;
+import org.barrelorgandiscovery.tools.VFSTools;
 import org.junit.Test;
 
 public class TestVFSTools {

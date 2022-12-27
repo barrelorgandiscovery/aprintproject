@@ -1,7 +1,7 @@
 package org.barrelorgandiscovery.gui.etl.states;
 
 /**
- * Différents états de la cellule
+ * Differents etats de la cellule
  * 
  * @author pfreydiere
  * 

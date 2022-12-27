@@ -11,8 +11,6 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 
-import org.apache.xmlbeans.impl.util.Base64;
-
 /**
  * Tools associated to streams
  * 
@@ -112,7 +110,7 @@ public class StreamsTools {
 				md.update(c, 0, cpt);
 			}
 
-			byte[] digest = Base64.encode(md.digest());
+			byte[] digest = Base64Tools.encodeToBytes(md.digest());
 
 			return digest;
 

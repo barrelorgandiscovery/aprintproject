@@ -1,7 +1,7 @@
 import java.text.*
 
 // Apply the java plugin to add support for Java
-apply plugin: 'java'
+apply plugin: 'java-library'
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -19,7 +19,12 @@ compileJava {
 	options.forkOptions.executable =  System.getenv('JAVA_HOME') + File.separator + "bin" + File.separator + "javac"
 	options.compilerArgs << "-XDignore.symbol.file"
 }
-
+processResources {
+	duplicatesStrategy(DuplicatesStrategy.WARN) 
+}
+sourcesJar {
+	duplicatesStrategy(DuplicatesStrategy.WARN) 
+}
 
 configurations {
 	xmlbean
@@ -28,35 +33,36 @@ configurations {
 // In this section you declare the dependencies for your production and test code
 dependencies {
 
-	compile project(':aprint-gervill')
+	api project(':aprint-gervill')
 	
 	// compile "xml-apis:xml-apis"
-	compile files(fileTree(dir:"${projectDir}/libs" , include:['**/*.jar']).toList())
+	api files(fileTree(dir:"${projectDir}/libs" , include:['**/*.jar']).toList())
 	
 	// https://mvnrepository.com/artifact/log4j/log4j
-	compile group: 'log4j', name: 'log4j', version: '1.2.14'
+	api group: 'log4j', name: 'log4j', version: '1.2.14'
 	
 	// https://mvnrepository.com/artifact/org.apache.commons/commons-vfs2
-    compile group: 'org.apache.commons', name: 'commons-vfs2', version: '2.9.0'
-    compile group: 'org.apache.commons', name: 'commons-vfs2', version: '2.9.0'
-     compile group: 'org.apache.commons', name: 'commons-vfs2-jackrabbit2', version: '2.9.0'
-    compile group: 'org.apache.commons', name: 'commons-vfs2-jackrabbit1', version: '2.9.0'
-   // https://mvnrepository.com/artifact/commons-net/commons-net
-compile group: 'commons-net', name: 'commons-net', version: '3.8.0'
-   // https://mvnrepository.com/artifact/org.apache.jackrabbit/jackrabbit-webdav
-compile group: 'org.apache.jackrabbit', name: 'jackrabbit-webdav', version: '2.21.9'
+    api group: 'org.apache.commons', name: 'commons-vfs2', version: '2.9.0'
+    
+    // api group: 'org.apache.commons', name: 'commons-vfs2-jackrabbit2', version: '2.9.0'
+    // api group: 'org.apache.commons', name: 'commons-vfs2-jackrabbit1', version: '2.9.0'
+	// https://mvnrepository.com/artifact/commons-net/commons-net
+	implementation group: 'commons-net', name: 'commons-net', version: '3.8.0'
+	   // https://mvnrepository.com/artifact/org.apache.jackrabbit/jackrabbit-webdav
+	api group: 'org.apache.jackrabbit', name: 'jackrabbit-webdav', version: '2.21.9'
    
-     
 	
+	// https://mvnrepository.com/artifact/org.apache.xmlbeans/xmlbeans
+	xmlbean 'org.apache.xmlbeans:xmlbeans:5.1.1'
+	api 'org.apache.xmlbeans:xmlbeans:5.1.1'
+
+	implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.6.4'
+	implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.6.4'
+	implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.6.4'
+	implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.6.4'
 	
-	compile group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.6.4'
-	compile group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.6.4'
-	compile group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.6.4'
-	compile group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.6.4'
+	testImplementation 'junit:junit:4.12'
 	
-	testCompile 'junit:junit:4.12'
-	
-	xmlbean files(fileTree(dir:"${projectDir}/libs", include:['xbean.jar','jsr173_1.0_api.jar']).toList())
 }
 
 sourceSets {
@@ -91,7 +97,7 @@ task buildSpecJar() {
 	doLast {
 		// <taskdef name="xmlbean" classname="org.apache.xmlbeans.impl.tool.XMLBean" classpath="RD/xmlbean/xmlbeans-2.4.0/lib/xbean.jar:RD/xmlbean/xmlbeans-2.4.0/lib/jsr173_1.0_api.jar" />
 		
-		ant.taskdef(name: 'xmlbean',
+		ant.taskdef(name: 'xmlbean',					
 		classname: 'org.apache.xmlbeans.impl.tool.XMLBean',
 		classpath: configurations.xmlbean.asPath)
 //		
@@ -101,16 +107,58 @@ task buildSpecJar() {
 //			</fileset>
 //		</xmlbean>
 //
-
 		ant.xmlbean(verbose: 'true',
-			destfile:"${projectDir}/build/punch_specs.jar",
+			destfile:"${projectDir}/build/ext_specs.jar",
 			failonerror:'true',
 			classpath:configurations.xmlbean.asPath) {
-				
-				fileset(dir: 'specifications', includes: 'PunchPlan.xsd')
-			
+				fileset(dir: 'specifications', includes: 
+					"Extensions.xsd"
+				)
+		}
+		
+		ant.xmlbean(verbose: 'true',
+			destfile:"${projectDir}/build/vb2010_specs.jar",
+			failonerror:'true',
+			classpath:configurations.xmlbean.asPath) {
+				fileset(dir: 'specifications', includes: 
+					"VirtualBook.xsd"
+				)
+		}
+		ant.xmlbean(verbose: 'true',
+		destfile:"${projectDir}/build/vb2012_specs.jar",
+		failonerror:'true',
+		classpath:configurations.xmlbean.asPath) {
+			fileset(dir: 'specifications', includes: 
+				"VirtualBook2012.xsd"
+			)
+		}
+		
+		ant.xmlbean(verbose: 'true',
+			destfile:"${projectDir}/build/vb2014_specs.jar",
+			failonerror:'true',
+			classpath:configurations.xmlbean.asPath) {
+				fileset(dir: 'specifications', includes: 
+					"VirtualBook2014.xsd"
+				)
+		}
+		
+		ant.xmlbean(verbose: 'true',
+			destfile:"${projectDir}/build/vb2016_specs.jar",
+			failonerror:'true',
+			classpath:configurations.xmlbean.asPath) {
+				fileset(dir: 'specifications', includes: 
+					"VirtualBook2016.xsd"
+				)
 		}
 
+		ant.xmlbean(verbose: 'true',
+			destfile:"${projectDir}/build/punchplan_specs.jar",
+			failonerror:'true',
+			classpath:configurations.xmlbean.asPath) {
+				fileset(dir: 'specifications', includes: 
+					"PunchPlan.xsd"
+				)
+		}
 	}
 }
 

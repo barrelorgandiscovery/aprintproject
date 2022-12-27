@@ -19,6 +19,12 @@ configurations.all {
 	resolutionStrategy.cacheChangingModulesFor 365, 'days'
 }
 
+
+sourcesJar {
+	duplicatesStrategy(DuplicatesStrategy.EXCLUDE) 
+}
+
+
 // In this section you declare where to find the dependencies of your project
 repositories {
 
@@ -31,39 +37,35 @@ repositories {
 
 	   // imagej repositories 
 	   maven {
-		   url "http://maven.imagej.net/content/repositories/releases"
+		   url "https://maven.imagej.net/content/repositories/releases"
 	   }
 	   maven {
 		   
-		   url 'http://maven.imagej.net/content/groups/public'
+		   url 'https://maven.imagej.net/content/groups/public'
 	   }
 }
 
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    compileOnly project(':aprint-gui')
-	testCompile name:'junit', group:'junit', version:'3.8'
-	compile name: 'Gray_Morphology-2.3.2'
-    compile name: 'Trainable_Segmentation', group:'sc.fiji', version:'3.2.34' 
+    implementation project(':aprint-gui')
+	testImplementation name:'junit', group:'junit', version:'3.8'
+	implementation name: 'Gray_Morphology-2.3.2'
+    implementation name: 'Trainable_Segmentation', group:'sc.fiji', version:'3.2.34' 
     // https://mvnrepository.com/artifact/sc.fiji/imagescience
-compile group: 'sc.fiji', name: 'imagescience', version: '3.0.0'
+	implementation group: 'sc.fiji', name: 'imagescience', version: '3.0.0'
 
 
-	compile group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.6.4'
-	compile group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.6.4'
-	compile group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.6.4'
-	
-    
-    
-    
+	implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.6.4'
+	implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.6.4'
+	implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.6.4'
     
 }
 
 task fatJar(type: Jar, dependsOn: jar) {
   baseName = project.name + '-all'
   extension="extension"
-  def conf = configurations.runtime
+  def conf = configurations.runtimeClasspath
   def l = conf.findAll { !it.name.startsWith("APrint.jar") }
   def deps = l.collect { it.isDirectory() ? it : zipTree(it) }
   from(deps) { 
@@ -71,5 +73,6 @@ task fatJar(type: Jar, dependsOn: jar) {
 	exclude 'META-INF/*.RSA'
 	exclude 'META-INF/*.PF'
   } with jar
+  duplicatesStrategy(DuplicatesStrategy.EXCLUDE) 
 }
 

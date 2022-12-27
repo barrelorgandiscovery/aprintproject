@@ -45,7 +45,7 @@ import org.barrelorgandiscovery.repository.Repository2;
 import org.barrelorgandiscovery.repository.Repository2Collection;
 import org.barrelorgandiscovery.repository.Repository2Factory;
 import org.barrelorgandiscovery.tools.JMessageBox;
-import org.barrelorgandiscovery.ui.tools.VFSTools;
+import org.barrelorgandiscovery.tools.VFSTools;
 import org.barrelorgandiscovery.virtualbook.Fragment;
 import org.barrelorgandiscovery.virtualbook.Hole;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
@@ -63,7 +63,7 @@ public class AEdit extends JFrame implements ActionListener {
 	private static final String GAMMETRANSPOSITION = "gammetranspositionfolder";
 
 	/**
-	 * serial associé au composant
+	 * serial associï¿½ au composant
 	 */
 	private static final long serialVersionUID = 3156455473917085009L;
 
@@ -423,7 +423,7 @@ public class AEdit extends JFrame implements ActionListener {
 	}
 
 	/**
-	 * Cette fonction déclenche l'import du fichier midi dans le progiciel
+	 * Cette fonction dï¿½clenche l'import du fichier midi dans le progiciel
 	 * 
 	 */
 	private void importMidiFile() throws AEditException {
@@ -435,7 +435,7 @@ public class AEdit extends JFrame implements ActionListener {
 		choose.setFileFilter(new VFSFileNameExtensionFilter("Midi File", "mid"));
 
 		if (choose.showOpenDialog(this) == APrintFileChooser.APPROVE_OPTION) {
-			// Récupération du nom de fichier
+			// Rï¿½cupï¿½ration du nom de fichier
 			AbstractFileObject result = choose.getSelectedFile();
 
 			if (result != null) {
@@ -468,20 +468,20 @@ public class AEdit extends JFrame implements ActionListener {
 	}
 
 	// ///////////////////////////////////////////////////////////////////////
-	// Gestion des propriétés associée à l'application
+	// Gestion des propriï¿½tï¿½s associï¿½e ï¿½ l'application
 
 	/**
-	 * Cette méthode lit une propriété associée au programme
+	 * Cette mï¿½thode lit une propriï¿½tï¿½ associï¿½e au programme
 	 * 
 	 * @param propertyname
-	 *            le nom de la propriété
+	 *            le nom de la propriï¿½tï¿½
 	 * @return
 	 */
 	private String readProperty(String propertyname) {
 
 		String userfolder = System.getProperty("user.home");
 		if (userfolder == null || !new File(userfolder).exists()) {
-			logger.error("le repertoire de l'utilisateur n'a pas été trouvé");
+			logger.error("le repertoire de l'utilisateur n'a pas ï¿½tï¿½ trouvï¿½");
 			return null;
 		}
 
@@ -489,7 +489,7 @@ public class AEdit extends JFrame implements ActionListener {
 		File propfile = new File(new File(userfolder), PROPERTIESFILE);
 
 		if (!propfile.exists()) {
-			logger.error("impossible de trouver le fichier de propriétés");
+			logger.error("impossible de trouver le fichier de propriï¿½tï¿½s");
 			return null;
 		}
 
@@ -501,7 +501,7 @@ public class AEdit extends JFrame implements ActionListener {
 			return null;
 		}
 
-		// lecture de la propriété
+		// lecture de la propriï¿½tï¿½
 
 		return prop.getProperty(propertyname);
 	}
@@ -511,9 +511,9 @@ public class AEdit extends JFrame implements ActionListener {
 
 		String userfolder = System.getProperty("user.home");
 		if (userfolder == null || !new File(userfolder).exists()) {
-			logger.error("le repertoire de l'utilisateur n'a pas été trouvé");
+			logger.error("le repertoire de l'utilisateur n'a pas ï¿½tï¿½ trouvï¿½");
 			throw new AEditException(
-					"le repertoire de l'utilisateur user.home n'a pas été trouvé");
+					"le repertoire de l'utilisateur user.home n'a pas ï¿½tï¿½ trouvï¿½");
 		}
 
 		// existance du fichier aprint.property ?
