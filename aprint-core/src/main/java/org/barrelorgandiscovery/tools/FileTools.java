@@ -23,7 +23,7 @@ public class FileTools {
 		if (renameOperation)
 			return true; // ok
 
-		// else 
+		// else
 		// copy file ...
 		try {
 			FileOutputStream fos = new FileOutputStream(newFile);
@@ -39,8 +39,10 @@ public class FileTools {
 					fis.close();
 				}
 
-				first.delete(); // delete the original file
-
+				if (!first.delete()) // delete the original file
+				{
+					logger.warn("deleting " + first + " returne false");
+				}
 				return true;
 			} finally {
 				fos.close();
@@ -52,7 +54,4 @@ public class FileTools {
 		}
 	}
 
-	
-	
-	
 }

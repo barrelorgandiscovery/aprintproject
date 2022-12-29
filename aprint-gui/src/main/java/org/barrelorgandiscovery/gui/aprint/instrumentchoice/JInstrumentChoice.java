@@ -52,7 +52,7 @@ public class JInstrumentChoice extends JPanel implements IInstrumentChoice {
 	private static final long serialVersionUID = 182147436234752673L;
 
 	/**
-	 * Référence au repository
+	 * Reference au repository
 	 */
 	private Repository2 rep = null;
 
@@ -97,7 +97,7 @@ public class JInstrumentChoice extends JPanel implements IInstrumentChoice {
 	 * Constructeur
 	 * 
 	 * @param repository
-	 *            le repository associé ...
+	 *            le repository associï¿½ ...
 	 */
 	public JInstrumentChoice(Repository2 repository,
 			IInstrumentChoiceListener listener) {
@@ -196,7 +196,7 @@ public class JInstrumentChoice extends JPanel implements IInstrumentChoice {
 
 		// ajout de l'image de l'instrument
 		imageInstrument = thepanel.getLabel("previewInstrument"); //$NON-NLS-1$
-		// imageInstrument.setAlignmentX(0.5f); // centré
+		// imageInstrument.setAlignmentX(0.5f); // centre
 		// imageInstrument.setBorder(BorderFactory.createEmptyBorder(3, 3, 3,
 		// 3));
 
@@ -238,7 +238,7 @@ public class JInstrumentChoice extends JPanel implements IInstrumentChoice {
 		reloadInstruments();
 		updateInstrumentInformations();
 
-		// Ajout de la gestion des évènements ..
+		// Ajout de la gestion des ï¿½vï¿½nements ..
 		choixInstrument.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				if (e.getStateChange() == ItemEvent.SELECTED) {
@@ -352,7 +352,7 @@ public class JInstrumentChoice extends JPanel implements IInstrumentChoice {
 						.addItem(new InstrumentDisplayer(instruments[i]));
 			}
 
-			// Sélection du premier instrument
+			// Sï¿½lection du premier instrument
 			if (instruments.length > 0)
 				choixInstrument.setSelectedIndex(0);
 		}

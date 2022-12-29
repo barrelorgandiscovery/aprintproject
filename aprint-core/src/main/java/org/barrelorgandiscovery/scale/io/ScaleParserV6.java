@@ -300,13 +300,13 @@ public class ScaleParserV6 implements LineParser {
 					if (values[0].startsWith("rr")) { //$NON-NLS-1$
 						logger.debug("read register reset"); //$NON-NLS-1$
 
-						String registerset_name = values[0].substring(3); // rr:
+						String registersetName = values[0].substring(3); // rr:
 
 						// check registers ...
-						checkRegisterSetExist(registerset_name);
+						checkRegisterSetExist(registersetName);
 
 						notemidi[nopiste] = new RegisterSetCommandResetDef(
-								registerset_name, retard, longueur);
+								registersetName, retard, longueur);
 
 					} else if (values[0].startsWith("rs")) { //$NON-NLS-1$
 						logger.debug("register set"); //$NON-NLS-1$
@@ -314,15 +314,15 @@ public class ScaleParserV6 implements LineParser {
 						String tmp = values[0].substring(3); // rs:
 						String[] parameters = tmp.split(":"); //$NON-NLS-1$
 
-						String registerset_name = parameters[0];
-						String register_name = parameters[1];
+						String registersetName = parameters[0];
+						String registerName = parameters[1];
 
 						// check registers ...
-						checkRegisterExistInRegisterSet(registerset_name,
-								register_name);
+						checkRegisterExistInRegisterSet(registersetName,
+								registerName);
 
 						notemidi[nopiste] = new RegisterCommandStartDef(
-								registerset_name, register_name, retard,
+								registersetName, registerName, retard,
 								longueur);
 
 					} else {
@@ -376,8 +376,9 @@ public class ScaleParserV6 implements LineParser {
 		for (Iterator iterator = registerset.iterator(); iterator.hasNext();) {
 			PipeStopGroup ps = (PipeStopGroup) iterator.next();
 
-			if (registerset_name.equals(ps.getName()))
+			if (registerset_name.equals(ps.getName())) {
 				return;
+			}
 		}
 
 		throw new Exception("pipestopgroup " + registerset_name + " not found");
@@ -392,12 +393,11 @@ public class ScaleParserV6 implements LineParser {
 			if (registerset_name.equals(ps.getName())) {
 				PipeStop[] registeredControlledPipeStops = ps
 						.getRegisteredControlledPipeStops();
+				
 				for (int i = 0; i < registeredControlledPipeStops.length; i++) {
-
 					if (registeredControlledPipeStops[i].getName().equals(
 							register_name))
 						return;
-
 				}
 
 				throw new Exception("cannot found " + register_name + " in "

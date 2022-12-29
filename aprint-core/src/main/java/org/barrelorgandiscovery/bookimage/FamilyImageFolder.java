@@ -17,9 +17,9 @@ import org.barrelorgandiscovery.tools.ImageTools;
  *
  */
 public class FamilyImageFolder implements IFamilyImageSeeker {
-	
+
 	private static Logger logger = Logger.getLogger(FamilyImageFolder.class);
-	
+
 	protected static final int MAX_IMAGE_IN_FOLDER = 10_000;
 	protected File folder;
 	protected int count = 0;
@@ -30,37 +30,37 @@ public class FamilyImageFolder implements IFamilyImageSeeker {
 		assert folder != null;
 		assert folder.exists();
 		assert folder.isDirectory();
-		
+
 		this.folder = folder;
 		this.filePatternMatching = filePatternMatching;
-		
-		refreshListFiles(folder);		
-		
-		
+
+		refreshListFiles(folder);
+
 	}
 
 	private void refreshListFiles(File folder) {
 		// read all images
-		
+		assert folder != null;
+
 		File[] allFiles = folder.listFiles();
 		if (allFiles == null) {
 			allFiles = new File[0];
 		}
-		
+
 		if (filePatternMatching != null) {
 			logger.debug("filter content");
 			allFiles = folder.listFiles(new FilenameFilter() {
-	
-			@Override
-			public boolean accept(File dir, String name) {
-				if (filePatternMatching.matcher(name).matches())
-					return true;
-				return false;
-			}
-		});
-	
+
+				@Override
+				public boolean accept(File dir, String name) {
+					if (filePatternMatching.matcher(name).matches())
+						return true;
+					return false;
+				}
+			});
+
 		}
-		
+
 		Arrays.sort(allFiles, new Comparator<File>() {
 			@Override
 			public int compare(File o1, File o2) {
@@ -79,10 +79,9 @@ public class FamilyImageFolder implements IFamilyImageSeeker {
 	 * @throws Exception
 	 */
 	public BufferedImage loadImage(int sequence) throws Exception {
-		
-		
+
 		File f = allFiles[sequence];
-		
+
 		return ImageTools.loadImage(f.toURL());
 	}
 
@@ -103,5 +102,5 @@ public class FamilyImageFolder implements IFamilyImageSeeker {
 	public File getFolder() {
 		return folder;
 	}
-	
+
 }

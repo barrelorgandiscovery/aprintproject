@@ -51,8 +51,8 @@ public abstract class AbstractEvent implements Comparable<AbstractEvent>,
 
 		assert timestamp == o.timestamp;
 
-		return ((Integer) ((Long) timestamp).hashCode())
-				.compareTo(((Long) o.timestamp).hashCode());
+		return Integer.compare(((Long) timestamp).hashCode()
+				,((Long) o.timestamp).hashCode());
 	}
 
 }

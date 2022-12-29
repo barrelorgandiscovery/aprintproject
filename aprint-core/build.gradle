@@ -1,7 +1,13 @@
 import java.text.*
 
+plugins {
+  id "com.github.spotbugs" version "5.0.13"
+}
+
 // Apply the java plugin to add support for Java
 apply plugin: 'java-library'
+
+apply plugin: 'checkstyle'
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -10,6 +16,26 @@ repositories {
 	jcenter()
 
 }
+
+checkstyle {
+    toolVersion '7.8.1'
+    configFile file("config/checkstyle/checkstyle.xml")
+}
+checkstyleMain {
+    source ='src/main/java'
+}
+
+// Example to configure HTML report
+spotbugsMain {
+    reports {
+        html {
+            required = true
+            outputLocation = file("$buildDir/reports/spotbugs/main/spotbugs.html")
+            stylesheet = 'fancy-hist.xsl'
+        }
+    }
+}
+
 
 compileJava {
 	options.encoding = 'iso-8859-1'
@@ -61,7 +87,9 @@ dependencies {
 	implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.6.4'
 	implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.6.4'
 	
-	testImplementation 'junit:junit:4.12'
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+	
 	
 }
 
@@ -200,3 +228,9 @@ task changeVersion() {
 build.dependsOn(changeVersion)
 processResources.dependsOn(changeVersion)
 
+
+test {
+
+ useJUnitPlatform()
+
+}

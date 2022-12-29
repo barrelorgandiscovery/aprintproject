@@ -12,7 +12,9 @@ import org.barrelorgandiscovery.instrument.SampleMapping;
 import org.barrelorgandiscovery.instrument.sample.ManagedAudioInputStream;
 import org.barrelorgandiscovery.instrument.sample.SoundSample;
 import org.barrelorgandiscovery.tools.MidiHelper;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
+
 
 import gervill.SF2Soundbank;
 

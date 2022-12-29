@@ -55,9 +55,9 @@
         <scheme name="ftps"/>
         <!-- <if-available class-name="org.apache.commons.net.ftp.FTPFile"/> -->
     </provider>
-    <provider class-name="org.apache.commons.vfs2.provider.http.HttpFileProvider">
+    <provider class-name="org.apache.commons.vfs2.provider.http5.Http5FileProvider">
         <scheme name="http"/>
-<!--         <if-available class-name="org.apache.commons.httpclient.HttpClient"/> -->
+        <if-available class-name="org.apache.commons.httpclient.HttpClient"/> 
     </provider>
     <provider class-name="org.apache.commons.vfs2.provider.https.HttpsFileProvider">
         <scheme name="https"/>

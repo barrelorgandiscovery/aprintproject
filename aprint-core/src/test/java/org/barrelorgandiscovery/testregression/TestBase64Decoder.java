@@ -3,7 +3,8 @@ package org.barrelorgandiscovery.testregression;
 import java.util.Base64;
 import java.util.Base64.Decoder;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
 
 public class TestBase64Decoder {
 

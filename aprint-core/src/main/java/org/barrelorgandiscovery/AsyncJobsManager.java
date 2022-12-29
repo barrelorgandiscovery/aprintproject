@@ -28,17 +28,15 @@ public class AsyncJobsManager implements Disposable {
 	private static Logger logger = Logger.getLogger(AsyncJobsManager.class);
 
 	/**
-	 * inner executor that periodically check the availability of the end of a
-	 * job
+	 * inner executor that periodically check the availability of the end of a job
 	 */
-	private ScheduledExecutorService execService = Executors
-			.newScheduledThreadPool(3,new ThreadFactory() {
-				public Thread newThread(Runnable r) {
-					Thread t = new Thread(r);
-					t.setPriority(Thread.MIN_PRIORITY);
-					return t;
-				}
-			});
+	private ScheduledExecutorService execService = Executors.newScheduledThreadPool(3, new ThreadFactory() {
+		public Thread newThread(Runnable r) {
+			Thread t = new Thread(r);
+			t.setPriority(Thread.MIN_PRIORITY);
+			return t;
+		}
+	});
 
 	/**
 	 * Executor for submitting jobs
@@ -75,35 +73,29 @@ public class AsyncJobsManager implements Disposable {
 									final Object result = future.get();
 									logger.debug("job " + j + " finished");
 									if (cb != null) {
-										SwingUtilities
-												.invokeLater(new Runnable() {
-													public void run() {
-														cb.jobFinished(result);
-													}
-												});
+										SwingUtilities.invokeLater(new Runnable() {
+											public void run() {
+												cb.jobFinished(result);
+											}
+										});
 
 									}
 								} catch (final Throwable ex) {
-									logger.error(
-											"error launching the job callback :"
-													+ ex.getMessage(), ex);
-									if (cb != null) {
-										SwingUtilities
-												.invokeLater(new Runnable() {
-													public void run() {
-														cb.jobError(ex);
-													}
-												});
+									logger.error("error launching the job callback :" + ex.getMessage(), ex);
+									assert cb != null;
+									SwingUtilities.invokeLater(new Runnable() {
+										public void run() {
+											cb.jobError(ex);
+										}
+									});
 
-									}
 								}
 							}
 						}
 					}
 				}
 
-				for (Iterator iterator2 = jobsToRemove.iterator(); iterator2
-						.hasNext();) {
+				for (Iterator iterator2 = jobsToRemove.iterator(); iterator2.hasNext();) {
 					Job job = (Job) iterator2.next();
 					jobs.remove(job);
 				}
@@ -116,10 +108,8 @@ public class AsyncJobsManager implements Disposable {
 	/**
 	 * Submit an asynchrone Job
 	 * 
-	 * @param f
-	 *            the job to do, might be cancellable
-	 * @param e
-	 *            the object who is called when events occurs in the processing
+	 * @param f the job to do, might be cancellable
+	 * @param e the object who is called when events occurs in the processing
 	 */
 	public void submitAlreadyExecutedJobToTrack(Future f, JobEvent e) {
 		Job j = new Job();
@@ -145,10 +135,8 @@ public class AsyncJobsManager implements Disposable {
 	/**
 	 * submit helper for groovy code
 	 * 
-	 * @param job
-	 *            the job to be done
-	 * @param successOrErrorCallBack
-	 *            in case of success or error, call this closure
+	 * @param job                    the job to be done
+	 * @param successOrErrorCallBack in case of success or error, call this closure
 	 * @since 2011.6
 	 */
 	public void submit(final Closure job, final Closure successOrErrorCallBack) {
@@ -158,16 +146,12 @@ public class AsyncJobsManager implements Disposable {
 	/**
 	 * submit helper for groovy code
 	 * 
-	 * @param job
-	 *            the job to be done
-	 * @param successCallBack
-	 *            in case of success, call this closure
-	 * @param errorCallBack
-	 *            in case of error, call this closure
+	 * @param job             the job to be done
+	 * @param successCallBack in case of success, call this closure
+	 * @param errorCallBack   in case of error, call this closure
 	 * @since 2011.6
 	 */
-	public void submit(final Closure job, final Closure successCallBack,
-			final Closure errorCallBack) {
+	public void submit(final Closure job, final Closure successCallBack, final Closure errorCallBack) {
 
 		final Job j = new Job();
 
@@ -185,9 +169,7 @@ public class AsyncJobsManager implements Disposable {
 					if (successCallBack != null)
 						successCallBack.call(result);
 				} catch (Throwable t) {
-					logger.error(
-							"error in calling job finished :" + t.getMessage(),
-							t);
+					logger.error("error in calling job finished :" + t.getMessage(), t);
 				}
 			}
 
@@ -196,15 +178,13 @@ public class AsyncJobsManager implements Disposable {
 					if (errorCallBack != null)
 						errorCallBack.call(ex);
 				} catch (Throwable t) {
-					logger.error(
-							"error in calling job error callback :"
-									+ t.getMessage(), t);
+					logger.error("error in calling job error callback :" + t.getMessage(), t);
 				}
 
 			}
 
 			public void jobAborted() {
-				
+
 			}
 		};
 		jobs.add(j);

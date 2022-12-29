@@ -4,7 +4,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 
 import org.barrelorgandiscovery.tools.ImageTools;
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
+
 
 public class TestBookimageIO {
 

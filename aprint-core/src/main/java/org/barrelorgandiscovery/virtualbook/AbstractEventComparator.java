@@ -32,7 +32,7 @@ public class AbstractEventComparator implements Comparator<AbstractEvent>, Seria
 		long ts1 = o1.getTimestamp();
 		long ts2 = o2.getTimestamp();
 
-		int cmp = ((Long) ts1).compareTo(ts2);
+		int cmp = Long.compare((Long) ts1,ts2);
 
 		if (cmp != 0)
 			return cmp;
@@ -51,7 +51,7 @@ public class AbstractEventComparator implements Comparator<AbstractEvent>, Seria
 			return -1;
 		}
 
-		return ((Integer) (o1.hashCode())).compareTo(o2.hashCode());
+		return Integer.compare(o1.hashCode(),o2.hashCode());
 
 	}
 

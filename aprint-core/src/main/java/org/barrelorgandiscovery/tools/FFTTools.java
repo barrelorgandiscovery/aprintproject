@@ -31,9 +31,8 @@ public class FFTTools {
 	}
 
 	public static long computeNearestPow2(long len) {
-		double l = Math.log(len / 2) / Math.log(2);
-		logger.debug("l : " + l);
-
+		double l = Math.log((double)len / 2) / Math.log(2);
+		// logger.debug("l : " + l);
 		long pow = (int) Math.pow(2, 1.0 * ((int) l));
 
 		return pow;
@@ -71,7 +70,7 @@ public class FFTTools {
 		logger.debug(" -> maxi - pow : " + index);
 
 		// calcul de la frequence principale ...
-		double freq = framerate / (pow / 2) * ((pow / 2) - maxi / 2);
+		double freq = framerate / ((double)pow / 2) * (((double)pow / 2) - maxi / 2);
 
 		return freq;
 

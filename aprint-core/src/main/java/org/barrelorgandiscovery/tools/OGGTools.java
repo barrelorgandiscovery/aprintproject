@@ -14,7 +14,6 @@ import org.xiph.libvorbis.vorbis_dsp_state;
 import org.xiph.libvorbis.vorbis_info;
 import org.xiph.libvorbis.vorbisenc;
 
-
 public class OGGTools {
 	static vorbisenc encoder;
 
@@ -91,101 +90,105 @@ public class OGGTools {
 
 		try {
 
-			FileOutputStream fos = new FileOutputStream(dest);
+			try (FileOutputStream fos = new FileOutputStream(dest)) {
 
-			while (!eos) {
+				while (!eos) {
 
-				if (!os.ogg_stream_flush(og))
-					break;
+					if (!os.ogg_stream_flush(og))
+						break;
 
-				fos.write(og.header, 0, og.header_len);
-				fos.write(og.body, 0, og.body_len);
-				System.out.print("."); //$NON-NLS-1$
-			}
-			System.out.print(Messages.getString("OGGTools.6")); //$NON-NLS-1$
-
-			FileInputStream fin = new FileInputStream(src);
-
-			System.out.print(Messages.getString("OGGTools.7")); //$NON-NLS-1$
-			while (!eos) {
-
-				int i;
-				int bytes = fin.read(readbuffer, 0, READ * 4); // stereo
-				// hardwired
-				// here
-
-				int break_count = 0;
-
-				if (bytes == 0) {
-
-					// end of file. this can be done implicitly in the mainline,
-					// but it's easier to see here in non-clever fashion.
-					// Tell the library we're at end of stream so that it can
-					// handle
-					// the last frame and mark end of stream in the output
-					// properly
-
-					vd.vorbis_analysis_wrote(0);
-
-				} else {
-
-					// data to encode
-
-					// expose the buffer to submit data
-					float[][] buffer = vd.vorbis_analysis_buffer(READ);
-
-					// uninterleave samples
-					for (i = 0; i < bytes / 4; i++) {
-						buffer[0][vd.pcm_current + i] = ((readbuffer[i * 4 + 1] << 8) | (0x00ff & (int) readbuffer[i * 4])) / 32768.f;
-						buffer[1][vd.pcm_current + i] = ((readbuffer[i * 4 + 3] << 8) | (0x00ff & (int) readbuffer[i * 4 + 2])) / 32768.f;
-					}
-
-					// tell the library how much we actually submitted
-					vd.vorbis_analysis_wrote(i);
+					fos.write(og.header, 0, og.header_len);
+					fos.write(og.body, 0, og.body_len);
+					System.out.print("."); //$NON-NLS-1$
 				}
+				System.out.print(Messages.getString("OGGTools.6")); //$NON-NLS-1$
 
-				// vorbis does some data preanalysis, then divvies up blocks for
-				// more involved
-				// (potentially parallel) processing. Get a single block for
-				// encoding now
+				try (FileInputStream fin = new FileInputStream(src)) {
 
-				while (vb.vorbis_analysis_blockout(vd)) {
+					System.out.print(Messages.getString("OGGTools.7")); //$NON-NLS-1$
+					while (!eos) {
 
-					// analysis, assume we want to use bitrate management
+						int i;
+						int bytes = fin.read(readbuffer, 0, READ * 4); // stereo
+						// hardwired
+						// here
 
-					vb.vorbis_analysis(null);
-					vb.vorbis_bitrate_addblock();
+						int break_count = 0;
 
-					while (vd.vorbis_bitrate_flushpacket(op)) {
+						if (bytes == 0) {
 
-						// weld the packet into the bitstream
-						os.ogg_stream_packetin(op);
+							// end of file. this can be done implicitly in the mainline,
+							// but it's easier to see here in non-clever fashion.
+							// Tell the library we're at end of stream so that it can
+							// handle
+							// the last frame and mark end of stream in the output
+							// properly
 
-						// write out pages (if any)
-						while (!eos) {
+							vd.vorbis_analysis_wrote(0);
 
-							if (!os.ogg_stream_pageout(og)) {
-								break_count++;
-								break;
+						} else {
+
+							// data to encode
+
+							// expose the buffer to submit data
+							float[][] buffer = vd.vorbis_analysis_buffer(READ);
+
+							// uninterleave samples
+							for (i = 0; i < bytes / 4; i++) {
+								buffer[0][vd.pcm_current
+										+ i] = ((readbuffer[i * 4 + 1] << 8) | (0x00ff & (int) readbuffer[i * 4]))
+												/ 32768.f;
+								buffer[1][vd.pcm_current
+										+ i] = ((readbuffer[i * 4 + 3] << 8) | (0x00ff & (int) readbuffer[i * 4 + 2]))
+												/ 32768.f;
 							}
 
-							fos.write(og.header, 0, og.header_len);
-							fos.write(og.body, 0, og.body_len);
-
-							// this could be set above, but for illustrative
-							// purposes, I do
-							// it here (to show that vorbis does know where the
-							// stream ends)
-							if (og.ogg_page_eos() > 0)
-								eos = true;
+							// tell the library how much we actually submitted
+							vd.vorbis_analysis_wrote(i);
 						}
-					}
-				}
-				System.out.print(Messages.getString("OGGTools.8")); //$NON-NLS-1$
-			}
 
-			fin.close();
-			fos.close();
+						// vorbis does some data preanalysis, then divvies up blocks for
+						// more involved
+						// (potentially parallel) processing. Get a single block for
+						// encoding now
+
+						while (vb.vorbis_analysis_blockout(vd)) {
+
+							// analysis, assume we want to use bitrate management
+
+							vb.vorbis_analysis(null);
+							vb.vorbis_bitrate_addblock();
+
+							while (vd.vorbis_bitrate_flushpacket(op)) {
+
+								// weld the packet into the bitstream
+								os.ogg_stream_packetin(op);
+
+								// write out pages (if any)
+								while (!eos) {
+
+									if (!os.ogg_stream_pageout(og)) {
+										break_count++;
+										break;
+									}
+
+									fos.write(og.header, 0, og.header_len);
+									fos.write(og.body, 0, og.body_len);
+
+									// this could be set above, but for illustrative
+									// purposes, I do
+									// it here (to show that vorbis does know where the
+									// stream ends)
+									if (og.ogg_page_eos() > 0)
+										eos = true;
+								}
+							}
+						}
+						System.out.print(Messages.getString("OGGTools.8")); //$NON-NLS-1$
+					}
+
+				}
+			}
 
 			System.out.print(Messages.getString("OGGTools.9")); //$NON-NLS-1$
 

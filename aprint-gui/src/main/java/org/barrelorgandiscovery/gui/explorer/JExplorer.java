@@ -38,6 +38,10 @@ public class JExplorer extends JPanel implements Explorer {
 
 	private Vector<ExplorerListener> listeners = new Vector<>();
 
+	/**
+	 * loadable node
+	 *
+	 */
 	public abstract class ExpNode extends DefaultMutableTreeNode {
 
 		protected boolean loaded;
@@ -120,6 +124,11 @@ public class JExplorer extends JPanel implements Explorer {
 		}
 	}
 
+	/**
+	 * bookmark node
+	 * @author pfreydiere
+	 *
+	 */
 	public class ExpBookmarksNode extends ExpNode {
 
 		private Bookmarks bookMarks;

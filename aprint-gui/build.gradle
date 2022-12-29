@@ -47,7 +47,9 @@ dependencies {
     
     implementation 'com.formdev:flatlaf:2.6'
     
-    testImplementation 'junit:junit:4.12'
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+	
 }
 
 sourceSets {

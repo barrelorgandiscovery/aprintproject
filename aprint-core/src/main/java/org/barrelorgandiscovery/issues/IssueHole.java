@@ -22,19 +22,19 @@ public class IssueHole extends AbstractSpatialIssue {
 
 		assert note != null;
 		assert note.length > 0;
-		
+
 		Region r = new Region();
 		r.start = Long.MAX_VALUE;
 		r.end = -Long.MAX_VALUE;
-		
+
 		r.beginningtrack = 0;
 		r.endtrack = 0;
-		
+
 		for (int i = 0; i < note.length; i++) {
 			r.start = Math.min(r.start, note[i].getTimestamp());
 			r.end = Math.max(r.end, note[i].getTimestamp() + note[i].getTimeLength());
 		}
-		
+
 		extent = r;
 
 	}
@@ -52,10 +52,10 @@ public class IssueHole extends AbstractSpatialIssue {
 	public Region getExtent() {
 		return extent;
 	}
-	
+
 	@Override
 	public String toLabel() {
-		
+
 		String s = TimeUtils.toMinSecs(getExtent().start);
 		switch (getType()) {
 		case IssuesConstants.HOLE_TOO_SMALL:
@@ -66,8 +66,11 @@ public class IssueHole extends AbstractSpatialIssue {
 			break;
 		case IssuesConstants.OVERLAPPING_HOLE:
 			s += Messages.getString("JIssuePresenter.4"); //$NON-NLS-1$
+			break;
+		default:
+			s += "" + getType();
 		}
-		
+
 		return s;
 	}
 

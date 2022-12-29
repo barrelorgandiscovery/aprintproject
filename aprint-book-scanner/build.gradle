@@ -8,7 +8,7 @@
  */
 
 // Apply the java plugin to add support for Java
-apply plugin: 'java'
+apply plugin: 'java-library'
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -28,19 +28,17 @@ compileJava {
 
 
 processResources {
-	duplicatesStrategy(DuplicatesStrategy.EXCLUDE) 
+	duplicatesStrategy(DuplicatesStrategy.WARN) 
 }
 sourcesJar {
-	duplicatesStrategy(DuplicatesStrategy.EXCLUDE) 
+	duplicatesStrategy(DuplicatesStrategy.WARN) 
 }
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
 
     implementation project(':aprint-machine-control')
-	
-	
-	implementation project(':aprint-gui')
+	compileOnly project(':aprint-gui')
 	
     implementation files(fileTree(dir:"${projectDir}/libs" , 
                     include:['**/*.jar']).toList())
@@ -85,7 +83,7 @@ task bootstrapJar(type: Jar, dependsOn: jar) {
   with jar
 }
 
-task fatJar(type: Jar, dependsOn: [jar, bootstrapJar]) {
+task fatJar(type: Jar, dependsOn: [jar, bootstrapJar, ":aprint-machine-control:jar"]) {
   baseName = project.name + '-all'
   extension="extensionlazy"
   def conf = configurations.runtimeClasspath
@@ -99,5 +97,5 @@ task fatJar(type: Jar, dependsOn: [jar, bootstrapJar]) {
     exclude 'extensions.properties'
     exclude 'extensionng.properties'
   } with jar
-  duplicatesStrategy(DuplicatesStrategy.EXCLUDE) 
+  duplicatesStrategy(DuplicatesStrategy.WARN) 
 }

@@ -231,7 +231,7 @@ public class GroovyScriptModelStep extends ModelStep implements IModelStepContex
 	}
 	
 	public void evaluateScriptParameters() throws Exception {
-		ModelParameter[] parameters = compiledScript.configureParameters();
+		compiledScript.configureParameters();
 	}
 
 	/**
@@ -281,7 +281,7 @@ public class GroovyScriptModelStep extends ModelStep implements IModelStepContex
 			}
 		}));
 
-		CompilerConfiguration conf = new CompilerConfiguration();
+		// CompilerConfiguration conf = new CompilerConfiguration();
 
 		// Add imports for script.
 		// ImportCustomizer importCustomizer = new ImportCustomizer();

@@ -1,5 +1,13 @@
 package org.barrelorgandiscovery.virtualbook;
 
+import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.scale.AbstractRegisterCommandDef;
+import org.barrelorgandiscovery.scale.PipeStopGroup;
+import org.barrelorgandiscovery.scale.Scale;
+import org.barrelorgandiscovery.tools.HashCodeUtils;
+import org.barrelorgandiscovery.tools.ReadOnlySet;
+import org.barrelorgandiscovery.tools.SerializeTools;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,33 +19,26 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.Vector;
 
-import org.apache.log4j.Logger;
-import org.barrelorgandiscovery.scale.AbstractRegisterCommandDef;
-import org.barrelorgandiscovery.scale.PipeStopGroup;
-import org.barrelorgandiscovery.scale.Scale;
-import org.barrelorgandiscovery.tools.HashCodeUtils;
-import org.barrelorgandiscovery.tools.ReadOnlySet;
-import org.barrelorgandiscovery.tools.SerializeTools;
-
 /**
- * Virtual book
+ * Virtual book data structure. This structure is used internally for
+ * manipulation.
  * 
  * @author Freydiere Patrice
  */
 public class VirtualBook implements Serializable, VirtualBookSectionManipulation {
 
 	/**
-	 * logger
+	 * logger.
 	 */
 	private static Logger logger = Logger.getLogger(VirtualBook.class);
 
 	/**
-	 * for the serialization
+	 * for the serialization.
 	 */
 	private static final long serialVersionUID = 2406557419052686712L;
 
 	/**
-	 * Reference scale for the book
+	 * Reference scale for the book.
 	 */
 	private Scale bookscale;
 
@@ -47,29 +48,28 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	private ArrayList<Hole> notes = new ArrayList<Hole>();
 
 	/**
-	 * Internal treeset for much efficient finding
+	 * Internal treeset for much efficient finding.
 	 */
-
 	// spatial index ...
 	private HoleSpatialIndex si = new HoleSpatialIndex();
 
 	/**
-	 * book name (for printing)
+	 * book name (for printing).
 	 */
 	private String name;
 
 	/**
-	 * associated book events events, they are always ordered
+	 * associated book events events, they are always ordered.
 	 */
 	private SortedSet<AbstractEvent> events = new TreeSet<AbstractEvent>(new AbstractEventComparator());
 
 	/**
-	 * Metadata on the virtualbook
+	 * Metadata on the virtualbook.
 	 */
 	private VirtualBookMetadata metadata = null;
 
 	/**
-	 * index from tracks
+	 * index from tracks.
 	 */
 	private ArrayList<Hole>[] trackIndex = null;
 
@@ -91,10 +91,9 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * default constructor
+	 * default constructor.
 	 * 
-	 * @param scale
-	 *            the scale of this book
+	 * @param scale the scale of this book
 	 */
 	public VirtualBook(Scale scale) {
 		this.bookscale = scale;
@@ -107,12 +106,10 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * Constructor
+	 * Constructor.
 	 * 
-	 * @param scale
-	 *            scale
-	 * @param holes
-	 *            the holes for the book
+	 * @param scale scale
+	 * @param holes the holes for the book
 	 */
 	public VirtualBook(Scale scale, ArrayList<Hole> holes) {
 		this(scale);
@@ -123,7 +120,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * construct a new VirtualBook with holes and events
+	 * construct a new VirtualBook with holes and events.
 	 */
 	public VirtualBook(Scale scale, VirtualBook copy) {
 		this(scale);
@@ -157,42 +154,44 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	// ///////////////////////////////////////////////////////////
 
 	/**
-	 * Add a hole in the book
+	 * Add a hole in the book.
 	 * 
-	 * @param hole
-	 *            hole to add
+	 * @param hole hole to add
 	 */
 	public void addHole(Hole hole) {
 
-		if (hole == null)
+		if (hole == null) {
 			return;
+		}
 
 		if (hole.getTrack() >= trackIndex.length) {
-			throw new RuntimeException("for hole " + hole + " track number " + hole.getTrack() + " is out of scope (" + trackIndex.length + ") for the scale :" + bookscale);
+			throw new RuntimeException("for hole " + hole + " track number " + hole.getTrack() + " is out of scope ("
+					+ trackIndex.length + ") for the scale :" + bookscale);
 		}
-		
-		// V�rification de la note associ�e au carton ..
+
+		// Vérification de la note associée au carton ..
 		notes.add(hole);
 		// notesorderedbyend.add(n);
 		si.add(hole);
 
-		
 		trackIndex[hole.getTrack()].add(hole);
 
-		if (bookscale.getTracksDefinition()[hole.getTrack()] instanceof AbstractRegisterCommandDef)
+		if (bookscale.getTracksDefinition()[hole.getTrack()] instanceof AbstractRegisterCommandDef) {
 			invalidateRegistrationSections();
+		}
 
 	}
 
 	/**
-	 * Add a hole collection to the book
+	 * Add a hole collection to the book.
 	 * 
 	 * @param holecollection
 	 */
 	public void addHole(Collection<Hole> holecollection) {
 
-		if (holecollection == null)
+		if (holecollection == null) {
 			return;
+		}
 
 		for (Hole h : holecollection) {
 			addHole(h);
@@ -236,8 +235,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	/**
 	 * Cut book by the hole passed in parameter
 	 * 
-	 * @param n
-	 *            la note de decoupe
+	 * @param n la note de decoupe
 	 */
 	public void cutHoles(Hole n) {
 		List<Hole> recherche = findHoles(n.getTimestamp(), n.getTimeLength(), n.getTrack(), n.getTrack());
@@ -270,9 +268,9 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 
 		trackIndex[n.getTrack()].remove(n);
 
-		if (bookscale.getTracksDefinition()[n.getTrack()] instanceof AbstractRegisterCommandDef)
+		if (bookscale.getTracksDefinition()[n.getTrack()] instanceof AbstractRegisterCommandDef) {
 			invalidateRegistrationSections();
-
+		}
 	}
 
 	/**
@@ -281,8 +279,9 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	 * @param holes
 	 */
 	public void removeHoles(List<Hole> holes) {
-		if (holes == null)
+		if (holes == null) {
 			return;
+		}
 
 		for (Iterator iterator = holes.iterator(); iterator.hasNext();) {
 			Hole hole = (Hole) iterator.next();
@@ -329,8 +328,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	/**
 	 * Find all the holes in the window specified in parameters
 	 * 
-	 * @param result
-	 *            the list to be filled
+	 * @param result the list to be filled
 	 * @param start
 	 * @param length
 	 */
@@ -339,49 +337,24 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * Find all the holes in the window specified in parameters, with an
-	 * additionnal filter
+	 * Find all the holes in the window specified in parameters, with an additionnal
+	 * filter
 	 * 
-	 * @param result
-	 *            the list to be filled
+	 * @param result the list to be filled
 	 * @param start
 	 * @param length
-	 * @param f
-	 *            the additional filter
+	 * @param f      the additional filter
 	 */
 	public void findHoles(long start, long length, Collection<Hole> result, HoleFilter f) {
 		si.find(start, start + length, result, f);
 	}
 
 	/**
-	 * Recherche toutes les notes dans la fenetre donnée de temps donnée
+	 * Range Hole filter.
 	 * 
-	 * @param start
-	 * @param length
-	 * @return
+	 * @author pfreydiere
+	 *
 	 */
-	/*
-	 * private ArrayList<Hole> dontworkfindNote(long start, long length) {
-	 * 
-	 * ArrayList<Hole> result = new ArrayList<Hole>();
-	 * 
-	 * Hole dstart = new Hole(Integer.MIN_VALUE, start, 0); Hole dend = new
-	 * Hole(Integer.MAX_VALUE, start + length, 0);
-	 * 
-	 * TreeSet<Hole> th = new TreeSet<Hole>(); th.addAll(notes.subSet(dstart,
-	 * dend)); th.addAll(notesorderedbyend.subSet(dstart, dend));
-	 * 
-	 * Iterator<Hole> it = th.iterator();
-	 * 
-	 * while (it.hasNext()) { Hole h = it.next(); if (!((h.getTimestamp() >
-	 * (start + length)) || ((h.getTimestamp() + h .getLength()) < start))) {
-	 * result.add(h); } } // note subset does not have the proper behaviour //
-	 * result.addAll(notes.subSet(dstart, dend)); //
-	 * result.addAll(notesorderedbyend.subSet(dstart, dend));
-	 * 
-	 * return result; }
-	 */
-
 	private static class RangeHoleFilter implements HoleFilter {
 
 		private int start;
@@ -409,7 +382,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * Recherche toutes les notes dans la fenetre donnée de temps donnée
+	 * Recherche toutes les notes dans la fenetre donnée de temps donnée.
 	 * 
 	 * @param start
 	 * @param length
@@ -440,7 +413,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * Recherche toutes les notes dans la fenetre donnée de temps donnée
+	 * Recherche toutes les notes dans la fenetre donnée de temps donnée.
 	 * 
 	 * @param start
 	 * @param length
@@ -454,18 +427,6 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 		final int p1 = Math.min(firsttrack, endtrack);
 		final int p2 = Math.max(firsttrack, endtrack);
 
-		/*
-		 * if (p1 == p2 && p1 >= 0 && p1 < bookscale.getTrackNb()) {
-		 * 
-		 * Hole intersectHole = new Hole(p1, start, length);
-		 * 
-		 * for (Iterator iterator = trackIndex[p1].iterator(); iterator
-		 * .hasNext();) { Hole hole = (Hole) iterator.next(); if
-		 * (Hole.isIntersect(hole, intersectHole)) resultList.add(hole); }
-		 * 
-		 * } else {
-		 */
-
 		findHoles(start, length, resultList, new HoleFilter() {
 
 			public boolean take(Hole h) {
@@ -474,18 +435,15 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 
 			}
 		});
-		// }
+
 	}
 
 	/**
-	 * Recherche des notes dans la fenetre donnée
+	 * Search holes or notes, in a given window.
 	 * 
-	 * @param start
-	 *            the start timestamp
-	 * @param length
-	 *            the length of the search
-	 * @param firsttrack
-	 *            the first track
+	 * @param start      the start timestamp
+	 * @param length     the length of the search
+	 * @param firsttrack the first track
 	 * @param endtrack
 	 * @return the array of holes found
 	 */
@@ -525,7 +483,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * Get the book length in microseconds
+	 * Get the book length in microseconds.
 	 * 
 	 * @return the book length in microseconds
 	 */
@@ -536,7 +494,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * get the first hole timestamp, if not found, Long.MAX_VALUE is returned
+	 * get the first hole timestamp, if not found, Long.MAX_VALUE is returned.
 	 * 
 	 * @return get the first hole timestamp
 	 */
@@ -560,8 +518,8 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * shift the holes, that begin at start and events of a delta (in micro
-	 * seconds) from the start position
+	 * shift the holes, that begin at start and events of a delta (in micro seconds)
+	 * from the start position.
 	 * 
 	 * @param delta
 	 */
@@ -609,7 +567,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * Get a copy of all the holes, sorted by timestamp
+	 * Get a copy of all the holes, sorted by timestamp.
 	 * 
 	 * @return get a copy array of the contained holes in the book
 	 */
@@ -628,7 +586,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * Get a copy of the holes
+	 * Get a copy of the holes.
 	 * 
 	 * @return
 	 */
@@ -667,7 +625,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * Get the name
+	 * Get the name.
 	 * 
 	 * @return the name of the book
 	 */
@@ -676,7 +634,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * Set the name
+	 * Set the name.
 	 * 
 	 * @param name
 	 */
@@ -685,7 +643,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * Add an Event
+	 * Add an Event.
 	 * 
 	 * @param event
 	 */
@@ -694,14 +652,11 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * find events of a given type from a start and end
+	 * find events of a given type from a start and end.
 	 * 
-	 * @param start
-	 *            start
-	 * @param end
-	 *            end
-	 * @param type
-	 *            event type, or null if all events are wished
+	 * @param start start
+	 * @param end   end
+	 * @param type  event type, or null if all events are wished
 	 * @return the events in the specified range
 	 */
 	@SuppressWarnings("unchecked")
@@ -732,14 +687,11 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * Find the previous event applicable from this timeStamp
+	 * Find the previous event applicable from this timeStamp.
 	 * 
-	 * @param <T>
-	 *            the event Type
-	 * @param timeStamp
-	 *            the timeStamp
-	 * @param type
-	 *            the type of the event
+	 * @param <T>       the event Type
+	 * @param timeStamp the timeStamp
+	 * @param type      the type of the event
 	 * @return
 	 */
 	public <T extends AbstractEvent> T findPreviousEvent(long timeStamp, Class<T> type) {
@@ -759,12 +711,10 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * Find the next event of the same type
+	 * Find the next event of the same type.
 	 * 
-	 * @param <T>
-	 *            the event Type
-	 * @param ae
-	 *            the abstract event
+	 * @param <T> the event Type
+	 * @param ae  the abstract event
 	 * @return
 	 */
 	public <T extends AbstractEvent> T findNextEvent(T ae) {
@@ -793,19 +743,17 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * get the events, ordered by timestamp [READ ONLY]
+	 * get the events, ordered by timestamp [READ ONLY].
 	 */
 	public Set<AbstractEvent> getOrderedEventsByRef() {
 		return new ReadOnlySet<AbstractEvent>(this.events);
 	}
 
 	/**
-	 * find the first event of a given type from the start point
+	 * find the first event of a given type from the start point.
 	 * 
-	 * @param start
-	 *            start point of the search
-	 * @param type
-	 *            event type
+	 * @param start start point of the search
+	 * @param type  event type
 	 * @return the first event
 	 */
 	@SuppressWarnings("unchecked")
@@ -826,7 +774,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * remove an event
+	 * remove an event.
 	 * 
 	 * @param event
 	 */
@@ -834,13 +782,11 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 		events.remove(event);
 	}
 
-
-
 	// ///////////////////////////////////////////////////////////////////////////
-	// methodes associ�es �la registration
+	// methodes associées à la registration
 
 	/**
-	 * Propri�t� m�morisant la liste des sections associ�es
+	 * Propriété mémorisant la liste des sections associées.
 	 */
 	private RegistrationSection[] rsections = null;
 
@@ -883,7 +829,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * get the section count
+	 * get the section count.
 	 * 
 	 * @return the number of registers section computed in the book
 	 */
@@ -906,10 +852,9 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * get the activated registers in the section
+	 * get the activated registers in the section.
 	 * 
-	 * @param section
-	 *            the section index
+	 * @param section the section index
 	 * @return the activated registers in the section
 	 */
 	public String[] getSectionRegisters(int section) {
@@ -1078,8 +1023,8 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	}
 
 	/**
-	 * Select the holes belonging to the selection, hole that start and the end
-	 * of the selection are not taken into consideration
+	 * Select the holes belonging to the selection, hole that start and the end of
+	 * the selection are not taken into consideration
 	 * 
 	 * @param sel
 	 * @return

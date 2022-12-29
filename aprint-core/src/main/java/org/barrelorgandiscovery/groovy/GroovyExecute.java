@@ -63,13 +63,13 @@ public class GroovyExecute extends APrintGroovyShell implements IExecute {
 				logger.debug("variable " + e.getKey() + " : " + e.getValue()); //$NON-NLS-1$ //$NON-NLS-2$
 			}
 		}
-		HashMap<String, Object> m = new HashMap<String, Object>();
 
-		if (variables != null) {
-			for (Entry<String, Object> e : variables.entrySet()) {
-				m.put(e.getKey(), e.getValue());
-			}
-		}
+		//		HashMap<String, Object> m = new HashMap<String, Object>();
+		//		if (variables != null) {
+		//			for (Entry<String, Object> e : variables.entrySet()) {
+		//				m.put(e.getKey(), e.getValue());
+		//			}
+		//		}
 
 		Binding binding = new Binding();
 		// binding for the output in the console ...

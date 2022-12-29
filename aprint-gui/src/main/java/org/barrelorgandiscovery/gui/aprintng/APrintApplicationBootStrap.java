@@ -19,6 +19,16 @@ import org.barrelorgandiscovery.gui.aprint.APrintProperties;
 
 /**
  * boot strap the application
+ * 
+ * 
+ * bootstrap needs some opens:
+ * --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.desktop/javax.swing.text=ALL-UNNAMED --add-opens java.desktop/javax.swing=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.io=ALL-UNNAMED --add-opens java.desktop/java.awt=ALL-UNNAMED
+ * 
+ * 
+ * 
+ * 
+ * 
+ * 
  * @author patrice
  *
  */
@@ -52,25 +62,6 @@ public class APrintApplicationBootStrap {
     sysprop.store(System.out, "");
 
     Logger.getRootLogger().setLevel(Level.DEBUG);
-
-    // Logger logger = Logger.getLogger(APrintApplicationBootStrap.class);
-    // if (logger.isInfoEnabled()) {
-    // sysprop.list(System.out);
-    // try {
-    // Set<Entry<Object, Object>> entrySet = sysprop.entrySet();
-    // for (Iterator iterator = entrySet.iterator(); iterator
-    // .hasNext();) {
-    // Entry<Object, Object> entry = (Entry<Object, Object>) iterator
-    // .next();
-    //
-    ////					logger.info("" + entry.getKey() + "=" //$NON-NLS-1$ //$NON-NLS-2$
-    // // + entry.getValue());
-    // }
-    // } catch (Exception ex) {
-    //				logger.error(ex.getMessage(), ex); //$NON-NLS-1$
-    // }
-    //
-    // }
 
     String mainFolder = sysprop.getProperty(MAINFOLDER_SYSPROP, null);
    

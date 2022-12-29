@@ -1,5 +1,11 @@
 package org.barrelorgandiscovery.scale;
 
+/**
+ * Exception in scale manipulation.
+ * 
+ * @author pfreydiere
+ *
+ */
 public class ScaleException extends Exception {
 
 	/**
@@ -7,11 +13,9 @@ public class ScaleException extends Exception {
 	 */
 	private static final long serialVersionUID = 8533938285389049680L;
 
-	
-	
 	public ScaleException() {
 		super();
-		}
+	}
 
 	public ScaleException(String message, Throwable cause) {
 		super(message, cause);

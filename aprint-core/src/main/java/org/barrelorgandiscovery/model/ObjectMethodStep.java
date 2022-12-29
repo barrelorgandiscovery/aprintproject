@@ -180,8 +180,6 @@ public class ObjectMethodStep extends ModelStep {
 	 */
 	private void createModelStepFromClass() throws Exception {
 
-		List<ModelParameter> ret = new ArrayList<ModelParameter>();
-
 		// create the constructor parameters
 		ArrayList<ModelParameter> constructorParameters = createModelParameters(getConstructor().getParameterTypes(),
 				getConstructor().getParameterAnnotations());

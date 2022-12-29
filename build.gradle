@@ -60,7 +60,6 @@ def exportedProjects = [
 ]
 
 task alljavadoc(type: Javadoc, dependsOn: [ ":aprint-gui:groovydoc"]) {
-    options.encoding = "iso-8859-1"
     failOnError = false
     source exportedProjects.collect { project(it).sourceSets.main.allJava }    											  
     classpath = files(exportedProjects.collect { project(it).sourceSets.main.compileClasspath })
@@ -138,7 +137,7 @@ project(':bundle') {
     }
 
 
-    task copyOutputJars(type:Copy,dependsOn: [':aprint-gui:fatJar', 
+    task copyOutputJars(type:Copy,dependsOn: [':aprint-machine-control:jar',':aprint-gui:jar', ':aprint-gui:fatJar', 
                             ':aprint-core:jar',':aprint-core:sourcesJar',
                             ':aprint-core:javadocJar',
                            ':aprint-gui:javadocJar',

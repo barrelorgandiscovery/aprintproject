@@ -40,7 +40,7 @@ dependencies {
 	// testCompile dependency to testCompile 'org.testng:testng:6.8.1' and add
 	// 'test.useTestNG()' to your build script.
 
-	implementation project(':aprint-gui')
+	compileOnly project(':aprint-gui')
 	implementation project(':aprint-machine-control')
 	implementation files(fileTree(dir:"${projectDir}/libs" , include:['**/*.jar']).toList())
 	testImplementation 'junit:junit:4.12'
@@ -75,7 +75,7 @@ task listJars() {
 }
 
 
-task fatJar(type: Jar, dependsOn: jar) {
+task fatJar(type: Jar, dependsOn: [jar, ":aprint-machine-control:jar"]) {
   baseName = project.name + '-all'
   extension="extension"
   def conf = configurations.runtimeClasspath
@@ -93,3 +93,9 @@ task fatJar(type: Jar, dependsOn: jar) {
 }
 
 
+
+test {
+
+ useJUnitPlatform()
+
+}

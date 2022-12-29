@@ -263,61 +263,70 @@ public class ExtensionManager implements ExtensionFactory {
 			throw new Exception("unsupported protocol " + protocol); //$NON-NLS-1$
 		}
 
-		long timestamp = System.currentTimeMillis();
-
-		String basename = "" + name + (version != null ? "_" + version : "") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				+ "_" + timestamp; //$NON-NLS-1$
-
-		String localName = basename + ".tmp"; //$NON-NLS-1$
-
-		String localFinalName = basename + extension_suffix; // $NON-NLS-1$
-
-		logger.debug("local Extension file name " + localName); //$NON-NLS-1$
-
-		logger.debug("creating outputFile"); //$NON-NLS-1$
-		final File tmpfile = new File(extensionfolder, localName);
-		final File finalfile = new File(extensionfolder, localFinalName);
-
-		FileOutputStream fos = new FileOutputStream(tmpfile);
 		try {
 
-			logger.debug("reading the stream ..."); //$NON-NLS-1$
+			long timestamp = System.currentTimeMillis();
 
-			byte[] buffer = new byte[1000];
-			int cpt = -1;
-			while ((cpt = is.read(buffer)) != -1) {
-				fos.write(buffer, 0, cpt);
+			String basename = "" + name + (version != null ? "_" + version : "") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					+ "_" + timestamp; //$NON-NLS-1$
+
+			String localName = basename + ".tmp"; //$NON-NLS-1$
+
+			String localFinalName = basename + extension_suffix; // $NON-NLS-1$
+
+			logger.debug("local Extension file name " + localName); //$NON-NLS-1$
+
+			logger.debug("creating outputFile"); //$NON-NLS-1$
+			final File tmpfile = new File(extensionfolder, localName);
+			final File finalfile = new File(extensionfolder, localFinalName);
+
+			FileOutputStream fos = new FileOutputStream(tmpfile);
+			try {
+
+				logger.debug("reading the stream ..."); //$NON-NLS-1$
+
+				byte[] buffer = new byte[1000];
+				int cpt = -1;
+				while ((cpt = is.read(buffer)) != -1) {
+					fos.write(buffer, 0, cpt);
+				}
+			} finally {
+				fos.close();
 			}
+			logger.debug("stream read OK"); //$NON-NLS-1$
+
+			// rename the file
+
+			if (!FileTools.rename(tmpfile, finalfile)) {
+				throw new Exception("fail to rename file " //$NON-NLS-1$
+						+ tmpfile.getAbsolutePath());
+			}
+
+			// ok
+
+			// ecriture de l'url dans le fichier .url ...
+			FileWriter fw = new FileWriter(new File(extensionfolder, localFinalName + ".url")); //$NON-NLS-1$
+			fw.write(url.toString());
+			fw.close();
+
+			IExtensionName[] listJarExtensions = listJarExtensions();
+			for (int i = 0; i < listJarExtensions.length; i++) {
+				IExtensionName extensionName2 = listJarExtensions[i];
+				if (extensionName2.getName().equals(name)) {
+					invalidateExtension(extensionName2);
+				}
+			}
+
+			// add the new extension ...
+			extensions.add(new ExtensionName(name, version, new File(extensionfolder, localFinalName), url));
 		} finally {
-			fos.close();
-		}
-		logger.debug("stream read OK"); //$NON-NLS-1$
-
-		// rename the file
-
-		if (!FileTools.rename(tmpfile, finalfile)) {
-			throw new Exception("fail to rename file " //$NON-NLS-1$
-					+ tmpfile.getAbsolutePath());
-		}
-
-		// ok
-
-		// ecriture de l'url dans le fichier .url ...
-		FileWriter fw = new FileWriter(new File(extensionfolder, localFinalName + ".url")); //$NON-NLS-1$
-		fw.write(url.toString());
-		fw.close();
-
-		IExtensionName[] listJarExtensions = listJarExtensions();
-		for (int i = 0; i < listJarExtensions.length; i++) {
-			IExtensionName extensionName2 = listJarExtensions[i];
-			if (extensionName2.getName().equals(name)) {
-				invalidateExtension(extensionName2);
+			if (is != null) {
+				try {
+					is.close();
+				} catch (Throwable tis) {
+				}
 			}
 		}
-
-		// add the new extension ...
-		extensions.add(new ExtensionName(name, version, new File(extensionfolder, localFinalName), url));
-
 	}
 
 	/**
