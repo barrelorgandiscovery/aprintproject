@@ -1,13 +1,15 @@
 import java.text.*
 
+/*
 plugins {
   id "com.github.spotbugs" version "5.0.13"
 }
+*/
 
 // Apply the java plugin to add support for Java
 apply plugin: 'java-library'
 
-apply plugin: 'checkstyle'
+// apply plugin: 'checkstyle'
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -15,7 +17,10 @@ repositories {
 	// You can declare any Maven/Ivy/file repository here.
 	jcenter()
 
+
 }
+
+/*
 
 checkstyle {
     toolVersion '7.8.1'
@@ -35,7 +40,7 @@ spotbugsMain {
         }
     }
 }
-
+*/
 
 compileJava {
 	options.encoding = 'iso-8859-1'
