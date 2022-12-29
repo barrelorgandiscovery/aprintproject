@@ -69,7 +69,6 @@ import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
 import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.VFS;
 import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -172,7 +171,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 	static final Logger logger = Logger.getLogger(APrintNG.class);
 
 	// ///////////////////////////////////////////////////////////////////////////
-	// Donn�es interne du formulaire
+	// Données interne du formulaire
 
 	/** Repository ... */
 	private RepositoryAdapter repository = null;
@@ -208,7 +207,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		super(properties.getFilePrefsStorage());
 
 		VFSTools.getManager();
-		
+
 		checkWebVersion();
 
 		System.out.println("ClassLoader :" + getClass().getClassLoader());
@@ -322,7 +321,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		SwingUtils.center(this);
 
 		getContentPane().setLayout(new BorderLayout());
-		getContentPane().add(new APrintNGWelcomePanel(this, exts), BorderLayout.CENTER);
+		getContentPane().add(new APrintNGWelcomeWithFilesPanel(this, exts), BorderLayout.CENTER);
 
 		getContentPane().validate();
 		repaint();
@@ -471,7 +470,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		JMenuBar menu = new JMenuBar();
 
 		constructMenuFile(menu);
-		
+
 		// constructInternetRepositoryMenu(menu);
 
 		constructMenuOutils(menu);
@@ -497,7 +496,8 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 	private void constructMenuOutils(JMenuBar menu) {
 
 		JMenu toolsMenu = new JMenu(Messages.getString("APrint.316")); //$NON-NLS-1$
-		// toolsMenu.setIcon(new ImageIcon(getClass().getResource("ark_options.png"))); //$NON-NLS-1$
+		// toolsMenu.setIcon(new ImageIcon(getClass().getResource("ark_options.png")));
+		// //$NON-NLS-1$
 
 		// Editeur de gamme ...
 
@@ -545,8 +545,6 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 
 		constructMenuGamme(toolsMenu);
 
-		
-		
 		menu.add(toolsMenu);
 
 		// call extensions
@@ -686,7 +684,8 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 	private void constructMenuOptions(JMenuBar menu) {
 
 		JMenu m_Options = new JMenu(Messages.getString("APrint.144")); //$NON-NLS-1$
-		// m_Options.setIcon(new ImageIcon(getClass().getResource("package_settings.png"))); //$NON-NLS-1$
+		// m_Options.setIcon(new
+		// ImageIcon(getClass().getResource("package_settings.png"))); //$NON-NLS-1$
 		m_Options.setMnemonic('o');
 
 		// JMenu repositoryMenu = constructMenuRepository(m_Options);
@@ -1204,7 +1203,8 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 	private void constructMenuFile(JMenuBar menu) {
 
 		JMenu m_fichier = new JMenu(Messages.getString("APrint.34")); //$NON-NLS-1$
-		// m_fichier.setIcon(new ImageIcon(getClass().getResource("filesave.png"))); //$NON-NLS-1$
+		// m_fichier.setIcon(new ImageIcon(getClass().getResource("filesave.png")));
+		// //$NON-NLS-1$
 		m_fichier.setMnemonic('f');
 
 		JMenuItem ouvrirvb = m_fichier.add(Messages.getString("APrintNG.10")); //$NON-NLS-1$
@@ -1607,25 +1607,23 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 						new VFSFileNameExtensionFilter("Virtual book File", new String[] { APrintConstants.BOOK })); //$NON-NLS-1$
 
 				choose.setFileSelectionMode(APrintFileChooser.FILES_ONLY);
-				
+
 				File lastFileProperty = aprintproperties.getFilePrefsStorage()
 						.getFileProperty("lastOpenedBookFileLocation", null); //$NON-NLS-1$
 
 				if (lastFileProperty != null) {
-						choose.setSelectedFile(lastFileProperty);
+					choose.setSelectedFile(lastFileProperty);
 				}
-				
-				
+
 				if (choose.showOpenDialog(this) == APrintFileChooser.APPROVE_OPTION) {
 					// R�cup�ration du nom de fichier
 					final AbstractFileObject result = choose.getSelectedFile();
 
 					if (result.exists()) {
 						try {
-							
+
 							saveLastOpenBookLocationFile(result);
-							
-							
+
 							loadBookInNewFrame(result);
 						} catch (Exception ex) {
 							logger.error("error in loading book :" + ex.getMessage(), ex); //$NON-NLS-1$
@@ -1688,10 +1686,9 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 	public void saveLastOpenBookLocationFile(final AbstractFileObject result) {
 		try {
 			File convertToFile = VFSTools.convertToFile(result);
-			aprintproperties.getFilePrefsStorage()
-			.setFileProperty("lastOpenedBookFileLocation", convertToFile); //$NON-NLS-1$
+			aprintproperties.getFilePrefsStorage().setFileProperty("lastOpenedBookFileLocation", convertToFile); //$NON-NLS-1$
 			aprintproperties.getFilePrefsStorage().save();
-		} catch(Throwable t) {
+		} catch (Throwable t) {
 		}
 	}
 
@@ -1754,7 +1751,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 					throw new ApplicationInstrumentNotFoundException(
 							Messages.getString("APrintNG.8") + "(" + preferredInstrumentName + ")",
 							vbreadresult.virtualBook // $NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					, vbreadresult.preferredInstrumentName);
+							, vbreadresult.preferredInstrumentName);
 				}
 
 				assert preferredInstrumentName != null && !preferredInstrumentName.isEmpty();
@@ -2291,15 +2288,13 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 			DataFlavor Linux = new DataFlavor("text/uri-list;class=java.io.Reader"); //$NON-NLS-1$
 			DataFlavor Windows = DataFlavor.javaFileListFlavor;
 
-			
-			
 			// On Linux (and OS X) file DnD is a reader
 			if (flavor.equals(Linux)) {
 				dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
 
 				BufferedReader read = new BufferedReader(flavor.getReaderForText(tr));
 				// Remove 'file://' from file name
-				String fileName = VFSTools.decodeURIEncoding(read.readLine().substring(7)); //$NON-NLS-1$ //$NON-NLS-2$
+				String fileName = VFSTools.decodeURIEncoding(read.readLine().substring(7)); // $NON-NLS-1$ //$NON-NLS-2$
 				// Remove 'localhost' from OS X file names
 				if (fileName.substring(0, 9).equals("localhost")) { //$NON-NLS-1$
 					fileName = fileName.substring(9);
@@ -2347,18 +2342,16 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 
 				// internet link
 				BufferedReader read = new BufferedReader(flavor.getReaderForText(tr));
-				
 
 				StringWriter sw = new StringWriter();
 
-				
 				char[] buffer = new char[200];
 				int readchar = read.read(buffer, 0, buffer.length);
-				
+
 				while (readchar != -1) {
 					sw.write(buffer, 0, readchar);
 					logger.debug("content :" + buffer);
-					readchar = read.read(buffer, 0, buffer.length);					
+					readchar = read.read(buffer, 0, buffer.length);
 				}
 
 				String[] links = HTMLParsingTools.parseHTMLAndExtractLinks(sw.getBuffer().toString());
@@ -2423,31 +2416,29 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 			logger.error(ex.getMessage(), ex);
 			JMessageBox.showMessage(this, Messages.getString("APrintNG.205")); //$NON-NLS-1$
 		}
+
 	}
 
-	/**
-	 * Handle file drop on the application
-	 *
-	 * @param file
-	 * @throws Exception
-	 */
-	protected void handleDropFileTarget(final File file) throws Exception {
-		if (file == null)
+	@Override
+	public void openFile(AbstractFileObject fileObject) throws Exception {
+		handleOpenFile(fileObject);
+	}
+
+	protected void handleOpenFile(final AbstractFileObject fo) throws Exception {
+		if (fo == null)
 			return;
 
-		String lowerCaseFileName = file.getName().toLowerCase();
+		String filename = fo.getName().getBaseName();
+
+		String lowerCaseFileName = filename.toLowerCase();
 		if (lowerCaseFileName.endsWith(".book")) { //$NON-NLS-1$
 			logger.debug("loading the book"); //$NON-NLS-1$
 
 			Callable<Boolean> c = new Callable<Boolean>() {
 
 				public Boolean call() throws Exception {
-
-					loadBookInNewFrame(file);
-					
-					saveLastOpenBookLocationFile(VFSTools.fromRegularFile(file));
-					
-
+					loadBookInNewFrame(fo);
+					saveLastOpenBookLocationFile(fo);
 					return null;
 				}
 			};
@@ -2458,7 +2449,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 				}
 
 				public void jobError(Throwable ex) {
-					JMessageBox.showMessage(APrintNG.this, Messages.getString("APrintNG.206") + file.getName()); //$NON-NLS-1$
+					JMessageBox.showMessage(APrintNG.this, Messages.getString("APrintNG.206") + filename); //$NON-NLS-1$
 				}
 
 				public void jobAborted() {
@@ -2483,10 +2474,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 
 							if (eira != null) {
 								EditableInstrumentManager im = eira.getEditableInstrumentManager();
-
-								AbstractFileObject fso = VFSTools.fromRegularFile(file);
-
-								importInstrumentToRepository(im, fso);
+								importInstrumentToRepository(im, fo);
 							}
 						}
 
@@ -2512,19 +2500,19 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 				+ APrintGroovyConsole.APRINTGROOVYSCRIPTEXTENSION)) {
 			logger.debug("opening aprint groovy script"); //$NON-NLS-1$
 			APrintGroovyInnerConsole gc = openGroovyScriptConsole();
-			AbstractFileObject fso = VFSTools.fromRegularFile(file);
-			gc.openScript(fso);
+			gc.openScript(fo);
 
 		} else if (lowerCaseFileName.endsWith(".mid") || lowerCaseFileName.endsWith(".kar")) { //$NON-NLS-2$
 
 			APrintNGImporterInternalFrame midiImportFrame = openNewImportMidiFrame();
-			AbstractFileObject resolvedFile = VFSTools.fromRegularFile(file);
-			midiImportFrame.defineCurrentMidiFile(resolvedFile);
+
+			midiImportFrame.defineCurrentMidiFile(fo);
 
 		} else if (lowerCaseFileName.endsWith(QuickScriptManager.APRINTBOOKGROOVYSCRIPTEXTENSION)) {
 			try {
-				logger.debug("reading :" + file); //$NON-NLS-1$
-				InputStreamReader ir = new InputStreamReader(new FileInputStream(file), Charset.forName("UTF-8")); //$NON-NLS-1$
+				logger.debug("reading :" + fo); //$NON-NLS-1$
+
+				InputStreamReader ir = new InputStreamReader(fo.getInputStream(), Charset.forName("UTF-8")); //$NON-NLS-1$
 				try {
 					StringBuffer sb = new StringBuffer();
 
@@ -2536,12 +2524,12 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 					}
 					logger.debug("saving the quick script to the script manager"); //$NON-NLS-1$
 
-					String scriptName = file.getName();
+					String scriptName = filename;
 					scriptName = scriptName.substring(0, scriptName.lastIndexOf('.'));
 					scriptManager.saveScript(scriptName, sb);
 
 					JMessageBox.showMessage(APrintNG.this, "QuickScript " //$NON-NLS-1$
-							+ file.getName() + " " + Messages.getString("APrintNG.208")); //$NON-NLS-2$
+							+ filename + " " + Messages.getString("APrintNG.208")); //$NON-NLS-2$
 
 				} finally {
 					ir.close();
@@ -2549,9 +2537,22 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 
 			} catch (Exception ex) {
 				logger.error("error reading the script file", ex); //$NON-NLS-1$
-				JMessageBox.showMessage(APrintNG.this, Messages.getString("APrintNG.209") + file.getName()); //$NON-NLS-1$
+				JMessageBox.showMessage(APrintNG.this, Messages.getString("APrintNG.209") + filename); //$NON-NLS-1$
 			}
 		}
+	}
+
+	/**
+	 * Handle file drop on the application
+	 *
+	 * @param file
+	 * @throws Exception
+	 */
+	protected void handleDropFileTarget(final File file) throws Exception {
+		if (file == null)
+			return;
+
+		handleOpenFile(VFSTools.fromRegularFile(file));
 	}
 
 	public APrintGroovyInnerConsole openGroovyScriptConsole(ClassLoader loaderForScripts) throws Exception {
@@ -2671,7 +2672,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		vb.setName(loadedVirtualBook.getName());
 		return vb;
 	}
-	
+
 	public IExtension[] getCurrentExtensions() {
 		return this.exts;
 	}

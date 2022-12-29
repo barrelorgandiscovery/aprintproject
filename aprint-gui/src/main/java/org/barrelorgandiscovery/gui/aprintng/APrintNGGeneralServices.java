@@ -2,6 +2,7 @@ package org.barrelorgandiscovery.gui.aprintng;
 
 import java.io.File;
 
+import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.barrelorgandiscovery.AsyncJobsManager;
 import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.issues.IssueCollection;
@@ -51,6 +52,14 @@ public interface APrintNGGeneralServices {
 	APrintNGVirtualBookFrame newVirtualBook(Instrument instrument) throws Exception;
 
 	/**
+	 * open file
+	 * 
+	 * @param fileObject
+	 * @throws Exception
+	 */
+	void openFile(AbstractFileObject fileObject) throws Exception;
+
+	/**
 	 * Get the instrument repository
 	 * 
 	 * @return
@@ -87,8 +96,8 @@ public interface APrintNGGeneralServices {
 	BookIndexing getBookIndexing();
 
 	/**
-	 * Return the async job manager this permit to send processing without
-	 * blocking the GUI
+	 * Return the async job manager this permit to send processing without blocking
+	 * the GUI
 	 * 
 	 * @return objet on which you can list, submit async jobs
 	 */
