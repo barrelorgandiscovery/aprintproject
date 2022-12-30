@@ -33,9 +33,9 @@ import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
 import com.jeta.forms.components.panel.FormPanel;
 
 /**
- * Panel for cropping sounds from a wav file
+ * Panel for cropping sounds from a wav file.
  * 
- * @author use
+ * @author pfreydiere
  * 
  */
 public class JCreateSoundSampleFromCropping extends JPanel {
@@ -351,6 +351,7 @@ public class JCreateSoundSampleFromCropping extends JPanel {
 			soundSampleListeners.remove(l);
 	}
 
+	// test method
 	public static void main(String[] args) throws Exception {
 		SwingUtilities.invokeAndWait(new Runnable() {
 			public void run() {
@@ -362,7 +363,7 @@ public class JCreateSoundSampleFromCropping extends JPanel {
 
 					SoundSample soundSample = GUIInstrumentTools
 							.loadWavFile(new File(
-									"C:/Documents and Settings/Freydiere Patrice/Bureau/Projets/Musique Mécanique/Enregistrement 50 limonaire/gamme-50-limonaire_egalise.wav")); //$NON-NLS-1$
+									"C:/Documents and Settings/Freydiere Patrice/Bureau/Projets/Musique MÃ©canique/Enregistrement 50 limonaire/gamme-50-limonaire_egalise.wav")); //$NON-NLS-1$
 
 					JCreateSoundSampleFromCropping c = new JCreateSoundSampleFromCropping();
 					c.setDisplayedSample(soundSample);

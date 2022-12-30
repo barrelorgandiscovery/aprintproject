@@ -90,7 +90,7 @@ public class JChoixGammeEtTransposition extends JDialog implements
 		if (choixgamme.getSelectedIndex() != -1) {
 			Scale g = (Scale) choixgamme.getSelectedItem();
 
-			// on récupère l'ensemble des transpositions associées à cette gamme
+			// on rÃ©cupÃ¨re l'ensemble des transpositions associÃ©es Ã  cette gamme
 			ArrayList<AbstractTransformation> t = tm.findTransposition(Scale
 					.getGammeMidiInstance(), g);
 
@@ -114,7 +114,7 @@ public class JChoixGammeEtTransposition extends JDialog implements
 	}
 
 	/**
-	 * Routine de test
+	 * Routine de test.
 	 * 
 	 * @param args
 	 */

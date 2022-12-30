@@ -5,7 +5,7 @@ import org.barrelorgandiscovery.scale.PipeStopGroupList;
 public interface RegisterSetListChangeListener {
 
 	/**
-	 * informe que la liste des jeu de registre a changée ..
+	 * informe que la liste des jeu de registre a changÃ©e ..
 	 * @param newlist
 	 */
 	void registerSetListChanged(PipeStopGroupList newlist);

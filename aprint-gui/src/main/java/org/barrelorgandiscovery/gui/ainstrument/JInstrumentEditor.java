@@ -73,6 +73,10 @@ public class JInstrumentEditor extends JFrame {
 
 	}
 
+	/**
+	 * init components
+	 * @throws Exception
+	 */
 	private void initComponents() throws Exception {
 
 		this.instrumentEditor = new JInstrumentEditorPanel(this);

@@ -15,6 +15,11 @@ import java.net.URL;
 
 import org.barrelorgandiscovery.tools.ImageTools;
 
+/**
+ * helper for cursor managing.
+ * @author pfreydiere
+ *
+ */
 public class CursorTools {
 
 	public static Cursor createCursorWithImage(BufferedImage smallImage)
@@ -56,11 +61,6 @@ public class CursorTools {
 	 * source image.
 	 * </p>
 	 * 
-	 * @see #createCompatibleImage(java.awt.image.BufferedImage)
-	 * @see #createCompatibleImage(java.awt.image.BufferedImage, int, int)
-	 * @see #createCompatibleImage(int, int)
-	 * @see #loadCompatibleImage(java.net.URL)
-	 * @see #toCompatibleImage(java.awt.image.BufferedImage)
 	 * @param width
 	 *            the width of the new image
 	 * @param height

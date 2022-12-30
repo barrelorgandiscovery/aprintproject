@@ -18,6 +18,11 @@ import org.barrelorgandiscovery.virtualbook.AbstractEvent;
 import org.barrelorgandiscovery.virtualbook.MarkerEvent;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 
+/**
+ * layer to display layers.
+ * @author pfreydiere
+ *
+ */
 public class MarkerLayer implements VirtualBookComponentLayer,
 		VirtualBookComponentLayerName {
 
@@ -48,7 +53,7 @@ public class MarkerLayer implements VirtualBookComponentLayer,
 				g2d.setColor(Color.GREEN);
 				g2d.setStroke(new BasicStroke(3));
 
-				// Récupération de l'étendue à afficher ...
+				// RÃ©cupÃ©ration de l'Ã©tendue Ã  afficher ...
 				Rectangle rect = g.getClipBounds(new Rectangle());
 
 				double start = jbookcomponentreference

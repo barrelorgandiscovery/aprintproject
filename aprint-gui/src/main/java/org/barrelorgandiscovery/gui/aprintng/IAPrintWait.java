@@ -4,14 +4,14 @@ import org.barrelorgandiscovery.gui.ICancelTracker;
 
 /**
  * interface implemented by visual component, permitting to
- * show an async process in progress
+ * show an async process in progress.
  * @author pfreydiere
  *
  */
 public interface IAPrintWait {
 
 	/**
-	 * Start the wait process
+	 * Start the wait process.
 	 * @param text
 	 * @param cancelTracker
 	 */
@@ -19,14 +19,14 @@ public interface IAPrintWait {
 			ICancelTracker cancelTracker);
 
 	/**
-	 * Fonction de lancement de la procedure d'attente d'APrint, doit être lancé
-	 * dans le thread de swing
+	 * Fonction de lancement de la procedure d'attente d'APrint, doit Ãªtre lancÃ©
+	 * dans le thread de swing.
 	 */
 	public abstract void infiniteStartWait(String text);
 
 	/**
-	 * Fonction de lancement de la procedure d'attente d'APrint, doit être lancé
-	 * dans le thread de swing
+	 * Fonction de lancement de la procedure d'attente d'APrint, doit Ãªtre lancÃ©
+	 * dans le thread de swing.
 	 */
 	public abstract void infiniteEndWait();
 

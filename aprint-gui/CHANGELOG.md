@@ -3,7 +3,7 @@
 ## 2022 Decembre
 
 - switch to java 17 
-
+- add explorer to main window
 
 ## 2021 December
 

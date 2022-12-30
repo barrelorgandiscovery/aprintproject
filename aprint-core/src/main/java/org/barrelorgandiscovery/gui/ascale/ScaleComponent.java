@@ -166,7 +166,7 @@ public class ScaleComponent extends JComponent {
 	private TexturePaint cartontrame = null;
 
 	/**
-	 * Constructeur par défaut ...
+	 * Default constructor
 	 */
 	public ScaleComponent() {
 
@@ -611,6 +611,11 @@ public class ScaleComponent extends JComponent {
 
 	}
 
+	/**
+	 * draw reference.
+	 * 
+	 * @param g the graph context
+	 */
 	private void drawReference(Graphics g) {
 		int y_reference;
 		int x_reference;
@@ -731,7 +736,7 @@ public class ScaleComponent extends JComponent {
 	 * Récupération du facteur d'échelle, par exemple 2 pour voir la gamme en 2 fois
 	 * plus gros
 	 * 
-	 * @return
+	 * @return the scale factor
 	 */
 	public double getScale() {
 		return 1 / scale;
@@ -748,14 +753,21 @@ public class ScaleComponent extends JComponent {
 	}
 
 	/**
-	 * Cette méthode converti la coordonnée de l'espace carton vers les coordonnées
-	 * écran.
+	 * Convert the book metrics coordinate to screen.
+	 * 
+	 * @return the screen X
 	 */
 	private int convertCartonToScreenX(double x) {
 		double d = x;
 		return MmToPixel(d);
 	}
 
+	/**
+	 * convert the metric book measure to screen coordinates
+	 * 
+	 * @param y
+	 * @return the screen y coordinate
+	 */
 	private int convertCartonToScreenY(double y) {
 		double d = +y;
 		return MmToPixel(d);
@@ -764,7 +776,7 @@ public class ScaleComponent extends JComponent {
 	/**
 	 * Récupère le DPI associé à l'écran pour l'affichage à l'échelle 1
 	 * 
-	 * @return
+	 * @return the dpi
 	 */
 	private int getDpi() {
 		if (dpi == -1)
@@ -777,23 +789,13 @@ public class ScaleComponent extends JComponent {
 	 * Converti une distance de mm en pixel
 	 * 
 	 * @param x
-	 * @return
+	 * @return the mm associated to pixels
 	 */
 	private int MmToPixel(double x) {
 
 		double pts_par_mm = (getDpi() * 1.0) / 25.4;
 		return (int) (x / scale * pts_par_mm);
 	}
-
-	// private double convertScreenXToCarton(int x) {
-	// double xmm = pixelToMm(x);
-	// return xmm;
-	// }
-	//
-	// private double convertScreenYToCarton(int y) {
-	// double ymm = pixelToMm(y);
-	// return ymm;
-	// }
 
 	/**
 	 * Converti une distance de pixel en mm
@@ -845,11 +847,7 @@ public class ScaleComponent extends JComponent {
 			ReferencedPercussion p = ReferencedPercussionList.findReferencedPercussionByMidiCode(pd.getPercussion());
 			if (p != null) {
 				sb.append(" - "); //$NON-NLS-1$
-				sb.append(ReferencedPercussion.getLocalizedDrumLabel(p)); // $NON-NLS-1$
-				// //$NON-NLS-1$
-				// //$NON-NLS-1$
-				// //$NON-NLS-1$
-				// //$NON-NLS-1$
+				sb.append(ReferencedPercussion.getLocalizedDrumLabel(p)); // $NON-NLS-1$			
 			}
 
 			if (!Double.isNaN(pd.getLength())) {
@@ -889,6 +887,7 @@ public class ScaleComponent extends JComponent {
 
 	}
 
+	
 	private Dimension getComponentInternalSize() {
 		return new Dimension(MmToPixel(largeur_gamme), MmToPixel(largeur_carton));
 

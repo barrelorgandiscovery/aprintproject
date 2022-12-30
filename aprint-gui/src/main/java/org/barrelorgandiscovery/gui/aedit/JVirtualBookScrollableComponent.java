@@ -41,7 +41,7 @@ import org.barrelorgandiscovery.virtualbook.VirtualBook;
 /**
  * 
  * A Component that can display a virtual book component, with scrollable
- * capabilities
+ * capabilities.
  * 
  * @author Freydiere Patrice
  * 
@@ -150,8 +150,6 @@ public class JVirtualBookScrollableComponent extends JPanel {
 			}
 		});
 
-		// add(panel);
-
 		add(jvirtualbookcomponent, BorderLayout.CENTER);
 		add(hscroll, BorderLayout.SOUTH);
 		add(vscroll, BorderLayout.EAST);
@@ -194,10 +192,10 @@ public class JVirtualBookScrollableComponent extends JPanel {
 	}
 
 	/**
-	 * Construction du composant en ajoutant la couche
+	 * construct the component, with a first layer
 	 * 
 	 * @param layer
-	 *            la couche à ajouter
+	 *            layer to add
 	 */
 	public JVirtualBookScrollableComponent(VirtualBookComponentLayer layer) {
 		this();
@@ -205,7 +203,7 @@ public class JVirtualBookScrollableComponent extends JPanel {
 	}
 
 	/**
-	 * Définit le carton virtuel de travail
+	 * Define the virtual book to work on.
 	 * 
 	 * @param carton
 	 */
@@ -282,7 +280,7 @@ public class JVirtualBookScrollableComponent extends JPanel {
 	}
 
 	// //////////////////////////////////////////////////////////
-	// Gestion de la sélection ...
+	// Gestion de la sÃ©lection ...
 
 	/**
 	 * add a hole to selection

@@ -6,7 +6,7 @@ import java.awt.Rectangle;
 
 /**
  * This implementation of the layer put the time in the component (with minutes /
- * secondes)
+ * secondes).
  * 
  * @author Freydiere Patrice
  * 
@@ -28,7 +28,7 @@ public class TimeBookLayer implements VirtualBookComponentLayer {
 	 */
 	public void draw(Graphics g, JVirtualBookComponent jcarton) {
 
-		// Récupération de l'étendue visualisée ...
+		// RÃ©cupÃ©ration de l'Ã©tendue visualisÃ©e ...
 		Rectangle r = g.getClipBounds(new Rectangle());
 
 		if (jcarton.getVirtualBook() == null)

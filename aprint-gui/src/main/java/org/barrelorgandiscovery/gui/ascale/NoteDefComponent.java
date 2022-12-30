@@ -218,7 +218,7 @@ public class NoteDefComponent extends AbstractTrackDefComponent {
 			int midinote = MidiHelper.extractNoteFromMidiCode(midicode);
 
 			LocalizedNoteChoose lnc = null;
-			// recherche de l'élément associé à la note midi ....
+			// recherche de l'Ã©lÃ©ment associÃ© Ã  la note midi ....
 			ComboBoxModel defaultmodel = note.getModel();
 			for (int i = 0; i < defaultmodel.getSize(); i++) {
 				LocalizedNoteChoose current = (LocalizedNoteChoose) defaultmodel

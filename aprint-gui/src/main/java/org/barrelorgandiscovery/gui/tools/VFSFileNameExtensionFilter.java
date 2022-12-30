@@ -8,6 +8,11 @@ import org.apache.log4j.Logger;
 
 import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileFilter;
 
+/**
+ * filter for filename associated to VFS objects, permit to filter the display.
+ * 
+ * @author pfreydiere
+ */
 public class VFSFileNameExtensionFilter extends AbstractVFSFileFilter {
 	private static Logger logger = Logger.getLogger(VFSFileNameExtensionFilter.class);
 
@@ -28,18 +33,27 @@ public class VFSFileNameExtensionFilter extends AbstractVFSFileFilter {
 		this.extensions = new String[] { extension.toLowerCase() };
 	}
 
+	/**
+	 * construct the filter using a description and extensions list.
+	 * 
+	 * @param description
+	 * @param extensions
+	 */
 	public VFSFileNameExtensionFilter(String description, String[] extensions) {
 		this.description = description;
 		this.extensions = extensions;
 	}
 
+	/*
+	 * 
+	 */
 	@Override
 	public boolean accept(FileObject f) {
 
 		if (f == null)
 			return false;
 
-		// on accepte les répertoire
+		// on accepte les rÃ©pertoire
 		try {
 			if (f.isFolder()) {
 				return true;
@@ -61,11 +75,17 @@ public class VFSFileNameExtensionFilter extends AbstractVFSFileFilter {
 		return false;
 	}
 
+	/**
+	 * get description
+	 */
 	@Override
 	public String getDescription() {
 		return description;
 	}
 
+	/**
+	 * to string conversion for debug or print.
+	 */
 	@Override
 	public String toString() {
 		return "" + getDescription() + " - " + Arrays.asList(extensions);

@@ -31,11 +31,9 @@ import org.barrelorgandiscovery.virtualbook.VirtualBook;
  * @author Freydiere Patrice
  * 
  */
-public class JEditableVirtualBookComponent extends
-		JVirtualBookScrollableComponent implements ITransaction {
+public class JEditableVirtualBookComponent extends JVirtualBookScrollableComponent implements ITransaction {
 
-	private static Logger logger = Logger
-			.getLogger(JEditableVirtualBookComponent.class);
+	private static Logger logger = Logger.getLogger(JEditableVirtualBookComponent.class);
 
 	/**
 	 * 
@@ -52,10 +50,11 @@ public class JEditableVirtualBookComponent extends
 	 */
 	private UndoStack undoStack;
 
-	private class HandleMouseEventsForTools implements MouseListener,
-			MouseMotionListener, MouseWheelListener, KeyListener {
+	private class HandleMouseEventsForTools
+			implements MouseListener, MouseMotionListener, MouseWheelListener, KeyListener {
+
 		// ///////////////////////////////////////////////////////////////////////////
-		// Gestion des évènements souris
+		// Mouse events
 
 		public void mouseDragged(MouseEvent e) {
 			if (currentTool != null)
@@ -107,17 +106,17 @@ public class JEditableVirtualBookComponent extends
 			if (currentTool != null)
 				currentTool.keyPressed(e);
 		}
-		
+
 		public void keyReleased(KeyEvent e) {
 			if (currentTool != null)
 				currentTool.keyReleased(e);
 		}
-		
+
 		public void keyTyped(KeyEvent e) {
 			if (currentTool != null)
 				currentTool.keyTyped(e);
 		}
-		
+
 	}
 
 	private HandleMouseEventsForTools mouseAndKeyEventListenerForTools = new HandleMouseEventsForTools();
@@ -144,8 +143,7 @@ public class JEditableVirtualBookComponent extends
 	/**
 	 * current snapping environnement
 	 */
-	private ISnappingEnvironment currentSnappingEnvironnement = new HolesSnappingEnvironnement(
-			this);
+	private ISnappingEnvironment currentSnappingEnvironnement = new HolesSnappingEnvironnement(this);
 
 	/**
 	 * return the snapping environnement ...
@@ -203,17 +201,14 @@ public class JEditableVirtualBookComponent extends
 	}
 
 	protected void fireCurrentToolChangedListener(Tool newTool, Tool oldTool) {
-		for (Iterator itCurrentToolChangedListener = toolsChangedListeners
-				.iterator(); itCurrentToolChangedListener.hasNext();) {
-			CurrentToolChanged ctc = (CurrentToolChanged) itCurrentToolChangedListener
-					.next();
+		for (Iterator itCurrentToolChangedListener = toolsChangedListeners.iterator(); itCurrentToolChangedListener
+				.hasNext();) {
+			CurrentToolChanged ctc = (CurrentToolChanged) itCurrentToolChangedListener.next();
 			try {
 				ctc.currentToolChanged(oldTool, newTool);
 
 			} catch (Throwable t) {
-				logger.error(
-						"error in current tool change listener :"
-								+ t.getMessage(), t);
+				logger.error("error in current tool change listener :" + t.getMessage(), t);
 				BugReporter.sendBugReport();
 			}
 		}
@@ -231,7 +226,7 @@ public class JEditableVirtualBookComponent extends
 
 		logger.debug("set Virtual Book ,  and clear the undostack ...");
 		undoStack.clearUndoOperations();
-		
+
 		fireVirtualBookChanged(carton);
 
 	}
@@ -263,11 +258,13 @@ public class JEditableVirtualBookComponent extends
 
 	private Queue<ByteArrayOutputStream> transactionalVirtualBooks = new LinkedList<ByteArrayOutputStream>();
 
-	/* (non-Javadoc)
-   * @see org.barrelorgandiscovery.gui.aedit.ITransaction#startEventTransaction()
-   */
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.barrelorgandiscovery.gui.aedit.ITransaction#startEventTransaction()
+	 */
 	@Override
-  public void startEventTransaction() {
+	public void startEventTransaction() {
 		logger.debug("startEventTransaction");
 		VirtualBook vb = super.getVirtualBook();
 		if (vb == null) {
@@ -279,19 +276,21 @@ public class JEditableVirtualBookComponent extends
 		}
 	}
 
-	/* (non-Javadoc)
-   * @see org.barrelorgandiscovery.gui.aedit.ITransaction#endEventTransaction()
-   */
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see org.barrelorgandiscovery.gui.aedit.ITransaction#endEventTransaction()
+	 */
 	@Override
-  public void endEventTransaction() {
+	public void endEventTransaction() {
 		logger.debug("endEventTransaction");
 		if (transactionalVirtualBooks.size() <= 0)
 			logger.error("ERROR IN THE TRANSACTION SYMETRY, check the code");
-		
+
 		ByteArrayOutputStream baos = transactionalVirtualBooks.poll();
 		VirtualBook vb = super.getVirtualBook();
 		if (vb != null && baos != null) {
-			
+
 			ByteArrayOutputStream baoscurrentvb = new ByteArrayOutputStream();
 			SerializeTools.writeObject(vb, baoscurrentvb);
 
@@ -317,15 +316,13 @@ public class JEditableVirtualBookComponent extends
 
 	private Vector<IVirtualBookChangedListener> listeners = new Vector<IVirtualBookChangedListener>();
 
-	public void addVirtualBookChangedListener(
-			IVirtualBookChangedListener listener) {
+	public void addVirtualBookChangedListener(IVirtualBookChangedListener listener) {
 		if (listener == null)
 			return;
 		listeners.add(listener);
 	}
 
-	public void removeVirtualBookChangedListener(
-			IVirtualBookChangedListener listener) {
+	public void removeVirtualBookChangedListener(IVirtualBookChangedListener listener) {
 		if (listener == null)
 			return;
 		listeners.remove(listener);
@@ -333,19 +330,16 @@ public class JEditableVirtualBookComponent extends
 
 	protected void fireVirtualBookChanged(VirtualBook newvb) {
 		logger.debug("Fire VirtualBook Changed");
-		
-		// selection might have changed, 
+
+		// selection might have changed,
 		checkSelectionHoleAreStillInBook();
-		
+
 		for (Iterator iterator = listeners.iterator(); iterator.hasNext();) {
-			IVirtualBookChangedListener l = (IVirtualBookChangedListener) iterator
-					.next();
+			IVirtualBookChangedListener l = (IVirtualBookChangedListener) iterator.next();
 			try {
 				l.virtualBookChanged(newvb);
 			} catch (Exception ex) {
-				logger.error(
-						"error when fireing virtualBook change :"
-								+ ex.getMessage(), ex);
+				logger.error("error when fireing virtualBook change :" + ex.getMessage(), ex);
 				BugReporter.sendBugReport();
 			}
 		}

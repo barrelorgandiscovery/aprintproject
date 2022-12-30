@@ -13,7 +13,7 @@ import org.barrelorgandiscovery.tools.streamstorage.FolderStreamStorage;
 
 
 /**
- * Classe de test 
+ * Test class for scale component 
  * 
  */
 public class ScaleComponentTest extends JFrame {
@@ -33,7 +33,7 @@ public class ScaleComponentTest extends JFrame {
 	}
 
 	/**
-	 * méthode de test unitaire pour le composant de gamme ...
+	 * mÃ©thode de test unitaire pour le composant de gamme ...
 	 * 
 	 * @param args
 	 */

@@ -16,7 +16,7 @@ import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.ui.tools.VerticalBagLayout;
 
 /**
- * Boite de dialog permettant le choix de la taille du poinçon
+ * Boite de dialog permettant le choix de la taille du poinÃ§on.
  * 
  * @author Freydiere Patrice
  */

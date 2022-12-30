@@ -41,7 +41,7 @@ public class OGGTools {
 	/**
 	 * VorbisEncoder.java
 	 * 
-	 * Usage: java -cp VorbisEncoder <Input File[.wav]> <Output File[.ogg]>
+	 * Usage: java -cp VorbisEncoder &gt;Input File[.wav]&lt; &gt;Output File[.ogg]&lt;
 	 * 
 	 */
 	public static void convert(File src, File dest) throws Exception {

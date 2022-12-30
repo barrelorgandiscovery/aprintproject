@@ -34,7 +34,15 @@ import com.mxgraph.util.mxPoint;
 import com.mxgraph.util.mxRectangle;
 import com.mxgraph.util.mxEventSource.mxIEventListener;
 
+/**
+ * palette for choosing processor for the model editor.
+ * 
+ * @author pfreydiere
+ *
+ */
 public class EditorPalette extends JPanel {
+
+	private static final long serialVersionUID = 4210384526542582899L;
 
 	private static final int ICON_SIZE = 64;
 
@@ -71,9 +79,7 @@ public class EditorPalette extends JPanel {
 			/*
 			 * (non-Javadoc)
 			 * 
-			 * @see
-			 * java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent
-			 * )
+			 * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent )
 			 */
 			public void mousePressed(MouseEvent e) {
 				clearSelection();
@@ -82,9 +88,7 @@ public class EditorPalette extends JPanel {
 			/*
 			 * (non-Javadoc)
 			 * 
-			 * @see
-			 * java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent
-			 * )
+			 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent )
 			 */
 			public void mouseClicked(MouseEvent e) {
 			}
@@ -92,9 +96,7 @@ public class EditorPalette extends JPanel {
 			/*
 			 * (non-Javadoc)
 			 * 
-			 * @see
-			 * java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent
-			 * )
+			 * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent )
 			 */
 			public void mouseEntered(MouseEvent e) {
 			}
@@ -102,9 +104,7 @@ public class EditorPalette extends JPanel {
 			/*
 			 * (non-Javadoc)
 			 * 
-			 * @see
-			 * java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent
-			 * )
+			 * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent )
 			 */
 			public void mouseExited(MouseEvent e) {
 			}
@@ -112,9 +112,7 @@ public class EditorPalette extends JPanel {
 			/*
 			 * (non-Javadoc)
 			 * 
-			 * @see
-			 * java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent
-			 * )
+			 * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent )
 			 */
 			public void mouseReleased(MouseEvent e) {
 			}
@@ -123,6 +121,9 @@ public class EditorPalette extends JPanel {
 
 		// Shows a nice icon for drag and drop but doesn't import anything
 		setTransferHandler(new TransferHandler() {
+			
+			private static final long serialVersionUID = 8262753202101628656L;
+
 			public boolean canImport(JComponent comp, DataFlavor[] flavors) {
 				return true;
 			}
@@ -158,21 +159,20 @@ public class EditorPalette extends JPanel {
 
 			Graphics2D g2 = (Graphics2D) g;
 
-			g2.setPaint(new GradientPaint(0, 0, getBackground(), getWidth(), 0,
-					gradientColor));
+			g2.setPaint(new GradientPaint(0, 0, getBackground(), getWidth(), 0, gradientColor));
 			g2.fill(rect);
 		}
 	}
 
 	/**
-	 * 
+	 * clear selection
 	 */
 	public void clearSelection() {
 		setSelectionEntry(null, null);
 	}
 
 	/**
-	 * 
+	 * set selection entry
 	 */
 	public void setSelectionEntry(JLabel entry, mxGraphTransferable t) {
 		JLabel last = selectedEntry;
@@ -187,11 +187,8 @@ public class EditorPalette extends JPanel {
 			// selectedEntry.setBorder(ShadowBorder.getSharedInstance());
 			selectedEntry.setOpaque(true);
 		}
-		
-		repaint();
 
-		// eventSource.fireEvent(EVENT_SELECT, new Object[] { selectedEntry, t,
-		// last });
+		repaint();
 	}
 
 	/**
@@ -199,12 +196,12 @@ public class EditorPalette extends JPanel {
 	 */
 	public void setPreferredWidth(int width) {
 		int cols = width / 55;
-		setPreferredSize(new Dimension(width,
-				(getComponentCount() * 55 / cols) + 30));
+		setPreferredSize(new Dimension(width, (getComponentCount() * 55 / cols) + 30));
 		revalidate();
 	}
 
 	/**
+	 * add edge template to palette.
 	 * 
 	 * @param name
 	 * @param icon
@@ -213,8 +210,7 @@ public class EditorPalette extends JPanel {
 	 * @param height
 	 * @param value
 	 */
-	public void addEdgeTemplate(final String name, ImageIcon icon,
-			String style, int width, int height, Object value) {
+	public void addEdgeTemplate(final String name, ImageIcon icon, String style, int width, int height, Object value) {
 		mxGeometry geometry = new mxGeometry(0, 0, width, height);
 		geometry.setTerminalPoint(new mxPoint(0, height), true);
 		geometry.setTerminalPoint(new mxPoint(width, 0), false);
@@ -227,6 +223,7 @@ public class EditorPalette extends JPanel {
 	}
 
 	/**
+	 * add template.
 	 * 
 	 * @param name
 	 * @param icon
@@ -235,11 +232,9 @@ public class EditorPalette extends JPanel {
 	 * @param height
 	 * @param value
 	 */
-	public void addTemplate(final String name, ImageIcon icon, String style,
-			int width, int height, Object value) {
-		
-		mxCell cell = new mxCell(value, new mxGeometry(0, 0, width, height),
-				style);
+	public void addTemplate(final String name, ImageIcon icon, String style, int width, int height, Object value) {
+
+		mxCell cell = new mxCell(value, new mxGeometry(0, 0, width, height), style);
 		cell.setVertex(true);
 
 		addTemplate(name, icon, cell);
@@ -256,18 +251,20 @@ public class EditorPalette extends JPanel {
 	 */
 	public void addTemplate(final String name, ImageIcon icon, mxCell cell) {
 		mxRectangle bounds = (mxGeometry) cell.getGeometry().clone();
-		final mxGraphTransferable t = new mxGraphTransferable(
-				new Object[] { cell }, bounds);
+		final mxGraphTransferable t = new mxGraphTransferable(new Object[] { cell }, bounds);
 
 		// Scales the image if it's too large for the library
 		if (icon != null) {
 			if (icon.getIconWidth() > ICON_SIZE || icon.getIconHeight() > ICON_SIZE) {
-				icon = new ImageIcon(icon.getImage().getScaledInstance(ICON_SIZE, ICON_SIZE,
-						java.awt.Image.SCALE_SMOOTH));
+				icon = new ImageIcon(
+						icon.getImage().getScaledInstance(ICON_SIZE, ICON_SIZE, java.awt.Image.SCALE_SMOOTH));
 			}
 		}
 
 		final JLabel entry = new JLabel(icon) {
+			
+			private static final long serialVersionUID = 477416925590433775L;
+
 			/**
 			 * 
 			 */
@@ -290,7 +287,7 @@ public class EditorPalette extends JPanel {
 			}
 		};
 
-		entry.setPreferredSize(new Dimension(ICON_SIZE + 18, ICON_SIZE+18));
+		entry.setPreferredSize(new Dimension(ICON_SIZE + 18, ICON_SIZE + 18));
 		entry.setBackground(EditorPalette.this.getBackground().brighter());
 		entry.setFont(new Font(entry.getFont().getFamily(), 0, 10));
 
@@ -306,9 +303,7 @@ public class EditorPalette extends JPanel {
 			/*
 			 * (non-Javadoc)
 			 * 
-			 * @see
-			 * java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent
-			 * )
+			 * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent )
 			 */
 			public void mousePressed(MouseEvent e) {
 				setSelectionEntry(entry, t);
@@ -317,9 +312,7 @@ public class EditorPalette extends JPanel {
 			/*
 			 * (non-Javadoc)
 			 * 
-			 * @see
-			 * java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent
-			 * )
+			 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent )
 			 */
 			public void mouseClicked(MouseEvent e) {
 			}
@@ -327,9 +320,7 @@ public class EditorPalette extends JPanel {
 			/*
 			 * (non-Javadoc)
 			 * 
-			 * @see
-			 * java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent
-			 * )
+			 * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent )
 			 */
 			public void mouseEntered(MouseEvent e) {
 			}
@@ -337,9 +328,7 @@ public class EditorPalette extends JPanel {
 			/*
 			 * (non-Javadoc)
 			 * 
-			 * @see
-			 * java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent
-			 * )
+			 * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent )
 			 */
 			public void mouseExited(MouseEvent e) {
 			}
@@ -347,9 +336,7 @@ public class EditorPalette extends JPanel {
 			/*
 			 * (non-Javadoc)
 			 * 
-			 * @see
-			 * java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent
-			 * )
+			 * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent )
 			 */
 			public void mouseReleased(MouseEvent e) {
 			}
@@ -368,9 +355,8 @@ public class EditorPalette extends JPanel {
 		};
 
 		DragSource dragSource = new DragSource();
-		DragGestureRecognizer dgr = dragSource
-				.createDefaultDragGestureRecognizer(entry,
-						DnDConstants.ACTION_COPY, dragGestureListener);
+		DragGestureRecognizer dgr = dragSource.createDefaultDragGestureRecognizer(entry, DnDConstants.ACTION_COPY,
+				dragGestureListener);
 
 		add(entry);
 	}

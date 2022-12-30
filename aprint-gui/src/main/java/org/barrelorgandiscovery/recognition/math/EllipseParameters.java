@@ -5,6 +5,12 @@ import java.io.Serializable;
 
 import Jama.Matrix;
 
+/**
+ * object holding the elipse parameter finding.
+ * 
+ * @author pfreydiere
+ *
+ */
 public class EllipseParameters implements Serializable {
 
 	public Point2D.Double centre;
@@ -32,7 +38,7 @@ public class EllipseParameters implements Serializable {
 
 	/**
 	 * compute position on the ellipse using the angle and ratio (length ratio, 1.0
-	 * -> on the ellipse circle)
+	 * -&gt;  on the ellipse circle).
 	 * 
 	 * @param a1
 	 * @param ratio
@@ -48,8 +54,8 @@ public class EllipseParameters implements Serializable {
 	}
 
 	/**
-	 * Compute a point on a ellipse, using the angle and ratio (length ratio, 1.0 ->
-	 * on the ellipse circle)
+	 * Compute a point on a ellipse, using the angle and ratio (length ratio, 1.0 -&gt;
+	 * on the ellipse circle).
 	 * 
 	 * @param a1
 	 * @param ratio
@@ -74,7 +80,7 @@ public class EllipseParameters implements Serializable {
 	}
 
 	/**
-	 * Compute a point on a ellipse, using the angle and ratio (length ratio, 1.0 ->
+	 * Compute a point on a ellipse, using the angle and ratio (length ratio, 1.0 -&gt;
 	 * on the ellipse circle)
 	 * 
 	 * @param a1

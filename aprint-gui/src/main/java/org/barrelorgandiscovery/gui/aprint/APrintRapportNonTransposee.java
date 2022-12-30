@@ -18,6 +18,8 @@ import org.barrelorgandiscovery.virtualbook.Hole;
 
 public class APrintRapportNonTransposee extends JDialog {
 
+	private static final long serialVersionUID = 5222290318496722374L;
+	
 	private JTextArea text;
 
 	public APrintRapportNonTransposee(Frame owner, ArrayList<Hole> holes,
@@ -25,13 +27,13 @@ public class APrintRapportNonTransposee extends JDialog {
 		super(owner, Messages.getString("APrintRapportNonTransposee.0"), true); //$NON-NLS-1$
 		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
-		// Lecture des éléments non transposés ...
+		// Lecture des Ã©lÃ©ments non transposÃ©s ...
 		text = new JTextArea();
 
 		AbstractTrackDef[] gammetracks = origine.getTracksDefinition();
 
 		StringBuffer sb = new StringBuffer();
-		// construction de la chaine de caractères ...
+		// construction de la chaine de caractÃ¨res ...
 		for (int i = 0; i < holes.size(); i++) {
 
 			Hole h = holes.get(i);

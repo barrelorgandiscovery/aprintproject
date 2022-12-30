@@ -21,7 +21,7 @@ import com.jeta.forms.components.panel.FormPanel;
 
 
 /**
- * Fenetre d'information sur le programme et les dernière évolutions
+ * Fenetre d'information sur le programme et les derniÃ¨re Ã©volutions
  * 
  * @author Freydiere Patrice
  * 

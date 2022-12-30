@@ -40,7 +40,7 @@ public class JPanelWaitableInJFrameWaitable extends JPanel implements IAPrintWai
 	}
 
 	/**
-	 * sequencer utilisé pour jouer le morceau
+	 * sequencer utilisÃ© pour jouer le morceau.
 	 */
 	private InfiniteProgressPanel infiniteprogresspanel = new InfiniteProgressPanel(null, 20, 0.5f, 0.5f);
 

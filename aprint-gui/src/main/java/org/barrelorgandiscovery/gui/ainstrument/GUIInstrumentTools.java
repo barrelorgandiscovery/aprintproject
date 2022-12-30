@@ -30,7 +30,7 @@ public class GUIInstrumentTools {
 	 * 
 	 * @param wavStream the stream
 	 * @param name
-	 * @return
+	 * @return the sound sample
 	 * @throws Exception
 	 */
 	public static SoundSample loadWavFile(InputStream wavStream, String name) throws Exception {
@@ -70,7 +70,7 @@ public class GUIInstrumentTools {
 	 * load wav from file,
 	 * 
 	 * @param wavFile
-	 * @return
+	 * @return the sound sample
 	 * @throws Exception
 	 */
 	public static SoundSample loadWavFile(File wavFile) throws Exception {
@@ -85,7 +85,7 @@ public class GUIInstrumentTools {
 	 * 
 	 * @param ais
 	 * @param factor
-	 * @return
+	 * @return the managed audio input stream
 	 * @throws Exception
 	 */
 	public static ManagedAudioInputStream adjust(AudioInputStream ais, float factor, ProgressIndicator pi)
@@ -146,8 +146,9 @@ public class GUIInstrumentTools {
 	/**
 	 * Crop the current section ...
 	 * 
-	 * @param start
-	 * @param end
+	 * @param start the crop start in time
+	 * @param end   the end of the crop
+	 * @return the cropped audio stream
 	 * @throws Exception
 	 */
 	public static ManagedAudioInputStream crop(AudioInputStream ais, long start, long end) throws Exception {

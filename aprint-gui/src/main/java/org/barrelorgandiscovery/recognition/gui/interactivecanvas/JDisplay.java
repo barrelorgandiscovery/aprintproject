@@ -478,7 +478,7 @@ public class JDisplay extends JComponent implements CurrentToolChangedAware {
 					JImageDisplayLayer jImageDisplayLayer = new JImageDisplayLayer();
 
 					File f = new File(
-							"C:\\projets\\APrint\\contributions\\gérard\\2014_09_Reconnaissance\\numerisation\\DSCN2825.JPG");
+							"C:\\projets\\APrint\\contributions\\gÃ©rard\\2014_09_Reconnaissance\\numerisation\\DSCN2825.JPG");
 					if (!f.exists())
 						throw new Exception("file " + f.getAbsolutePath() + " not found");
 					BufferedImage bi = ImageTools.loadImage(f.toURL());
@@ -600,11 +600,19 @@ public class JDisplay extends JComponent implements CurrentToolChangedAware {
 		}
 	}
 
+	/**
+	 * remove the layer.
+	 * 
+	 * @param layer
+	 */
 	public void removeLayer(JLayer layer) {
 		layers.remove(layer);
 		layer.removeLayerChangedListener(refresh);
 	}
 
+	/**
+	 * listener for current tool change
+	 */
 	private Vector<CurrentToolChanged> listeners = new Vector<CurrentToolChanged>();
 
 	/*
@@ -631,6 +639,12 @@ public class JDisplay extends JComponent implements CurrentToolChangedAware {
 			listeners.remove(listener);
 	}
 
+	/**
+	 * called for firing the event for tool change.
+	 * 
+	 * @param oldTool
+	 * @param newTool
+	 */
 	protected void fireToolChanged(Tool oldTool, Tool newTool) {
 		for (CurrentToolChanged ctc : listeners) {
 			try {
@@ -641,14 +655,29 @@ public class JDisplay extends JComponent implements CurrentToolChangedAware {
 		}
 	}
 
+	/**
+	 * get the affinetranform for display.
+	 * 
+	 * @return
+	 */
 	public AffineTransform getTransformRef() {
 		return currentTransform;
 	}
 
+	/**
+	 * define the transform ref.
+	 * 
+	 * @param transform
+	 */
 	public void setTransformRef(AffineTransform transform) {
 		currentTransform = transform;
 	}
 
+	/**
+	 * define the default tool.
+	 * 
+	 * @param t
+	 */
 	public void setDefaultTool(Tool t) {
 		if (this.defaultTool != null)
 			this.defaultTool.unactivated();
@@ -658,6 +687,11 @@ public class JDisplay extends JComponent implements CurrentToolChangedAware {
 			t.activated();
 	}
 
+	/**
+	 * getting the default tool.
+	 * 
+	 * @return
+	 */
 	public Tool getDefaultTool() {
 		return defaultTool;
 	}

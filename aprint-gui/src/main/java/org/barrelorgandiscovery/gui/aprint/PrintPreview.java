@@ -94,7 +94,7 @@ public class PrintPreview extends JFrame implements Runnable {
 				} else if (m_target.print(g, pp_pf, pageIndex) != Printable.PAGE_EXISTS)
 					break;
 
-				// sauvegarde de l'image dans un répertoire temporaire ...
+				// sauvegarde de l'image dans un rÃ©pertoire temporaire ...
 				File f;
 				try {
 					f = File.createTempFile("printpreviewaprint", "img"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -263,10 +263,10 @@ public class PrintPreview extends JFrame implements Runnable {
 	}
 
 	/**
-	 * Class permettant l'aperçu avant impression
+	 * preview before printing.
 	 * 
 	 * @param target
-	 *            objet à imprimer
+	 *            object to print
 	 */
 	public PrintPreview(Printable target) {
 		this(target, Messages.getString("PrintPreview.13"), false); //$NON-NLS-1$
@@ -277,10 +277,10 @@ public class PrintPreview extends JFrame implements Runnable {
 	}
 
 	/**
-	 * Class permettant l'aperçu avant impression
+	 * preview before printing.
 	 * 
 	 * @param target
-	 *            objet à imprimer
+	 *            objet to print
 	 * @param title
 	 */
 	public PrintPreview(Printable target, String title) {
@@ -288,7 +288,7 @@ public class PrintPreview extends JFrame implements Runnable {
 	}
 
 	/**
-	 * Class permettant l'aperçu avant impression
+	 * preview before printing.
 	 * 
 	 * @param target
 	 * @param title
@@ -298,6 +298,13 @@ public class PrintPreview extends JFrame implements Runnable {
 		this(target, title, shrink, null);
 	}
 
+	/**
+	 * preview before printing.
+	 * @param target
+	 * @param title
+	 * @param shrink
+	 * @param defaultpageformat
+	 */
 	public PrintPreview(Printable target, String title, boolean shrink,
 			PageFormat defaultpageformat) {
 		super(title);
@@ -367,7 +374,7 @@ public class PrintPreview extends JFrame implements Runnable {
 	 */
 	class PreviewContainer extends JPanel {
 		/**
-		 * No Identifiant pour la sérialisation
+		 * No Identifiant pour la sÃ©rialisation
 		 */
 		private static final long serialVersionUID = 3432120445985995972L;
 
