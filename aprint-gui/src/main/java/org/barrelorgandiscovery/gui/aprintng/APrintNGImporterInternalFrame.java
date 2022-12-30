@@ -483,7 +483,7 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame impleme
 		}
 	}
 
-	private MidiIOResult readMidiFile(AbstractFileObject f) throws Exception {
+	public static MidiIOResult readMidiFile(AbstractFileObject f) throws Exception {
 		try {
 			InputStream inputStream = f.getInputStream();
 			try {
@@ -494,19 +494,19 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame impleme
 		} catch (Exception ex) {
 			// Erreur de chargement du fichier
 
-			// Affichage du probl�me ..
+			// Affichage du problème ..
 			logger.error("Chargement du carton", ex); //$NON-NLS-1$
 			throw new Exception("Error while loading the midi file :" + ex.getMessage(), ex);
 		}
 
 	}
-
+	
 	/**
-	 * Methode de transposition du carton pour un orgue donn�
+	 * transpose book for a given instrument
 	 * 
 	 * @throws Exception
 	 */
-	private void transposeCarton() throws Exception {
+	public void transposeCarton() throws Exception {
 
 		VirtualBook transposedCarton;
 
@@ -522,7 +522,7 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame impleme
 		assert readCarton != null;
 
 		//
-		// M�morisation des erreurs lors de la lecture ou transformation
+		// Mémorisation des erreurs lors de la lecture ou transformation
 		//
 		IssueCollection issueCollection = new IssueCollection();
 
@@ -552,7 +552,7 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame impleme
 				// // r.setModal(true);
 				// r.setVisible(true);
 
-				// ajout des probl�mes d�tect�s....
+				// ajout des problèmes détectés....
 
 				// patch for issueCollection ...
 
@@ -627,12 +627,10 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame impleme
 		
 		transposedCarton.setMetadata(virtualBookMetadata);
 		
-		
-		
 
 		waitininterface.infiniteChangeText(Messages.getString("APrint.157")); //$NON-NLS-1$
 
-		// Dans les deux cas, on regarde les trous se t�l�scopant ...
+		// Dans les deux cas, on regarde les trous se téléscopant ...
 		OverlappingHole oh = new OverlappingHole();
 		IssueCollection ic = oh.check(transposedCarton);
 		if (ic != null)
@@ -640,7 +638,7 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame impleme
 
 		waitininterface.infiniteChangeText(Messages.getString("APrint.158")); //$NON-NLS-1$
 
-		// Autres v�rifications associ�es � la gamme ...
+		// Autres vérifications associées à la gamme ...
 		Checker[] c = CheckerFactory.createCheckers(at.getScaleDestination());
 		Checker composite = CheckerFactory.toComposite(c);
 
@@ -674,26 +672,29 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame impleme
 	}
 
 	/**
-	 * cette m�thode interne permet de rafraichir le liste des instruments en
-	 * fonction de la soudbank charg�e
+	 * cette méthode interne permet de rafraichir le liste des instruments en
+	 * fonction de la soundbank chargée
 	 */
 	private void refreshInstruments() {
-
 		instrumentChoice.reloadInstruments();
-
 	}
 
 	/**
-	 * R�cup�re l'instrument s�lectionn�
+	 * Récupère l'instrument sélectionné
 	 * 
 	 * @return
 	 */
 	private org.barrelorgandiscovery.instrument.Instrument getSelectedInstrument() {
 		return instrumentChoice.getCurrentInstrument();
 	}
+	
+	
+	public void setSelectedInstrument(String instrumentName) {
+		instrumentChoice.selectInstrument(instrumentName);		
+	}
 
 	// ////////////////////////////////////////////////////////////////////////
-	// Gestion de l'�tat de l'interface ...
+	// Gestion de l'état de l'interface ...
 
 	private void instrumentChanged() {
 		try {
@@ -721,7 +722,7 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame impleme
 	}
 
 	/**
-	 * Verifie l'�tat de l'interface en fonction de l'�tat de l'IHM
+	 * Verifie l'état de l'interface en fonction de l'état de l'IHM
 	 */
 	private void checkState() throws Exception {
 
@@ -729,18 +730,18 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame impleme
 	}
 
 	/**
-	 * R�cup�re la gamme actuellement s�lectionn�e, null si celle ci n'est pas
-	 * s�lectionn�e
+	 * Récupère la gamme actuellement sélectionnée, null si celle ci n'est pas
+	 * sélectionnée
 	 * 
 	 * @return
 	 */
 	private Scale getSelectedGamme() {
 
-		// R�cup�ration de l'instrument et de la gamme associ�e ...
+		// Récupération de l'instrument et de la gamme associée ...
 
 		org.barrelorgandiscovery.instrument.Instrument ins = getSelectedInstrument();
 		if (ins == null) {
-			return null; // pas de gamme s�lectionn�e ...
+			return null; // pas de gamme sélectionnée ...
 		}
 
 		return (Scale) ins.getScale();
@@ -758,7 +759,7 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame impleme
 
 			logger.debug("asking for custom parameters in translation"); //$NON-NLS-1$
 
-			// on est invok� par un thread s�par�
+			// on est invoké par un thread séparé
 			SwingUtilities.invokeAndWait(new Runnable() {
 				public void run() {
 

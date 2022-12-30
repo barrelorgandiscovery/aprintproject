@@ -1698,6 +1698,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 	 * @throws Exception
 	 */
 	private APrintNGImporterInternalFrame openNewImportMidiFrame() throws Exception {
+
 		APrintNGImporterInternalFrame aprintNGImporterInternalFrame = new APrintNGImporterInternalFrame(this, this,
 				aprintproperties, this.exts, this.repository, this);
 
@@ -2461,7 +2462,6 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 
 			Callable<Boolean> ft = new Callable<Boolean>() {
 				public Boolean call() throws Exception {
-
 					try {
 						Repository2 rep2 = repository.getRepository2();
 						if (rep2 instanceof Repository2Collection) {
@@ -2477,18 +2477,14 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 								importInstrumentToRepository(im, fo);
 							}
 						}
-
 						return true;
 					} catch (final Exception ex) {
 						SwingUtilities.invokeLater(new Runnable() {
-
 							public void run() {
-
 								JMessageBox.showMessage(APrintNG.this, Messages.getString("APrintNG.207") //$NON-NLS-1$
 										+ ex.getMessage());
 							}
 						});
-
 						return false;
 					}
 				}
@@ -2502,11 +2498,29 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 			APrintGroovyInnerConsole gc = openGroovyScriptConsole();
 			gc.openScript(fo);
 
-		} else if (lowerCaseFileName.endsWith(".mid") || lowerCaseFileName.endsWith(".kar")) { //$NON-NLS-2$
+		} else if (lowerCaseFileName.endsWith(".mid") || lowerCaseFileName.endsWith(".kar")) { //$NON-NLS-1$ //$NON-NLS-2$
 
-			APrintNGImporterInternalFrame midiImportFrame = openNewImportMidiFrame();
+			// one refinement
+			FileObject parent = fo.getParent();
+			try {
+				FileObject resolvedProperties = parent.resolveFile("aprint_mid.properties"); //$NON-NLS-1$
+				Properties properties = new Properties();
+				properties.load(resolvedProperties.getContent().getInputStream());
 
-			midiImportFrame.defineCurrentMidiFile(fo);
+				String instrument = properties.getProperty("instrument"); //$NON-NLS-1$
+				logger.debug("instrument for folder " + resolvedProperties.getName() + ":" + instrument);
+				APrintNGImporterInternalFrame frame = openNewImportMidiFrame();
+				frame.setSelectedInstrument(instrument);
+				frame.defineCurrentMidiFile(fo);
+				frame.transposeCarton();
+				frame.dispose();
+
+			} catch (Exception ex) {
+				// fall back
+				APrintNGImporterInternalFrame midiImportFrame = openNewImportMidiFrame();
+				;
+				midiImportFrame.defineCurrentMidiFile(fo);
+			}
 
 		} else if (lowerCaseFileName.endsWith(QuickScriptManager.APRINTBOOKGROOVYSCRIPTEXTENSION)) {
 			try {
