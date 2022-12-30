@@ -17,7 +17,9 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextPane;
 import javax.swing.JToolBar;
+import javax.swing.TransferHandler;
 
+import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
 import org.barrelorgandiscovery.gui.etl.IConsoleShowListener;
@@ -58,6 +60,13 @@ public class APrintNGModelFrame extends APrintNGInternalFrame {
 
 	private ToolWindow tConsolewindow;
 
+	/**
+	 * Constructor
+	 * 
+	 * @param aprintproperties
+	 * @param services
+	 * @throws Exception
+	 */
 	public APrintNGModelFrame(APrintProperties aprintproperties, APrintNGGeneralServices services) throws Exception {
 		super(aprintproperties.getFilePrefsStorage(), "Model Editor", true, true, true, true); //$NON-NLS-1$
 		assert services != null;
@@ -169,26 +178,34 @@ public class APrintNGModelFrame extends APrintNGInternalFrame {
 		JMenuItem openMenuItem = new JMenuItem(new LoadAction());
 
 		jFileMenu.add(openMenuItem);
-		JMenuItem saveMenuItem = new JMenuItem(new SaveAction());
+		JMenuItem saveMenuItem = new JMenuItem(new SaveAsAction());
 		jFileMenu.add(saveMenuItem);
 
 		jFileMenu.addSeparator();
 		JMenuItem closeOption = jFileMenu.add(Messages.getString("APrintNGModelFrame.10")); //$NON-NLS-1$
-		closeOption.addActionListener( (e) -> { dispose();} );
-		
+		closeOption.addActionListener((e) -> {
+			dispose();
+		});
+
 		menu.add(jFileMenu);
+//
+//		JMenu editMenu = new JMenu("Edit");
+//		menu.add(editMenu);
+//		editMenu.add(TransferHandler.getCopyAction());
+//		editMenu.add(TransferHandler.getCutAction());
+//		editMenu.add(TransferHandler.getPasteAction());
 
 		add(menu, BorderLayout.NORTH);
 	}
 
-	class SaveAction extends AbstractAction {
+	class SaveAsAction extends AbstractAction {
 
 		/**
 		 * 
 		 */
 		private static final long serialVersionUID = 1905861931062174374L;
 
-		public SaveAction() {
+		public SaveAsAction() {
 			super(Messages.getString("APrintNGModelFrame.11"), //$NON-NLS-1$
 					new ImageIcon(APrintNGModelFrame.class.getResource("filesave.png"))); //$NON-NLS-1$
 		}
@@ -201,7 +218,7 @@ public class APrintNGModelFrame extends APrintNGInternalFrame {
 		@Override
 		public void actionPerformed(ActionEvent e) {
 			//
-			modeleditor.save();
+			modeleditor.saveAs();
 		}
 	}
 
@@ -256,4 +273,9 @@ public class APrintNGModelFrame extends APrintNGInternalFrame {
 			}
 		}
 	}
+
+	public void load(AbstractFileObject fileToOpen) throws Exception {
+		modeleditor.loadFile(fileToOpen);
+	}
+
 }

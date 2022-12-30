@@ -20,8 +20,9 @@ import javax.swing.plaf.basic.BasicLabelUI;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.barrelorgandiscovery.extensions.IExtension;
+import org.barrelorgandiscovery.gui.aprint.APrintProperties;
 import org.barrelorgandiscovery.gui.explorer.ExplorerListener;
-import org.barrelorgandiscovery.gui.explorer.JExplorer;
+import org.barrelorgandiscovery.gui.explorer.JExplorerWithSearch;
 
 public class APrintNGWelcomeWithFilesPanel extends JPanel {
 
@@ -29,10 +30,13 @@ public class APrintNGWelcomeWithFilesPanel extends JPanel {
 
 	APrintNG aprintng;
 	IExtension[] extensions;
+	APrintProperties properties;
 
-	public APrintNGWelcomeWithFilesPanel(APrintNG aprintng, IExtension[] extensions) throws Exception {
+	public APrintNGWelcomeWithFilesPanel(APrintProperties properties, APrintNG aprintng, IExtension[] extensions)
+			throws Exception {
 		this.aprintng = aprintng;
 		this.extensions = extensions;
+		this.properties = properties;
 
 		initComponents();
 	}
@@ -134,7 +138,7 @@ public class APrintNGWelcomeWithFilesPanel extends JPanel {
 
 		add(tp, BorderLayout.CENTER);
 
-		JExplorer exp = new JExplorer();
+		JExplorerWithSearch exp = new JExplorerWithSearch(properties, aprintng, aprintng.getBookIndexing());
 
 		tp.addTab("Welcome", aPrintNGWelcomePanel);
 
@@ -143,8 +147,7 @@ public class APrintNGWelcomeWithFilesPanel extends JPanel {
 		labTab1.setUI(new VerticalLabelUI(false)); // true/false to make it upwards/downwards
 		tp.setTabComponentAt(0, labTab1); // For component1
 
-		tp.addTab("Explorer",
-				new JScrollPane(exp, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED));
+		tp.addTab("Explorer", exp);
 
 		JLabel labTab2 = new JLabel("File Explorer");
 		labTab2.setUI(new VerticalLabelUI(false));
@@ -152,17 +155,17 @@ public class APrintNGWelcomeWithFilesPanel extends JPanel {
 
 		tp.setTabPlacement(JTabbedPane.LEFT);
 		tp.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
-		
+
 		exp.addExplorerListener(new ExplorerListener() {
-			
+
 			@Override
 			public void selectionChanged(FileObject[] fo) throws Exception {
-				
+
 			}
-			
+
 			@Override
 			public void doubleClick(FileObject fo) throws Exception {
-				aprintng.openFile((AbstractFileObject)fo);				
+				aprintng.openFile((AbstractFileObject) fo);
 			}
 		});
 

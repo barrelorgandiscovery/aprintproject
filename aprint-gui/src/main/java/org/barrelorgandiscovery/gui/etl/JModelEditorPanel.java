@@ -13,7 +13,9 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
+import javax.swing.TransferHandler;
 
+import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.AsyncJobsManager;
@@ -103,7 +105,7 @@ public class JModelEditorPanel extends JPanel {
 		tb.add(save);
 
 		save.addActionListener(e -> {
-			save();
+			saveAs();
 		});
 
 		tb.addSeparator();
@@ -125,6 +127,13 @@ public class JModelEditorPanel extends JPanel {
 			modelEditor.redo();
 		});
 		tb.add(redo);
+		
+		tb.addSeparator();
+		// copy 
+		tb.add(new JButton(modelEditor.bind("copy", TransferHandler.getCopyAction(), ImageTools.loadIcon(getClass(), "editcopy.png"))));
+		tb.add(new JButton(modelEditor.bind("cut", TransferHandler.getCutAction(), ImageTools.loadIcon(getClass(), "editcut.png"))));
+		tb.add(new JButton(modelEditor.bind("paste", TransferHandler.getPasteAction(), ImageTools.loadIcon(getClass(), "editpaste.png"))));
+		
 
 		tb.addSeparator();
 		tb.add(new JButton(modelEditor.bind(Messages.getString("JModelEditorPanel.23"), //$NON-NLS-1$
@@ -184,12 +193,7 @@ public class JModelEditorPanel extends JPanel {
 			int ret = fileChooser.showDialog(this, Messages.getString("JModelEditorPanel.6")); //$NON-NLS-1$
 			if (ret == APrintFileChooser.APPROVE_OPTION) {
 				AbstractFileObject selectedFile = fileChooser.getSelectedFile();
-				if (selectedFile != null && selectedFile.exists()) {
-					modelEditor.loadGraph(selectedFile); // new
-					// File("c:\\temp\\test.xml")
-					lastModelFileName = selectedFile;
-					logger.debug("open file"); //$NON-NLS-1$
-				}
+				loadFile(selectedFile);
 			}
 
 		} catch (Exception ex) {
@@ -197,6 +201,15 @@ public class JModelEditorPanel extends JPanel {
 			// ex.printStackTrace(System.err);
 			JMessageBox.showError(this, ex);
 			BugReporter.sendBugReport();
+		}
+	}
+
+	public void loadFile(AbstractFileObject selectedFile) throws Exception {
+		if (selectedFile != null && selectedFile.exists()) {
+			modelEditor.loadGraph(selectedFile); // new
+			// File("c:\\temp\\test.xml")
+			lastModelFileName = selectedFile;
+			logger.debug("open file"); //$NON-NLS-1$
 		}
 	}
 
@@ -244,7 +257,7 @@ public class JModelEditorPanel extends JPanel {
 
 	}
 
-	public void save() {
+	public void saveAs() {
 		try {
 
 			File f = prefs.getFileProperty(USER_DEFAULTDIRLOCATION, new File(".")); //$NON-NLS-1$
@@ -266,11 +279,13 @@ public class JModelEditorPanel extends JPanel {
 						// ask overwrite
 						if (JOptionPane.showConfirmDialog(this, Messages.getString("JModelEditorPanel.16")) //$NON-NLS-1$
 						!= JOptionPane.YES_OPTION) { // $NON-NLS-1$
+							// cancel
 							return;
 						}
 					}
 
 					modelEditor.saveGraph(selectedFile);
+					this.lastModelFileName = selectedFile;
 					logger.debug("file saved"); //$NON-NLS-1$
 				}
 			}

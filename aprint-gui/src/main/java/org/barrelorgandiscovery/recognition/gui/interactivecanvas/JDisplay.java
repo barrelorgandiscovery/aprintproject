@@ -690,7 +690,7 @@ public class JDisplay extends JComponent implements CurrentToolChangedAware {
 	/**
 	 * getting the default tool.
 	 * 
-	 * @return
+	 * @return	
 	 */
 	public Tool getDefaultTool() {
 		return defaultTool;

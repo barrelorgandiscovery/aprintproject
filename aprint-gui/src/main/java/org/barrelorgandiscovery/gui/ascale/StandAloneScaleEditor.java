@@ -10,6 +10,7 @@ import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.awt.print.PrinterJob;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -20,6 +21,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 
+import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.gui.aprint.PrintPreview;
@@ -28,6 +30,7 @@ import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.repository.Repository2;
 import org.barrelorgandiscovery.scale.Scale;
+import org.barrelorgandiscovery.scale.ScaleException;
 import org.barrelorgandiscovery.scale.importer.MidiBoekGammeImporter;
 import org.barrelorgandiscovery.scale.io.ScaleIO;
 import org.barrelorgandiscovery.tools.JMessageBox;
@@ -324,19 +327,7 @@ public class StandAloneScaleEditor extends JFrame {
 			if (selectedFile == null)
 				return;
 
-			Scale returnscale = null;
-
-			InputStream istream = selectedFile.getInputStream();
-			try {
-				returnscale = ScaleIO.readGamme(istream);
-			} finally {
-				istream.close();
-			}
-			if (returnscale != null) {
-				lastLoadedOrSavedScale = returnscale;
-				loadGamme(returnscale);
-				lastLoadedOrSavedFile = selectedFile;
-			}
+			openGamme(selectedFile);
 
 		} catch (Exception ex) {
 			logger.error("openGamme", ex); //$NON-NLS-1$
@@ -344,6 +335,23 @@ public class StandAloneScaleEditor extends JFrame {
 					+ ex.getMessage());
 			BugReporter.sendBugReport();
 		}
+	}
+
+	public void openGamme(AbstractFileObject selectedFile) throws FileSystemException, IOException, ScaleException {
+		
+		Scale returnscale;
+		InputStream istream = selectedFile.getInputStream();
+		try {
+			returnscale = ScaleIO.readGamme(istream);
+		} finally {
+			istream.close();
+		}
+		if (returnscale != null) {
+			lastLoadedOrSavedScale = returnscale;
+			loadGamme(returnscale);
+			lastLoadedOrSavedFile = selectedFile;
+		}
+		
 	}
 
 	private void saveAsGamme() {

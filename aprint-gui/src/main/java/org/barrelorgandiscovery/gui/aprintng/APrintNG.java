@@ -321,7 +321,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		SwingUtils.center(this);
 
 		getContentPane().setLayout(new BorderLayout());
-		getContentPane().add(new APrintNGWelcomeWithFilesPanel(this, exts), BorderLayout.CENTER);
+		getContentPane().add(new APrintNGWelcomeWithFilesPanel(aprintproperties, this, exts), BorderLayout.CENTER);
 
 		getContentPane().validate();
 		repaint();
@@ -684,13 +684,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 	private void constructMenuOptions(JMenuBar menu) {
 
 		JMenu m_Options = new JMenu(Messages.getString("APrint.144")); //$NON-NLS-1$
-		// m_Options.setIcon(new
-		// ImageIcon(getClass().getResource("package_settings.png"))); //$NON-NLS-1$
 		m_Options.setMnemonic('o');
-
-		// JMenu repositoryMenu = constructMenuRepository(m_Options);
-		//
-		// m_Options.add(repositoryMenu);
 
 		logger.debug("add option menu from extension"); //$NON-NLS-1$
 
@@ -737,7 +731,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 
 		forcedLocale.add(createLanguageMenu(Messages.getString("APrintNG.31"), null)); //$NON-NLS-1$
 		forcedLocale.add(createLanguageMenu("English", Locale.ENGLISH)); //$NON-NLS-1$
-		forcedLocale.add(createLanguageMenu("Fran�ais", Locale.FRENCH)); //$NON-NLS-1$
+		forcedLocale.add(createLanguageMenu("Français", Locale.FRENCH)); //$NON-NLS-1$
 		forcedLocale.add(createLanguageMenu("Deutsch", Locale.GERMAN)); //$NON-NLS-1$
 		forcedLocale.add(createLanguageMenu("Italiano", Locale.ITALIAN)); //$NON-NLS-1$
 		forcedLocale.add(createLanguageMenu("Spanish", new Locale("es"))); //$NON-NLS-1$
@@ -2492,6 +2486,23 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 
 			asyncJobsManager.submitAndExecuteJob(ft, null);
 
+		} else if (lowerCaseFileName.endsWith(".model")) {
+			logger.debug("opening model " + lowerCaseFileName);
+			APrintNGModelFrame modelEditor = openModelEditor();
+			modelEditor.load(fo);
+
+		} else if (lowerCaseFileName.endsWith(".gamme")) {
+
+			// prefs for user ...
+
+			StandAloneScaleEditor editor = new StandAloneScaleEditor(APrintNG.this,
+					new ScaleEditorPrefs(aprintproperties.getFilePrefsStorage()));
+			editor.setLocationByPlatform(true);
+			SwingUtils.center(editor);
+			editor.setVisible(true);
+
+			editor.openGamme(fo);
+
 		} else if (lowerCaseFileName.endsWith("." //$NON-NLS-1$
 				+ APrintGroovyConsole.APRINTGROOVYSCRIPTEXTENSION)) {
 			logger.debug("opening aprint groovy script"); //$NON-NLS-1$
@@ -2518,7 +2529,6 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 			} catch (Exception ex) {
 				// fall back
 				APrintNGImporterInternalFrame midiImportFrame = openNewImportMidiFrame();
-				;
 				midiImportFrame.defineCurrentMidiFile(fo);
 			}
 

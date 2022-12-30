@@ -58,6 +58,7 @@ public class BookIndexing implements Disposable {
 	private static Logger logger = Logger.getLogger(BookIndexing.class);
 
 	private APrintProperties props = null;
+	
 	private Analyzer analyzer = null;
 	private Directory luceneDirectory;
 	private File searchFolder = null;
@@ -103,9 +104,11 @@ public class BookIndexing implements Disposable {
 		if (f.isDirectory()) {
 
 			File[] subFiles = f.listFiles();
-			for (int i = 0; i < subFiles.length; i++) {
-				File file = subFiles[i];
-				nbindexedFile = recurseIndexFiles(file, index, indicator, nbindexedFile + 1);
+			if (subFiles != null) {
+				for (int i = 0; i < subFiles.length; i++) {
+					File file = subFiles[i];
+					nbindexedFile = recurseIndexFiles(file, index, indicator, nbindexedFile + 1);
+				}
 			}
 
 		} else {
@@ -146,7 +149,6 @@ public class BookIndexing implements Disposable {
 						prepare = StringTools.join(prepare.split("_"), " ");
 						prepare = StringTools.join(prepare.split("-"), " ");
 						prepare = StringTools.join(prepare.split("."), " ");
-						
 
 						all.append(f.getAbsolutePath()).append(" ").append(prepare).append(" ");
 
@@ -207,9 +209,9 @@ public class BookIndexing implements Disposable {
 
 	public ScoredDocument[] search(String search) throws Exception {
 
-		/* if (search == null || "".equals(search))
-			return new ScoredDocument[0];
-	*/
+		/*
+		 * if (search == null || "".equals(search)) return new ScoredDocument[0];
+		 */
 		// Now search the index:
 		IndexSearcher isearcher = new IndexSearcher(luceneDirectory, true); // read-only=true
 		try {

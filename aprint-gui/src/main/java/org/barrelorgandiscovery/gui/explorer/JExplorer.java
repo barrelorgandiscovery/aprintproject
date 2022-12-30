@@ -5,6 +5,8 @@ import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
 
@@ -113,12 +115,21 @@ public class JExplorer extends JPanel implements Explorer {
 
 			this.removeAllChildren();
 			FileObject[] childrens = fo.getChildren();
+
 			if (childrens != null) {
+				// sort the filename
+				Arrays.sort(childrens, new Comparator<FileObject>() {
+					public int compare(FileObject o1, FileObject o2) {
+						return o1.getName().getBaseName().compareTo(o2.getName().getBaseName());
+					};
+				});
+
 				for (FileObject f : childrens) {
 
 					add(new ExpFFolderNode(f));
 					((DefaultTreeModel) JExplorer.this.tree.getModel()).nodeStructureChanged(this);
 				}
+
 			}
 			loaded = true;
 		}
@@ -126,6 +137,7 @@ public class JExplorer extends JPanel implements Explorer {
 
 	/**
 	 * bookmark node
+	 * 
 	 * @author pfreydiere
 	 *
 	 */

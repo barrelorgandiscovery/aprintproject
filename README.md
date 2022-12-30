@@ -50,6 +50,13 @@ for creating the Installer with updated extensions launch the following command 
 gradlew createAllInstaller
 ```
 
+building only the jars :
+```
+gradlew createMacOsAndLinuxBundle
+```
+
+
+
 ### for DEVS : Launch automatic tests and global test report
 
 ```
