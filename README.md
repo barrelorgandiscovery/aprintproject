@@ -1,15 +1,13 @@
 # APrint Studio Project
 
-*Barrel organ discovery - 2004-2020*
+*Barrel organ discovery - 2004-2022*
 
 CI 2020 q2 : ![](https://travis-ci.org/barrelorgandiscovery/aprintproject.svg?branch=aprint_2020_q2)
 
 This repository contains the **full source** of APrint Studio, more informations can be found on the web site : [http://www.barrel-organ-discovery.org](http://www.barrel-organ-discovery.org)  
 
 
-
 ![](doc/main_screenshot.png)
-
 
 
 APrint Studio is composed of a constellation of **tools** for creating **mechanical books** , for **street organs**, **fair organs**, **musicbox** .. 
@@ -22,8 +20,7 @@ for discussions use freddy's forum, [https://orguedebarbarie.vraiforum.com/](htt
 
 ### How to Build main project
 
-For building the project, **Java 8** **SDK is needed**. (meaning the Java 8 JDK), this can be downloaded from Oracle Download Center, or you can download the aprint build version [here](http://www.barrel-organ-discovery.org/builds/jdk1.8.0_25_x64.zip)
-
+Note on 2022 version, this version switch to 13 to 17 java version mainly. This java version can be downloaded from Oracle Download Center or adoptjdk website.
 
 
 from the root folder, launch :
