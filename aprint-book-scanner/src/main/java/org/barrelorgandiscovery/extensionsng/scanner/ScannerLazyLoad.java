@@ -20,13 +20,19 @@ public class ScannerLazyLoad {
 	public static void lazyLoadScanner(IPrefsStorage extensionPreferences, Repository2 repository, APrintNG application)
 			throws Exception {
 
-
-		JScanOrMergeWizard jScanOrMergeWizard = new JScanOrMergeWizard(extensionPreferences, repository,
-				application.getCurrentExtensions());
-		APrintNGInternalFrame frame = new APrintNGInternalFrame(extensionPreferences);
-		frame.getContentPane().setLayout(new BorderLayout());
-		frame.getContentPane().add(jScanOrMergeWizard, BorderLayout.CENTER);
-		frame.setVisible(true);
+		Thread current = Thread.currentThread();
+		ClassLoader old = current.getContextClassLoader();
+		current.setContextClassLoader(ScannerLazyLoad.class.getClassLoader());
+		try {
+			JScanOrMergeWizard jScanOrMergeWizard = new JScanOrMergeWizard(extensionPreferences, repository,
+					application.getCurrentExtensions());
+			APrintNGInternalFrame frame = new APrintNGInternalFrame(extensionPreferences);
+			frame.getContentPane().setLayout(new BorderLayout());
+			frame.getContentPane().add(jScanOrMergeWizard, BorderLayout.CENTER);
+			frame.setVisible(true);
+		} finally {
+			current.setContextClassLoader(old);
+		}
 	}
 
 }

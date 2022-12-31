@@ -36,7 +36,7 @@ sourcesJar {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    api project(':aprint-core')
+    api project(':aprint-machine-control')
     api files(fileTree(dir:"${projectDir}/libs" , include:['**/*.jar']).toList())
     
     // https://mvnrepository.com/artifact/org.anarres.vfsjfilechooser/filechooser-core
