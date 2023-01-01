@@ -21,7 +21,7 @@ on:
 
 jobs:
   build-windows-appimage:
-    name: Build Installer on Windows
+    name: Build AppImage on Windows
     runs-on: windows-latest
     steps:
 
@@ -53,7 +53,7 @@ jobs:
         retention-days: 1
 
   build-linux-appimage:
-    name: Build Installer on Linux
+    name: Build AppImage on Linux
     runs-on: ubuntu-latest
     steps:
 
@@ -87,7 +87,7 @@ jobs:
 
 
   build-macos-appimage:
-    name: Build Installer on MacOsX
+    name: Build AppImage on MacOsX
     runs-on: macos-latest
     steps:
 
