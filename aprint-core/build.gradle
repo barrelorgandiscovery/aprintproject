@@ -41,7 +41,7 @@ spotbugsMain {
     }
 }
 */
-
+/*
 compileJava {
 	options.encoding = 'iso-8859-1'
 	//enable incremental compilation
@@ -50,6 +50,7 @@ compileJava {
 	options.forkOptions.executable =  System.getenv('JAVA_HOME') + File.separator + "bin" + File.separator + "javac"
 	options.compilerArgs << "-XDignore.symbol.file"
 }
+*/
 processResources {
 	duplicatesStrategy(DuplicatesStrategy.WARN) 
 }

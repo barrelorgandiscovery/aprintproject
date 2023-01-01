@@ -356,6 +356,13 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 							ZipBookImage zbook = new ZipBookImage(f);
 							setTiledImage(zbook);
 
+						} else if (f.getName().toLowerCase().endsWith(".png") || 
+								f.getName().toLowerCase().endsWith(".jpg") || 
+								f.getName().toLowerCase().endsWith(".jpeg")) {
+
+							BufferedImage bi = ImageTools.loadImage(f);
+							setTiledImage(new StandaloneTiledImage(bi));
+
 						} else {
 							logger.error("cannot display image " + f); //$NON-NLS-1$
 						}
@@ -554,7 +561,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		// rect
 
 		rectbookCreationToolbtn = (JToggleButton) fa.getButton("recttoolcreatebook"); //$NON-NLS-1$
-		rectbookCreationToolbtn.setToolTipText("add pixels in book trainingset"); 
+		rectbookCreationToolbtn.setToolTipText("add pixels in book trainingset");
 		rectbookCreationToolbtn.setText("");
 		rectbookCreationToolbtn.setIcon(new ImageIcon(
 				ImageTools.loadImage(JRecognitionVirtualBookPanel.class.getResource("pencil_red_box.png"))));// $NON-NLS-1$ //$NON-NLS-1$
@@ -572,10 +579,10 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 				logger.error(ex.getMessage(), ex);
 			}
 		});
-		
+
 		rectHoleCreationToolbtn = (JToggleButton) fa.getButton("recttoolcreatehole"); //$NON-NLS-1$
 		rectHoleCreationToolbtn.setText("");
-		rectHoleCreationToolbtn.setToolTipText("add pixels in hole trainingset"); 
+		rectHoleCreationToolbtn.setToolTipText("add pixels in hole trainingset");
 		rectHoleCreationToolbtn.setIcon(new ImageIcon(
 				ImageTools.loadImage(JRecognitionVirtualBookPanel.class.getResource("pencil_green_box.png"))));// $NON-NLS-1$ //$NON-NLS-1$
 
@@ -743,31 +750,29 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		spnthreshold = fa.getSpinner("spnthreshold"); //$NON-NLS-1$
 		spnthreshold.setModel(new SpinnerNumberModel(127, 0, 255, 5));
 
-		
-		JLabel lblMainTitle = (JLabel)fa.getLabel("lblMainTitle");//$NON-NLS-1$
+		JLabel lblMainTitle = (JLabel) fa.getLabel("lblMainTitle");//$NON-NLS-1$
 		lblMainTitle.setText(Messages.getString("JRecognitionVirtualBookPanel2.19")); //$NON-NLS-1$
-		
-		JLabel lblWelcome = (JLabel)fa.getLabel("lblWelcome");//$NON-NLS-1$
+
+		JLabel lblWelcome = (JLabel) fa.getLabel("lblWelcome");//$NON-NLS-1$
 		lblWelcome.setText(Messages.getString("JRecognitionVirtualBookPanel2.21")); //$NON-NLS-1$
-		
-		JLabel lblChooseExistingModel = (JLabel)fa.getLabel("lblChooseExistingModel");//$NON-NLS-1$
+
+		JLabel lblChooseExistingModel = (JLabel) fa.getLabel("lblChooseExistingModel");//$NON-NLS-1$
 		lblChooseExistingModel.setText(Messages.getString("JRecognitionVirtualBookPanel2.23")); //$NON-NLS-1$
-		
-		JLabel lblExportElementForModel = (JLabel)fa.getLabel("lblExportElementForModel");//$NON-NLS-1$
+
+		JLabel lblExportElementForModel = (JLabel) fa.getLabel("lblExportElementForModel");//$NON-NLS-1$
 		lblExportElementForModel.setText(Messages.getString("JRecognitionVirtualBookPanel2.25")); //$NON-NLS-1$
-		
-		JTabbedPane tabbedPane = (JTabbedPane)fa.getTabbedPane("tabbed");//$NON-NLS-1$
+
+		JTabbedPane tabbedPane = (JTabbedPane) fa.getTabbedPane("tabbed");//$NON-NLS-1$
 		tabbedPane.setTitleAt(0, Messages.getString("JRecognitionVirtualBookPanel2.26")); //$NON-NLS-1$
 		tabbedPane.setTitleAt(1, Messages.getString("JRecognitionVirtualBookPanel2.27")); //$NON-NLS-1$
 		tabbedPane.setTitleAt(2, Messages.getString("JRecognitionVirtualBookPanel2.29")); //$NON-NLS-1$
 		tabbedPane.setTitleAt(3, Messages.getString("JRecognitionVirtualBookPanel2.31")); //$NON-NLS-1$
-		
-		JLabel lblholes = (JLabel)fa.getLabel("lblholes");//$NON-NLS-1$
+
+		JLabel lblholes = (JLabel) fa.getLabel("lblholes");//$NON-NLS-1$
 		lblholes.setText(Messages.getString("JRecognitionVirtualBookPanel2.33")); //$NON-NLS-1$
-		JLabel lblbook = (JLabel)fa.getLabel("lblbook");//$NON-NLS-1$
+		JLabel lblbook = (JLabel) fa.getLabel("lblbook");//$NON-NLS-1$
 		lblbook.setText(Messages.getString("JRecognitionVirtualBookPanel2.35")); //$NON-NLS-1$
-		
-		
+
 		setLayout(new BorderLayout());
 		add(fp, BorderLayout.CENTER);
 

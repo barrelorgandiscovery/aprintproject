@@ -244,6 +244,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 							tiledImage.setCurrentImageFamilyDisplay("renormed");
 
 							imageBackGroundLayer.setTiledBackgroundimage(tiledImage);
+							
 						} else {
 							logger.error("cannot display image " + f);
 						}
