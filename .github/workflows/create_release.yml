@@ -47,9 +47,7 @@ jobs:
     - id: rename-files
       name: Rename files
       run: |
-        ls -alR ./bundle/build/distributions/
-        mv ./bundle/build/distributions/aprint ./bundle/build/distributions/aprint-windows
-        ls -alR ./bundle/build/distributions/
+        move ./bundle/build/distributions/aprint ./bundle/build/distributions/aprint-windows
 
 # SAVE INSTALLER
     - id: upload-installer
