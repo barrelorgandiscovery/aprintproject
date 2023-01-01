@@ -132,11 +132,25 @@ jobs:
       with:
         name: ubuntu-aprint
 
+    - id: rename-downloaded-files
+      name: Rename downloaded files
+      run: |
+        ls -alR
+        mv aprint aprint-linux
+        ls -alR
+
     - id: download-windows-image
       name: Download Windows appimage
       uses: actions/download-artifact@v2
       with:
         name: windows-aprint
+
+    - id: rename-downloaded-files
+      name: Rename downloaded files
+      run: |
+        ls -alR
+        mv aprint aprint-windows
+        ls -alR
 
     - id: download-macos-image
       name: Download MacOs appimage
@@ -162,7 +176,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create-release.outputs.upload_url }}
-        asset_path: aprint
+        asset_path: aprint-linux
         asset_name: ubuntu-aprint
         asset_content_type: application/x-binary
 
@@ -173,7 +187,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create-release.outputs.upload_url }}
-        asset_path: aprint
+        asset_path: aprint-windows
         asset_name: windows-aprint
         asset_content_type: application/x-binary
 
