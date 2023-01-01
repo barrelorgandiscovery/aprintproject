@@ -5,6 +5,7 @@ import java.awt.Container;
 import java.awt.event.ActionEvent;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
 import org.apache.log4j.Logger;
@@ -24,11 +25,9 @@ import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
 
 public class ModifyInstrumentAction extends RepositoryAbstractAction {
 
-	private static Logger logger = Logger
-			.getLogger(ModifyInstrumentAction.class);
+	private static Logger logger = Logger.getLogger(ModifyInstrumentAction.class);
 
-	public ModifyInstrumentAction(Object parent,
-			CurrentRepositoryInformations infos) {
+	public ModifyInstrumentAction(Object parent, CurrentRepositoryInformations infos) {
 		super(parent, infos);
 	}
 
@@ -44,16 +43,12 @@ public class ModifyInstrumentAction extends RepositoryAbstractAction {
 					.getCurrentInstrumentEditableInstrumentManagerRepository();
 
 			if (currentEditableInstrumentManagerRepository == null)
-				throw new Exception(
-						"cannot get editable instrumentmanager repository"); //$NON-NLS-1$
+				throw new Exception("cannot get editable instrumentmanager repository"); //$NON-NLS-1$
 
 			EditableInstrumentManagerRepository em = currentEditableInstrumentManagerRepository;
 
-			final String editableInstrumentName = em
-					.findAssociatedEditableInstrumentName(currentInstrument
-							.getName());
-			final EditableInstrumentManager iem = em
-					.getEditableInstrumentManager();
+			final String editableInstrumentName = em.findAssociatedEditableInstrumentName(currentInstrument.getName());
+			final EditableInstrumentManager iem = em.getEditableInstrumentManager();
 
 			if (editableInstrumentName == null)
 				throw new Exception("unsupported repository for getting name"); //$NON-NLS-1$
@@ -62,8 +57,7 @@ public class ModifyInstrumentAction extends RepositoryAbstractAction {
 
 				public void run() {
 					try {
-						infos.getWaitInterface().infiniteStartWait(
-								"load instrument"); //$NON-NLS-1$
+						infos.getWaitInterface().infiniteStartWait("load instrument"); //$NON-NLS-1$
 						final IEditableInstrument editableInstrument = iem
 								.loadEditableInstrument(editableInstrumentName);
 
@@ -73,11 +67,9 @@ public class ModifyInstrumentAction extends RepositoryAbstractAction {
 									JFrame f = new JFrame();
 									f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 									// f.setAlwaysOnTop(true);
-									f.setIconImage(APrintNG
-											.getAPrintApplicationIcon());
+									f.setIconImage(APrintNG.getAPrintApplicationIcon());
 
-									JRepositoryInstrumentEditorPanel p = new JRepositoryInstrumentEditorPanel(
-											f);
+									JRepositoryInstrumentEditorPanel p = new JRepositoryInstrumentEditorPanel(f);
 
 									Container contentPane = f.getContentPane();
 									contentPane.setLayout(new BorderLayout());
@@ -115,8 +107,7 @@ public class ModifyInstrumentAction extends RepositoryAbstractAction {
 
 		} catch (Throwable t) {
 			logger.error("error in creating the new instrument ... ", t); //$NON-NLS-1$
-			JMessageBox.showMessage(parent,
-					Messages.getString("JRepositoryForm.17")); //$NON-NLS-1$
+			JMessageBox.showMessage(parent, Messages.getString("JRepositoryForm.17")); //$NON-NLS-1$
 		}
 
 	}

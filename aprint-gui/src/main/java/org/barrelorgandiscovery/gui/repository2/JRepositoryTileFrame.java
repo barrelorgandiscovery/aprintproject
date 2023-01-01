@@ -78,6 +78,8 @@ public class JRepositoryTileFrame extends JFrameWaitable {
 
 	private JButton exportbutton;
 
+	private JButton duplicateButton;
+	
 	private JButton properties;
 
 	private JLabel labelrepository;
@@ -270,6 +272,18 @@ public class JRepositoryTileFrame extends JFrameWaitable {
 		modifybutton.setToolTipText(Messages
 				.getString("JRepositoryTileFrame.10001")); //$NON-NLS-1$
 
+		
+		duplicateButton = (JButton) fp.getComponentByName("duplicate"); //$NON-NLS-1$
+		assert duplicateButton != null;
+		final DuplicateInstrumentAction duplicateInstrumentAction = new DuplicateInstrumentAction(
+				this, currentInternalCurrentRepositoryInformations);
+		duplicateButton.setAction(duplicateInstrumentAction);
+		duplicateButton.setText("Duplicate ..."); 
+		duplicateButton.setIcon(new ImageIcon(getClass().getResource(
+				"configure.png")));//$NON-NLS-1$
+		duplicateButton.setToolTipText("duplicate selected instrument with a new name"); 
+		
+		
 		deletebutton = (JButton) fp.getComponentByName("delete"); //$NON-NLS-1$
 		assert deletebutton != null;
 		deletebutton.setAction(new DeleteAction(this,
@@ -373,6 +387,8 @@ public class JRepositoryTileFrame extends JFrameWaitable {
 
 		newbutton.setEnabled(false);
 		modifybutton.setEnabled(false);
+		duplicateButton.setEnabled(false);
+		
 		deletebutton.setEnabled(false);
 		importbutton.setEnabled(false);
 		exportbutton.setEnabled(false);
@@ -391,9 +407,12 @@ public class JRepositoryTileFrame extends JFrameWaitable {
 				if (ri instanceof EditableInstrumentManagerRepository) {
 					deletebutton.setEnabled(true);
 					modifybutton.setEnabled(true);
+					
+					
 				}
 
 			}
+			duplicateButton.setEnabled(true);
 
 		}
 

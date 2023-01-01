@@ -149,7 +149,8 @@ public class APrintNGWelcomePanel extends JPanel {
 		
 		
 		FormAccessor formAccessor = fp.getFormAccessor();
-		formAccessor.replaceBean(fp.getComponentByName("extensionplace"),new JScrollPane( panelExtension, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));//$NON-NLS-1$
+		formAccessor.replaceBean(fp.getComponentByName("extensionplace"),new JScrollPane( panelExtension, 
+				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));//$NON-NLS-1$
 
 		/////////////////////////////////////// add extensions
 		WelcomeExtensionExtensionPoint[] allPoints = ExtensionPointProvider
