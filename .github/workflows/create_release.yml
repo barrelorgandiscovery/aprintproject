@@ -29,8 +29,6 @@ jobs:
     - id: checkout-code
       name: Checkout code
       uses: actions/checkout@v2
-      with:
-        - ref: ${{ github.tag }}
 
     - id: setup-jdk
       name: Setup JDK
