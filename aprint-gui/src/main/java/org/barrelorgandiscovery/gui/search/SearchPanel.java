@@ -100,7 +100,7 @@ public class SearchPanel extends JPanel implements ActionListener {
 		this.waitInterface = waitInterface;
 		this.owner = owner;
 		initComponents();
-		
+
 		search();
 	}
 
@@ -170,7 +170,6 @@ public class SearchPanel extends JPanel implements ActionListener {
 			}
 		};
 		searchfield.addKeyListener(searchAdapterForTextField);
-
 
 		searchbutton = (JButton) sp.getButton("searchbutton"); //$NON-NLS-1$
 		assert searchbutton != null;
@@ -284,17 +283,16 @@ public class SearchPanel extends JPanel implements ActionListener {
 		dm.addColumn("fileref"); //$NON-NLS-1$
 
 		DefaultTableColumnModel tcm = new DefaultTableColumnModel();
-		
-		
+
 		TableColumn tc = new TableColumn(0);
-		
+
 		tc.setHeaderValue("Score");
 		tcm.addColumn(tc);
-		
+
 		tc = new TableColumn(1);
 		tc.setHeaderValue(Messages.getString("SearchPanel.53")); //$NON-NLS-1$
 		tc.setMinWidth(300);
-		
+
 		tcm.addColumn(tc);
 		tc = new TableColumn(2);
 		tc.setHeaderValue(Messages.getString("SearchPanel.54")); //$NON-NLS-1$
@@ -362,9 +360,7 @@ public class SearchPanel extends JPanel implements ActionListener {
 						+ selectedFile.getAbsolutePath());
 
 				props.setSearchFolder(selectedFile);
-
 				checkUI();
-
 			}
 		}
 
@@ -445,7 +441,6 @@ public class SearchPanel extends JPanel implements ActionListener {
 
 			logger.debug("search :" + searchText); //$NON-NLS-1$
 
-			
 			ScoredDocument[] search = bi.search(searchText);
 
 			logger.debug("search done"); //$NON-NLS-1$
@@ -468,7 +463,7 @@ public class SearchPanel extends JPanel implements ActionListener {
 				String fileref = document.get("fileref"); //$NON-NLS-1$
 				String all = document.get("all");
 
-				model.addRow(new Object[] {"" + score, name, scale, genre, instrument, description, fileref });
+				model.addRow(new Object[] { "" + score, name, scale, genre, instrument, description, fileref });
 			}
 
 			DateFormatter df = new DateFormatter();
@@ -481,14 +476,15 @@ public class SearchPanel extends JPanel implements ActionListener {
 
 		} catch (Exception ex) {
 			logger.error("error while searching :" + ex.getMessage(), ex); //$NON-NLS-1$
-			
-			resultnumberlabel.setText("Error in query :" + ex.getMessage());
-			
-			// JMessageBox.showMessage(owner, Messages.getString("SearchPanel.81") + ex.getMessage()); //$NON-NLS-1$
+			String message = ex.getMessage();
+			if (message != null && message.length() > 40) {
+				message = message.substring(0, 40) + "...";
+			}
+			resultnumberlabel.setText("Error in query :" + message);
 		}
 
 	}
-	
+
 	public TableModel getLatestResults() {
 		return (DefaultTableModel) searchcomponent.getModel();
 	}
