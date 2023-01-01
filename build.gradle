@@ -260,7 +260,7 @@ project(':bundle') {
             into "build/installFolder"
     }
 
-    task createjpackage(type: Exec /*, dependsOn: [prepareInstallerFolder] */ ) {
+    task createjpackage(type: Exec , dependsOn: [prepareInstallerFolder] ) {
         commandLine "${System.env.JAVA_HOME}/bin/jpackage",
            "@${project.projectDir}/../jpackage-image.cfg"
         workingDir "${project.projectDir}/.."
