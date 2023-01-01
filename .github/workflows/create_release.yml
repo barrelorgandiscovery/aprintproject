@@ -162,7 +162,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create-release.outputs.upload_url }}
-        asset_path: ubuntu-aprint
+        asset_path: aprint
         asset_name: ubuntu-aprint
         asset_content_type: application/x-binary
 
@@ -173,7 +173,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create-release.outputs.upload_url }}
-        asset_path: windows-aprint
+        asset_path: aprint
         asset_name: windows-aprint
         asset_content_type: application/x-binary
 
@@ -184,8 +184,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create-release.outputs.upload_url }}
-        asset_path: macos-aprint
-        asset_name: macos-aprint
+        asset_path: aprint.app
+        asset_name: aprint.app
         asset_content_type: application/x-binary
 
 
