@@ -43,6 +43,14 @@ jobs:
       with:
         arguments: build createjpackage -x test
 
+
+    - id: rename-files
+      name: Rename files
+      run: |
+        ls -alR ./bundle/build/distributions/
+        mv ./bundle/build/distributions/aprint ./bundle/build/distributions/aprint-windows
+        ls -alR ./bundle/build/distributions/
+
 # SAVE INSTALLER
     - id: upload-installer
       name: Upload installer
@@ -74,6 +82,13 @@ jobs:
       uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
       with:
         arguments: build createjpackage -x test
+
+    - id: rename-downloaded-files
+      name: Rename downloaded files
+      run: |
+        ls -alR ./bundle/build/distributions/
+        mv ./bundle/build/distributions/aprint ./bundle/build/distributions/aprint-linux
+        ls -alR ./bundle/build/distributions/
 
 # SAVE INSTALLER
     - id: upload-installer
@@ -132,26 +147,13 @@ jobs:
       with:
         name: ubuntu-aprint
 
-    - id: rename-downloaded-files
-      name: Rename downloaded files
-      run: |
-        ls -alR
-        mv aprint aprint-linux
-        ls -alR
 
     - id: download-windows-image
       name: Download Windows appimage
       uses: actions/download-artifact@v2
       with:
         name: windows-aprint
-
-    - id: rename-downloaded-files
-      name: Rename downloaded files
-      run: |
-        ls -alR
-        mv aprint aprint-windows
-        ls -alR
-
+        
     - id: download-macos-image
       name: Download MacOs appimage
       uses: actions/download-artifact@v2
