@@ -158,6 +158,11 @@ jobs:
       with:
         name: macos-aprint
 
+    - id: display-downloaded-files
+      name: display downloaded files
+      run: |
+        ls -alR .
+
 # CREATE GITHUB RELEASE AND ADD ASSETS
     - id: create-release
       name: Create GitHub release
