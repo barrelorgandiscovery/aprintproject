@@ -21,33 +21,15 @@ for discussions use freddy's forum, [https://orguedebarbarie.vraiforum.com/](htt
 ### How to Build main project
 
 Note on 2022 version, this version switch to 13 to 17 java version mainly. This java version can be downloaded from Oracle Download Center or adoptjdk website.
+The binaries are now provided on the github website, and everybody is able to build the app-image. The adoptjdk 17 is needed.
 
+#### Building the app image
 
-from the root folder, launch :
-
-```
-gradlew createAllJars
-```
-
-compilation results will be located in bundle\build
-extensions (that are installed in the personal home folder) are generated in bundle\offlineinstall-extensions 
-
-
-### Running the project from command line
-
-```
-java -Xmx2g -server -Dmainfolder="C:\Users\use\Documents\.." -cp aprint.jar org.barrelorgandiscovery.gui.aprintng.APrintApplicationBootStrap
-```
-
-
-### Building the windows installer (only on windows platefoms)
-
-Windows installer is available, using the NSIS project, **NSIS** must be installed to create the windows installer.
 
 for creating the Installer with updated extensions launch the following command :
 
 ```
-gradlew createAllInstaller
+gradlew createjpackage
 ```
 
 building only the jars :
@@ -55,9 +37,13 @@ building only the jars :
 gradlew createMacOsAndLinuxBundle
 ```
 
+#### Running the project from command line
 
+```
+java -Xmx2g -server -Dmainfolder="C:\Users\use\Documents\.." -cp aprint.jar org.barrelorgandiscovery.gui.aprintng.APrintApplicationBootStrap
+```
 
-### for DEVS : Launch automatic tests and global test report
+#### for DEVS : Launch automatic tests and global test report
 
 ```
 gradlew check testReport jacocoTestReport
