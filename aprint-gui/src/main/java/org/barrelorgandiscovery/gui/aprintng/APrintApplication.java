@@ -272,6 +272,8 @@ public class APrintApplication {
 					}
 
 					prop.setFirstTimeOpenAPrintAndGetWebInstruments(false);
+				} else {
+					logger.debug("external instruments has already been downloaded");
 				}
 
 				while (p.isVisible()) {
@@ -283,10 +285,8 @@ public class APrintApplication {
 					p = null;
 
 					// restart the application
-					System.gc();
-
+					System.gc(); // make sure all the opened files has been closed (if not explicitely closed)
 					System.exit(0); // user must restart to take effect
-
 				}
 
 				initLanguageWithProperties(prop);
@@ -338,8 +338,6 @@ public class APrintApplication {
 	}
 
 	private static void setQuaquaLnf() {
-		
-
 		// set the Quaqua Look and Feel in the UIManager
 		try {
 			UIManager
@@ -415,29 +413,4 @@ public class APrintApplication {
 		//resetJavaLibraryPath();
 	}
 
-	/**
-	 * Supprime le cache du "java.library.path". Cela forcera le classloader a
-	 * reverifier sa valeur lors du prochaine chargement de librairie.
-	 * 
-	 * Attention : ceci est specifique a la JVM de Sun et pourrait ne pas
-	 * fonctionner sur une autre JVM...
-	 */
-	/*
-	private static void resetJavaLibraryPath() {
-		synchronized (Runtime.getRuntime()) {
-			try {
-				Field field = ClassLoader.class.getDeclaredField("usr_paths");
-				field.setAccessible(true);
-				field.set(null, null);
-
-				field = ClassLoader.class.getDeclaredField("sys_paths");
-				field.setAccessible(true);
-				field.set(null, null);
-			} catch (NoSuchFieldException e) {
-				throw new RuntimeException(e);
-			} catch (IllegalAccessException e) {
-				throw new RuntimeException(e);
-			}
-		}
-	}*/
 }

@@ -145,6 +145,7 @@ import org.barrelorgandiscovery.scale.comparator.TracksAndPositionedNoteComparat
 import org.barrelorgandiscovery.search.BookIndexing;
 import org.barrelorgandiscovery.tools.Dirtyable;
 import org.barrelorgandiscovery.tools.Disposable;
+import org.barrelorgandiscovery.tools.ImageTools;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.StreamsTools;
 import org.barrelorgandiscovery.tools.StringTools;
@@ -276,7 +277,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 
 		setIconImage(getAPrintApplicationIcon()); // $NON-NLS-1$
 
-		// Chargement des objets n�cessaires
+		// Chargement des objets nécessaires
 
 		defineNewGammeAndTranspositionFolder(rep);
 
@@ -466,7 +467,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 	 *
 	 * @return the constructed menu
 	 */
-	private JMenuBar constructMenu() {
+	private JMenuBar constructMenu() throws Exception {
 		JMenuBar menu = new JMenuBar();
 
 		constructMenuFile(menu);
@@ -488,12 +489,16 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		return menu;
 	}
 
+	private ImageIcon resize(String resourcename) throws Exception {
+		return new ImageIcon(ImageTools.loadImageAndCrop(getClass().getResource(resourcename), 32, 32));
+	}
+
 	/**
 	 * Construct the tools menu
 	 *
 	 * @param menu
 	 */
-	private void constructMenuOutils(JMenuBar menu) {
+	private void constructMenuOutils(JMenuBar menu) throws Exception {
 
 		JMenu toolsMenu = new JMenu(Messages.getString("APrint.316")); //$NON-NLS-1$
 		// toolsMenu.setIcon(new ImageIcon(getClass().getResource("ark_options.png")));
@@ -506,10 +511,48 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		editeurgamme.addActionListener(this);
 		editeurgamme.setActionCommand("SCALEDITOR"); //$NON-NLS-1$
 
+		JMenuItem instrumentsAndScales = toolsMenu.add(Messages.getString("APrintNG.1")); //$NON-NLS-1$
+		instrumentsAndScales.setIcon(resize("logomanageinstruments.png"));//$NON-NLS-1$
+		instrumentsAndScales.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+
+					showInstrumentEditor();
+
+				} catch (Exception ex) {
+					logger.error("error in showing the repositoryeditor :" //$NON-NLS-1$
+							+ ex.getMessage(), ex);
+					BugReporter.sendBugReport();
+				}
+			}
+		});
+
+		constructMenuGamme(toolsMenu);
+
 		toolsMenu.addSeparator();
 
+		JMenuItem modelEditor = new JMenuItem();
+		modelEditor.setText("Model Editor");
+		modelEditor.setIcon(new ImageIcon(
+				ImageTools.loadImageAndCrop(JModelEditorPanel.class.getResource("model-editor.png"), 32, 32)));
+
+		modelEditor.addActionListener(e -> {
+			try {
+				openModelEditor();
+			} catch (Exception ex) {
+				JMessageBox.showMessage(APrintNG.this, "Error Opening model editor :" //$NON-NLS-1$
+						+ ex.getMessage());
+				BugReporter.sendBugReport();
+			}
+		});
+		modelEditor.setEnabled(ENABLE_MODELEDITOR);
+		toolsMenu.add(modelEditor);
+
+		menu.add(toolsMenu);
+
 		JMenuItem groovyScriptConsole = new JMenuItem(Messages.getString("APrint.317")); //$NON-NLS-1$
-		groovyScriptConsole.setIcon(new ImageIcon(GroovyMain.class.getResource("ConsoleIcon.png"))); //$NON-NLS-1$
+		groovyScriptConsole.setIcon(new ImageIcon(
+				ImageTools.loadImageAndCrop(GroovyMain.class.getResource("ConsoleIcon.png"), 32, 32))); //$NON-NLS-1$
 		groovyScriptConsole.setAccelerator(KeyStroke.getKeyStroke("control G")); //$NON-NLS-1$
 		groovyScriptConsole.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -527,25 +570,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		});
 
 		toolsMenu.add(groovyScriptConsole);
-
-		JMenuItem modelEditor = new JMenuItem();
-		modelEditor.setText("Model Editor");
-		modelEditor.setIcon(new ImageIcon(JModelEditorPanel.class.getResource("model-editor.png")));
-		modelEditor.addActionListener(e -> {
-			try {
-				openModelEditor();
-			} catch (Exception ex) {
-				JMessageBox.showMessage(APrintNG.this, "Error Opening model editor :" //$NON-NLS-1$
-						+ ex.getMessage());
-				BugReporter.sendBugReport();
-			}
-		});
-		modelEditor.setEnabled(ENABLE_MODELEDITOR);
-		toolsMenu.add(modelEditor);
-
-		constructMenuGamme(toolsMenu);
-
-		menu.add(toolsMenu);
+		toolsMenu.addSeparator();
 
 		// call extensions
 		ToolMenuExtensionPoint[] allToolMenuExtensionPoints = ExtensionPointProvider
@@ -585,7 +610,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		apropos.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
-					// lecture du fichier de propri�t�
+					// lecture du fichier de propriété
 
 					AboutFrame af = new AboutFrame(APrintNG.this, Messages.getString("APrint.86"), true); //$NON-NLS-1$
 
@@ -688,19 +713,6 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 
 		logger.debug("add option menu from extension"); //$NON-NLS-1$
 
-		OptionMenuItemsExtensionPoint[] allOptionMenuPoints = ExtensionPointProvider
-				.getAllPoints(OptionMenuItemsExtensionPoint.class, exts);
-		for (int i = 0; i < allOptionMenuPoints.length; i++) {
-			OptionMenuItemsExtensionPoint addOptionMenuItems = allOptionMenuPoints[i];
-			try {
-				addOptionMenuItems.addOptionMenuItem(m_Options);
-			} catch (Throwable t) {
-				logger.error("Extension " + addOptionMenuItems // $NON-NLS-1$
-						+ " throw an exception", t); // $NON-NLS-1$
-			}
-		}
-
-		m_Options.addSeparator();
 		JMenuItem miTranslator = new JMenuItem(Messages.getString("APrint.242")); //$NON-NLS-1$
 		miTranslator.setIcon(new ImageIcon(getClass().getResource("locale.png"))); //$NON-NLS-1$
 		miTranslator.addActionListener(new ActionListener() {
@@ -780,6 +792,20 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		m_Options.add(lookandfeel);
 		m_Options.addSeparator();
 		m_Options.add(constructMenuOptionRendering());
+
+		// extension then ...
+		m_Options.addSeparator();
+		OptionMenuItemsExtensionPoint[] allOptionMenuPoints = ExtensionPointProvider
+				.getAllPoints(OptionMenuItemsExtensionPoint.class, exts);
+		for (int i = 0; i < allOptionMenuPoints.length; i++) {
+			OptionMenuItemsExtensionPoint addOptionMenuItems = allOptionMenuPoints[i];
+			try {
+				addOptionMenuItems.addOptionMenuItem(m_Options);
+			} catch (Throwable t) {
+				logger.error("Extension " + addOptionMenuItems // $NON-NLS-1$
+						+ " throw an exception", t); // $NON-NLS-1$
+			}
+		}
 
 		menu.add(m_Options);
 	}
@@ -1152,23 +1178,6 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 
 		shortCutImportInstrumentFromFile.setIcon(new ImageIcon(getClass().getResource("link.png"))); //$NON-NLS-1$
 
-		m_gamme.addSeparator();
-
-		JMenuItem instrumentsAndScales = m_gamme.add(Messages.getString("APrintNG.1")); //$NON-NLS-1$
-		instrumentsAndScales.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-
-					showInstrumentEditor();
-
-				} catch (Exception ex) {
-					logger.error("error in showing the repositoryeditor :" //$NON-NLS-1$
-							+ ex.getMessage(), ex);
-					BugReporter.sendBugReport();
-				}
-			}
-		});
-
 		menu.add(m_gamme);
 	}
 
@@ -1282,18 +1291,13 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 			JMenu current = imprimergamme;
 
 			for (int i = 0; i < rc.getRepositoryCount(); i++) {
-
 				Repository2 r = rc.getRepository(i);
-
 				String[] scaleNamesInRepository = r.getScaleNames();
-
 				current = addScalesInMenu(current, scaleNamesInRepository, r.getName());
 			}
 
 		} else {
-
 			String[] gammenames = gm.getScaleNames();
-
 			addScalesInMenu(imprimergamme, gammenames, null);
 		}
 	}
@@ -1325,7 +1329,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 	}
 
 	private void changeGammeFolder() throws RepositoryException, IOException {
-		// choix du r�pertoire de gamme ...
+		// choix du répertoire de gamme ...
 		JDirectoryChooser dc = new JDirectoryChooser(Messages.getString("APrintApplication.2")); //$NON-NLS-1$
 
 		dc.setSelectedFile(aprintproperties.getGammeAndTranlation());
@@ -1340,7 +1344,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 
 			// rafraichissement des transpositions ...
 
-			// m�morisation du r�pertoire contenant le repository
+			// mémorisation du répertoire contenant le repository
 			aprintproperties.setGammeAndTranlation(repertoire);
 		}
 	}
@@ -1388,9 +1392,9 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 	private InternalRepositoryListenerClass internalRepositoryListenerClass = new InternalRepositoryListenerClass();
 
 	/**
-	 * charge les nouvelles gammes contenues dans le r�pertoire
+	 * charge les nouvelles gammes contenues dans le répertoire
 	 *
-	 * @param folder le r�pertoire contenant des gammes
+	 * @param folder le répertoire contenant des gammes
 	 */
 	private void defineNewGammeAndTranspositionFolder(File folder) throws RepositoryException {
 
