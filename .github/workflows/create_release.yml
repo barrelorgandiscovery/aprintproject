@@ -88,7 +88,7 @@ jobs:
 
   build-macos-appimage:
     name: Build Installer on MacOsX
-    runs-on: maxos-latest
+    runs-on: macos-latest
     steps:
 
 # SETUP BUILD ENVIRONMENT
@@ -177,8 +177,8 @@ jobs:
         asset_name: windows-aprint.zip
         asset_content_type: application/x-binary
 
-    - id: release-maxos-appimage
-      name: Release maxos appimage
+    - id: release-macos-appimage
+      name: Release macos appimage
       uses: actions/upload-release-asset@latest
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
