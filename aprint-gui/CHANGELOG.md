@@ -4,6 +4,8 @@
 
 - switch to java 17 
 - add explorer to main window
+- add duplicate instrument function
+- rationalize icons size, and menu in main window
 
 ## 2021 December
 
