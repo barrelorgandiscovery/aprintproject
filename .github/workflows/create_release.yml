@@ -89,7 +89,7 @@ jobs:
 
 
   build-macos-appimage:
-    name: Build Installer on Linux
+    name: Build Installer on MacOsX
     runs-on: maxos-latest
     steps:
 
@@ -139,6 +139,12 @@ jobs:
       uses: actions/download-artifact@v2
       with:
         name: windows-aprint
+
+    - id: download-macos-image
+      name: Download MacOs appimage
+      uses: actions/download-artifact@v2
+      with:
+        name: macos-aprint
 
 # CREATE GITHUB RELEASE AND ADD ASSETS
     - id: create-release
