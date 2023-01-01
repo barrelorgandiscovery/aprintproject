@@ -187,8 +187,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create-release.outputs.upload_url }}
-        asset_path: aprint-linux
-        asset_name: ubuntu-aprint
+        asset_path: aprint-linux.zip
+        asset_name: ubuntu-aprint.zip
         asset_content_type: application/x-binary
 
     - uses: montudor/action-zip@v1
@@ -202,8 +202,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create-release.outputs.upload_url }}
-        asset_path: aprint-windows
-        asset_name: aprint-windows
+        asset_path: aprint-windows.zip
+        asset_name: aprint-windows.zip
         asset_content_type: application/x-binary
 
     - uses: montudor/action-zip@v1
