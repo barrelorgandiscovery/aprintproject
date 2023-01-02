@@ -49,24 +49,21 @@ public class JInstrumentTileViewer extends JPanel {
 	 */
 	private static final long serialVersionUID = 3732150759797647883L;
 
-	private static Logger logger = Logger
-			.getLogger(JInstrumentTileViewer.class);
+	private static Logger logger = Logger.getLogger(JInstrumentTileViewer.class);
 
 	private Repository2 rep;
 	private JList l;
-	
+
 	private InstrumentSelectedListener instrumentSelectedListener;
 
-	public void setInstrumentSelectedListener(
-			InstrumentSelectedListener instrumentSelectedListener) {
+	public void setInstrumentSelectedListener(InstrumentSelectedListener instrumentSelectedListener) {
 		this.instrumentSelectedListener = instrumentSelectedListener;
 	}
 
 	public InstrumentSelectedListener getInstrumentSelectedListener() {
 		return instrumentSelectedListener;
 	}
-	
-	
+
 	private static class InsVerticalRenderer implements ListCellRenderer {
 
 		private JLabel labelImage = new JLabel();
@@ -75,7 +72,7 @@ public class JInstrumentTileViewer extends JPanel {
 		public JPanel p = new JPanel();
 
 		public InsVerticalRenderer() {
-			
+
 			BorderLayout bl = new BorderLayout();
 			bl.setHgap(3);
 			p.setLayout(bl);
@@ -86,11 +83,11 @@ public class JInstrumentTileViewer extends JPanel {
 			labelText.setHorizontalAlignment(SwingConstants.CENTER);
 			// small space in the bottom
 			p.setBorder(new EmptyBorder(2, 2, 10, 2));
-			
+
 		}
 
-		public Component getListCellRendererComponent(JList list, Object value,
-				int index, boolean isSelected, boolean cellHasFocus) {
+		public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected,
+				boolean cellHasFocus) {
 
 			try {
 				Instrument ins = (Instrument) value;
@@ -100,9 +97,8 @@ public class JInstrumentTileViewer extends JPanel {
 
 				labelText.setText(ins.getName());
 
-				p.setBackground(isSelected ? UIManager
-						.getColor("Table.selectionBackground") : UIManager
-						.getColor("Table.background"));
+				p.setBackground(isSelected ? UIManager.getColor("Table.selectionBackground")
+						: UIManager.getColor("Table.background"));
 
 				return p;
 
@@ -132,8 +128,8 @@ public class JInstrumentTileViewer extends JPanel {
 		l.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				if (e.getClickCount()>1) {
-					Instrument i = (Instrument)l.getSelectedValue();
+				if (e.getClickCount() > 1) {
+					Instrument i = (Instrument) l.getSelectedValue();
 					if (i != null) {
 						selectionChanged(i);
 						if (instrumentSelectedListener != null) {
@@ -142,8 +138,7 @@ public class JInstrumentTileViewer extends JPanel {
 								instrumentSelectedListener.instrumentDoubleClicked(i);
 
 							} catch (Throwable ex) {
-								logger.error(
-										"error in instrument selection :" + ex.getMessage(), ex);
+								logger.error("error in instrument selection :" + ex.getMessage(), ex);
 								JMessageBox.showError(null, ex);
 								BugReporter.sendBugReport();
 							}
@@ -158,13 +153,12 @@ public class JInstrumentTileViewer extends JPanel {
 		JScrollPane sp = new JScrollPane(l);
 
 		add(sp, BorderLayout.CENTER);
-		
-		l.setBorder(new EmptyBorder(3,3,3,3));
+
+		l.setBorder(new EmptyBorder(3, 3, 3, 3));
 
 	}
 
-	private class InternalSelectionChangeListener implements
-			ListSelectionListener {
+	private class InternalSelectionChangeListener implements ListSelectionListener {
 		public void valueChanged(ListSelectionEvent e) {
 
 			JList l = (JList) e.getSource();
@@ -195,8 +189,7 @@ public class JInstrumentTileViewer extends JPanel {
 				instrumentSelectedListener.instrumentSelected(ins);
 
 			} catch (Throwable ex) {
-				logger.error(
-						"error in instrument selection :" + ex.getMessage(), ex);
+				logger.error("error in instrument selection :" + ex.getMessage(), ex);
 				JMessageBox.showError(null, ex);
 				BugReporter.sendBugReport();
 			}
@@ -206,8 +199,7 @@ public class JInstrumentTileViewer extends JPanel {
 
 	private InternalSelectionChangeListener iscl = new InternalSelectionChangeListener();
 
-	private class InternalRepositoryChangeListener implements
-			RepositoryChangedListener {
+	private class InternalRepositoryChangeListener implements RepositoryChangedListener {
 
 		public void transformationAndImporterChanged() {
 
@@ -236,6 +228,13 @@ public class JInstrumentTileViewer extends JPanel {
 
 	}
 
+	private String filterName = null;
+
+	public void setNameFilter(String filterName) {
+		this.filterName = filterName;
+		reloadInstruments();
+	}
+
 	public Repository2 getCurrentRepository() {
 		return this.rep;
 	}
@@ -248,7 +247,9 @@ public class JInstrumentTileViewer extends JPanel {
 
 		DefaultListModel dlm = new DefaultListModel();
 		for (Instrument ins : vinstrument) {
-			dlm.addElement(ins);
+			if (filterName == null || ins.getName().toLowerCase().indexOf(filterName.toLowerCase()) != -1) {
+				dlm.addElement(ins);
+			}
 		}
 
 		l.setModel(dlm);
@@ -274,12 +275,11 @@ public class JInstrumentTileViewer extends JPanel {
 	@Override
 	public void doLayout() {
 
-
 		int instrumentNumber = l.getModel().getSize();
 		if (instrumentNumber > 0) {
 
-			Component c = l.getCellRenderer().getListCellRendererComponent(l,
-					l.getModel().getElementAt(0), 0, false, false);
+			Component c = l.getCellRenderer().getListCellRendererComponent(l, l.getModel().getElementAt(0), 0, false,
+					false);
 
 			Dimension preferredSizeOfOneTile = c.getPreferredSize();
 			if (preferredSizeOfOneTile.height > 0) {
@@ -332,15 +332,15 @@ public class JInstrumentTileViewer extends JPanel {
 		});
 
 	}
+
 	@Override
 	public synchronized void addMouseListener(MouseListener l) {
 		this.l.addMouseListener(l);
 	}
-	
+
 	@Override
 	public synchronized void removeMouseListener(MouseListener l) {
 		this.l.removeMouseListener(l);
 	}
-	
-	
+
 }

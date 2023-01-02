@@ -1,5 +1,7 @@
 package org.barrelorgandiscovery.gui.aprint.instrumentchoice;
 
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
@@ -11,20 +13,26 @@ import java.awt.image.BufferedImage;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.Properties;
 
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ListCellRenderer;
+import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
 import org.apache.log4j.lf5.LF5Appender;
+import org.barrelorgandiscovery.gui.aprint.APrintProperties;
 import org.barrelorgandiscovery.gui.aprint.PrintPreview;
 import org.barrelorgandiscovery.gui.aprintng.APrintNG;
 import org.barrelorgandiscovery.gui.ascale.ScaleComponent;
@@ -32,12 +40,12 @@ import org.barrelorgandiscovery.gui.ascale.ScalePrintDocument;
 import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.repository.Repository2;
+import org.barrelorgandiscovery.repository.Repository2Factory;
 import org.barrelorgandiscovery.repository.RepositoryChangedListener;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.ui.tools.VerticalBagLayout;
 
 import com.jeta.forms.components.panel.FormPanel;
-
 
 public class JInstrumentChoice extends JPanel implements IInstrumentChoice {
 
@@ -91,16 +99,40 @@ public class JInstrumentChoice extends JPanel implements IInstrumentChoice {
 
 	}
 
+	private static ListCellRenderer<? super InstrumentDisplayer> createListRenderer() {
+		return new DefaultListCellRenderer() {
+			private Color background = new Color(0, 100, 255, 15);
+			private Color defaultBackground = (Color) UIManager.get("List.background");
+
+			@Override
+			public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected,
+					boolean cellHasFocus) {
+				Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+				if (c instanceof JLabel) {
+					JLabel label = (JLabel) c;
+					InstrumentDisplayer emp = (InstrumentDisplayer) value;
+					label.setText(String.format("%s", emp.toString()));
+					if (!isSelected) {
+						label.setBackground(index % 2 == 0 ? background : defaultBackground);
+					}
+				}
+				return c;
+			}
+		};
+	}
+
+	private static boolean employeeFilter(InstrumentDisplayer emp, String str) {
+		return emp.toString().toLowerCase().contains(str.toLowerCase());
+	}
+
 	private IInstrumentChoiceListener listener = null;
 
 	/**
 	 * Constructeur
 	 * 
-	 * @param repository
-	 *            le repository associ� ...
+	 * @param repository le repository associé ...
 	 */
-	public JInstrumentChoice(Repository2 repository,
-			IInstrumentChoiceListener listener) {
+	public JInstrumentChoice(Repository2 repository, IInstrumentChoiceListener listener) {
 
 		assert repository != null;
 
@@ -111,21 +143,17 @@ public class JInstrumentChoice extends JPanel implements IInstrumentChoice {
 		initComponents();
 	}
 
-	private void internalChangeRespositoryAndRegisterEvents(
-			Repository2 repository) {
+	private void internalChangeRespositoryAndRegisterEvents(Repository2 repository) {
 
 		if (rep != null)
-			rep
-					.removeRepositoryChangedListener(internalRepositoryChangeListener);
+			rep.removeRepositoryChangedListener(internalRepositoryChangeListener);
 
-		repository
-				.addRepositoryChangedListener(internalRepositoryChangeListener);
+		repository.addRepositoryChangedListener(internalRepositoryChangeListener);
 
 		this.rep = repository;
 	}
 
-	private class InternalRepositoryChangeListener implements
-			RepositoryChangedListener {
+	private class InternalRepositoryChangeListener implements RepositoryChangedListener {
 
 		public void instrumentsChanged() {
 			reloadInstruments();
@@ -133,7 +161,6 @@ public class JInstrumentChoice extends JPanel implements IInstrumentChoice {
 
 		public void scalesChanged() {
 			updateInstrumentInformations();
-
 		}
 
 		public void transformationAndImporterChanged() {
@@ -162,8 +189,7 @@ public class JInstrumentChoice extends JPanel implements IInstrumentChoice {
 
 		try {
 
-			InputStream is = getClass().getResourceAsStream(
-					"APrintInstrumentChoice.jfrm"); //$NON-NLS-1$
+			InputStream is = getClass().getResourceAsStream("APrintInstrumentChoice.jfrm"); //$NON-NLS-1$
 			if (is == null)
 				throw new Exception("form not found"); //$NON-NLS-1$
 			thepanel = new FormPanel(is);
@@ -173,11 +199,12 @@ public class JInstrumentChoice extends JPanel implements IInstrumentChoice {
 		}
 
 		choixInstrument = thepanel.getComboBox("instrumentList"); //$NON-NLS-1$
+		choixInstrument.setEditable(true);
+		Autocompletion.enable(choixInstrument);
 
 		panel = new JPanel();
 		panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
-		panel.setBorder(new TitledBorder(Messages
-				.getString("JChoixInstrument.0"))); //$NON-NLS-1$
+		panel.setBorder(new TitledBorder(Messages.getString("JChoixInstrument.0"))); //$NON-NLS-1$
 
 		panelInstrumentChoice.setLayout(new VerticalBagLayout());
 
@@ -208,11 +235,9 @@ public class JInstrumentChoice extends JPanel implements IInstrumentChoice {
 		lblinstrument = thepanel.getLabel("labelInstrumentName"); //$NON-NLS-1$
 
 		buttonImprimerGamme = new JButton();
-		buttonImprimerGamme.setIcon(new ImageIcon(APrintNG.class
-				.getResource("preview.png"))); //$NON-NLS-1$
+		buttonImprimerGamme.setIcon(new ImageIcon(APrintNG.class.getResource("preview.png"))); //$NON-NLS-1$
 
-		buttonImprimerGamme.setToolTipText(Messages
-				.getString("JChoixInstrument.1")); //$NON-NLS-1$
+		buttonImprimerGamme.setToolTipText(Messages.getString("JChoixInstrument.1")); //$NON-NLS-1$
 
 		buttonImprimerGamme.addActionListener(new ActionListener() {
 
@@ -227,8 +252,7 @@ public class JInstrumentChoice extends JPanel implements IInstrumentChoice {
 
 				} catch (Exception ex) {
 					logger.error("imprimergammeinstrument", ex); //$NON-NLS-1$
-					JMessageBox.showMessage(null, Messages
-							.getString("JChoixInstrument.5")); //$NON-NLS-1$
+					JMessageBox.showMessage(null, Messages.getString("JChoixInstrument.5")); //$NON-NLS-1$
 				}
 			}
 		});
@@ -260,8 +284,11 @@ public class JInstrumentChoice extends JPanel implements IInstrumentChoice {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see fr.freydierepatrice.gui.aprint.instrumentchoice.IInstrumentChoice#setRepository(fr.freydierepatrice.repository.Repository2)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see fr.freydierepatrice.gui.aprint.instrumentchoice.IInstrumentChoice#
+	 * setRepository(fr.freydierepatrice.repository.Repository2)
 	 */
 	public void setRepository(Repository2 newrep) {
 
@@ -285,8 +312,7 @@ public class JInstrumentChoice extends JPanel implements IInstrumentChoice {
 		if (iimage != null) {
 			imageInstrument.setIcon(new ImageIcon(iimage));
 		} else {
-			imageInstrument.setIcon(new ImageIcon(new BufferedImage(100, 134,
-					BufferedImage.TYPE_4BYTE_ABGR)));
+			imageInstrument.setIcon(new ImageIcon(new BufferedImage(100, 134, BufferedImage.TYPE_4BYTE_ABGR)));
 		}
 
 		lbldescription.setText(null);
@@ -304,8 +330,7 @@ public class JInstrumentChoice extends JPanel implements IInstrumentChoice {
 		gammecomponent.setSize(size);
 
 		// Create a picture of the scale ...
-		BufferedImage bi = new BufferedImage(size.width, size.height,
-				BufferedImage.TYPE_4BYTE_ABGR);
+		BufferedImage bi = new BufferedImage(size.width, size.height, BufferedImage.TYPE_4BYTE_ABGR);
 		Graphics2D g = bi.createGraphics();
 		try {
 			gammecomponent.paint(g);
@@ -321,8 +346,11 @@ public class JInstrumentChoice extends JPanel implements IInstrumentChoice {
 
 	}
 
-	/* (non-Javadoc)
-	 * @see fr.freydierepatrice.gui.aprint.instrumentchoice.IInstrumentChoice#reloadInstruments()
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see fr.freydierepatrice.gui.aprint.instrumentchoice.IInstrumentChoice#
+	 * reloadInstruments()
 	 */
 	public void reloadInstruments() {
 		// Recharge les instruments du repository ...
@@ -348,11 +376,10 @@ public class JInstrumentChoice extends JPanel implements IInstrumentChoice {
 			});
 
 			for (int i = 0; i < instruments.length; i++) {
-				choixInstrument
-						.addItem(new InstrumentDisplayer(instruments[i]));
+				choixInstrument.addItem(new InstrumentDisplayer(instruments[i]));
 			}
 
-			// S�lection du premier instrument
+			// Sélection du premier instrument
 			if (instruments.length > 0)
 				choixInstrument.setSelectedIndex(0);
 		}
@@ -361,44 +388,42 @@ public class JInstrumentChoice extends JPanel implements IInstrumentChoice {
 	public boolean selectInstrument(String instrumentName) {
 		if (instrumentName == null)
 			return false;
-		
-		for (int i = 0 ; i < choixInstrument.getItemCount() ; i ++)
-		{
+
+		for (int i = 0; i < choixInstrument.getItemCount(); i++) {
 			InstrumentDisplayer id = (InstrumentDisplayer) choixInstrument.getItemAt(i);
-			if (instrumentName.equals( id.getInstrument().getName()))
-			{
+			if (instrumentName.equals(id.getInstrument().getName())) {
 				choixInstrument.setSelectedIndex(i);
 				return true;
 			}
 		}
 		return false;
 	}
-	
+
 	private String currentInstrumentFilter = null;
-	
+
 	public String getInstrumentFilter() {
 		return currentInstrumentFilter;
 	}
-	
+
 	public void setInstrumentFilter(String filter) {
-		if (filter == null || "".equals(filter.trim()))
-		{
+		if (filter == null || "".equals(filter.trim())) {
 			currentInstrumentFilter = null;
 			return;
 		}
-		
+
 		currentInstrumentFilter = filter.trim().toLowerCase();
-		
+
 	}
-	
-	
-	/* (non-Javadoc)
-	 * @see fr.freydierepatrice.gui.aprint.instrumentchoice.IInstrumentChoice#getCurrentInstrument()
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see fr.freydierepatrice.gui.aprint.instrumentchoice.IInstrumentChoice#
+	 * getCurrentInstrument()
 	 */
 	public Instrument getCurrentInstrument() {
 
-		InstrumentDisplayer o = ((InstrumentDisplayer) choixInstrument
-				.getSelectedItem());
+		InstrumentDisplayer o = ((InstrumentDisplayer) choixInstrument.getSelectedItem());
 		if (o == null)
 			return null;
 
@@ -410,8 +435,22 @@ public class JInstrumentChoice extends JPanel implements IInstrumentChoice {
 		BasicConfigurator.resetConfiguration();
 		BasicConfigurator.configure(new LF5Appender());
 
+		APrintProperties properties = new APrintProperties(false);
+		Properties p = new Properties();
+		p.setProperty("repositorytype", "folder");
+
+		p.setProperty("folder", "/home/use/aprintstudio/private");
+
+		Repository2 repository2 = Repository2Factory.create(p, properties);
+
 		JFrame f = new JFrame();
-		f.getContentPane().add(new JInstrumentChoice(null, null));
+		f.getContentPane().add(new JInstrumentChoice(repository2, new IInstrumentChoiceListener() {
+			@Override
+			public void instrumentChanged(Instrument newInstrument) {
+				System.out.println("selected instrument :" + newInstrument);
+			}
+		}));
+		f.setSize(new Dimension(500, 400));
 		f.setVisible(true);
 
 	}

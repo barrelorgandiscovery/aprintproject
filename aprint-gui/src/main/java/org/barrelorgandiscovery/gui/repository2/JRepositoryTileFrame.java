@@ -6,6 +6,8 @@ import java.awt.Font;
 import java.awt.Frame;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.InputStream;
@@ -18,6 +20,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JTextField;
 
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Logger;
@@ -83,6 +86,8 @@ public class JRepositoryTileFrame extends JFrameWaitable {
 	private JButton properties;
 
 	private JLabel labelrepository;
+	
+	private JTextField filter;
 
 	public JRepositoryTileFrame(JFrame owner, Repository2 repository,
 			APrintProperties props) throws Exception {
@@ -250,6 +255,8 @@ public class JRepositoryTileFrame extends JFrameWaitable {
 
 			}
 		});
+		
+		filter = (JTextField) fp.getComponentByName("filter");  //$NON-NLS-1$
 
 		newbutton = (JButton) fp.getComponentByName("new"); //$NON-NLS-1$
 		assert newbutton != null;
@@ -355,6 +362,14 @@ public class JRepositoryTileFrame extends JFrameWaitable {
 
 		getContentPane().add(fp, BorderLayout.CENTER);
 
+		filter.addKeyListener(new KeyAdapter() {
+			@Override
+			public void keyReleased(KeyEvent e) {
+				String sfilter = filter.getText();
+				tv.setNameFilter(sfilter);
+			}
+		});
+		
 	}
 
 	/**
@@ -462,7 +477,7 @@ public class JRepositoryTileFrame extends JFrameWaitable {
 		Properties p = new Properties();
 		p.setProperty("repositorytype", "folder"); //$NON-NLS-1$ //$NON-NLS-2$
 		p.setProperty("folder", //$NON-NLS-1$
-				"C:\\users\\use\\aprintstudio\\private"); //$NON-NLS-1$
+				"/home/use/aprintstudio/private"); //$NON-NLS-1$
 
 		APrintProperties aprintproperties = new APrintProperties(true);
 

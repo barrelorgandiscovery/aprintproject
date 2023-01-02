@@ -79,9 +79,10 @@ public class JCoverFlowInstrumentChoiceWithFilter extends JPanel {
 
 			@Override
 			public void keyPressed(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					searchListener.actionPerformed(null);
-				}
+			}
+			@Override
+			public void keyReleased(KeyEvent e) {
+				searchListener.actionPerformed(null);
 			}
 
 		});
