@@ -1,5 +1,9 @@
 # Changelog
 
+## 2023 January
+
+- add text filters for instrument names, saving time for search elements
+
 ## 2022 Decembre
 
 - switch to java 17 
