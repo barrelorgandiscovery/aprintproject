@@ -40,7 +40,9 @@ import org.apache.http.client.CookieStore;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.config.ConnectionConfig;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
 import org.apache.http.config.SocketConfig;
@@ -61,10 +63,13 @@ import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.BasicHttpClientConnectionManager;
 import org.apache.http.impl.conn.DefaultProxyRoutePlanner;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 import org.apache.http.message.BasicHeader;
+import org.apache.http.params.CoreConnectionPNames;
+import org.apache.http.params.HttpParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.ssl.SSLContextBuilder;
 
@@ -75,10 +80,9 @@ public class BodProvider extends AbstractOriginatingFileProvider {
 			UserAuthenticationData.USERNAME, UserAuthenticationData.PASSWORD };
 
 	/** FileProvider capabilities */
-	static final Collection<Capability> CAPABILITIES = Collections
-			.unmodifiableCollection(Arrays.asList(Capability.GET_TYPE, Capability.READ_CONTENT, Capability.URI,
-					Capability.GET_LAST_MODIFIED, Capability.ATTRIBUTES, Capability.DIRECTORY_READ_CONTENT, 
-					Capability.LIST_CHILDREN ));
+	static final Collection<Capability> CAPABILITIES = Collections.unmodifiableCollection(
+			Arrays.asList(Capability.GET_TYPE, Capability.READ_CONTENT, Capability.URI, Capability.GET_LAST_MODIFIED,
+					Capability.ATTRIBUTES, Capability.DIRECTORY_READ_CONTENT, Capability.LIST_CHILDREN));
 
 	/**
 	 * Constructs a new provider.
@@ -96,9 +100,15 @@ public class BodProvider extends AbstractOriginatingFileProvider {
 
 		final PoolingHttpClientConnectionManager connManager = new PoolingHttpClientConnectionManager(
 				socketFactoryRegistry);
-		connManager.setMaxTotal(builder.getMaxTotalConnections(fileSystemOptions));
-		connManager.setDefaultMaxPerRoute(builder.getMaxConnectionsPerHost(fileSystemOptions));
 
+		// final BasicHttpClientConnectionManager connManager = new
+		// BasicHttpClientConnectionManager();
+
+		// connManager.setMaxTotal(builder.getMaxTotalConnections(fileSystemOptions));
+		// connManager.setDefaultMaxPerRoute(builder.getMaxConnectionsPerHost(fileSystemOptions));
+		//connManager.setMaxTotal(1000);
+		// connManager.setDefaultMaxPerRoute(10000);
+		
 		// @formatter:off
         final SocketConfig socketConfig =
                 SocketConfig
@@ -126,9 +136,12 @@ public class BodProvider extends AbstractOriginatingFileProvider {
 
 	private RequestConfig createDefaultRequestConfig(final BodFileSystemConfigBuilder builder,
 			final FileSystemOptions fileSystemOptions) {
-		return RequestConfig.custom()
-				.setConnectTimeout(DurationUtils.toMillisInt(builder.getConnectionTimeoutDuration(fileSystemOptions)))
-				.build();
+		
+		RequestConfig requestConfig = RequestConfig.custom().setConnectTimeout(3 * 1000).build();
+		return requestConfig;
+//		return RequestConfig.custom()
+//				.setConnectTimeout(DurationUtils.toMillisInt(builder.getConnectionTimeoutDuration(fileSystemOptions)))
+//				.build();
 	}
 
 	private HostnameVerifier createHostnameVerifier(final BodFileSystemConfigBuilder builder,
@@ -171,14 +184,16 @@ public class BodProvider extends AbstractOriginatingFileProvider {
 				: NoConnectionReuseStrategy.INSTANCE;
 		final SSLContext sslContext = createSSLContext(builder, fileSystemOptions);
 		final HostnameVerifier hostNameVerifier = createHostnameVerifier(builder, fileSystemOptions);
-		final HttpClientBuilder httpClientBuilder = HttpClients.custom()
-				.setRoutePlanner(createHttpRoutePlanner(builder, fileSystemOptions))
-				.setConnectionManager(createConnectionManager(builder, fileSystemOptions, sslContext, hostNameVerifier))
-				.setSSLContext(sslContext).setSSLHostnameVerifier(hostNameVerifier)
-				.setConnectionReuseStrategy(connectionReuseStrategy)
-				.setDefaultRequestConfig(createDefaultRequestConfig(builder, fileSystemOptions))
-				.setDefaultHeaders(defaultHeaders)
-				.setDefaultCookieStore(createDefaultCookieStore(builder, fileSystemOptions));
+		final HttpClientBuilder httpClientBuilder =
+
+				HttpClients.custom().setRoutePlanner(createHttpRoutePlanner(builder, fileSystemOptions))
+						.setConnectionManager(
+								createConnectionManager(builder, fileSystemOptions, sslContext, hostNameVerifier))
+						.setSSLContext(sslContext).setSSLHostnameVerifier(hostNameVerifier)
+						.setConnectionReuseStrategy(connectionReuseStrategy)
+						.setDefaultRequestConfig(createDefaultRequestConfig(builder, fileSystemOptions))
+						.setDefaultHeaders(defaultHeaders)
+						.setDefaultCookieStore(createDefaultCookieStore(builder, fileSystemOptions));
 
 		if (!builder.getFollowRedirect(fileSystemOptions)) {
 			httpClientBuilder.disableRedirectHandling();
@@ -316,6 +331,7 @@ public class BodProvider extends AbstractOriginatingFileProvider {
 			authData = UserAuthenticatorUtils.authenticate(fileSystemOptions, AUTHENTICATOR_TYPES);
 			httpClientContext = createHttpClientContext(builder, rootName, fileSystemOptions, authData);
 			httpClient = createHttpClient(builder, rootName, fileSystemOptions);
+
 		} finally {
 			UserAuthenticatorUtils.cleanup(authData);
 		}

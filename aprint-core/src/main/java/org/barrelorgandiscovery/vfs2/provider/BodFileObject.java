@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.StringTokenizer;
 
 import org.apache.commons.vfs2.FileContentInfoFactory;
@@ -21,7 +20,9 @@ import org.apache.commons.vfs2.util.RandomAccessMode;
 import org.apache.http.Header;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
+import org.apache.http.HttpVersion;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.methods.HttpUriRequest;
@@ -54,7 +55,19 @@ public class BodFileObject<FS extends BodFileSystem> extends AbstractFileObject<
 	/**
 	 * The last executed HEAD {@code HttpResponse} object.
 	 */
-	private HttpResponse lastHeadResponse;
+	private ResponseInformations lastHeadResponse;
+
+	static class ResponseInformations {
+		public Header contentLen;
+		public Header lastModified;
+	}
+
+	ResponseInformations toResponseInformation(HttpResponse response) {
+		ResponseInformations responseInformations = new ResponseInformations();
+		responseInformations.contentLen = response.getFirstHeader(HTTP.CONTENT_LEN);
+		responseInformations.lastModified = response.getFirstHeader("Last-Modified");
+		return responseInformations;
+	}
 
 	/**
 	 * Construct {@code Http4FileObject}.
@@ -95,7 +108,7 @@ public class BodFileObject<FS extends BodFileSystem> extends AbstractFileObject<
 			return 0L;
 		}
 
-		final Header header = lastHeadResponse.getFirstHeader(HTTP.CONTENT_LEN);
+		final Header header = lastHeadResponse.contentLen;
 
 		if (header == null) {
 			// Assume 0 content-length
@@ -107,7 +120,8 @@ public class BodFileObject<FS extends BodFileSystem> extends AbstractFileObject<
 
 	@Override
 	protected InputStream doGetInputStream(final int bufferSize) throws Exception {
-		final HttpGet getRequest = new HttpGet(getInternalURI());
+		URI callUrl = getHttpUri();
+		final HttpGet getRequest = new HttpGet(callUrl);
 		final HttpResponse httpResponse = executeHttpUriRequest(getRequest);
 		final int status = httpResponse.getStatusLine().getStatusCode();
 
@@ -126,7 +140,7 @@ public class BodFileObject<FS extends BodFileSystem> extends AbstractFileObject<
 	protected long doGetLastModifiedTime() throws Exception {
 		FileSystemException.requireNonNull(lastHeadResponse, "vfs.provider.http/last-modified.error", getName());
 
-		final Header header = lastHeadResponse.getFirstHeader("Last-Modified");
+		final Header header = lastHeadResponse.lastModified;
 
 		FileSystemException.requireNonNull(header, "vfs.provider.http/last-modified.error", getName());
 
@@ -138,29 +152,53 @@ public class BodFileObject<FS extends BodFileSystem> extends AbstractFileObject<
 		throw new UnsupportedOperationException("Not implemented.");
 	}
 
+	URI getHttpUri() {
+		return URI.create(getInternalURI().toString().replaceAll("bod://", "http://"));
+	}
+
+	FileType fileType = null;
+
 	@Override
 	protected FileType doGetType() throws Exception {
-		lastHeadResponse = executeHttpUriRequest(new HttpHead(getInternalURI()));
-		final int status = lastHeadResponse.getStatusLine().getStatusCode();
 
-		if (status == HttpStatus.SC_OK
-				|| status == HttpStatus.SC_METHOD_NOT_ALLOWED /* method is not allowed, but resource exist */) {
-
-			return FileType.FILE;
+		if (fileType != null) {
+			return fileType;
 		}
 
-		if (status == HttpStatus.SC_NOT_FOUND || status == HttpStatus.SC_GONE) {
-			return FileType.IMAGINARY;
-		}
-
+		URI callUri = getHttpUri();
+		HttpHead head = new HttpHead(callUri);
+		head.setProtocolVersion(HttpVersion.HTTP_1_0);
+		var httpResponse = executeHttpUriRequest(head);
 		try {
-			getChildren();
-			return FileType.FOLDER;
-		} catch (Exception ex) {
-			// continue
-		}
 
-		throw new FileSystemException("vfs.provider.http/head.error", getName(), Integer.valueOf(status));
+			lastHeadResponse = toResponseInformation(httpResponse);
+			final int status = httpResponse.getStatusLine().getStatusCode();
+
+			if (status == HttpStatus.SC_OK
+					|| status == HttpStatus.SC_METHOD_NOT_ALLOWED /* method is not allowed, but resource exist */) {
+				fileType = FileType.FILE;
+				return fileType;
+			}
+
+			if (status == HttpStatus.SC_NOT_FOUND || status == HttpStatus.SC_GONE) {
+				fileType = FileType.IMAGINARY;
+				return fileType;
+
+			}
+
+			try {
+				getChildren();
+				fileType = FileType.FOLDER;
+				return fileType;
+
+			} catch (Exception ex) {
+				// continue
+			}
+
+			throw new FileSystemException("vfs.provider.http/head.error", getName(), Integer.valueOf(status));
+		} finally {
+			httpResponse.close();
+		}
 	}
 
 	@Override
@@ -171,29 +209,33 @@ public class BodFileObject<FS extends BodFileSystem> extends AbstractFileObject<
 	@Override
 	protected String[] doListChildren() throws Exception {
 
-		URI contentListUri = URI.create(internalURI + "/CONTENT");
+		URI contentListUri = URI.create(getHttpUri() + "/CONTENT");
 
 		final HttpGet getRequest = new HttpGet(contentListUri);
-		final HttpResponse httpResponse = executeHttpUriRequest(getRequest);
-		final int status = httpResponse.getStatusLine().getStatusCode();
+		final CloseableHttpResponse httpResponse = executeHttpUriRequest(getRequest);
+		try {
+			final int status = httpResponse.getStatusLine().getStatusCode();
 
-		if (status == HttpStatus.SC_NOT_FOUND) {
+			if (status == HttpStatus.SC_NOT_FOUND) {
 
-			throw new FileNotFoundException(getName());
+				throw new FileNotFoundException(getName());
+			}
+
+			if (status != HttpStatus.SC_OK) {
+				throw new FileSystemException("vfs.provider.http/get.error", getName(), Integer.valueOf(status));
+			}
+
+			String content = StreamsTools
+					.fullyReadUTF8StringFromStream(new MonitoredHttpResponseContentInputStream(httpResponse, 4096));
+
+			ArrayList<String> al = new ArrayList<String>();
+			(new StringTokenizer(content, "\n").asIterator()).forEachRemaining((s) -> al.add((String) s));
+
+			return al.toArray(new String[al.size()]);
+
+		} finally {
+			httpResponse.close();
 		}
-
-		if (status != HttpStatus.SC_OK) {
-			throw new FileSystemException("vfs.provider.http/get.error", getName(), Integer.valueOf(status));
-		}
-
-		String content = StreamsTools
-				.fullyReadUTF8StringFromStream(new MonitoredHttpResponseContentInputStream(httpResponse, 4096));
-
-		ArrayList<String> al = new ArrayList<String>();
-		(new StringTokenizer(content, "\n").asIterator()).forEachRemaining((s) -> al.add((String) s));
-
-		return al.toArray(new String[al.size()]);
-
 	}
 
 	/**
@@ -206,10 +248,16 @@ public class BodFileObject<FS extends BodFileSystem> extends AbstractFileObject<
 	 *
 	 * @since 2.5.0
 	 */
-	protected HttpResponse executeHttpUriRequest(final HttpUriRequest httpRequest) throws IOException {
+	protected CloseableHttpResponse executeHttpUriRequest(final HttpUriRequest httpRequest) throws IOException {
+
 		final HttpClient httpClient = getAbstractFileSystem().getHttpClient();
+
+		// System.out.println("execute : " + httpRequest);
 		final HttpClientContext httpClientContext = getAbstractFileSystem().getHttpClientContext();
-		return httpClient.execute(httpRequest, httpClientContext);
+		CloseableHttpResponse response = (CloseableHttpResponse) httpClient.execute(httpRequest, httpClientContext);
+		// System.out.println("  response :" + response.getStatusLine());
+		return response;
+
 	}
 
 	@Override
@@ -232,12 +280,17 @@ public class BodFileObject<FS extends BodFileSystem> extends AbstractFileObject<
 	 * @return the last executed HEAD {@code HttpResponse} object
 	 * @throws IOException if IO error occurs
 	 */
-	HttpResponse getLastHeadResponse() throws IOException {
+	ResponseInformations getLastHeadResponse() throws IOException {
 		if (lastHeadResponse != null) {
 			return lastHeadResponse;
 		}
-
-		return executeHttpUriRequest(new HttpHead(getInternalURI()));
+		HttpHead head = new HttpHead(getHttpUri());
+		CloseableHttpResponse response = executeHttpUriRequest(head);
+		try {
+			return toResponseInformation(response);
+		} finally {
+			response.close();
+		}
 	}
 
 	/**

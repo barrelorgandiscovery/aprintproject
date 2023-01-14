@@ -255,6 +255,7 @@ project(':bundle') {
 	    from('offlineinstall-extensions') { include '**/*' }
             from ('build') { include 'aprint.jar' }
             from ('maxosx-bundle') { include '**/*' }
+            from ('.') { include 'icon.jpg' }
 
             into "build/installFolder"
     }
