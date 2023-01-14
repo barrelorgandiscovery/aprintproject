@@ -22,6 +22,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
 import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemException;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.tools.VFSTools;
 
@@ -54,6 +55,8 @@ public class JExplorer extends JPanel implements Explorer {
 
 		public abstract void load() throws Exception;
 
+		public abstract boolean reload() throws Exception;
+		
 	}
 
 	public class ExpFFolderNode extends ExpNode {
@@ -113,9 +116,19 @@ public class JExplorer extends JPanel implements Explorer {
 				fo = resolveFile;
 			}
 
+			if (!reload()) {
+				this.removeAllChildren();
+				((DefaultTreeModel) JExplorer.this.tree.getModel()).nodeStructureChanged(this);
+			}
+			
+			loaded = true;
+		}
+
+		public boolean reload() throws FileSystemException {
 			this.removeAllChildren();
 			FileObject[] childrens = fo.getChildren();
-
+			
+			boolean retvalue = false;
 			if (childrens != null) {
 				// sort the filename
 				Arrays.sort(childrens, new Comparator<FileObject>() {
@@ -128,10 +141,11 @@ public class JExplorer extends JPanel implements Explorer {
 
 					add(new ExpFFolderNode(f));
 					((DefaultTreeModel) JExplorer.this.tree.getModel()).nodeStructureChanged(this);
+					retvalue = true; // has children
 				}
 
 			}
-			loaded = true;
+			return retvalue;
 		}
 	}
 
@@ -147,6 +161,18 @@ public class JExplorer extends JPanel implements Explorer {
 
 		public ExpBookmarksNode(Bookmarks bookMarks) throws Exception {
 			this.bookMarks = bookMarks;
+			reload();
+		}
+
+		@Override
+		public void load() throws Exception {
+			loaded = true;
+		}
+		
+		@Override
+		public boolean reload() throws Exception {
+			removeAllChildren();
+			boolean retvalue = false;
 			for (int i = 0; i < bookMarks.getSize(); i++) {
 				TitledURLEntry entry = bookMarks.getEntry(i);
 				String url = entry.getURL();
@@ -157,13 +183,11 @@ public class JExplorer extends JPanel implements Explorer {
 					logger.error(ex.getMessage(), ex);
 					add(new ExpFFolderNode(url));
 				}
+				retvalue = true;
 			}
+			return retvalue;
 		}
-
-		@Override
-		public void load() throws Exception {
-			loaded = true;
-		}
+		
 	}
 
 	protected JTree tree;
@@ -251,6 +275,12 @@ public class JExplorer extends JPanel implements Explorer {
 
 	}
 
+	public void reload() throws Exception {
+		ExpBookmarksNode root = new ExpBookmarksNode(new Bookmarks());
+		tree.setModel(new DefaultTreeModel(root));
+		root.reload();
+	}
+	
 	@Override
 	public void addExplorerListener(ExplorerListener listener) {
 		if (listener != null)

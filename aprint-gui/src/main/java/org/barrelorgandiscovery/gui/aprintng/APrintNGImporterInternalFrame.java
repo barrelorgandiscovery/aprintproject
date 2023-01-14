@@ -43,6 +43,7 @@ import org.barrelorgandiscovery.gui.aprint.extensionspoints.InformCurrentVirtual
 import org.barrelorgandiscovery.gui.aprint.instrumentchoice.IInstrumentChoice;
 import org.barrelorgandiscovery.gui.aprint.instrumentchoice.IInstrumentChoiceListener;
 import org.barrelorgandiscovery.gui.aprint.instrumentchoice.JCoverFlowInstrumentChoice;
+import org.barrelorgandiscovery.gui.aprint.instrumentchoice.JCoverFlowInstrumentChoiceWithFilter;
 import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
 import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.instrument.Instrument;
@@ -85,12 +86,14 @@ import com.l2fprod.common.propertysheet.PropertySheetPanel;
  */
 public class APrintNGImporterInternalFrame extends APrintNGInternalFrame implements ActionListener {
 
+	private static final long serialVersionUID = 5172381979982952271L;
+
 	private static Logger logger = Logger.getLogger(APrintNGImporterInternalFrame.class);
 
 	private boolean init = true;
 
 	/**
-	 * Executor pour l'�x�cution des taches longues
+	 * Executor pour l'éxécution des taches longues
 	 */
 	private Executor backgroundexecutor = Executors.newCachedThreadPool(new ThreadFactory() {
 		public Thread newThread(Runnable r) {
@@ -107,10 +110,6 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame impleme
 	private JComponent choixtransposition;
 
 	private JComboBox listetransposition = new JComboBox();
-
-	private JTextField searchTextField = new JTextField(20);
-	private JButton searchButton = new JButton(Messages.getString("APrint.292")); //$NON-NLS-1$
-	private JButton resetFilterButton = new JButton(Messages.getString("APrint.293")); //$NON-NLS-1$
 
 	private AbstractTransformation getCurrentTransposition() {
 		return (AbstractTransformation) listetransposition.getSelectedItem();
@@ -178,11 +177,6 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame impleme
 		listetransposition.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent e) {
 				try {
-
-					// transposedCarton = null;
-					// pianoroll.setVirtualBook(null);
-					//
-					//
 					checkState();
 				} catch (Exception ex) {
 					JMessageBox.showMessage(services.getOwnerForDialog(), Messages.getString("APrint.55") //$NON-NLS-1$
@@ -205,20 +199,8 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame impleme
 		JLabel lblnomfichier = pInstrument.getLabel("lblmidiorkartoimport");//$NON-NLS-1$
 		lblnomfichier.setText(Messages.getString("APrint.160"));//$NON-NLS-1$
 
-		// /////////////////////////////////////////////////////////////////////////////
-		// Panneau de choix de gamme, transposition et instruments
-
-		// Panneau de choix de l'instrument ..
-		// instrumentChoice = new JInstrumentChoice(repository.getRepository2(),
-		// new IInstrumentChoiceListener() {
-		// public void instrumentChanged(
-		// fr.freydierepatrice.instrument.Instrument newInstrument) {
-		// APrint.this.instrumentChanged();
-		// }
-		// });
-
-		JCoverFlowInstrumentChoice cfic = new JCoverFlowInstrumentChoice(repository.getRepository2(),
-				new IInstrumentChoiceListener() {
+		JCoverFlowInstrumentChoiceWithFilter cfic = new JCoverFlowInstrumentChoiceWithFilter(
+				repository.getRepository2(), new IInstrumentChoiceListener() {
 					public void instrumentChanged(org.barrelorgandiscovery.instrument.Instrument newInstrument) {
 						APrintNGImporterInternalFrame.this.instrumentChanged();
 					}
@@ -226,58 +208,6 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame impleme
 		instrumentChoice = cfic;
 
 		pInstrument.getFormAccessor().replaceBean(pInstrument.getComponentByName("instruments"), cfic);
-
-		JLabel lblSearch = (JLabel) pInstrument.getComponentByName("lblfilterinstruments");//$NON-NLS-1$
-		lblSearch.setText(Messages.getString("APrint.161"));//$NON-NLS-1$
-
-		searchTextField = (JTextField) pInstrument.getComponentByName("txtfilter");//$NON-NLS-1$
-
-		final ActionListener searchListener = new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					String filter = searchTextField.getText();
-					logger.debug("search criteria :" + filter); //$NON-NLS-1$
-					instrumentChoice.setInstrumentFilter(filter);
-					instrumentChoice.reloadInstruments();
-				} catch (Exception ex) {
-					logger.error("error in defining the instrument filter : " //$NON-NLS-1$
-							+ ex.getMessage(), ex);
-				}
-			}
-		};
-
-		searchTextField.addKeyListener(new KeyAdapter() {
-
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if (e.getKeyCode() == KeyEvent.VK_ENTER) {
-					searchListener.actionPerformed(null);
-				}
-			}
-
-		});
-
-		resetFilterButton = (JButton) pInstrument.getButton("reset"); //$NON-NLS-1$
-		resetFilterButton.setText(Messages.getString("APrint.293")); //$NON-NLS-1$
-
-		resetFilterButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-					String filter = searchTextField.getText();
-					logger.debug("old search criteria :" + filter); //$NON-NLS-1$
-					instrumentChoice.setInstrumentFilter(null);
-					instrumentChoice.reloadInstruments();
-				} catch (Exception ex) {
-					logger.error("error in resetting the instrument filter : " //$NON-NLS-1$
-							+ ex.getMessage(), ex);
-				}
-
-			}
-		});
-
-		searchButton = (JButton) pInstrument.getComponentByName("filterinstruments"); //$NON-NLS-1$
-		searchButton.addActionListener(searchListener);
-		searchButton.setText(Messages.getString("APrint.292")); //$NON-NLS-1$
 
 		JButton convertir = (JButton) pInstrument.getComponentByName("import"); //$NON-NLS-1$
 		convertir.setText(Messages.getString("APrint.130")); //$NON-NLS-1$
@@ -418,13 +348,12 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame impleme
 
 	/**
 	 * Rafraichit la liste des transposition en fonction de la gamme, ou de
-	 * l'instrument s�lectionn� s�lectionn�e
+	 * l'instrument sélectionné
 	 */
 	private void refreshTranspositions() {
 
 		setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 		try {
-			// On r�cup�re la gamme s�lectionn�e dans la liste
 
 			Scale g = getSelectedGamme();
 
@@ -500,7 +429,7 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame impleme
 		}
 
 	}
-	
+
 	/**
 	 * transpose book for a given instrument
 	 * 
@@ -517,7 +446,6 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame impleme
 		MidiIOResult readMidiFile = readMidiFile(midifile);
 
 		VirtualBook readCarton = readMidiFile.virtualBook;
-		
 
 		assert readCarton != null;
 
@@ -608,7 +536,7 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame impleme
 				}
 
 				logger.debug("get the result ..."); //$NON-NLS-1$
-			
+
 				transposedCarton = r.virtualbook;
 			} finally {
 				inputStream.close();
@@ -618,15 +546,12 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame impleme
 		}
 
 		assert transposedCarton != null;
-		
-		
-		
+
 		VirtualBookMetadata virtualBookMetadata = new VirtualBookMetadata();
 		virtualBookMetadata.setName(midifile.getName().getBaseName());
 		virtualBookMetadata.setDescription("Converted from Midifile " + virtualBookMetadata.getName());
-		
+
 		transposedCarton.setMetadata(virtualBookMetadata);
-		
 
 		waitininterface.infiniteChangeText(Messages.getString("APrint.157")); //$NON-NLS-1$
 
@@ -687,10 +612,9 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame impleme
 	private org.barrelorgandiscovery.instrument.Instrument getSelectedInstrument() {
 		return instrumentChoice.getCurrentInstrument();
 	}
-	
-	
+
 	public void setSelectedInstrument(String instrumentName) {
-		instrumentChoice.selectInstrument(instrumentName);		
+		instrumentChoice.selectInstrument(instrumentName);
 	}
 
 	// ////////////////////////////////////////////////////////////////////////
@@ -784,7 +708,6 @@ public class APrintNGImporterInternalFrame extends APrintNGInternalFrame impleme
 
 			waitininterface.infiniteChangeText(Messages.getString("APrint.253")); //$NON-NLS-1$
 
-			// on est invok� par un thread s�par�
 			SwingUtilities.invokeAndWait(new Runnable() {
 				public void run() {
 

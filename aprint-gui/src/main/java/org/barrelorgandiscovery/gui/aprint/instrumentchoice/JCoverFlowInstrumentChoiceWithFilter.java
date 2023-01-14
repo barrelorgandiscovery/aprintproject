@@ -24,7 +24,9 @@ import com.jeta.forms.components.panel.FormPanel;
  * 
  * @author pfreydiere
  */
-public class JCoverFlowInstrumentChoiceWithFilter extends JPanel {
+public class JCoverFlowInstrumentChoiceWithFilter extends JPanel implements IInstrumentChoice {
+
+	private static final long serialVersionUID = 8224055166988386721L;
 
 	private static Logger logger = Logger.getLogger(JCoverFlowInstrumentChoiceWithFilter.class);
 
@@ -80,6 +82,7 @@ public class JCoverFlowInstrumentChoiceWithFilter extends JPanel {
 			@Override
 			public void keyPressed(KeyEvent e) {
 			}
+
 			@Override
 			public void keyReleased(KeyEvent e) {
 				searchListener.actionPerformed(null);
@@ -111,13 +114,38 @@ public class JCoverFlowInstrumentChoiceWithFilter extends JPanel {
 
 	}
 
-	public void selectInstrument(String instrumentName) {
-		instrumentChoice.selectInstrument(instrumentName);
+	@Override
+	public boolean selectInstrument(String instrumentName) {
+		return instrumentChoice.selectInstrument(instrumentName);
 	}
-	
+
 	public Instrument getFirstInstrument() {
 		return instrumentChoice.getFirstInstrument();
 	}
-	
-	
+
+	public Instrument getCurrentInstrument() {
+		return instrumentChoice.getCurrentInstrument();
+	}
+
+	@Override
+	public void setRepository(Repository2 newrep) {
+		instrumentChoice.setRepository(newrep);
+	}
+
+	@Override
+	public void reloadInstruments() {
+		instrumentChoice.reloadInstruments();
+	}
+
+	@Override
+	public String getInstrumentFilter() {
+		return instrumentChoice.getInstrumentFilter();
+	}
+
+	@Override
+	public void setInstrumentFilter(String filter) {
+		instrumentChoice.setInstrumentFilter(filter);
+
+	}
+
 }

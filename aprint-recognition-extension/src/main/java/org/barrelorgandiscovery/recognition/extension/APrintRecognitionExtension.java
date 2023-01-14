@@ -17,6 +17,7 @@ import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.extensions.ExtensionPoint;
 import org.barrelorgandiscovery.gui.aprint.instrumentchoice.IInstrumentChoiceListener;
 import org.barrelorgandiscovery.gui.aprint.instrumentchoice.JCoverFlowInstrumentChoice;
+import org.barrelorgandiscovery.gui.aprint.instrumentchoice.JCoverFlowInstrumentChoiceWithFilter;
 import org.barrelorgandiscovery.gui.aprintng.extensionspoints.WelcomeExtensionExtensionPoint;
 import org.barrelorgandiscovery.gui.aprintng.helper.BaseExtension;
 import org.barrelorgandiscovery.instrument.Instrument;
@@ -152,7 +153,7 @@ public class APrintRecognitionExtension extends BaseExtension {
 			Container cp = d.getContentPane();
 			cp.setLayout(new BorderLayout());
 
-			final JCoverFlowInstrumentChoice ic = new JCoverFlowInstrumentChoice(
+			final JCoverFlowInstrumentChoiceWithFilter ic = new JCoverFlowInstrumentChoiceWithFilter(
 					application.getRepository(),
 					new IInstrumentChoiceListener() {
 

@@ -2092,7 +2092,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 				pjob.print();
 			} // PF anciennement en commentaire
 
-			// } // sinon l'utilisateur a click� sur annuler ...
+			// } // user cancel ...
 
 		} catch (Exception ex) {
 			ex.printStackTrace(System.err);
@@ -2670,10 +2670,8 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		}
 	}
 
-	/** Verifie l'�tat de l'interface en fonction de l'�tat de l'IHM */
+	/** Check GUI state */
 	private void checkState() throws Exception {
-
-		// le carton a �t� transpos� / transform�
 
 		// on regarde si on est en train de jouer
 		// le morceau ....
@@ -2681,7 +2679,6 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		PlaySubSystem currentPlaySubSystem = this.playsubsystem.getCurrent();
 
 		if (currentPlaySubSystem.isPlaying()) {
-			// on d�sactive le bouton imprimer
 			rewind.setEnabled(false);
 			imprimer.setEnabled(false);
 			preview.setEnabled(false);
