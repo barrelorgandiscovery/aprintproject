@@ -11,6 +11,7 @@ import java.io.File;
 import java.net.URL;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 
 import javax.swing.JButton;
@@ -368,37 +369,37 @@ public class SearchPanel extends JPanel implements ActionListener {
 
 	private void indexFolder() {
 		try {
+			final ArrayList<File> foldersToIndex = new ArrayList<>();
+
 			final File sf = props.getSearchFolder();
-			if (sf == null)
-				return;
+			if (sf != null)
+				foldersToIndex.add(sf);
+
+			Arrays.stream(props.getSearchAdditionalFolders()).forEach(foldersToIndex::add);
+
 			logger.debug("indexFolder :" + sf); //$NON-NLS-1$
 
 			Runnable r = new Runnable() {
 				public void run() {
-					try {
+					waitInterface.infiniteStartWait(Messages.getString("SearchPanel.63")); //$NON-NLS-1$
 
-						waitInterface.infiniteStartWait(Messages.getString("SearchPanel.63")); //$NON-NLS-1$
-
-						props.setSearchFolder(sf);
-
-						bi.index(sf, new ProgressIndicator() {
-
-							public void progress(double progress, String message) {
-								waitInterface
-										.infiniteChangeText(Messages.getString("SearchPanel.63") + " ... " + message);
-
-							}
-						});
-
-						waitInterface.infiniteEndWait();
-
-					} catch (Exception ex) {
-						logger.error("error in indexing .." + ex.getMessage(), //$NON-NLS-1$
-								ex);
-						waitInterface.infiniteEndWait();
-						JMessageBox.showMessage(owner, Messages.getString("SearchPanel.65") //$NON-NLS-1$
-								+ ex.getMessage());
-					}
+					foldersToIndex.forEach((sf) -> {
+						try {
+							bi.index(sf, new ProgressIndicator() {
+								public void progress(double progress, String message) {
+									waitInterface.infiniteChangeText(
+											Messages.getString("SearchPanel.63") + " ... " + message);
+								}
+							});
+						} catch (Exception ex) {
+							logger.error("error in indexing .." + ex.getMessage(), //$NON-NLS-1$
+									ex);
+							waitInterface.infiniteEndWait();
+							JMessageBox.showMessage(owner, Messages.getString("SearchPanel.65") //$NON-NLS-1$
+									+ ex.getMessage());
+						}
+					});
+					waitInterface.infiniteEndWait();
 				}
 			};
 
@@ -565,26 +566,20 @@ public class SearchPanel extends JPanel implements ActionListener {
 
 			@Override
 			public void infiniteStartWait(String text) {
-
 			}
 
 			@Override
 			public void infiniteStartWait(String text, ICancelTracker cancelTracker) {
-				// TODO Auto-generated method stub
-
 			}
 
 			@Override
 			public void infiniteEndWait() {
-				// TODO Auto-generated method stub
-
 			}
 
 			@Override
 			public void infiniteChangeText(String text) {
-				// TODO Auto-generated method stub
-
 			}
+
 		};
 		SearchPanel searchPanel = new SearchPanel(bi, p, w, null);
 

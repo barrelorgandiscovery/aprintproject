@@ -52,6 +52,11 @@ import com.jeta.forms.components.panel.FormPanel;
  */
 public class JSoundSampleEditorPanel extends JPanel implements Disposable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6808772337256177743L;
+
 	static class LocalizedNoteChoose {
 		private int noteCode;
 		private String localizedNote;
@@ -92,11 +97,7 @@ public class JSoundSampleEditorPanel extends JPanel implements Disposable {
 
 	}
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = -6808772337256177743L;
-
+	
 	private static Logger logger = Logger
 			.getLogger(JSoundSampleEditorPanel.class);
 
