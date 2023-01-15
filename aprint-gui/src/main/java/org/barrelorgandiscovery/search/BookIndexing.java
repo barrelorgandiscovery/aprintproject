@@ -93,6 +93,16 @@ public class BookIndexing implements Disposable {
 			bufferedInputStream.close();
 		}
 	}
+	
+	public String tokenize(String s) {
+		if (s == null) {
+			return null;
+		}
+		
+		s = StringTools.join(s.split("[/_\\-.]"), " ");
+		
+		return s;
+	}
 
 	private int recurseIndexFiles(File f, IndexWriter index, ProgressIndicator indicator, int nbindexedFile)
 			throws Exception {
@@ -131,24 +141,22 @@ public class BookIndexing implements Disposable {
 						StringBuilder all = new StringBuilder();
 
 						doc.add(new Field(SCALE_FIELD, vb.getScale().getName(), Field.Store.YES, Field.Index.ANALYZED));
-						all.append(vb.getScale().getName()).append(" ");
+						all.append(tokenize(vb.getScale().getName())).append(" ");
 
 						if (vb.getName() != null) {
 							doc.add(new Field(NAME_FIELD, vb.getName(), Field.Store.YES, Field.Index.ANALYZED));
-							all.append(vb.getName()).append(" ");
+							all.append(tokenize(vb.getName())).append(" ");
 						}
 
 						if (m.getGenre() != null) {
 							doc.add(new Field(GENRE_FIELD, m.getGenre(), Field.Store.YES, Field.Index.ANALYZED));
-							all.append(m.getGenre()).append(" ");
+							all.append(tokenize(m.getGenre())).append(" ");
 						}
 
 						doc.add(new Field(FILEREF_FIELD, f.toURL().toString(), Field.Store.YES, Field.Index.NO));
 
 						String prepare = f.getAbsolutePath();
-						prepare = StringTools.join(prepare.split("_"), " ");
-						prepare = StringTools.join(prepare.split("-"), " ");
-						prepare = StringTools.join(prepare.split("."), " ");
+						prepare = tokenize(prepare);
 
 						all.append(f.getAbsolutePath()).append(" ").append(prepare).append(" ");
 
@@ -158,12 +166,12 @@ public class BookIndexing implements Disposable {
 						}
 						if (m.getArranger() != null) {
 							doc.add(new Field(ARRANGER_FIELD, m.getArranger(), Field.Store.YES, Field.Index.ANALYZED));
-							all.append(m.getArranger()).append(" ");
+							all.append(tokenize(m.getArranger())).append(" ");
 						}
 						if (m.getDescription() != null) {
 							doc.add(new Field(DESCRIPTION_FIELD, m.getDescription(), Field.Store.YES,
 									Field.Index.ANALYZED));
-							all.append(m.getDescription()).append(" ");
+							all.append(tokenize(m.getDescription())).append(" ");
 
 						}
 						if (vbr.preferredInstrumentName != null) {
