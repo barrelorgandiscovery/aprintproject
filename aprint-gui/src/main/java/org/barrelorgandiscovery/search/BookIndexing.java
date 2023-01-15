@@ -58,7 +58,7 @@ public class BookIndexing implements Disposable {
 	private static Logger logger = Logger.getLogger(BookIndexing.class);
 
 	private APrintProperties props = null;
-	
+
 	private Analyzer analyzer = null;
 	private Directory luceneDirectory;
 	private File searchFolder = null;
@@ -202,6 +202,26 @@ public class BookIndexing implements Disposable {
 
 			recurseIndexFiles(directory, iwriter, indicator, 0);
 
+		} finally {
+			iwriter.close();
+		}
+	}
+
+	public void index(File[] directories, ProgressIndicator indicator) throws Exception {
+
+		if (directories == null) {
+			return;
+		}
+
+		// To store an index on disk, use this instead:
+		// Directory directory = FSDirectory.open("/tmp/testindex");
+		IndexWriter iwriter = new IndexWriter(luceneDirectory, analyzer, true, new IndexWriter.MaxFieldLength(25000));
+		try {
+			for (File d : directories) {
+
+				if (d != null)
+					recurseIndexFiles(d, iwriter, indicator, 0);
+			}
 		} finally {
 			iwriter.close();
 		}

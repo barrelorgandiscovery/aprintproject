@@ -14,11 +14,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 
+import javax.swing.AbstractButton;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
@@ -109,6 +112,8 @@ public class SearchPanel extends JPanel implements ActionListener {
 
 	private JComponent advancedsearchcomponent;
 
+	private JList additionalFolderList;
+
 	public void setSearchPanelListener(ISearchPanelListener searchPanelListener) {
 		this.searchPanelListener = searchPanelListener;
 	}
@@ -155,6 +160,34 @@ public class SearchPanel extends JPanel implements ActionListener {
 			}
 		});
 		indexfolder.setText(Messages.getString("SearchPanel.11")); //$NON-NLS-1$
+
+		additionalFolderList = spp.getList("additionalfolders");
+		assert additionalFolderList != null;
+
+		File[] allAdditionalFolders = props.getSearchAdditionalFolders();
+		assert allAdditionalFolders != null;
+		DefaultListModel<File> model = (DefaultListModel<File>) additionalFolderList.getModel();
+		Arrays.stream(allAdditionalFolders).forEach((f) -> model.addElement(f));
+
+		AbstractButton btnAddAdditionalFolder = spp.getButton("addfolder"); //$NON-NLS-1$
+		assert btnAddAdditionalFolder != null;
+		btnAddAdditionalFolder.addActionListener((e) -> {
+			try {
+				addAdditionalFolder();
+			} catch (Throwable t) {
+				JMessageBox.showError(this, t);
+			}
+		});
+
+		AbstractButton btnRemoveSelectedFolder = spp.getButton("removefolder"); //$NON-NLS-1$
+		assert btnRemoveSelectedFolder != null;
+		btnRemoveSelectedFolder.addActionListener((e) -> {
+			try {
+				removeAdditionalSelectedFolder();
+			} catch (Throwable t) {
+				JMessageBox.showError(this, t);
+			}
+		});
 
 		FormPanel sp = new FormPanel(getClass().getResourceAsStream("searchpanel.jfrm")); //$NON-NLS-1$
 
@@ -367,6 +400,50 @@ public class SearchPanel extends JPanel implements ActionListener {
 
 	}
 
+	private void addAdditionalFolder() throws Exception {
+		logger.debug("add additional folder"); //$NON-NLS-1$
+
+		File sf = props.getSearchFolder();
+
+		JDirectoryChooser c = new JDirectoryChooser(sf);
+		if (c.showDialog(this, Messages.getString("SearchPanel.60")) == JDirectoryChooser.APPROVE_OPTION) { //$NON-NLS-1$
+			File selectedFile = c.getSelectedFile();
+			if (selectedFile != null) {
+				logger.debug("selected file :" //$NON-NLS-1$
+						+ selectedFile.getAbsolutePath());
+
+				DefaultListModel<File> model = (DefaultListModel<File>) additionalFolderList.getModel();
+				model.addElement(selectedFile);
+
+				saveAdditionalFolders();
+				checkUI();
+			}
+		}
+
+	}
+
+	private void removeAdditionalSelectedFolder() throws Exception {
+		logger.debug("remove selected folder"); //$NON-NLS-1$
+
+		int index = additionalFolderList.getSelectedIndex();
+		if (index != -1) {
+			DefaultListModel<File> model = (DefaultListModel<File>) additionalFolderList.getModel();
+			model.remove(index);
+			saveAdditionalFolders();
+			checkUI();
+		}
+
+	}
+
+	private void saveAdditionalFolders() throws Exception {
+		DefaultListModel<File> model = (DefaultListModel<File>) additionalFolderList.getModel();
+		File[] folders = new File[model.size()];
+		model.copyInto(folders);
+		props.setSearchAdditionalFolders(folders);
+		
+
+	}
+
 	private void indexFolder() {
 		try {
 			final ArrayList<File> foldersToIndex = new ArrayList<>();
@@ -383,22 +460,20 @@ public class SearchPanel extends JPanel implements ActionListener {
 				public void run() {
 					waitInterface.infiniteStartWait(Messages.getString("SearchPanel.63")); //$NON-NLS-1$
 
-					foldersToIndex.forEach((sf) -> {
-						try {
-							bi.index(sf, new ProgressIndicator() {
-								public void progress(double progress, String message) {
-									waitInterface.infiniteChangeText(
-											Messages.getString("SearchPanel.63") + " ... " + message);
-								}
-							});
-						} catch (Exception ex) {
-							logger.error("error in indexing .." + ex.getMessage(), //$NON-NLS-1$
-									ex);
-							waitInterface.infiniteEndWait();
-							JMessageBox.showMessage(owner, Messages.getString("SearchPanel.65") //$NON-NLS-1$
-									+ ex.getMessage());
-						}
-					});
+					try {
+						bi.index(foldersToIndex.toArray(new File[0]), new ProgressIndicator() {
+							public void progress(double progress, String message) {
+								waitInterface
+										.infiniteChangeText(Messages.getString("SearchPanel.63") + " ... " + message);
+							}
+						});
+					} catch (Exception ex) {
+						logger.error("error in indexing .." + ex.getMessage(), //$NON-NLS-1$
+								ex);
+						waitInterface.infiniteEndWait();
+						JMessageBox.showMessage(owner, Messages.getString("SearchPanel.65") //$NON-NLS-1$
+								+ ex.getMessage());
+					}
 					waitInterface.infiniteEndWait();
 				}
 			};

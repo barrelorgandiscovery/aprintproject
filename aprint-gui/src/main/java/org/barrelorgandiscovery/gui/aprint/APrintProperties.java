@@ -262,8 +262,9 @@ public class APrintProperties {
 			for (File f : additionalFolders) {
 				if (f != null) {
 					if (!folders.isEmpty()) {
-						folders += "," + f.getAbsolutePath();
+						folders += "," ;
 					}
+					folders+= f.getAbsolutePath();
 				}
 			}
 		}
