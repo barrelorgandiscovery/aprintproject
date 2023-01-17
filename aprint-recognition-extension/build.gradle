@@ -38,10 +38,12 @@ repositories {
 	   // imagej repositories 
 	   maven {
 		   url "https://maven.imagej.net/content/repositories/releases"
+		   setAllowInsecureProtocol(true)
 	   }
 	   maven {
 		   
 		   url 'https://maven.imagej.net/content/groups/public'
+			setAllowInsecureProtocol(true)
 	   }
 }
 
