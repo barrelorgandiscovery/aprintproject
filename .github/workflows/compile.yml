@@ -31,5 +31,5 @@ jobs:
       - name: Build with Gradle
         uses: gradle/gradle-build-action@67421db6bd0bf253fb4bd25b31ebb98943c375e1
         with:
-          arguments: build -x test -Dhttps.protocols=TLSv1.2,TLSv1.3
+          arguments: build -x test -Dhttps.protocols=TLSv1.2,TLSv1.3 -Djavax.net.ssl.trustStore=keystore/keystore -Djavax.net.ssl.trustStorePassword=keystore
 
