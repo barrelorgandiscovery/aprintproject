@@ -24,6 +24,7 @@ sourcesJar {
 	duplicatesStrategy(DuplicatesStrategy.EXCLUDE) 
 }
 
+def useLocal = true
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -48,10 +49,16 @@ repositories {
 }
 
 
+
 // In this section you declare the dependencies for your production and test code
 dependencies {
     compileOnly project(':aprint-gui')
 	testImplementation name:'junit', group:'junit', version:'3.8'
+
+	if (useLocal) {
+           implementation files(fileTree(dir:"${projectDir}/dependencies" , include:['**/*.jar']).toList())
+	} else {
+
 	implementation name: 'Gray_Morphology-2.3.2'
     implementation name: 'Trainable_Segmentation', group:'sc.fiji', version:'3.2.34' 
     // https://mvnrepository.com/artifact/sc.fiji/imagescience
@@ -61,7 +68,7 @@ dependencies {
 	implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.6.4'
 	implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.6.4'
 	implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.6.4'
-    
+    	}
 }
 
 task fatJar(type: Jar, dependsOn: jar) {
@@ -78,6 +85,10 @@ task fatJar(type: Jar, dependsOn: jar) {
   duplicatesStrategy(DuplicatesStrategy.EXCLUDE) 
 }
 
+task copyDependencies(type: Copy) {
+   from configurations.runtimeClasspath
+   into 'dependencies'
+}
 
 test {
 
