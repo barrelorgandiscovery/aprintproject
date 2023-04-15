@@ -48,7 +48,7 @@ import org.barrelorgandiscovery.virtualbook.transformation.AbstractTransformatio
 import org.barrelorgandiscovery.virtualbook.transformation.LinearTransposition;
 
 /**
- * Extension de per�age pour la machine � percer de g�rard
+ * Punch extension
  * 
  * @author Freydiere Patrice
  * 
