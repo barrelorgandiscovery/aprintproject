@@ -38,6 +38,8 @@ import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
 import com.birosoft.liquid.LiquidLookAndFeel;
 import com.easynth.lookandfeel.EaSynthLookAndFeel;
 import com.formdev.flatlaf.FlatLightLaf;
+import com.googlecode.vfsjfilechooser2.accessories.bookmarks.Bookmarks;
+import com.googlecode.vfsjfilechooser2.accessories.bookmarks.TitledURLEntry;
 import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
 /**
@@ -54,7 +56,8 @@ public class APrintApplication {
 	private static APrintNG p;
 
 	/**
-	 * main function, that is called from command line
+	 * main function, that is called from command line, this method should be
+	 * bootstrap for child first class loading
 	 * 
 	 * @param args
 	 */
@@ -114,7 +117,6 @@ public class APrintApplication {
 			} else {
 				Logger.getRootLogger().setLevel(Level.DEBUG);
 			}
-
 
 			Logger logger = Logger.getLogger(APrintApplicationBootStrap.class);
 			if (logger.isInfoEnabled()) {
@@ -177,48 +179,30 @@ public class APrintApplication {
 
 				// setLiquidLnf();
 
+				check_lnf();
+
+				// check book marks
+
 				try {
-
-					String llnfcn = LiquidLookAndFeel.class.getName();
-					if (!isLookAndFeelInstalled(llnfcn))
-						javax.swing.UIManager.installLookAndFeel("Liquid Look And Feel", llnfcn); //$NON-NLS-1$
-
-					String rodlnfclassname = NimRODLookAndFeel.class.getName();
-					if (!isLookAndFeelInstalled(rodlnfclassname)) {
-						javax.swing.UIManager.installLookAndFeel("NimROD Look And Feel", rodlnfclassname); //$NON-NLS-1$
-					}
-
-					String easynthlnf = EaSynthLookAndFeel.class.getName();
-					if (!isLookAndFeelInstalled(easynthlnf)) {
-						javax.swing.UIManager.installLookAndFeel("EaSynth Look And Feel", easynthlnf); //$NON-NLS-1$
-					}
-
-					String flatlaf = FlatLightLaf.class.getName();
-					if (!isLookAndFeelInstalled(flatlaf)) {
-						javax.swing.UIManager.installLookAndFeel("FlatLaf And Feel", flatlaf); //$NON-NLS-1$
-					}
-
-					LiquidLookAndFeel.setLiquidDecorations(true, "mac"); //$NON-NLS-1$
-					// LiquidLookAndFeel.setStipples(false);
-					LiquidLookAndFeel.setToolbarFlattedButtons(true);
-
-					try {
-						String windowslnf = com.jgoodies.looks.windows.WindowsLookAndFeel.class.getName();
-						if (!isLookAndFeelInstalled(windowslnf)) {
-							UIManager.installLookAndFeel("JGoodies Windows lnf", windowslnf);
+					Bookmarks b = new Bookmarks();
+					boolean found = false;
+					for (int i = 0 ; i < b.getSize() ; i ++ ) {
+						String title = b.getTitle(i);
+						if ("Web Library".equals(title)) {
+							found = true;
+							break;
 						}
-
-						String plsticlnf = com.jgoodies.looks.plastic.PlasticLookAndFeel.class.getName();
-						if (!isLookAndFeelInstalled(plsticlnf)) {
-							UIManager.installLookAndFeel("JGoodies Plastic lnf", plsticlnf);
-						}
-
-					} catch (Throwable t) {
-
 					}
+					
+					if (!found) {
+						b.add(new TitledURLEntry("Web Library", "bod://www.barrel-organ-discovery.org:80/READONLY_WEB_SITE_CONTENT"));
+						b.save();
+					}
+					
+					
 
 				} catch (Throwable t) {
-
+					logger.error("fail to check bookmarks :" + t.getMessage(), t);
 				}
 
 				logger.debug("loading the look and feel ..."); //$NON-NLS-1$
@@ -226,7 +210,10 @@ public class APrintApplication {
 				try {
 
 					String lnf = prop.getLookAndFeel();
-					if (lnf == null || "swing".equals(lnf)) { //$NON-NLS-1$
+					if (lnf == null || lnf.isBlank()) {
+						javax.swing.UIManager
+								.setLookAndFeel((LookAndFeel) com.formdev.flatlaf.FlatLightLaf.class.newInstance());
+					} else if ("swing".equals(lnf)) { //$NON-NLS-1$
 						javax.swing.UIManager
 								.setLookAndFeel(javax.swing.UIManager.getCrossPlatformLookAndFeelClassName());
 
@@ -270,6 +257,7 @@ public class APrintApplication {
 					logger.debug("external instruments has already been downloaded");
 				}
 
+				// main loop
 				while (p.isVisible()) {
 					Thread.sleep(100);
 				}
@@ -283,6 +271,7 @@ public class APrintApplication {
 					System.exit(0); // user must restart to take effect
 				}
 
+				// reinit the language if the exit is linked to language change
 				initLanguageWithProperties(prop);
 
 			}
@@ -296,7 +285,56 @@ public class APrintApplication {
 		}
 	}
 
+	// check look and feel
+	private static void check_lnf() {
+		try {
+
+			String llnfcn = LiquidLookAndFeel.class.getName();
+			if (!isLookAndFeelInstalled(llnfcn))
+				javax.swing.UIManager.installLookAndFeel("Liquid Look And Feel", llnfcn); //$NON-NLS-1$
+
+			String rodlnfclassname = NimRODLookAndFeel.class.getName();
+			if (!isLookAndFeelInstalled(rodlnfclassname)) {
+				javax.swing.UIManager.installLookAndFeel("NimROD Look And Feel", rodlnfclassname); //$NON-NLS-1$
+			}
+
+			String easynthlnf = EaSynthLookAndFeel.class.getName();
+			if (!isLookAndFeelInstalled(easynthlnf)) {
+				javax.swing.UIManager.installLookAndFeel("EaSynth Look And Feel", easynthlnf); //$NON-NLS-1$
+			}
+
+			String flatlaf = FlatLightLaf.class.getName();
+			if (!isLookAndFeelInstalled(flatlaf)) {
+				javax.swing.UIManager.installLookAndFeel("FlatLaf And Feel", flatlaf); //$NON-NLS-1$
+			}
+
+			LiquidLookAndFeel.setLiquidDecorations(true, "mac"); //$NON-NLS-1$
+			// LiquidLookAndFeel.setStipples(false);
+			LiquidLookAndFeel.setToolbarFlattedButtons(true);
+
+			try {
+				String windowslnf = com.jgoodies.looks.windows.WindowsLookAndFeel.class.getName();
+				if (!isLookAndFeelInstalled(windowslnf)) {
+					UIManager.installLookAndFeel("JGoodies Windows lnf", windowslnf);
+				}
+
+				String plsticlnf = com.jgoodies.looks.plastic.PlasticLookAndFeel.class.getName();
+				if (!isLookAndFeelInstalled(plsticlnf)) {
+					UIManager.installLookAndFeel("JGoodies Plastic lnf", plsticlnf);
+				}
+
+			} catch (Throwable t) {
+
+			}
+
+		} catch (Throwable t) {
+
+		}
+	}
+
 	/**
+	 * Show Splash
+	 * 
 	 * @throws IOException
 	 */
 	private static void showSplash() throws IOException {

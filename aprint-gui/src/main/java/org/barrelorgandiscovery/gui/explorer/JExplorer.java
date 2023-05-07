@@ -79,6 +79,12 @@ public class JExplorer extends JPanel implements Explorer {
 			DefaultMutableTreeNode defaultMutableTreeNode = new DefaultMutableTreeNode("Loading ... ");
 			add(defaultMutableTreeNode);
 		}
+		
+		public ExpFFolderNode(FileObject fo, String overloadedName) {
+			this(fo);
+			this.userObject = overloadedName;
+		}
+		
 
 		private boolean _selected;
 
@@ -150,7 +156,7 @@ public class JExplorer extends JPanel implements Explorer {
 	}
 
 	/**
-	 * bookmark node
+	 * bookmark node, listing the bookmarks
 	 * 
 	 * @author pfreydiere
 	 *
@@ -178,7 +184,7 @@ public class JExplorer extends JPanel implements Explorer {
 				String url = entry.getURL();
 				try {
 					FileObject resolveFile = VFSTools.getManager().resolveFile(url);
-					add(new ExpFFolderNode(resolveFile));
+					add(new ExpFFolderNode(resolveFile, entry.getTitle()));
 				} catch (Exception ex) {
 					logger.error(ex.getMessage(), ex);
 					add(new ExpFFolderNode(url));
@@ -192,14 +198,16 @@ public class JExplorer extends JPanel implements Explorer {
 
 	protected JTree tree;
 
+	private Object owner;
+	
 	/**
 	 * constructor
 	 * 
 	 * @throws Exception
 	 */
-	public JExplorer() throws Exception {
+	public JExplorer(Object owner) throws Exception {
 		super();
-
+		this.owner = owner;
 		setLayout(new BorderLayout());
 		tree = new JTree(new ExpBookmarksNode(new Bookmarks()));
 		add(tree, BorderLayout.CENTER);
@@ -293,10 +301,9 @@ public class JExplorer extends JPanel implements Explorer {
 	}
 
 	public static void main(String[] args) throws Exception {
-
 		JFrame f = new JFrame();
 		f.getContentPane().setLayout(new BorderLayout());
-		f.getContentPane().add(new JExplorer(), BorderLayout.CENTER);
+		f.getContentPane().add(new JExplorer(null), BorderLayout.CENTER);
 		f.setSize(new Dimension(700, 500));
 		f.setVisible(true);
 	}

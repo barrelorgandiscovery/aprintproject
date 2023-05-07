@@ -46,7 +46,7 @@ public class JExplorerWithSearch extends JPanel {
 
 	protected void initComponents() throws Exception {
 		setLayout(new BorderLayout());
-		explorer = new JExplorer();
+		explorer = new JExplorer(services.getOwnerForDialog());
 
 		JPanel explorerPanelWithTools = new JPanel();
 		explorerPanelWithTools.setLayout(new BorderLayout());
@@ -59,7 +59,7 @@ public class JExplorerWithSearch extends JPanel {
 		tb.add(bookmarkButton);
 		bookmarkButton.addActionListener((e) -> {
 			try {
-				BookmarksDialog bookmarkDialog = new BookmarksDialog((Frame) services.getOwner(), null);
+				BookmarksDialog bookmarkDialog = new BookmarksDialog((Frame) services.getOwnerForDialog(), null);
 				bookmarkDialog.setVisible(true);
 				explorer.reload();
 			} catch (Exception ex) {
