@@ -52,15 +52,15 @@ public class NewBookFrame extends TerminalParameterModelStep implements IModelSt
 				new CompositeType(
 						new ModelType[] { new JavaType(VirtualBook.class),
 								new GenericSimpleType(Collection.class, new Class[] { Hole.class }) },
-						"virtualBook", "Book or Holes"),
-				"virtualbook", "Virtual Book", null);
+						"virtualBook", Messages.getString("NewBookFrame.1")), //$NON-NLS-1$ //$NON-NLS-2$
+				"virtualbook", Messages.getString("NewBookFrame.3"), null); //$NON-NLS-1$ //$NON-NLS-2$
 		updateConfig();
 		// fromConfig();
 	}
 
 	@Override
 	public String getLabel() {
-		return "Open VirtualBook in Frame";
+		return Messages.getString("NewBookFrame.4"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -97,7 +97,7 @@ public class NewBookFrame extends TerminalParameterModelStep implements IModelSt
 		PropertyEditorRegistry ef = (PropertyEditorRegistry) p.getEditorFactory();
 
 		Property[] properties = p.getProperties();
-		logger.debug("properties :" + Arrays.asList(properties));
+		logger.debug("properties :" + Arrays.asList(properties)); //$NON-NLS-1$
 		assert properties.length == 1;
 
 		ef.registerEditor(properties[0], new InstrumentNameChooserPropertyEditor(env.getRepository()));
@@ -111,7 +111,7 @@ public class NewBookFrame extends TerminalParameterModelStep implements IModelSt
 
 		if (services != null && getValue() != null) {
 
-			logger.debug("open the virtual book");
+			logger.debug("open the virtual book"); //$NON-NLS-1$
 
 			Collection<Hole> h = null;
 			if (getValue() instanceof VirtualBook) {
@@ -121,22 +121,22 @@ public class NewBookFrame extends TerminalParameterModelStep implements IModelSt
 			}
 			assert h != null;
 
-			logger.debug("get the instrument");
-			log("get instrument :" + instrumentName);
+			logger.debug("get the instrument"); //$NON-NLS-1$
+			log("get instrument :" + instrumentName); //$NON-NLS-1$
 			Instrument instrument = services.getRepository().getInstrument(instrumentName);
 
-			logger.debug("instrument loaded :" + instrumentName);
+			logger.debug("instrument loaded :" + instrumentName); //$NON-NLS-1$
 			if (instrument == null)
-				throw new Exception("instrument " + instrumentName + " not found");
-			logger.debug("opening virtual book");
+				throw new Exception("instrument " + instrumentName + " not found"); //$NON-NLS-1$ //$NON-NLS-2$
+			logger.debug("opening virtual book"); //$NON-NLS-1$
 
 			VirtualBook vb = new VirtualBook(instrument.getScale());
 			vb.addHole(h);
-			logger.debug("open frame");
+			logger.debug("open frame"); //$NON-NLS-1$
 			APrintNGVirtualBookFrame frame = services.newVirtualBook(vb, instrument);
 
 		} else {
-			logger.info("context variable services not defined, or null value");
+			logger.info("context variable services not defined, or null value"); //$NON-NLS-1$
 		}
 
 		return result;
@@ -160,8 +160,8 @@ public class NewBookFrame extends TerminalParameterModelStep implements IModelSt
 	public void updateConfig() {
 
 		instrumentParameter = new ModelValuedParameter();
-		instrumentParameter.setName("instrumentname");
-		instrumentParameter.setLabel("Instrument Name");
+		instrumentParameter.setName("instrumentname"); //$NON-NLS-1$
+		instrumentParameter.setLabel(Messages.getString("NewBookFrame.16")); //$NON-NLS-1$
 		instrumentParameter.setType(new JavaType(String.class));
 		instrumentParameter.setValue(instrumentName);
 		instrumentParameter.setStep(this);
@@ -177,7 +177,7 @@ public class NewBookFrame extends TerminalParameterModelStep implements IModelSt
 	protected ParameterError[] validateConfigValues() {
 		assert instrumentParameter != null;
 
-		logger.debug("validate config values");
+		logger.debug("validate config values"); //$NON-NLS-1$
 
 		ParameterError[] validateConfigValues = super.validateConfigValues();
 		if (validateConfigValues != null && validateConfigValues.length > 0) {
@@ -186,8 +186,8 @@ public class NewBookFrame extends TerminalParameterModelStep implements IModelSt
 
 		if (configureParameters == null || instrumentParameter.getValue() == null
 				|| !(instrumentParameter.getValue() instanceof String)
-				|| (((String) instrumentParameter.getValue()).trim().equals(""))) {
-			return new ParameterError[] { new ParameterError(instrumentParameter, "no instrument selected") };
+				|| (((String) instrumentParameter.getValue()).trim().equals(""))) { //$NON-NLS-1$
+			return new ParameterError[] { new ParameterError(instrumentParameter, "no instrument selected") }; //$NON-NLS-1$
 		}
 		return new ParameterError[0];
 	}

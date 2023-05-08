@@ -106,7 +106,8 @@ public class JExplorer extends JPanel implements Explorer {
 				}
 				return fo.isFile();
 			} catch (Exception ex) {
-				throw new RuntimeException(ex.getMessage(), ex);
+				// throw new RuntimeException(ex.getMessage(), ex);
+				return false;
 			}
 		}
 

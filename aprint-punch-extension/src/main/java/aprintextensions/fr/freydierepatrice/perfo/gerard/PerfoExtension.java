@@ -125,9 +125,9 @@ public class PerfoExtension implements IExtension, InitExtensionPoint,
 	private JButton mi = null;
 
 	private JButton createOptionButton() {
-		mi = new JButton("Options de per�age ...");
-		// largeur du poin�on ...
-		// hauteur du poin�on ...
+		mi = new JButton("Options de perçage ...");
+		// largeur du poinçon ...
+		// hauteur du poinçon ...
 		mi.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
@@ -162,7 +162,7 @@ public class PerfoExtension implements IExtension, InitExtensionPoint,
 
 		this.currentVirtualBook = vb;
 
-		// V�rification des contraintes ...
+		// Vérification des contraintes ...
 		perfoconverter = new PerfoPunchConverter(vb);
 
 		perfoconverter.convertToPunchPage(parameters.poinconsize,
@@ -199,7 +199,7 @@ public class PerfoExtension implements IExtension, InitExtensionPoint,
 			if (perfoconverter.hasErrors()) {
 				JMessageBox
 						.showMessage(aprintref,
-								"des erreurs subsistes dans le carton, le per�age ne reflete pas l'�coute");
+								"des erreurs subsistes dans le carton, le perçage ne reflete pas l'�coute");
 			}
 
 			// lancement de l'optimisation ...
@@ -209,7 +209,7 @@ public class PerfoExtension implements IExtension, InitExtensionPoint,
 				public void run() {
 
 					CancelTracker ct = new CancelTracker();
-					aprintref.infiniteStartWait("Optimisation du trac�", ct);
+					aprintref.infiniteStartWait("Optimisation du tracé", ct);
 					try {
 
 						perfoconverter.optimize(aprintref, ct);
@@ -244,8 +244,8 @@ public class PerfoExtension implements IExtension, InitExtensionPoint,
 				return;
 			}
 
-			// S�lection du fichier ..
-			// demande du fichier � sauvegarder ...
+			// Sélection du fichier ..
+			// demande du fichier à sauvegarder ...
 			APrintFileChooser choose = new APrintFileChooser();
 
 			choose.setFileSelectionMode(APrintFileChooser.FILES_ONLY);
@@ -258,7 +258,7 @@ public class PerfoExtension implements IExtension, InitExtensionPoint,
 				AbstractFileObject savedfile = choose.getSelectedFile();
 				if (savedfile == null) {
 					JMessageBox.showMessage(aprintref,
-							"pas de fichier s�lectionn�");
+							"pas de fichier sélectionné");
 					return;
 				}
 
@@ -314,7 +314,7 @@ public class PerfoExtension implements IExtension, InitExtensionPoint,
 						fw.close();
 					}
 
-					JMessageBox.showMessage(aprintref, "Fichier sauvegard�");
+					JMessageBox.showMessage(aprintref, "Fichier sauvegardé");
 
 				} catch (Throwable ex) {
 					JMessageBox.showMessage(aprintref,
@@ -350,7 +350,7 @@ public class PerfoExtension implements IExtension, InitExtensionPoint,
 	private JButton savedxf = null;
 
 	private void addPerfoButtonsInToolBar(JToolBar tb) {
-		optimize = new JButton("Optimiser le trac�");
+		optimize = new JButton("Optimiser le tracé");
 		optimize.setIcon(new ImageIcon(getClass().getResource("misc.png")));
 		optimize.setToolTipText("Optimisation du parcours du poincons pour l'extention perfo");
 		optimize.setActionCommand("OPTIMIZE");
@@ -386,7 +386,7 @@ public class PerfoExtension implements IExtension, InitExtensionPoint,
 
 		savedxf = new JButton("exporter en DXF");
 		savedxf.setIcon(new ImageIcon(getClass().getResource("misc.png")));
-		savedxf.setToolTipText("Exporter le carton dans un fichier DXF pour per�age laser");
+		savedxf.setToolTipText("Exporter le carton dans un fichier DXF pour perçage laser");
 		savedxf.setActionCommand("SAVEDXF");
 		savedxf.addActionListener(this);
 
