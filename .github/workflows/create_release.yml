@@ -179,7 +179,7 @@ jobs:
 
     - name: Compress action step
       uses: a7ul/tar-action@v1.1.0
-      id: compress
+      id: compress linux bundle
       with:
         command: c
         files: |
@@ -214,7 +214,7 @@ jobs:
 
     - name: Compress action step
       uses: a7ul/tar-action@v1.1.0
-      id: compress
+      id: compress macos bundle
       with:
         command: c
         files: |
