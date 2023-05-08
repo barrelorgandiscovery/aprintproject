@@ -94,8 +94,9 @@ jobs:
       id: compress_linux_bundle
       with:
         command: c
+        cwd: ./bundle/build/distributions/
         files: |
-          ./bundle/build/distributions
+          ./
         outPath: aprint-linux.tar.gz
 
 # SAVE INSTALLER
@@ -138,8 +139,9 @@ jobs:
       id: compress_macos_bundle
       with:
         command: c
+        cwd: ./bundle/build/distributions/
         files: |
-          ./bundle/build/distributions/
+          ./
         outPath: aprint-macos-13.tar.gz
 
 # SAVE INSTALLER
