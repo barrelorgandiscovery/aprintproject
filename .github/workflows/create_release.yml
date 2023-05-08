@@ -139,7 +139,7 @@ jobs:
       with:
         command: c
         files: |
-          ./aprint.app
+          ./bundle/build/distributions/
         outPath: aprint-macos-13.tar.gz
 
 # SAVE INSTALLER
