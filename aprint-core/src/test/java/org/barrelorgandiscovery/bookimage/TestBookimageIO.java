@@ -7,7 +7,6 @@ import org.barrelorgandiscovery.tools.ImageTools;
 
 import org.junit.jupiter.api.Test;
 
-
 public class TestBookimageIO {
 
 	@Test

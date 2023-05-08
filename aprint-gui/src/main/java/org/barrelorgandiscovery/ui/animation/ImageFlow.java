@@ -408,9 +408,11 @@ public class ImageFlow extends JPanel {
 	 */
 	public void setAvatarIndex(int index) {
 		avatarIndex = index;
-		ImageFlowItem imageFlowItem = avatars.get(index);
-		if (imageFlowItem != null) {
-			avatarText = imageFlowItem.getLabel();
+		if (index < avatars.size()) {
+			ImageFlowItem imageFlowItem = avatars.get(index);
+			if (imageFlowItem != null) {
+				avatarText = imageFlowItem.getLabel();
+			}
 		}
 		notifyListSelectionListener();
 	}

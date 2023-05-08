@@ -26,6 +26,8 @@ import org.barrelorgandiscovery.ui.animation.StackLayout;
 public class JCoverFlowInstrumentChoice extends JPanel implements
 		IInstrumentChoice {
 
+	private static final long serialVersionUID = 8641238135428307324L;
+	
 	private static Logger logger = Logger
 			.getLogger(JCoverFlowInstrumentChoice.class);
 

@@ -22,10 +22,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemManager;
-import org.apache.commons.vfs2.FileSystemOptions;
 import org.apache.commons.vfs2.VFS;
-import org.apache.commons.vfs2.provider.ftp.FtpFileSystemConfigBuilder;
 import org.jdesktop.swingx.HorizontalLayout;
 
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;

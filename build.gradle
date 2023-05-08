@@ -250,13 +250,22 @@ project(':bundle') {
     }
 
 
-    // using jpackage
-    task prepareInstallerFolder(type: Copy, dependsOn: [copyOutputJars, copyExtensionJars]) {
-	    from('offlineinstall-extensions') { include '**/*' }
-            from ('build') { include 'aprint.jar' }
-            from ('maxosx-bundle') { include '**/*' }
+    task copyMainJarToInstallerFolder(type: Copy, dependsOn: [copyOutputJars, copyExtensionJars]) {
+            from ('build') { include 'aprint.jar'}
+            from ('.') { include 'icon.jpg'}
 
             into "build/installFolder"
+    }
+    // using jpackage
+    task prepareInstallerFolder(type: Copy, dependsOn: [copyMainJarToInstallerFolder]) {
+	    from('offlineinstall-extensions') { include '**/*' } 
+            from ('maxosx-bundle') { include '**/*' }
+
+            eachFile { fcd ->
+               fcd.path = fcd.name
+            }
+
+            into "build/installFolder/aprintstudio"
     }
 
     task createjpackage(type: Exec , dependsOn: [prepareInstallerFolder] ) {
@@ -265,6 +274,6 @@ project(':bundle') {
         workingDir "${project.projectDir}/.."
     }
 
-
 }
+
 

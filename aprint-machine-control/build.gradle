@@ -17,8 +17,19 @@ dependencies {
 	implementation group: 'log4j', name: 'log4j', version: '1.2.14'
     api files(fileTree(dir:"${projectDir}/libs" , include:['**/*.jar']).toList())
     
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    	final def junitJupiterGroup = 'org.junit.jupiter'
+ 	final def junitJupiterVersion = '5.4.0'
+
+ 	final def junitPlatformGroup = 'org.junit.platform'
+ 	final def junitPlatformVersion = '1.4.0'
+	
+	testImplementation(group: junitJupiterGroup, name: 'junit-jupiter-api', version: junitJupiterVersion)
+    testRuntimeOnly(group: junitJupiterGroup, name: 'junit-jupiter-engine', version: junitJupiterVersion)
+    testRuntimeOnly(group: junitJupiterGroup, name: 'junit-jupiter-params', version: junitJupiterVersion)
+
+    testRuntimeOnly(group: junitPlatformGroup, name: 'junit-platform-launcher', version: junitPlatformVersion)
+    testRuntimeOnly(group: junitPlatformGroup, name: 'junit-platform-runner', version: junitPlatformVersion)
+	
 	
 }
 

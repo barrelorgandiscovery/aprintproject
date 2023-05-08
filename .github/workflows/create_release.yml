@@ -101,7 +101,7 @@ jobs:
 
   build-macos-appimage:
     name: Build AppImage on MacOsX
-    runs-on: macos-latest
+    runs-on: macos-13
     steps:
 
 # SETUP BUILD ENVIRONMENT
@@ -176,9 +176,15 @@ jobs:
         prerelease: true
 
 
-    - uses: montudor/action-zip@v1
+
+    - name: Compress action step
+      uses: a7ul/tar-action@v1.1.0
+      id: compress_linux_bundle
       with:
-        args: zip -qq -r aprint-linux.zip aprint-linux
+        command: c
+        files: |
+          ./aprint-linux
+        outPath: aprint-linux.tar.gz
 
     - id: release-linux-appimage
       name: Release Linux appimage
@@ -187,8 +193,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create-release.outputs.upload_url }}
-        asset_path: aprint-linux.zip
-        asset_name: ubuntu-aprint.zip
+        asset_path: aprint-linux.tar.gz
+        asset_name: ubuntu-aprint.tar.gz
         asset_content_type: application/x-binary
 
     - uses: montudor/action-zip@v1
@@ -206,9 +212,14 @@ jobs:
         asset_name: aprint-windows.zip
         asset_content_type: application/x-binary
 
-    - uses: montudor/action-zip@v1
+    - name: Compress action step
+      uses: a7ul/tar-action@v1.1.0
+      id: compress_macos_bundle
       with:
-        args: zip -qq -r aprint-macos.zip aprint.app
+        command: c
+        files: |
+          ./aprint.app
+        outPath: aprint-macos-13.tar.gz
 
     - id: release-macos-appimage
       name: Release macos appimage
@@ -217,8 +228,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create-release.outputs.upload_url }}
-        asset_path: aprint-macos.zip
-        asset_name: aprint-macos.zip
+        asset_path: aprint-macos-13.tar.gz
+        asset_name: aprint-macos-13.tar.gz
         asset_content_type: application/x-binary
 
 

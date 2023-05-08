@@ -3,7 +3,7 @@ package org.barrelorgandiscovery.testjava;
 import org.junit.Test;
 
 /**
- * test for Java Type casting with base class
+ * test for Java Type casting with base class used with childfirst classloader
  * @author pfreydiere
  *
  */

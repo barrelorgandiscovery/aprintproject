@@ -44,7 +44,7 @@ public class JInstrumentTileViewerPanel extends JPanel {
 		assert formInputStream != null;
 		FormPanel fp = new FormPanel(formInputStream);
 
-		JInstrumentTileViewer instrumentChooser = new JInstrumentTileViewer(repository);
+		JInstrumentTileViewerWithFilter instrumentChooser = new JInstrumentTileViewerWithFilter(repository);
 		fp.getFormAccessor().replaceBean("tile", instrumentChooser); //$NON-NLS-1$
 
 		JButton choose = (JButton) fp.getButton("choose"); //$NON-NLS-1$

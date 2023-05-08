@@ -17,6 +17,7 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.awt.print.PageFormat;
@@ -162,6 +163,12 @@ import com.l2fprod.common.swing.JDirectoryChooser;
 import groovy.lang.Binding;
 import groovy.ui.GroovyMain;
 
+/**
+ * main class for the aprint ng application
+ * 
+ * @author pfreydiere
+ *
+ */
 public class APrintNG extends APrintNGInternalFrame implements ActionListener, APrintRepositoryListener,
 		APrintPageFormat, APrintNGGeneralServices, DropTargetListener {
 
@@ -1210,6 +1217,14 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		// //$NON-NLS-1$
 		m_fichier.setMnemonic('f');
 
+		JMenuItem newvb = m_fichier.add("New ..");
+		newvb.addActionListener(this);
+		newvb.setActionCommand("NEW"); //$NON-NLS-1$
+		newvb.setText(Messages.getString("APrintNG.4000") + "..."); //$NON-NLS-1$ //$NON-NLS-2$
+		newvb.setIcon(new ImageIcon(APrintNG.getAPrintApplicationIcon()));
+		
+		m_fichier.addSeparator();
+		
 		JMenuItem ouvrirvb = m_fichier.add(Messages.getString("APrintNG.10")); //$NON-NLS-1$
 		ouvrirvb.setActionCommand("LOAD"); //$NON-NLS-1$
 		ouvrirvb.setAccelerator(KeyStroke.getKeyStroke("control O")); //$NON-NLS-1$
@@ -1584,6 +1599,15 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 						}, Messages.getString("APrintNG.4000"), this.repository.getRepository2()); // $NON-NLS-1$
 
 				intf.getContentPane().add(p, BorderLayout.CENTER);
+				
+//				intf.addComponentListener(new ComponentAdapter() {
+//					@Override
+//					public void componentResized(ComponentEvent e) {
+//						super.componentResized(e);
+//						p.invalidate();
+//					}
+//				});
+				
 				intf.setVisible(true);
 
 			} else if ("SEARCH".equals(e.getActionCommand())) { //$NON-NLS-1$

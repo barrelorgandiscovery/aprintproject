@@ -20,7 +20,7 @@ import javax.swing.event.ChangeListener;
 import org.barrelorgandiscovery.tools.SwingUtils;
 
 /**
- * Dialogue permettant la saisie des paramètres de perforation
+ * Dialogue permettant la saisie des parametres de perforation
  * 
  * @author Freydiere Patrice
  * 
@@ -39,7 +39,7 @@ public class JPerfoExtensionParameters extends JDialog {
 	private JPerfoExtensionParameters(Frame owner,
 			PerfoExtensionParameters initParameters) {
 		super(owner);
-		setTitle("Parametres pour le perçage");
+		setTitle("Parametres pour le perÃ§age");
 
 		assert initParameters != null;
 
@@ -47,7 +47,7 @@ public class JPerfoExtensionParameters extends JDialog {
 
 		// construction de la fenetre ...
 		JPanel p = new JPanel();
-		p.setBorder(new TitledBorder("Parametres"));
+		p.setBorder(new TitledBorder("ParamÃ¨tres"));
 
 		GridBagLayout gl = new GridBagLayout();
 		p.setLayout(gl);
@@ -64,7 +64,7 @@ public class JPerfoExtensionParameters extends JDialog {
 		splargeur.setEditor(new JSpinner.NumberEditor(splargeur, "0.0"));
 
 		p.add(splargeur, constructGridBagContraint(1, 1));
-		p.add(new JLabel("Longueur du poinçon (dans le sens du carton) (mm)"),
+		p.add(new JLabel("Longueur du poinÃ§on (dans le sens du carton) (mm)"),
 				constructGridBagContraint(0, 1));
 
 		JSpinner spheight = new JSpinner(new SpinnerNumberModel(
@@ -80,7 +80,7 @@ public class JPerfoExtensionParameters extends JDialog {
 		spheight.setEditor(new JSpinner.NumberEditor(spheight, "0.0"));
 
 		p.add(spheight, constructGridBagContraint(1, 2));
-		p.add(new JLabel("Hauteur du poinçon (dans le sens des pistes) (mm)"),
+		p.add(new JLabel("Hauteur du poinÃ§on (dans le sens des pistes) (mm)"),
 				constructGridBagContraint(0, 2));
 
 		JSpinner spminimumLength = new JSpinner(new SpinnerNumberModel(
@@ -97,7 +97,7 @@ public class JPerfoExtensionParameters extends JDialog {
 				"0.0"));
 
 		p.add(spminimumLength, constructGridBagContraint(1, 3));
-		p.add(new JLabel("Distance minimum à respecter en fin de trous (mm):"),
+		p.add(new JLabel("Distance minimum Ã  respecter en fin de trous (mm):"),
 				constructGridBagContraint(0, 3));
 
 		JSpinner spChevauchement = new JSpinner(new SpinnerNumberModel(
@@ -128,7 +128,7 @@ public class JPerfoExtensionParameters extends JDialog {
 		spPageSize.setEditor(new JSpinner.NumberEditor(spPageSize, "0.0"));
 
 		p.add(spPageSize, constructGridBagContraint(1, 5));
-		p.add(new JLabel("Taille de la page de perçage (mm):"),
+		p.add(new JLabel("Taille de la page de perÃ§age (mm):"),
 				constructGridBagContraint(0, 5));
 
 		getContentPane().add(p, BorderLayout.CENTER);

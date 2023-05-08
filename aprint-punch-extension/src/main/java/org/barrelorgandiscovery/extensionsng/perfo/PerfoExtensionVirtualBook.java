@@ -158,9 +158,9 @@ public class PerfoExtensionVirtualBook
 	private JButton mi = null;
 
 	private JButton createOptionButton() {
-		mi = new JButton("Options de per�age ...");
-		// largeur du poin�on ...
-		// hauteur du poin�on ...
+		mi = new JButton("Options de perçage ...");
+		// largeur du poinçon ...
+		// hauteur du poinçon ...
 		mi.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 
@@ -253,7 +253,7 @@ public class PerfoExtensionVirtualBook
 
 			if (perfoconverter.hasErrors()) {
 				JMessageBox.showMessage(aprintref.getOwnerForDialog(),
-						"des erreurs subsistes dans le carton, le per�age ne reflete pas l'�coute");
+						"des erreurs subsistes dans le carton, le perçage ne reflete pas l'écoute");
 			}
 
 			// lancement de l'optimisation ...
@@ -264,7 +264,7 @@ public class PerfoExtensionVirtualBook
 
 					CancelTracker ct = new CancelTracker();
 
-					frame.getWaitInterface().infiniteStartWait("Optimisation du trac�", ct);
+					frame.getWaitInterface().infiniteStartWait("Optimisation du tracé", ct);
 					try {
 
 						perfoconverter.optimize(frame.getWaitInterface(), ct);

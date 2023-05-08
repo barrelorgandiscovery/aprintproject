@@ -34,7 +34,7 @@ import org.noos.xing.mydoggy.ToolWindowType;
 import org.noos.xing.mydoggy.plaf.MyDoggyToolWindowManager;
 
 /**
- * Extension de perçage pour la machine à percer de gérard
+ * Extension de perÃ§age pour la machine Ã  percer de gÃ©rard
  * 
  * @author Freydiere Patrice
  * 

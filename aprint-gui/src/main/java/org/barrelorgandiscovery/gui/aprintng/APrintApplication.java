@@ -19,6 +19,10 @@ import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -34,6 +38,8 @@ import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
 import com.birosoft.liquid.LiquidLookAndFeel;
 import com.easynth.lookandfeel.EaSynthLookAndFeel;
 import com.formdev.flatlaf.FlatLightLaf;
+import com.googlecode.vfsjfilechooser2.accessories.bookmarks.Bookmarks;
+import com.googlecode.vfsjfilechooser2.accessories.bookmarks.TitledURLEntry;
 import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
 /**
@@ -50,11 +56,12 @@ public class APrintApplication {
 	private static APrintNG p;
 
 	/**
-	 * main function, that is called from command line
+	 * main function, that is called from command line, this method should be
+	 * bootstrap for child first class loading
 	 * 
 	 * @param args
 	 */
-	@SuppressWarnings("unchecked")//$NON-NLS-1$
+	@SuppressWarnings("unchecked") //$NON-NLS-1$
 	public static void main(final String[] args) throws Exception {
 
 		BugReporter.init("APrint"); //$NON-NLS-1$
@@ -72,56 +79,64 @@ public class APrintApplication {
 			boolean isbeta = false;
 			boolean isdevelop = false;
 
-			if (args.length > 0) //$NON-NLS-1$
-			{
-				if (args[0].equals("develop")) { //$NON-NLS-1$
-					isdevelop = true;
-					isbeta = true;
-				}
+			org.apache.commons.cli.CommandLineParser parser = new DefaultParser();
+			final Options options = new Options();
 
-				if (args[0].equals("beta")) //$NON-NLS-1$
-					isbeta = true;
+			options.addOption(new Option("d", "develop", false, "turn on develop"));
+			options.addOption(new Option("b", "beat", false, "turn on beta"));
+			options.addOption(new Option("m", "mainfolder", true, "main folder argument"));
 
-				if (isdevelop && (!ProfilingCondition.isProfiling())) {
-					// remove the log if profiling condition
-					LF5Appender lf5 = new LF5Appender();
-					BasicConfigurator.configure(lf5);
-				}
+			CommandLine cmd = parser.parse(options, args);
+
+			if (cmd.hasOption('d')) {
+				isdevelop = true;
+				isbeta = true;
+			}
+			if (cmd.hasOption('b')) {
+				isbeta = true;
 			}
 
-			if (!ProfilingCondition.isProfiling() && !isdevelop)
-			{
+			// Dump system properties
+
+			Properties sysprop = System.getProperties();
+			String mainFolder = sysprop.getProperty(APrintApplicationBootStrap.MAINFOLDER_SYSPROP, null);
+
+			String commandline_mainfolderValue = cmd.getOptionValue('m');
+			if (commandline_mainfolderValue != null && !commandline_mainfolderValue.isEmpty()) {
+				mainFolder = commandline_mainfolderValue;
+			}
+
+			if (isdevelop && (!ProfilingCondition.isProfiling())) {
+				// remove the log if profiling condition
+				LF5Appender lf5 = new LF5Appender();
+				BasicConfigurator.configure(lf5);
+			}
+
+			if (!ProfilingCondition.isProfiling() && !isdevelop) {
 				Logger.getRootLogger().setLevel(Level.ERROR);
 			} else {
 				Logger.getRootLogger().setLevel(Level.DEBUG);
 			}
-			
-			
-			// Dump system properties
-
-			Properties sysprop = System.getProperties();
 
 			Logger logger = Logger.getLogger(APrintApplicationBootStrap.class);
 			if (logger.isInfoEnabled()) {
 				sysprop.list(System.out);
 				try {
 					Set<Entry<Object, Object>> entrySet = sysprop.entrySet();
-					for (Iterator iterator = entrySet.iterator(); iterator
-							.hasNext();) {
-						Entry<Object, Object> entry = (Entry<Object, Object>) iterator
-								.next();
+					for (Iterator iterator = entrySet.iterator(); iterator.hasNext();) {
+						Entry<Object, Object> entry = (Entry<Object, Object>) iterator.next();
 
 						logger.info("" + entry.getKey() + "=" //$NON-NLS-1$ //$NON-NLS-2$
 								+ entry.getValue());
 					}
 				} catch (Exception ex) {
-					logger.error(ex.getMessage(), ex); //$NON-NLS-1$
+					logger.error(ex.getMessage(), ex); // $NON-NLS-1$
 				}
 
 			}
 
 			final APrintProperties prop = new APrintProperties("aprintstudio", //$NON-NLS-1$
-					isbeta, sysprop.getProperty(APrintApplicationBootStrap.MAINFOLDER_SYSPROP));
+					isbeta, mainFolder);
 
 			// splash
 			showSplash();
@@ -153,11 +168,8 @@ public class APrintApplication {
 			// Verification du repertoire de gammes ...
 			File f = prop.getGammeAndTranlation();
 			if (f != null && !f.exists()) {
-				JMessageBox.showMessage(
-						null,
-						Messages.getString("APrintApplication.3") //$NON-NLS-1$
-								+ f.getAbsolutePath()
-								+ Messages.getString("APrintApplication.4")); //$NON-NLS-1$
+				JMessageBox.showMessage(null, Messages.getString("APrintApplication.3") //$NON-NLS-1$
+						+ f.getAbsolutePath() + Messages.getString("APrintApplication.4")); //$NON-NLS-1$
 				prop.setGammeAndTranlation(null);
 			}
 
@@ -167,57 +179,30 @@ public class APrintApplication {
 
 				// setLiquidLnf();
 
+				check_lnf();
+
+				// check book marks
+
 				try {
-
-					String llnfcn = LiquidLookAndFeel.class.getName();
-					if (!isLookAndFeelInstalled(llnfcn))
-						javax.swing.UIManager.installLookAndFeel(
-								"Liquid Look And Feel", llnfcn); //$NON-NLS-1$
-
-					String rodlnfclassname = NimRODLookAndFeel.class.getName();
-					if (!isLookAndFeelInstalled(rodlnfclassname)) {
-						javax.swing.UIManager.installLookAndFeel(
-								"NimROD Look And Feel", rodlnfclassname); //$NON-NLS-1$
-					}
-
-					String easynthlnf = EaSynthLookAndFeel.class.getName();
-					if (!isLookAndFeelInstalled(easynthlnf)) {
-						javax.swing.UIManager.installLookAndFeel(
-								"EaSynth Look And Feel", easynthlnf); //$NON-NLS-1$
+					Bookmarks b = new Bookmarks();
+					boolean found = false;
+					for (int i = 0 ; i < b.getSize() ; i ++ ) {
+						String title = b.getTitle(i);
+						if ("Web Library".equals(title)) {
+							found = true;
+							break;
+						}
 					}
 					
-					String flatlaf = FlatLightLaf.class.getName();
-					if (!isLookAndFeelInstalled(flatlaf)) {
-						javax.swing.UIManager.installLookAndFeel(
-								"FlatLaf And Feel", flatlaf); //$NON-NLS-1$
+					if (!found) {
+						b.add(new TitledURLEntry("Web Library", "bod://www.barrel-organ-discovery.org:80/READONLY_WEB_SITE_CONTENT"));
+						b.save();
 					}
-
-					LiquidLookAndFeel.setLiquidDecorations(true, "mac"); //$NON-NLS-1$
-					// LiquidLookAndFeel.setStipples(false);
-					LiquidLookAndFeel.setToolbarFlattedButtons(true);
-
-					try {
-						String windowslnf = com.jgoodies.looks.windows.WindowsLookAndFeel.class
-								.getName();
-						if (!isLookAndFeelInstalled(windowslnf)) {
-							UIManager.installLookAndFeel(
-									"JGoodies Windows lnf", windowslnf);
-						}
-
-						String plsticlnf = com.jgoodies.looks.plastic.PlasticLookAndFeel.class
-								.getName();
-						if (!isLookAndFeelInstalled(plsticlnf)) {
-							UIManager.installLookAndFeel(
-									"JGoodies Plastic lnf", plsticlnf);
-						}
-
-
-					} catch (Throwable t) {
-
-					}
+					
+					
 
 				} catch (Throwable t) {
-
+					logger.error("fail to check bookmarks :" + t.getMessage(), t);
 				}
 
 				logger.debug("loading the look and feel ..."); //$NON-NLS-1$
@@ -225,17 +210,16 @@ public class APrintApplication {
 				try {
 
 					String lnf = prop.getLookAndFeel();
-					if (lnf == null || "swing".equals(lnf)) { //$NON-NLS-1$
+					if (lnf == null || lnf.isBlank()) {
 						javax.swing.UIManager
-								.setLookAndFeel(javax.swing.UIManager
-										.getCrossPlatformLookAndFeelClassName());
+								.setLookAndFeel((LookAndFeel) com.formdev.flatlaf.FlatLightLaf.class.newInstance());
+					} else if ("swing".equals(lnf)) { //$NON-NLS-1$
+						javax.swing.UIManager
+								.setLookAndFeel(javax.swing.UIManager.getCrossPlatformLookAndFeelClassName());
 
 					} else {
-						Class<?> lnfclass = APrintApplication.class
-								.getClassLoader().loadClass(lnf);
-						javax.swing.UIManager
-								.setLookAndFeel((LookAndFeel) lnfclass
-										.newInstance());
+						Class<?> lnfclass = APrintApplication.class.getClassLoader().loadClass(lnf);
+						javax.swing.UIManager.setLookAndFeel((LookAndFeel) lnfclass.newInstance());
 					}
 
 				} catch (Throwable t) {
@@ -250,8 +234,7 @@ public class APrintApplication {
 
 					if (!p.hasInstrumentsInWebRepository()) {
 
-						if (JOptionPane.showConfirmDialog(p,
-								Messages.getString("APrintApplication.6"), //$NON-NLS-1$
+						if (JOptionPane.showConfirmDialog(p, Messages.getString("APrintApplication.6"), //$NON-NLS-1$
 								Messages.getString("APrintApplication.7"), //$NON-NLS-1$
 								JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION) {
 							logger.debug("getting the first time, the web instruments ... "); //$NON-NLS-1$
@@ -259,11 +242,9 @@ public class APrintApplication {
 							try {
 								p.synchronizeWebRepositories();
 							} catch (Throwable t) {
-								logger.error(
-										Messages.getString("APrintApplication.9") //$NON-NLS-1$
-												+ t.getMessage(), t);
-								JMessageBox.showMessage(p, Messages
-										.getString("APrintApplication.10")); //$NON-NLS-1$
+								logger.error(Messages.getString("APrintApplication.9") //$NON-NLS-1$
+										+ t.getMessage(), t);
+								JMessageBox.showMessage(p, Messages.getString("APrintApplication.10")); //$NON-NLS-1$
 								BugReporter.sendBugReport();
 							}
 							logger.debug("synchronization done ..."); //$NON-NLS-1$
@@ -276,6 +257,7 @@ public class APrintApplication {
 					logger.debug("external instruments has already been downloaded");
 				}
 
+				// main loop
 				while (p.isVisible()) {
 					Thread.sleep(100);
 				}
@@ -289,6 +271,7 @@ public class APrintApplication {
 					System.exit(0); // user must restart to take effect
 				}
 
+				// reinit the language if the exit is linked to language change
 				initLanguageWithProperties(prop);
 
 			}
@@ -297,18 +280,65 @@ public class APrintApplication {
 			logger.error(ex.getMessage(), ex);
 			ex.printStackTrace(System.err);
 			BugReporter.sendBugReport();
-			JMessageBox.showMessage(null,
-					Messages.getString("APrintApplication.5") //$NON-NLS-1$
-							+ ex.getMessage() + "\n ->" + ex.toString()); //$NON-NLS-1$
+			JMessageBox.showMessage(null, Messages.getString("APrintApplication.5") //$NON-NLS-1$
+					+ ex.getMessage() + "\n ->" + ex.toString()); //$NON-NLS-1$
+		}
+	}
+
+	// check look and feel
+	private static void check_lnf() {
+		try {
+
+			String llnfcn = LiquidLookAndFeel.class.getName();
+			if (!isLookAndFeelInstalled(llnfcn))
+				javax.swing.UIManager.installLookAndFeel("Liquid Look And Feel", llnfcn); //$NON-NLS-1$
+
+			String rodlnfclassname = NimRODLookAndFeel.class.getName();
+			if (!isLookAndFeelInstalled(rodlnfclassname)) {
+				javax.swing.UIManager.installLookAndFeel("NimROD Look And Feel", rodlnfclassname); //$NON-NLS-1$
+			}
+
+			String easynthlnf = EaSynthLookAndFeel.class.getName();
+			if (!isLookAndFeelInstalled(easynthlnf)) {
+				javax.swing.UIManager.installLookAndFeel("EaSynth Look And Feel", easynthlnf); //$NON-NLS-1$
+			}
+
+			String flatlaf = FlatLightLaf.class.getName();
+			if (!isLookAndFeelInstalled(flatlaf)) {
+				javax.swing.UIManager.installLookAndFeel("FlatLaf And Feel", flatlaf); //$NON-NLS-1$
+			}
+
+			LiquidLookAndFeel.setLiquidDecorations(true, "mac"); //$NON-NLS-1$
+			// LiquidLookAndFeel.setStipples(false);
+			LiquidLookAndFeel.setToolbarFlattedButtons(true);
+
+			try {
+				String windowslnf = com.jgoodies.looks.windows.WindowsLookAndFeel.class.getName();
+				if (!isLookAndFeelInstalled(windowslnf)) {
+					UIManager.installLookAndFeel("JGoodies Windows lnf", windowslnf);
+				}
+
+				String plsticlnf = com.jgoodies.looks.plastic.PlasticLookAndFeel.class.getName();
+				if (!isLookAndFeelInstalled(plsticlnf)) {
+					UIManager.installLookAndFeel("JGoodies Plastic lnf", plsticlnf);
+				}
+
+			} catch (Throwable t) {
+
+			}
+
+		} catch (Throwable t) {
+
 		}
 	}
 
 	/**
+	 * Show Splash
+	 * 
 	 * @throws IOException
 	 */
 	private static void showSplash() throws IOException {
-		BufferedImage image = ImageIO.read(APrintApplication.class
-				.getResourceAsStream("splash.jpg")); //$NON-NLS-1$
+		BufferedImage image = ImageIO.read(APrintApplication.class.getResourceAsStream("splash.jpg")); //$NON-NLS-1$
 		final SplashScreenWindow s = new SplashScreenWindow(image);
 		s.setVisible(true);
 
@@ -333,15 +363,13 @@ public class APrintApplication {
 		}
 
 		// init the localization process ...
-		Messages.initLocale(prop.getExtensionFolder(),
-				prop.getDisplayKeyNamesForTranslation());
+		Messages.initLocale(prop.getExtensionFolder(), prop.getDisplayKeyNamesForTranslation());
 	}
 
 	private static void setQuaquaLnf() {
 		// set the Quaqua Look and Feel in the UIManager
 		try {
-			UIManager
-					.setLookAndFeel("ch.randelshofer.quaqua.QuaquaLookAndFeel"); //$NON-NLS-1$
+			UIManager.setLookAndFeel("ch.randelshofer.quaqua.QuaquaLookAndFeel"); //$NON-NLS-1$
 			// set UI manager properties here that affect Quaqua
 
 		} catch (Exception e) {
@@ -363,8 +391,7 @@ public class APrintApplication {
 			// lf.setPlasticTheme(new SkyPink());
 			// UIManager.setLookAndFeel(lf);
 
-			javax.swing.UIManager
-					.setLookAndFeel("com.birosoft.liquid.LiquidLookAndFeel"); //$NON-NLS-1$
+			javax.swing.UIManager.setLookAndFeel("com.birosoft.liquid.LiquidLookAndFeel"); //$NON-NLS-1$
 			LiquidLookAndFeel.setLiquidDecorations(true, "mac"); //$NON-NLS-1$
 			// LiquidLookAndFeel.setStipples(false);
 			LiquidLookAndFeel.setToolbarFlattedButtons(true);
@@ -380,8 +407,7 @@ public class APrintApplication {
 			return false;
 
 		assert classname != null;
-		LookAndFeelInfo[] installedLookAndFeels = javax.swing.UIManager
-				.getInstalledLookAndFeels();
+		LookAndFeelInfo[] installedLookAndFeels = javax.swing.UIManager.getInstalledLookAndFeels();
 		for (int i = 0; i < installedLookAndFeels.length; i++) {
 			LookAndFeelInfo lookAndFeelInfo = installedLookAndFeels[i];
 			if (classname.equals(lookAndFeelInfo.getClassName()))
@@ -394,8 +420,7 @@ public class APrintApplication {
 	/**
 	 * Ajoute un nouveau repertoire dans le java.library.path.
 	 * 
-	 * @param dir
-	 *            Le nouveau repertoire a ajouter.
+	 * @param dir Le nouveau repertoire a ajouter.
 	 */
 	private static void addToJavaLibraryPath(File dir) {
 		final String LIBRARY_PATH = "java.library.path";
@@ -403,14 +428,13 @@ public class APrintApplication {
 			throw new IllegalArgumentException(dir + " is not a directory.");
 		}
 		String javaLibraryPath = System.getProperty(LIBRARY_PATH);
-		System.setProperty(LIBRARY_PATH, javaLibraryPath
-				+ File.pathSeparatorChar + dir.getAbsolutePath());
+		System.setProperty(LIBRARY_PATH, javaLibraryPath + File.pathSeparatorChar + dir.getAbsolutePath());
 
 		String msg = "Library path :" + System.getProperty(LIBRARY_PATH);
 		logger.info(msg);
 		System.out.println(msg);
 
-		//resetJavaLibraryPath();
+		// resetJavaLibraryPath();
 	}
 
 }

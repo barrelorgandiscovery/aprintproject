@@ -22,6 +22,7 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreePath;
 
 import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemException;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.tools.VFSTools;
 
@@ -54,6 +55,8 @@ public class JExplorer extends JPanel implements Explorer {
 
 		public abstract void load() throws Exception;
 
+		public abstract boolean reload() throws Exception;
+		
 	}
 
 	public class ExpFFolderNode extends ExpNode {
@@ -76,6 +79,12 @@ public class JExplorer extends JPanel implements Explorer {
 			DefaultMutableTreeNode defaultMutableTreeNode = new DefaultMutableTreeNode("Loading ... ");
 			add(defaultMutableTreeNode);
 		}
+		
+		public ExpFFolderNode(FileObject fo, String overloadedName) {
+			this(fo);
+			this.userObject = overloadedName;
+		}
+		
 
 		private boolean _selected;
 
@@ -97,7 +106,8 @@ public class JExplorer extends JPanel implements Explorer {
 				}
 				return fo.isFile();
 			} catch (Exception ex) {
-				throw new RuntimeException(ex.getMessage(), ex);
+				// throw new RuntimeException(ex.getMessage(), ex);
+				return false;
 			}
 		}
 
@@ -113,9 +123,19 @@ public class JExplorer extends JPanel implements Explorer {
 				fo = resolveFile;
 			}
 
+			if (!reload()) {
+				this.removeAllChildren();
+				((DefaultTreeModel) JExplorer.this.tree.getModel()).nodeStructureChanged(this);
+			}
+			
+			loaded = true;
+		}
+
+		public boolean reload() throws FileSystemException {
 			this.removeAllChildren();
 			FileObject[] childrens = fo.getChildren();
-
+			
+			boolean retvalue = false;
 			if (childrens != null) {
 				// sort the filename
 				Arrays.sort(childrens, new Comparator<FileObject>() {
@@ -128,15 +148,16 @@ public class JExplorer extends JPanel implements Explorer {
 
 					add(new ExpFFolderNode(f));
 					((DefaultTreeModel) JExplorer.this.tree.getModel()).nodeStructureChanged(this);
+					retvalue = true; // has children
 				}
 
 			}
-			loaded = true;
+			return retvalue;
 		}
 	}
 
 	/**
-	 * bookmark node
+	 * bookmark node, listing the bookmarks
 	 * 
 	 * @author pfreydiere
 	 *
@@ -147,35 +168,47 @@ public class JExplorer extends JPanel implements Explorer {
 
 		public ExpBookmarksNode(Bookmarks bookMarks) throws Exception {
 			this.bookMarks = bookMarks;
-			for (int i = 0; i < bookMarks.getSize(); i++) {
-				TitledURLEntry entry = bookMarks.getEntry(i);
-				String url = entry.getURL();
-				try {
-					FileObject resolveFile = VFSTools.getManager().resolveFile(url);
-					add(new ExpFFolderNode(resolveFile));
-				} catch (Exception ex) {
-					logger.error(ex.getMessage(), ex);
-					add(new ExpFFolderNode(url));
-				}
-			}
+			reload();
 		}
 
 		@Override
 		public void load() throws Exception {
 			loaded = true;
 		}
+		
+		@Override
+		public boolean reload() throws Exception {
+			removeAllChildren();
+			boolean retvalue = false;
+			for (int i = 0; i < bookMarks.getSize(); i++) {
+				TitledURLEntry entry = bookMarks.getEntry(i);
+				String url = entry.getURL();
+				try {
+					FileObject resolveFile = VFSTools.getManager().resolveFile(url);
+					add(new ExpFFolderNode(resolveFile, entry.getTitle()));
+				} catch (Exception ex) {
+					logger.error(ex.getMessage(), ex);
+					add(new ExpFFolderNode(url));
+				}
+				retvalue = true;
+			}
+			return retvalue;
+		}
+		
 	}
 
 	protected JTree tree;
 
+	private Object owner;
+	
 	/**
 	 * constructor
 	 * 
 	 * @throws Exception
 	 */
-	public JExplorer() throws Exception {
+	public JExplorer(Object owner) throws Exception {
 		super();
-
+		this.owner = owner;
 		setLayout(new BorderLayout());
 		tree = new JTree(new ExpBookmarksNode(new Bookmarks()));
 		add(tree, BorderLayout.CENTER);
@@ -251,6 +284,12 @@ public class JExplorer extends JPanel implements Explorer {
 
 	}
 
+	public void reload() throws Exception {
+		ExpBookmarksNode root = new ExpBookmarksNode(new Bookmarks());
+		tree.setModel(new DefaultTreeModel(root));
+		root.reload();
+	}
+	
 	@Override
 	public void addExplorerListener(ExplorerListener listener) {
 		if (listener != null)
@@ -263,10 +302,9 @@ public class JExplorer extends JPanel implements Explorer {
 	}
 
 	public static void main(String[] args) throws Exception {
-
 		JFrame f = new JFrame();
 		f.getContentPane().setLayout(new BorderLayout());
-		f.getContentPane().add(new JExplorer(), BorderLayout.CENTER);
+		f.getContentPane().add(new JExplorer(null), BorderLayout.CENTER);
 		f.setSize(new Dimension(700, 500));
 		f.setVisible(true);
 	}

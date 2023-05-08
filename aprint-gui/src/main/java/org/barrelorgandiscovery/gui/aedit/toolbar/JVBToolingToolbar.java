@@ -68,12 +68,12 @@ public class JVBToolingToolbar extends JToolBar {
 		// add default tools
 
 		JToggleButton pan = addTool(new PanTool(evb));
-		pan.setIcon(new ImageIcon(getClass().getResource("hand.png"), "Move")); //$NON-NLS-1$
+		pan.setIcon(new ImageIcon(getClass().getResource("hand.png"), org.barrelorgandiscovery.gui.aedit.toolbar.Messages.getString("JVBToolingToolbar.0"))); //$NON-NLS-1$ //$NON-NLS-2$
 		pan.setToolTipText("Move the book"); //$NON-NLS-1$
 
 		measure = addTool(new MeasureTool(evb));
-		measure.setIcon(new ImageIcon(getClass().getResource("measure.png"), "Measure")); //$NON-NLS-1$
-		measure.setToolTipText("Measure on the book");
+		measure.setIcon(new ImageIcon(getClass().getResource("measure.png"), org.barrelorgandiscovery.gui.aedit.toolbar.Messages.getString("JVBToolingToolbar.1"))); //$NON-NLS-1$ //$NON-NLS-2$
+		measure.setToolTipText(org.barrelorgandiscovery.gui.aedit.toolbar.Messages.getString("JVBToolingToolbar.2")); //$NON-NLS-1$
 
 		zoomplus = add(new AbstractAction() {
 
@@ -99,8 +99,8 @@ public class JVBToolingToolbar extends JToolBar {
 			}
 		});
 
-		zoommoins.setIcon(new ImageIcon(getClass().getResource("viewmagminus.png"), "Zoom +")); //$NON-NLS-1$
-		zoommoins.setToolTipText("Zoom on the book");
+		zoommoins.setIcon(new ImageIcon(getClass().getResource("viewmagminus.png"), org.barrelorgandiscovery.gui.aedit.toolbar.Messages.getString("JVBToolingToolbar.3"))); //$NON-NLS-1$ //$NON-NLS-2$
+		zoommoins.setToolTipText(org.barrelorgandiscovery.gui.aedit.toolbar.Messages.getString("JVBToolingToolbar.4")); //$NON-NLS-1$
 
 		JToggleButton zoombox = addTool(new ZoomBox(JVBToolingToolbar.this.evb));
 		zoombox.setIcon(new ImageIcon(getClass().getResource("viewmagbox.png"))); //$NON-NLS-1$
@@ -116,8 +116,8 @@ public class JVBToolingToolbar extends JToolBar {
 			}
 		});
 
-		fitToHeight.setIcon(new ImageIcon(getClass().getResource("viewmagfit.png"), "Fit")); //$NON-NLS-1$
-		fitToHeight.setToolTipText("Fit the book on the screen");
+		fitToHeight.setIcon(new ImageIcon(getClass().getResource("viewmagfit.png"), org.barrelorgandiscovery.gui.aedit.toolbar.Messages.getString("JVBToolingToolbar.5"))); //$NON-NLS-1$ //$NON-NLS-2$
+		fitToHeight.setToolTipText(org.barrelorgandiscovery.gui.aedit.toolbar.Messages.getString("JVBToolingToolbar.6")); //$NON-NLS-1$
 
 		addSeparator();
 

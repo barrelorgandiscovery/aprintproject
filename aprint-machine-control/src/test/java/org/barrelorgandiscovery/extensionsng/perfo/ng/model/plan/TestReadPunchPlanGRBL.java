@@ -2,7 +2,8 @@ package org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan;
 
 import java.io.InputStream;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
 
 public class TestReadPunchPlanGRBL {
 

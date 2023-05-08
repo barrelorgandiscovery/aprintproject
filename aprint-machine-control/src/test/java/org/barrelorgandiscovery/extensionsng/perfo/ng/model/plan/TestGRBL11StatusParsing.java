@@ -4,7 +4,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLStatus;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+
 
 public class TestGRBL11StatusParsing {
 

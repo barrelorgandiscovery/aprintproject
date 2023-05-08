@@ -88,7 +88,7 @@ public class PerfoMidiImporter extends AbstractMidiImporter implements
 
 					}
 
-					// Vérification de la longueur ...
+					// VÃ©rification de la longueur ...
 					if (destinationscale.timeToMM(mn.getLength()) < parameters
 							.getMinholesize()) {
 						mn = new MidiNote(mn.getTimeStamp(),

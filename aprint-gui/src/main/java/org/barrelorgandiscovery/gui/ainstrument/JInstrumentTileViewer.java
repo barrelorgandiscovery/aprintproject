@@ -256,7 +256,7 @@ public class JInstrumentTileViewer extends JPanel {
 	}
 
 	/**
-	 * 
+	 * load instrument
 	 * @return
 	 */
 	protected Vector<Instrument> loadInstrument() {
@@ -324,10 +324,9 @@ public class JInstrumentTileViewer extends JPanel {
 		f.setSize(500, 500);
 		f.setVisible(true);
 		f.addPropertyChangeListener("size", new PropertyChangeListener() {
-
 			public void propertyChange(PropertyChangeEvent evt) {
+				// revalidate the layout
 				f.validate();
-
 			}
 		});
 

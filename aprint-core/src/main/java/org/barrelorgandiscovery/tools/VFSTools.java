@@ -11,6 +11,7 @@ import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.VFS;
 import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 import org.apache.commons.vfs2.provider.AbstractFileObject;
+import org.barrelorgandiscovery.vfs2.provider.BodProvider;
 
 /**
  * Tools for interacting between VFS and Java file API
@@ -31,6 +32,9 @@ public class VFSTools {
 		fsManager.setConfiguration(providerResourceUrl);
 
 		fsManager.init();
+		
+		fsManager.addProvider("bod", new BodProvider());
+		
 		FSMANAGER = fsManager;
 		VFS.setManager(FSMANAGER);
 		return FSMANAGER;

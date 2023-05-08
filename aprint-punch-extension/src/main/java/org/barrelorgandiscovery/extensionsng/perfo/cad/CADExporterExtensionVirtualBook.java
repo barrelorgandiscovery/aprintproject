@@ -75,7 +75,7 @@ public class CADExporterExtensionVirtualBook extends BaseVirtualBookExtension
 	private GraphicsLayer graphicLayer;
 
 	public CADExporterExtensionVirtualBook() throws Exception {
-		graphicLayer = new GraphicsLayer("Trac� Vectoriel");
+		graphicLayer = new GraphicsLayer("Tracé Vectoriel");
 		defaultAboutAuthor = "Patrice Freydiere";
 		defaultAboutVersion = "2020.12.12";
 		createParametersPanel();

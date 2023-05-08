@@ -1,13 +1,16 @@
 package org.barrelorgandiscovery.gui.explorer;
 
 import java.awt.BorderLayout;
+import java.awt.Frame;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URL;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JToolBar;
 
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
@@ -16,6 +19,8 @@ import org.barrelorgandiscovery.gui.search.ISearchPanelListener;
 import org.barrelorgandiscovery.gui.search.SearchPanel;
 import org.barrelorgandiscovery.search.BookIndexing;
 import org.barrelorgandiscovery.tools.JMessageBox;
+
+import com.googlecode.vfsjfilechooser2.accessories.bookmarks.BookmarksDialog;
 
 public class JExplorerWithSearch extends JPanel {
 
@@ -41,11 +46,30 @@ public class JExplorerWithSearch extends JPanel {
 
 	protected void initComponents() throws Exception {
 		setLayout(new BorderLayout());
-		explorer = new JExplorer();
+		explorer = new JExplorer(services.getOwnerForDialog());
+
+		JPanel explorerPanelWithTools = new JPanel();
+		explorerPanelWithTools.setLayout(new BorderLayout());
+		explorerPanelWithTools.add(explorer, BorderLayout.CENTER);
+
+		// tools on top
+		JToolBar tb = new JToolBar();
+		explorerPanelWithTools.add(tb, BorderLayout.NORTH);
+		JButton bookmarkButton = new JButton("BookMarks ...");
+		tb.add(bookmarkButton);
+		bookmarkButton.addActionListener((e) -> {
+			try {
+				BookmarksDialog bookmarkDialog = new BookmarksDialog((Frame) services.getOwnerForDialog(), null);
+				bookmarkDialog.setVisible(true);
+				explorer.reload();
+			} catch (Exception ex) {
+				logger.error(ex.getMessage(), ex);
+			}
+		});
 
 		sp = new SearchPanel(bookIndexing, props, services, this);
 
-		JSplitPane spane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(explorer), sp);
+		JSplitPane spane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(explorerPanelWithTools), sp);
 		add(spane, BorderLayout.CENTER);
 
 		sp.setSearchPanelListener(new ISearchPanelListener() {

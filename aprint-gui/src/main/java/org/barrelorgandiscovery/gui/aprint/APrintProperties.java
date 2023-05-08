@@ -2,6 +2,7 @@ package org.barrelorgandiscovery.gui.aprint;
 
 import java.awt.Dimension;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Locale;
 
 import org.barrelorgandiscovery.messages.Messages;
@@ -48,6 +49,8 @@ public class APrintProperties {
 
 	private static final String SEARCH_FOLDER = "searchfolder"; //$NON-NLS-1$
 
+	private static final String ADDITIONAL_SEARCH_FOLDERS = "searchadditionalfolders"; //$NON-NLS-1$
+
 	private static final String APRINTNG_VB_HEIGHT = "aprintvbheight"; //$NON-NLS-1$
 
 	private static final String APRINTNG_VB_WIDTH = "aprintvbwidth"; //$NON-NLS-1$
@@ -59,7 +62,7 @@ public class APrintProperties {
 	private static final String LAST_INSTRUMENTBUNDLEFILE_FOLDER = "lastinstrumentbundlefilefolder"; //$NON-NLS-1$
 
 	private static final String LAST_MOV_FILE = "lastmovfile";
-	
+
 	private static final String FORCED_LOCAL = "forcedlocal";
 
 	private static final String TOOLBARVISIBILITYPREFIX = "toolbarvisibility";
@@ -87,7 +90,7 @@ public class APrintProperties {
 			// mkdirs
 			new File(mainFolder).mkdirs();
 		}
-		
+
 		if (userfolder == null || !new File(userfolder).exists())
 			throw new Exception(Messages.getString("APrintProperties.1")); //$NON-NLS-1$
 
@@ -181,7 +184,7 @@ public class APrintProperties {
 	}
 
 	public String getLookAndFeel() {
-		return ps.getStringProperty(LOOK_AND_FEEL, null); //$NON-NLS-1$
+		return ps.getStringProperty(LOOK_AND_FEEL, null); // $NON-NLS-1$
 	}
 
 	public void setLookAndFeel(String lookandfeelclass) {
@@ -253,6 +256,37 @@ public class APrintProperties {
 		ps.setFileProperty(SEARCH_FOLDER, searchFolder);
 	}
 
+	public void setSearchAdditionalFolders(File[] additionalFolders) {
+		String folders = "";
+		if (additionalFolders != null) {
+			for (File f : additionalFolders) {
+				if (f != null) {
+					if (!folders.isEmpty()) {
+						folders += "," ;
+					}
+					folders+= f.getAbsolutePath();
+				}
+			}
+		}
+
+		ps.setStringProperty(ADDITIONAL_SEARCH_FOLDERS, folders);
+	}
+
+	public File[] getSearchAdditionalFolders() {
+		ArrayList<File> arrayList = new ArrayList<File>();
+
+		String values = ps.getStringProperty(ADDITIONAL_SEARCH_FOLDERS, "");
+		String[] split = values.split(",");
+		if (split != null) {
+			for (String s : split) {
+				if (s != null && !s.isEmpty()) {
+					arrayList.add(new File(s));
+				}
+			}
+		}
+		return arrayList.toArray(new File[arrayList.size()]);
+	}
+
 	public int getAdditionalWebRepositoriesCount() {
 		return ps.getIntegerProperty(APRINT_ADDITIONAL_WEB_REPOSITORIES_PREFIX + ".count", 0);
 	}
@@ -271,13 +305,12 @@ public class APrintProperties {
 
 	/*
 	 * public String getAdditionalWebRepositoriesFolderName(int i) { return
-	 * ps.getStringProperty(APRINT_ADDITIONAL_WEB_REPOSITORIES_PREFIX + "." + i
-	 * + ".foldername", null); }
+	 * ps.getStringProperty(APRINT_ADDITIONAL_WEB_REPOSITORIES_PREFIX + "." + i +
+	 * ".foldername", null); }
 	 * 
-	 * public void setAdditionalWebRepositoriesFolderName(int i, String
-	 * foldername) {
-	 * ps.setStringProperty(APRINT_ADDITIONAL_WEB_REPOSITORIES_PREFIX + "." + i
-	 * + ".foldername", foldername); }
+	 * public void setAdditionalWebRepositoriesFolderName(int i, String foldername)
+	 * { ps.setStringProperty(APRINT_ADDITIONAL_WEB_REPOSITORIES_PREFIX + "." + i +
+	 * ".foldername", foldername); }
 	 */
 	public String getAdditionalWebRepositoriesUrl(int i) {
 		return ps.getStringProperty(APRINT_ADDITIONAL_WEB_REPOSITORIES_PREFIX + "." + i + ".url", null);
