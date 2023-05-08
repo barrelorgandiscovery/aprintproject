@@ -15,8 +15,7 @@ APrint Studio is composed of a constellation of **tools** for creating **mechani
 ### Discussions / Forum
 
 for issues, improvements, this github repository is the right place. 
-for discussions use freddy's forum, [https://orguedebarbarie.vraiforum.com/](https://orguedebarbarie.vraiforum.com/)
-
+for discussions , [https://github.com/barrelorgandiscovery/aprintproject/discussions](https://github.com/barrelorgandiscovery/aprintproject/discussions) 
 
 ### How to Build main project
 
