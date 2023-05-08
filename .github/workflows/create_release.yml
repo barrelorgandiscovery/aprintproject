@@ -88,13 +88,23 @@ jobs:
         mv ./bundle/build/distributions/aprint ./bundle/build/distributions/aprint-linux
         ls -alR ./bundle/build/distributions/
 
+
+    - name: Compress action step
+      uses: a7ul/tar-action@v1.1.0
+      id: compress_linux_bundle
+      with:
+        command: c
+        files: |
+          ./bundle/build/distributions
+        outPath: aprint-linux.tar.gz
+
 # SAVE INSTALLER
     - id: upload-installer
       name: Upload installer
       uses: actions/upload-artifact@v2
       with:
-        path: ./bundle/build/distributions
-        name: ubuntu-aprint
+        path: aprint-linux.tar.gz
+        name: aprint-linux.tar.gz
         retention-days: 1
 
 
@@ -122,13 +132,23 @@ jobs:
       with:
         arguments: build createjpackage -x test
 
+    # compress before upload
+    - name: Compress action step
+      uses: a7ul/tar-action@v1.1.0
+      id: compress_macos_bundle
+      with:
+        command: c
+        files: |
+          ./aprint.app
+        outPath: aprint-macos-13.tar.gz
+
 # SAVE INSTALLER
     - id: upload-installer
       name: Upload installer
       uses: actions/upload-artifact@v2
       with:
-        path: ./bundle/build/distributions
-        name: macos-aprint
+        path: aprint-macos-13.tar.gz
+        name: aprint-macos-13.tar.gz
         retention-days: 1
 
 
@@ -143,7 +163,7 @@ jobs:
       name: Download Linux appimage
       uses: actions/download-artifact@v2
       with:
-        name: ubuntu-aprint
+        name: aprint-linux.tar.gz
 
 
     - id: download-windows-image
@@ -156,7 +176,7 @@ jobs:
       name: Download MacOs appimage
       uses: actions/download-artifact@v2
       with:
-        name: macos-aprint
+        name: aprint-macos-13.tar.gz
 
     - id: display-downloaded-files
       name: display downloaded files
@@ -174,18 +194,7 @@ jobs:
         release_name: prerelease-${{ github.ref_name }}
         draft: true
         prerelease: true
-
-
-
-    - name: Compress action step
-      uses: a7ul/tar-action@v1.1.0
-      id: compress_linux_bundle
-      with:
-        command: c
-        files: |
-          ./aprint-linux
-        outPath: aprint-linux.tar.gz
-
+          
     - id: release-linux-appimage
       name: Release Linux appimage
       uses: actions/upload-release-asset@latest
@@ -194,7 +203,7 @@ jobs:
       with:
         upload_url: ${{ steps.create-release.outputs.upload_url }}
         asset_path: aprint-linux.tar.gz
-        asset_name: ubuntu-aprint.tar.gz
+        asset_name: aprint-linux.tar.gz
         asset_content_type: application/x-binary
 
     - uses: montudor/action-zip@v1
@@ -211,15 +220,6 @@ jobs:
         asset_path: aprint-windows.zip
         asset_name: aprint-windows.zip
         asset_content_type: application/x-binary
-
-    - name: Compress action step
-      uses: a7ul/tar-action@v1.1.0
-      id: compress_macos_bundle
-      with:
-        command: c
-        files: |
-          ./aprint.app
-        outPath: aprint-macos-13.tar.gz
 
     - id: release-macos-appimage
       name: Release macos appimage
