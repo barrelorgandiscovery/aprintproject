@@ -172,7 +172,7 @@ public class APrintApplication {
 			System.setSecurityManager(null);
 
 			logger.debug("adding native library folder");
-			File aprintFolder = aprintFolder;
+			
 			if (aprintFolder != null) {
 				File nl = new File(aprintFolder, "pluginnativelibraries");
 				if (!nl.exists()) {
