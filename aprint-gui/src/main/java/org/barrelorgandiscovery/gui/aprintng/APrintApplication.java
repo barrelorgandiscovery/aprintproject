@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Iterator;
@@ -138,6 +139,23 @@ public class APrintApplication {
 			final APrintProperties prop = new APrintProperties("aprintstudio", //$NON-NLS-1$
 					isbeta, mainFolder);
 
+
+			File aprintFolder = prop.getAprintFolder();
+			// check write permission in aprint folder
+			try {
+				
+				File writeTestFile = new File(aprintFolder, "writeTest.file");
+				try(var fw = new FileWriter(writeTestFile)) {
+					fw.write("testwrite");
+				}
+				
+			} catch(Exception ex) {
+				logger.error("error checking the write permissions :" + ex.getMessage(), ex);
+				JOptionPane.showConfirmDialog(null, "Fail to write in " + aprintFolder + ", check folder permissions");
+				return;
+			}	
+			
+			
 			// splash
 			showSplash();
 
@@ -154,13 +172,15 @@ public class APrintApplication {
 			System.setSecurityManager(null);
 
 			logger.debug("adding native library folder");
-			File aprintFolder = prop.getAprintFolder();
+			File aprintFolder = aprintFolder;
 			if (aprintFolder != null) {
 				File nl = new File(aprintFolder, "pluginnativelibraries");
-				if (!nl.exists())
+				if (!nl.exists()) {
 					nl.mkdirs();
+				}
 
 				addToJavaLibraryPath(nl);
+
 			}
 
 			initLanguageWithProperties(prop);
@@ -186,20 +206,19 @@ public class APrintApplication {
 				try {
 					Bookmarks b = new Bookmarks();
 					boolean found = false;
-					for (int i = 0 ; i < b.getSize() ; i ++ ) {
+					for (int i = 0; i < b.getSize(); i++) {
 						String title = b.getTitle(i);
 						if ("Web Library".equals(title)) {
 							found = true;
 							break;
 						}
 					}
-					
+
 					if (!found) {
-						b.add(new TitledURLEntry("Web Library", "bod://www.barrel-organ-discovery.org:80/READONLY_WEB_SITE_CONTENT"));
+						b.add(new TitledURLEntry("Web Library",
+								"bod://www.barrel-organ-discovery.org:80/READONLY_WEB_SITE_CONTENT"));
 						b.save();
 					}
-					
-					
 
 				} catch (Throwable t) {
 					logger.error("fail to check bookmarks :" + t.getMessage(), t);

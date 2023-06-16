@@ -25,6 +25,8 @@ import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
 
 public class ModifyInstrumentAction extends RepositoryAbstractAction {
 
+	private static final long serialVersionUID = 3895429106900710829L;
+	
 	private static Logger logger = Logger.getLogger(ModifyInstrumentAction.class);
 
 	public ModifyInstrumentAction(Object parent, CurrentRepositoryInformations infos) {

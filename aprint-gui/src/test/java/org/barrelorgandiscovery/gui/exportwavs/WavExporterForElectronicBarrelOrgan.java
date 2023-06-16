@@ -166,7 +166,7 @@ public class WavExporterForElectronicBarrelOrgan extends JPanel {
 		track.add(new MidiEvent(shortMessage, 1L));
 
 		ShortMessage endNoteMessage = new ShortMessage(ShortMessage.NOTE_OFF, channel, note, 127);
-		track.add(new MidiEvent(endNoteMessage, 1000L));
+		track.add(new MidiEvent(endNoteMessage, 10000L/4));
 
 		try (FileOutputStream os = new FileOutputStream(new File(outputFolder, "DEFAULT_" + note + ".WAV"))) {
 
@@ -259,19 +259,19 @@ public class WavExporterForElectronicBarrelOrgan extends JPanel {
 //		File insf2 = new File(
 //				"/home/use/projets/2022-02_Orgue_Electronique/work/sons/arachno-soundfont-10-sf2/Arachno SoundFont - Version 1.0.sf2");
 
-		// File insf2 = new File(
-		// "/home/use/projets/2022-02_Orgue_Electronique/work/sons/SoniMusicae-Diato-sf2/Sonimusicae-diato-sf2/Diato.sf2");
+		 File insf2 = new File(
+		 "/home/use/projets/2022-02_Orgue_Electronique/work/sons/bibliotheque_sons/SoniMusicae-Diato-sf2/Sonimusicae-diato-sf2/Diato.sf2");
 
 		// File insf2 = new
 		// File("/home/use/projets/2022-02_Orgue_Electronique/work/sons/SoniMusicae-Blanchet1720-sf2/Soni
 		// Musicae-Blanchet1720-sf2/Blanchet-1720.sf2");
 
-		String sbpath = "GeneralUser GS MuseScore v1.442.sf2";
-		File outFolder = new File("/home/use/tmp/outputsoundgm");
+		// String sbpath = "GeneralUser GS MuseScore v1.442.sf2";
+		File outFolder = new File("/home/use/tmp/outputdiato");
 		outFolder.mkdirs();
-		File insf2 = new File(
-				"/home/use/projets/2022-02_Orgue_Electronique/work/sons/bibliotheque_sons/GeneralUser_GS_1.442-MuseScore/GeneralUser GS 1.442 MuseScore/"
-						+ sbpath);
+//		File insf2 = new File(
+//				"/home/use/projets/2022-02_Orgue_Electronique/work/sons/bibliotheque_sons/GeneralUser_GS_1.442-MuseScore/GeneralUser GS 1.442 MuseScore/"
+//						+ sbpath);
 
 		// 97 -> plantage SoftLinearResampler2, : -19532
 
