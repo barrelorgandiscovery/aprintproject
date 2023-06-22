@@ -943,7 +943,17 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 			logger.debug("AI, strategy"); //$NON-NLS-1$
 
 			wekaRecognitionStrategy = new WekaRecognitionStrategy(virtualBookComponent.getVirtualBook().getScale());
-
+			
+			if (bookHoles == null && freeBookRects == null) {
+				JMessageBox.showMessage(this, "You must defines some book areas or regions");
+				return;
+			}
+			
+			if (holesHoles == null && freeHoleRects == null) {
+				JMessageBox.showMessage(this, "You must defines some holes areas or regions");
+				return;
+			}
+			
 			wekaRecognitionStrategy.train(bookHoles, freeBookRects, holesHoles, freeHoleRects, imageToRecognize);
 			current = wekaRecognitionStrategy;
 

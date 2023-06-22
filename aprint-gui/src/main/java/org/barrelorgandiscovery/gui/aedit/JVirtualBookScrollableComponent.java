@@ -183,7 +183,7 @@ public class JVirtualBookScrollableComponent extends JPanel {
 
 		// update the scrolls
 
-		hscroll.setMaximum((int) (((double) vb.getLength()) / 1000000 * s.getSpeed() / increment));
+		hscroll.setMaximum((int) (((double) vb.getLength_fast()) / 1000000 * s.getSpeed() / increment));
 
 		vscroll.setMaximum((int) (bookWidth / increment));
 

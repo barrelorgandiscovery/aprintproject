@@ -72,6 +72,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	 * index from tracks.
 	 */
 	private ArrayList<Hole>[] trackIndex = null;
+	
 
 	/*
 	 * (non-Javadoc)
@@ -196,7 +197,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 		for (Hole h : holecollection) {
 			addHole(h);
 		}
-
+		
 	}
 
 	/**
@@ -230,6 +231,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 		} else {
 			addHole(n);
 		}
+		
 	}
 
 	/**
@@ -463,7 +465,7 @@ public class VirtualBook implements Serializable, VirtualBookSectionManipulation
 	 * @return the book length in microseconds
 	 */
 	public long getLength() {
-
+		
 		long longueur = 0;
 
 		Iterator<Hole> it = notes.iterator();

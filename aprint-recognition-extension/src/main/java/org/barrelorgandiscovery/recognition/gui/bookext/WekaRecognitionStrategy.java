@@ -91,9 +91,7 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 		
 		Instances instances = null;
 
-		assert bookHoles != null;
-		assert holesHoles != null;
-
+	
 		if (bookHoles != null) {
 			for (Hole h : bookHoles) {
 				constructTrainingSet(h, BOOK_CLASS, familyTiledImage);

@@ -558,8 +558,8 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		menu.add(toolsMenu);
 
 		JMenuItem groovyScriptConsole = new JMenuItem(Messages.getString("APrint.317")); //$NON-NLS-1$
-		groovyScriptConsole.setIcon(new ImageIcon(
-				ImageTools.loadImageAndCrop(GroovyMain.class.getResource("ConsoleIcon.png"), 32, 32))); //$NON-NLS-1$
+		groovyScriptConsole.setIcon(
+				new ImageIcon(ImageTools.loadImageAndCrop(GroovyMain.class.getResource("ConsoleIcon.png"), 32, 32))); //$NON-NLS-1$
 		groovyScriptConsole.setAccelerator(KeyStroke.getKeyStroke("control G")); //$NON-NLS-1$
 		groovyScriptConsole.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -1222,9 +1222,9 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		newvb.setActionCommand("NEW"); //$NON-NLS-1$
 		newvb.setText(Messages.getString("APrintNG.4000") + "..."); //$NON-NLS-1$ //$NON-NLS-2$
 		newvb.setIcon(new ImageIcon(APrintNG.getAPrintApplicationIcon()));
-		
+
 		m_fichier.addSeparator();
-		
+
 		JMenuItem ouvrirvb = m_fichier.add(Messages.getString("APrintNG.10")); //$NON-NLS-1$
 		ouvrirvb.setActionCommand("LOAD"); //$NON-NLS-1$
 		ouvrirvb.setAccelerator(KeyStroke.getKeyStroke("control O")); //$NON-NLS-1$
@@ -1599,7 +1599,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 						}, Messages.getString("APrintNG.4000"), this.repository.getRepository2()); // $NON-NLS-1$
 
 				intf.getContentPane().add(p, BorderLayout.CENTER);
-				
+
 //				intf.addComponentListener(new ComponentAdapter() {
 //					@Override
 //					public void componentResized(ComponentEvent e) {
@@ -1607,7 +1607,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 //						p.invalidate();
 //					}
 //				});
-				
+
 				intf.setVisible(true);
 
 			} else if ("SEARCH".equals(e.getActionCommand())) { //$NON-NLS-1$
@@ -2041,7 +2041,10 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		}
 
 		public void stop() throws Exception {
-			currentPlaySubSystem.stop();
+			try {
+				currentPlaySubSystem.stop();
+			} catch (Throwable t) {
+			}
 			m.fireStopPlaySubSystem();
 		}
 
