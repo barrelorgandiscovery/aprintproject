@@ -111,7 +111,11 @@ public class TerminalParameterModelStep extends ModelStepWithConsole implements 
 	 * Display name or label
 	 */
 	public String getLabel() {
-		return parameter.getLabel();
+		String stringValue = "" + value;
+		if (stringValue.length() > 20) {
+			stringValue = stringValue.substring(0, 20);
+		}
+		return parameter.getLabel() + "-" + ("" + value);
 	}
 
 	/**
