@@ -1,0 +1,1 @@
+xdg-icon-resource install --size 32 icon.png APrint-APrint 

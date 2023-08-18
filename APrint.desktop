@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=APrint
+Comment=Book Arranging
+Exec=/home/use/aprintproject/bundle/build/distributions/aprint/bin/aprint %U
+Icon=APrint-APrint
+Terminal=false
+Type=Application
+Encoding=UTF-8
+Categories=Application;
+StartupWMClass=aprint
+MimeType=application/x-aprint
+Name[en_US]=APrint
+
