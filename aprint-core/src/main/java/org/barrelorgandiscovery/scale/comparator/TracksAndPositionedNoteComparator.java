@@ -8,7 +8,7 @@ import org.barrelorgandiscovery.tools.MidiHelper;
 /**
  * Compare the tracks number and notes equivalence
  * 
- * @author use
+ * @author pfreydiere
  * 
  */
 public class TracksAndPositionedNoteComparator extends TracksNumberComparator {

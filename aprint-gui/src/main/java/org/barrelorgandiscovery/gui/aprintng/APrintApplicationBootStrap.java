@@ -76,6 +76,13 @@ public class APrintApplicationBootStrap {
 		Logger.getRootLogger().setLevel(Level.DEBUG);
 
 		String mainFolder = sysprop.getProperty(MAINFOLDER_SYSPROP, null);
+		if (mainFolder == null) {
+			mainFolder = sysprop.getProperty("jpackage.app-path", null);
+			if (mainFolder != null) {
+				File root = new File(mainFolder).getParentFile().getParentFile();
+				mainFolder = new File(root, "lib/app").getAbsolutePath();
+			}
+		}
 
 		String commandline_mainfolderValue = cmd.getOptionValue('m');
 		if (commandline_mainfolderValue != null && !commandline_mainfolderValue.isEmpty()) {

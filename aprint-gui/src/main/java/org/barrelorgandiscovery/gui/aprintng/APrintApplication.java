@@ -8,6 +8,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -101,6 +102,13 @@ public class APrintApplication {
 
 			Properties sysprop = System.getProperties();
 			String mainFolder = sysprop.getProperty(APrintApplicationBootStrap.MAINFOLDER_SYSPROP, null);
+			if (mainFolder == null) {
+				mainFolder = sysprop.getProperty("jpackage.app-path", null);
+				if (mainFolder != null) {
+					File root = new File(mainFolder).getParentFile().getParentFile();
+					mainFolder = new File(root, "lib/app").getAbsolutePath();
+				}
+			}
 
 			String commandline_mainfolderValue = cmd.getOptionValue('m');
 			if (commandline_mainfolderValue != null && !commandline_mainfolderValue.isEmpty()) {
@@ -194,6 +202,7 @@ public class APrintApplication {
 			}
 
 			boolean restart = true;
+			boolean first = true;
 
 			while (restart) {
 
@@ -275,6 +284,23 @@ public class APrintApplication {
 				} else {
 					logger.debug("external instruments has already been downloaded");
 				}
+				
+				if (first) {
+					
+					List<String> filesToOpen = cmd.getArgList();
+					// handle file opening from command line
+					for (String s: filesToOpen) {
+						try {
+						p.handleDropFileTarget(new File(s));
+						} catch (Exception ex) {
+							JMessageBox.showMessage(p, "Fail to open " + s + ": " + ex.getMessage());
+							ex.printStackTrace();
+						}
+					}
+					
+					first = false;
+				}
+				
 
 				// main loop
 				while (p.isVisible()) {
