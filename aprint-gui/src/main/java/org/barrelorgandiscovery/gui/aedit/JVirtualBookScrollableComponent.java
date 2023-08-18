@@ -315,7 +315,7 @@ public class JVirtualBookScrollableComponent extends JPanel {
 	}
 
 	// ///////////////////////////////////////////////////////////
-	// gestion de la selection par blocks
+	// manage block selection
 
 	/**
 	 * set the selection block
