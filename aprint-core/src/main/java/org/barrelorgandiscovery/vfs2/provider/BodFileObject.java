@@ -69,6 +69,18 @@ public class BodFileObject<FS extends BodFileSystem> extends AbstractFileObject<
 		return responseInformations;
 	}
 
+	@Override
+	public boolean exists() throws FileSystemException {
+		boolean exists = (getType() != FileType.IMAGINARY);
+		return exists;
+	}
+
+	@Override
+	public FileType getType() throws FileSystemException {
+		FileType type = super.getType();
+		return type;
+	}
+
 	/**
 	 * Construct {@code Http4FileObject}.
 	 *
@@ -153,7 +165,13 @@ public class BodFileObject<FS extends BodFileSystem> extends AbstractFileObject<
 	}
 
 	URI getHttpUri() {
-		return URI.create(getInternalURI().toString().replaceAll("bod://", "http://"));
+		String uri = getInternalURI().toString();
+
+		uri = uri.replaceAll("bod://", "http://");
+		if (uri.contains(":443")) {
+			uri = uri.replaceAll("http://", "https://");
+		}
+		return URI.create(uri);
 	}
 
 	FileType fileType = null;
@@ -174,10 +192,31 @@ public class BodFileObject<FS extends BodFileSystem> extends AbstractFileObject<
 			lastHeadResponse = toResponseInformation(httpResponse);
 			final int status = httpResponse.getStatusLine().getStatusCode();
 
+			// try get content
+
 			if (status == HttpStatus.SC_OK
 					|| status == HttpStatus.SC_METHOD_NOT_ALLOWED /* method is not allowed, but resource exist */) {
 				fileType = FileType.FILE;
 				return fileType;
+			}
+
+			if (status == HttpStatus.SC_NOT_FOUND) {
+				// try /content
+				URI contentListUri = URI.create(getHttpUri() + "/CONTENT");
+
+				final HttpGet getRequest = new HttpGet(contentListUri);
+				try (final CloseableHttpResponse httpResponseContent = executeHttpUriRequest(getRequest)) {
+					try {
+						final int content_status = httpResponseContent.getStatusLine().getStatusCode();
+						if (content_status == HttpStatus.SC_OK) {
+							getChildren();
+							fileType = FileType.FOLDER;
+							return fileType;
+						}
+					} catch (Exception ex) {
+						// continue
+					}
+				}
 			}
 
 			if (status == HttpStatus.SC_NOT_FOUND || status == HttpStatus.SC_GONE) {
@@ -255,7 +294,7 @@ public class BodFileObject<FS extends BodFileSystem> extends AbstractFileObject<
 		// System.out.println("execute : " + httpRequest);
 		final HttpClientContext httpClientContext = getAbstractFileSystem().getHttpClientContext();
 		CloseableHttpResponse response = (CloseableHttpResponse) httpClient.execute(httpRequest, httpClientContext);
-		// System.out.println("  response :" + response.getStatusLine());
+		// System.out.println(" response :" + response.getStatusLine());
 		return response;
 
 	}

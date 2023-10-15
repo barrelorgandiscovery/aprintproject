@@ -34,6 +34,7 @@ public class VFSTools {
 		fsManager.init();
 		
 		fsManager.addProvider("bod", new BodProvider());
+		fsManager.addProvider("bods", new BodProvider());
 		
 		FSMANAGER = fsManager;
 		VFS.setManager(FSMANAGER);

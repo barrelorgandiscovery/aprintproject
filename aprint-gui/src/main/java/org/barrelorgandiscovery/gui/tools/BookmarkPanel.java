@@ -23,6 +23,7 @@ import javax.swing.UIManager;
 
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.VFS;
+import org.barrelorgandiscovery.tools.VFSTools;
 import org.jdesktop.swingx.HorizontalLayout;
 
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
@@ -195,22 +196,12 @@ public class BookmarkPanel extends JComponent implements ActionListener {
 
 					FileObject fo = null;
 					String failureMessage = null;
-					try {
-//						if(aTitledURLEntry.getURL().startsWith("ftp")) {
-//							 FileSystemOptions opts = new FileSystemOptions();
-//
-//						        FtpFileSystemConfigBuilder.getInstance().setPassiveMode(opts, true);
-//						        FileSystemManager manager = VFS.getManager();
-//fo = manager.resolveFile(aTitledURLEntry.getURL(), opts);
-//						} else {
-//							
-						
-						fo = VFS.getManager().resolveFile(aTitledURLEntry.getURL());
-						//}
-
-						if ((fo != null) && !fo.exists()) {
+					try {						
+						fo = VFSTools.getManager().resolveFile(aTitledURLEntry.getURL());
+						//FileObject[] childrens = fo.getChildren();
+						/* if ((fo != null) && !fo.exists()) {
 							fo = null;
-						}
+						}*/
 					} catch (Throwable exc) {
 						fo = null;
 						failureMessage = exc.getMessage();
