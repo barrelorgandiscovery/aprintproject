@@ -10,7 +10,7 @@ import org.barrelorgandiscovery.optimizers.punch.PunchConverterOptimizer;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.virtualbook.Hole;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TestPunchIO {
 

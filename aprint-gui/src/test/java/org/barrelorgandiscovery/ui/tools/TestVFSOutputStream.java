@@ -4,11 +4,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 
-import org.apache.commons.vfs2.FileName;
-import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.barrelorgandiscovery.tools.VFSTools;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TestVFSOutputStream {
 

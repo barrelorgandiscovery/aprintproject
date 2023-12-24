@@ -3,13 +3,11 @@ package org.barrelorgandiscovery.extensionsng.perfo.ng.panel.wizard;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.CutToCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.DisplacementCommand;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.plan.PunchPlan;
-import org.barrelorgandiscovery.extensionsng.perfo.ng.panel.wizard.StepResume.PunchBookAndPlan;
 import org.barrelorgandiscovery.optimizers.model.CutLine;
-import org.barrelorgandiscovery.optimizers.model.OptimizedObject;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.virtualbook.Hole;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TestRevertingPunchPlan {
 

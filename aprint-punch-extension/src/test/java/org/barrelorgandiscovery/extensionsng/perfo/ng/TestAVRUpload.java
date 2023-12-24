@@ -4,8 +4,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import jssc.SerialPort;
 import jssc.SerialPortEvent;
@@ -22,11 +21,6 @@ import jssc.SerialPortException;
 public class TestAVRUpload {
 
 	private SerialPort serialPort;
-
-	@Before
-	public void setup() {
-
-	}
 
 	public char toDigit(int i) {
 		return (char) ('0' + i);

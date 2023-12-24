@@ -8,8 +8,6 @@ import java.io.OutputStreamWriter;
 import java.nio.charset.Charset;
 import java.util.Properties;
 
-import org.junit.Test;
-
 public class ConvertResourcesToUTF8 {
 
 	// @Test

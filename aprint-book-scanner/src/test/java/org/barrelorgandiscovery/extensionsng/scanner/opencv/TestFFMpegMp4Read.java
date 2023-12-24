@@ -1,19 +1,11 @@
 package org.barrelorgandiscovery.extensionsng.scanner.opencv;
 
-import java.awt.BorderLayout;
 import java.awt.image.BufferedImage;
-import java.nio.ByteBuffer;
-import java.nio.ShortBuffer;
-
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
 
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.Java2DFrameConverter;
-import org.junit.Test;
 
 public class TestFFMpegMp4Read {
 

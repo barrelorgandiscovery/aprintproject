@@ -1,6 +1,6 @@
 package org.barrelorgandiscovery.testjava;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 /**
  * test for Java Type casting with base class used with childfirst classloader

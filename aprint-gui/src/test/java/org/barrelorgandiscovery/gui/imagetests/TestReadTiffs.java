@@ -5,8 +5,6 @@ import java.io.File;
 
 import javax.imageio.ImageIO;
 
-import org.junit.Test;
-
 public class TestReadTiffs {
 
 	//@Test
