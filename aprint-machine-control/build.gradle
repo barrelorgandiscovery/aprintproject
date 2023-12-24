@@ -17,6 +17,8 @@ dependencies {
 	implementation group: 'log4j', name: 'log4j', version: '1.2.14'
     api files(fileTree(dir:"${projectDir}/libs" , include:['**/*.jar']).toList())
     
+    api group:'io.github.java-native', name:'jssc', version: '2.9.6'
+    
     	final def junitJupiterGroup = 'org.junit.jupiter'
  	final def junitJupiterVersion = '5.4.0'
 
