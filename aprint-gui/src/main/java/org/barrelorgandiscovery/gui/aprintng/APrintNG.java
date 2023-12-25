@@ -1191,7 +1191,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 	public void showInstrumentEditor() throws Exception {
 
 		JRepositoryTileFrame f = new JRepositoryTileFrame(this, repository.getRepository2(), aprintproperties);
-
+		
 		f.setTitle(Messages.getString("APrintNG.2")); //$NON-NLS-1$
 
 		f.setIconImage(getIconImage());
@@ -1202,6 +1202,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		SwingUtils.center(f);
 
 		f.setVisible(true);
+		f.setFocusOnFilter();
 		f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 	}
 
@@ -2640,7 +2641,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		logger.debug("open model editor");
 		APrintNGModelFrame f = new APrintNGModelFrame(getProperties(), this);
 
-		f.setSize(800, 600);
+		// f.setSize(800, 600);
 		f.setVisible(true);
 		addNewInternalFrame(f);
 
