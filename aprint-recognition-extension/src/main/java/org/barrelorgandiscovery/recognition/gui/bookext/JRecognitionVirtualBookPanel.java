@@ -4,6 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -25,6 +27,7 @@ import java.util.stream.Collectors;
 
 import javax.swing.AbstractAction;
 import javax.swing.AbstractButton;
+import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -37,7 +40,9 @@ import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
 import javax.swing.JToggleButton;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.border.BevelBorder;
 
 import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
@@ -53,7 +58,10 @@ import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
 import org.barrelorgandiscovery.gui.aedit.RectSelectTool;
 import org.barrelorgandiscovery.gui.aedit.Tool;
 import org.barrelorgandiscovery.gui.aedit.UndoStack;
+import org.barrelorgandiscovery.gui.aprintng.IStatusBarFeedBackTransactional;
+import org.barrelorgandiscovery.gui.aprintng.IStatusBarFeedback;
 import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
+import org.barrelorgandiscovery.gui.tools.APrintStatusBarHandling.StatusBarTransaction;
 import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.images.books.tools.BookImageRecognitionTiledImage;
 import org.barrelorgandiscovery.images.books.tools.IFamilyImageSeekerTiledImage;
@@ -130,7 +138,9 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 	 */
 	HolesDisplayOverlayLayer bookNotesOverlay = new HolesDisplayOverlayLayer();
 
-	WekaRecognitionStrategy wekaRecognitionStrategy;
+	// we remember the weka session, for preserving the training
+	WekaRecognitionStrategy sessionRemeberedWekaRecognitionStrategy;
+
 	IRecognitionStrategy thresholdStrategy = new IRecognitionStrategy() {
 		@Override
 		public BufferedImage apply(BufferedImage image) {
@@ -150,7 +160,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		}
 	};
 
-	IRecognitionStrategy current = wekaRecognitionStrategy;
+	IRecognitionStrategy current = null;
 
 	JSlider sldtransparencytraining;
 
@@ -169,6 +179,36 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 	JLabel lblprogress;
 
 	ScheduledExecutorService processingGuiLabel = Executors.newSingleThreadScheduledExecutor();
+
+	IStatusBarFeedBackTransactional statusBar = new IStatusBarFeedBackTransactional() {
+		@Override
+		public void generalInformation(String usertext) {
+		}
+
+		@Override
+		public StatusBarTransaction startTransaction() {
+			return null;
+		}
+
+		@Override
+		public void transactionProgress(StatusBarTransaction transaction, double progress) {
+		}
+
+		@Override
+		public void transactionText(StatusBarTransaction transaction, String text) {
+		}
+
+		@Override
+		public void endTransaction(StatusBarTransaction transaction) {
+		}
+
+	};
+
+	void setStatusBar(IStatusBarFeedBackTransactional statusBarFeedBack) {
+		if (statusBarFeedBack != null) {
+			this.statusBar = statusBarFeedBack;
+		}
+	}
 
 	/**
 	 * add hole in layer, for recognition
@@ -356,9 +396,9 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 							ZipBookImage zbook = new ZipBookImage(f);
 							setTiledImage(zbook);
 
-						} else if (f.getName().toLowerCase().endsWith(".png") || 
-								f.getName().toLowerCase().endsWith(".jpg") || 
-								f.getName().toLowerCase().endsWith(".jpeg")) {
+						} else if (f.getName().toLowerCase().endsWith(".png")
+								|| f.getName().toLowerCase().endsWith(".jpg")
+								|| f.getName().toLowerCase().endsWith(".jpeg")) {
 
 							BufferedImage bi = ImageTools.loadImage(f);
 							setTiledImage(new StandaloneTiledImage(bi));
@@ -449,7 +489,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		btnchoosemodel = (JButton) fa.getButton("btnchoosemodel");//$NON-NLS-1$
 		btnchoosemodel.addActionListener((e) -> {
 			try {
-
+				statusBar.generalInformation("loading pretrained model");
 				loadPretrainedModel();
 
 			} catch (Throwable t) {
@@ -474,7 +514,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 				SwingUtils.recurseSetEnable(thrsholdform, rbthrshold.isSelected());
 
 				if (tabModelUse.getSelectedIndex() == 0) {
-					current = wekaRecognitionStrategy;
+					current = sessionRemeberedWekaRecognitionStrategy;
 				} else {
 					// existing model
 					current = thresholdStrategy;
@@ -665,6 +705,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		btnlaunchrecognition.addActionListener((e) -> {
 			try {
 				ensureLayersVisible();
+				statusBar.generalInformation("launch recognition");
 				launchRecognition();
 			} catch (Exception ex) {
 
@@ -907,6 +948,8 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 
 	private void launchRecognition() throws Exception {
 
+		// In GUI Thread
+
 		ArrayList<Hole> bookHoles = bookRegionDisplay.getHoles();
 		ArrayList<Hole> holesHoles = holeRegionDisplay.getHoles();
 
@@ -939,134 +982,157 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 
 		recognitionDisplay.setTiledBackgroundimage(tiledImage);
 
-		if (rbIA.isSelected()) {
-			logger.debug("AI, strategy"); //$NON-NLS-1$
+		// Define strategy
+		CompletableFuture<IRecognitionStrategy> modelChoosen = CompletableFuture.supplyAsync(() -> {
+			try {
+				if (rbIA.isSelected()) {
+					logger.debug("AI, strategy"); //$NON-NLS-1$
 
-			wekaRecognitionStrategy = new WekaRecognitionStrategy(virtualBookComponent.getVirtualBook().getScale());
-			
-			if (bookHoles == null && freeBookRects == null) {
-				JMessageBox.showMessage(this, "You must defines some book areas or regions");
-				return;
-			}
-			
-			if (holesHoles == null && freeHoleRects == null) {
-				JMessageBox.showMessage(this, "You must defines some holes areas or regions");
-				return;
-			}
-			
-			wekaRecognitionStrategy.train(bookHoles, freeBookRects, holesHoles, freeHoleRects, imageToRecognize);
-			current = wekaRecognitionStrategy;
+					sessionRemeberedWekaRecognitionStrategy = new WekaRecognitionStrategy(
+							virtualBookComponent.getVirtualBook().getScale());
 
-		} else {
+					if (bookHoles == null && freeBookRects == null) {
+						JMessageBox.showMessage(this, "You must defines some book areas or regions");
+						return null;
+					}
 
-			if (tabModelUse.isEnabled()) {
-				if (currentPretrainedModel != null) {
-					logger.debug("create pretrained model"); //$NON-NLS-1$
-					current = new WekaWithPreTrainedModel(currentPretrainedModel);
+					if (holesHoles == null && freeHoleRects == null) {
+						JMessageBox.showMessage(this, "You must defines some holes areas or regions");
+						return null;
+					}
+
+					statusBar.generalInformation("Start Training ...");
+					sessionRemeberedWekaRecognitionStrategy.train(bookHoles, freeBookRects, holesHoles, freeHoleRects,
+							imageToRecognize);
+					return sessionRemeberedWekaRecognitionStrategy;
+
+				} else {
+
+					if (tabModelUse.isEnabled()) {
+						if (currentPretrainedModel != null) {
+							logger.debug("create pretrained model"); //$NON-NLS-1$
+							return new WekaWithPreTrainedModel(currentPretrainedModel);
+						}
+					} else {
+						logger.debug("threshold strategy"); //$NON-NLS-1$
+						return thresholdStrategy;
+					}
 				}
-			} else {
-				logger.debug("threshold strategy"); //$NON-NLS-1$
-				current = thresholdStrategy;
+				
+				return null;
+
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				return null;
 			}
-		}
+		});
 
 		if (backGroundThread != null) {
 			backGroundThread.cancel();
 			backGroundThread = null;
 		}
 
-		// clear
-		recognitionDisplay.setHoles(null);
+		modelChoosen.thenApply((IRecognitionStrategy strategy) -> {
 
-		/**
-		 * ordering the task queue depending on the user point of view
-		 * 
-		 * @author pfreydiere
-		 *
-		 */
-		class PriorityImageComparator implements Comparator<Integer> {
-			private int center;
+			this.current = strategy;
 
-			PriorityImageComparator(int center) {
-				this.center = center;
-			}
+			// clear
+			recognitionDisplay.setHoles(null);
 
-			@Override
-			public int compare(Integer o1, Integer o2) {
-				int d1 = Math.abs(o1 - center);
-				int d2 = Math.abs(o2 - center);
-				return Integer.compare(d1, d2);
-			}
-		}
+			/**
+			 * ordering the task queue depending on the user point of view
+			 * 
+			 * @author pfreydiere
+			 *
+			 */
+			class PriorityImageComparator implements Comparator<Integer> {
+				private int center;
 
-		backGroundThread = new BackgroundTileImageProcessingThread<>(tiledImage, new TiledProcessedListener() {
-
-			@Override
-			public <T> void tileProcessed(int index, T parameter) {
-
-				SwingUtilities.invokeLater(() -> {
-					assert virtualBookComponent != null;
-					virtualBookComponent.repaint();
-				});
-
-				// change tile computing priority
-				int[] visibleTiles = backgroundBook.getCurrentVisibleTiles();
-
-				int min = Integer.MAX_VALUE;
-				int max = Integer.MIN_VALUE;
-				for (int i = 0; i < visibleTiles.length; i++) {
-					min = Math.min(visibleTiles[i], min);
-					max = Math.max(visibleTiles[i], max);
+				PriorityImageComparator(int center) {
+					this.center = center;
 				}
 
-				backGroundThread.sortProcessingQueue(new PriorityImageComparator((min + max) / 2));
+				@Override
+				public int compare(Integer o1, Integer o2) {
+					int d1 = Math.abs(o1 - center);
+					int d2 = Math.abs(o2 - center);
+					return Integer.compare(d1, d2);
+				}
 			}
 
-			@Override
-			public void errorInProcessingTile(String errormsg) {
-				logger.error(errormsg);
-			}
-		}, 1); // one thread
+			backGroundThread = new BackgroundTileImageProcessingThread<>(tiledImage, new TiledProcessedListener() {
 
-		backGroundThread.start(new TileProcessing<Void>() {
-			@Override
-			public Void process(int index, BufferedImage image) throws Exception {
+				@Override
+				public <T> void tileProcessed(int index, T parameter) {
 
-				logger.debug("loading image " + index); //$NON-NLS-1$
-				BufferedImage bi = imageToRecognize.loadImage(index);
-				if (bi == null) {
-					logger.error("erroneous index, image number " + index + " cannot be loaded in " + imageToRecognize); //$NON-NLS-1$ //$NON-NLS-2$
+					SwingUtilities.invokeLater(() -> {
+						assert virtualBookComponent != null;
+						virtualBookComponent.repaint();
+					});
+
+					// change tile computing priority
+					int[] visibleTiles = backgroundBook.getCurrentVisibleTiles();
+
+					int min = Integer.MAX_VALUE;
+					int max = Integer.MIN_VALUE;
+					for (int i = 0; i < visibleTiles.length; i++) {
+						min = Math.min(visibleTiles[i], min);
+						max = Math.max(visibleTiles[i], max);
+					}
+
+					backGroundThread.sortProcessingQueue(new PriorityImageComparator((min + max) / 2));
+				}
+
+				@Override
+				public void errorInProcessingTile(String errormsg) {
+					logger.error(errormsg);
+				}
+			}, 1); // one thread
+
+			backGroundThread.start(new TileProcessing<Void>() {
+				@Override
+				public Void process(int index, BufferedImage image) throws Exception {
+
+					logger.debug("loading image " + index); //$NON-NLS-1$
+					BufferedImage bi = imageToRecognize.loadImage(index);
+					if (bi == null) {
+						logger.error(
+								"erroneous index, image number " + index + " cannot be loaded in " + imageToRecognize); //$NON-NLS-1$ //$NON-NLS-2$
+						return null;
+					}
+
+					BufferedImage binaryresult = current.apply(bi);
+
+					String fileName = tiledImage.constructImagePath(index, REC_INLINE_FAMILY).getAbsolutePath();
+					logger.debug("saving " + fileName); //$NON-NLS-1$
+					IJ.save(new ImagePlus("", binaryresult), fileName); //$NON-NLS-1$
+
+					Scale scale = virtualBookComponent.getVirtualBook().getScale();
+
+					// manage the threshold
+					int decision_threashold = 50;
+
+					ReadResultBag readResult = BookReadProcessor.readResult2(binaryresult, index * bi.getWidth(),
+							scale.mmToTime(scale.getWidth() / imageToRecognize.getHeight()), scale, null, false,
+							decision_threashold);
+
+					ArrayList<Hole> holes = recognitionDisplay.getHoles();
+					if (holes == null) {
+						holes = new ArrayList<Hole>();
+					}
+
+					holes.addAll(readResult.virtualbook.getHolesCopy());
+					// display results
+					recognitionDisplay.setHoles(holes);
+
 					return null;
+
 				}
+			});
 
-				BufferedImage binaryresult = current.apply(bi);
-
-				String fileName = tiledImage.constructImagePath(index, REC_INLINE_FAMILY).getAbsolutePath();
-				logger.debug("saving " + fileName); //$NON-NLS-1$
-				IJ.save(new ImagePlus("", binaryresult), fileName); //$NON-NLS-1$
-
-				Scale scale = virtualBookComponent.getVirtualBook().getScale();
-
-				// manage the threshold
-				int decision_threashold = 50;
-
-				ReadResultBag readResult = BookReadProcessor.readResult2(binaryresult, index * bi.getWidth(),
-						scale.mmToTime(scale.getWidth() / imageToRecognize.getHeight()), scale, null, false,
-						decision_threashold);
-
-				ArrayList<Hole> holes = recognitionDisplay.getHoles();
-				if (holes == null) {
-					holes = new ArrayList<Hole>();
-				}
-
-				holes.addAll(readResult.virtualbook.getHolesCopy());
-				// display results
-				recognitionDisplay.setHoles(holes);
-
-				return null;
-
-			}
+			return (Void)null;
 		});
+
 	}
 
 	IFamilyImageSeekerTiledImage getBackgroundImage() {
@@ -1098,7 +1164,7 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 	public void dispose() {
 		closeBackGroundThread();
 
-		List<Runnable> sutdown = processingGuiLabel.shutdownNow();
+		List<Runnable> shutdown = processingGuiLabel.shutdownNow();
 		this.processingGuiLabel = null;
 	}
 

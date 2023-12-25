@@ -1,5 +1,9 @@
 # Changelog
 
+## 2023 December
+
+- add status bar in book windows, and extensions
+
 ## 2023 January
 
 - add text filters for instrument names, saving time for search elements

@@ -345,9 +345,11 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 		AffineTransform display = AffineTransform.getScaleInstance(factor, factor);
 		display.concatenate(t);
 
-		AffineTransform shift = AffineTransform.getTranslateInstance(component.convertCartonToScreenX(xoffset),
+		AffineTransform shift = AffineTransform.getTranslateInstance(
+				component.convertCartonToScreenX(xoffset),
 				component.convertCartonToScreenY(0));
 		shift.concatenate(display);
+		
 		return shift;
 	}
 
@@ -386,49 +388,62 @@ public class ImageAndHolesVisualizationLayer implements VirtualBookComponentBack
 
 		Graphics2D g2d = (Graphics2D) g;
 
-		Stroke stroke = new BasicStroke(2.0f);
-		if (this.holesStroke != null) {
-			stroke = this.holesStroke;
-		}
-		g2d.setStroke(stroke);
-
-		if (holes != null) {
-			for (Iterator<Hole> iterator = holes.iterator(); iterator.hasNext();) {
-				Hole h = iterator.next();
-
-				double xmm = xoffset + jbookcomponentreference.timestampToMM(h.getTimestamp()) * xscale;
-				double widthmm = jbookcomponentreference.timeToMM(h.getTimeLength()) * xscale;
-
-				double y = scale.getFirstTrackAxis() + scale.getIntertrackHeight() * h.getTrack();
-
-				if (scale.isPreferredViewedInversed())
-					y = scale.getWidth() - y;
-
-				y -= scale.getTrackWidth() / 2;
-
-				g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 0.5f));
-
-				g2d.fillRect(jbookcomponentreference.convertCartonToScreenX(xmm),
-						jbookcomponentreference.convertCartonToScreenY(y), jbookcomponentreference.MmToPixel(widthmm),
-						jbookcomponentreference.MmToPixel(scale.getTrackWidth()));
+		Stroke oldStroke = g2d.getStroke();
+		try {
+			Stroke stroke = new BasicStroke(1.5f);
+			if (this.holesStroke != null) {
+				stroke = this.holesStroke;
 			}
-		}
+			g2d.setStroke(stroke);
 
-		if (shapes != null && shapes.size() > 0) {
-			AffineTransform a = constructAffineTransformForDisplay(jbookcomponentreference, scale.getWidth(),
-					scale.getWidth());
-			AffineTransform oldTransform = g2d.getTransform();
-			try {
-				g2d.setTransform(a);
-				for (Shape s : shapes) {
-					g2d.draw(s);
+			if (holes != null) {
+
+				Composite oldComposite = g2d.getComposite();
+				try {
+					g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, 0.5f));
+
+					for (Iterator<Hole> iterator = holes.iterator(); iterator.hasNext();) {
+						Hole h = iterator.next();
+
+						double xmm = xoffset + jbookcomponentreference.timestampToMM(h.getTimestamp()) * xscale;
+						double widthmm = jbookcomponentreference.timeToMM(h.getTimeLength()) * xscale;
+
+						double y = scale.getFirstTrackAxis() + scale.getIntertrackHeight() * h.getTrack();
+
+						if (scale.isPreferredViewedInversed())
+							y = scale.getWidth() - y;
+
+						y -= scale.getTrackWidth() / 2;
+
+						g2d.fillRect(jbookcomponentreference.convertCartonToScreenX(xmm),
+								jbookcomponentreference.convertCartonToScreenY(y),
+								jbookcomponentreference.MmToPixel(widthmm),
+								jbookcomponentreference.MmToPixel(scale.getTrackWidth()));
+					}
+				} finally {
+					g2d.setComposite(oldComposite);
 				}
-				
-			} finally {
-				g2d.setTransform(oldTransform);
 			}
-		}
 
+			if (shapes != null && shapes.size() > 0) {
+				AffineTransform a = constructAffineTransformForDisplay(jbookcomponentreference, scale.getWidth(),
+						scale.getWidth());
+				AffineTransform oldTransform = g2d.getTransform();
+				try {
+					g2d.setTransform(a);
+					for (Shape s : shapes) {
+						g2d.draw(s);
+					}
+
+				} finally {
+					g2d.setTransform(oldTransform);
+				}
+			}
+		} finally {
+
+			g2d.setStroke(oldStroke);
+
+		}
 	}
 
 	public void setXoffset(double xoffset) {

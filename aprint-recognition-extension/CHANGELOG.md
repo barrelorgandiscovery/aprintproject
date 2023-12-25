@@ -1,6 +1,11 @@
 
 # ChangeLog
 
+## December 2023
+
+- Change GUI
+- Improve user feedback
+
 ## April - May 2021
 
 - GUI change to ease the use

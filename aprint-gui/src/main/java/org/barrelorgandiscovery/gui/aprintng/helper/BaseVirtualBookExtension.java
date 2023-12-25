@@ -18,11 +18,16 @@ import org.barrelorgandiscovery.extensions.IExtension;
 import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.InformCurrentInstrumentExtensionPoint;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.InformCurrentVirtualBookExtensionPoint;
+import org.barrelorgandiscovery.gui.aprint.extensionspoints.InformStatusBarExtensionPoint;
+import org.barrelorgandiscovery.gui.aprint.extensionspoints.InformStatusBarTransactionalExtensionPoint;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.LayersExtensionPoint;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.ToolbarAddExtensionPoint;
 import org.barrelorgandiscovery.gui.aprintng.APrintNGVirtualBookFrame;
+import org.barrelorgandiscovery.gui.aprintng.IStatusBarFeedBackTransactional;
+import org.barrelorgandiscovery.gui.aprintng.IStatusBarFeedback;
 import org.barrelorgandiscovery.gui.aprintng.extensionspoints.InformVirtualBookFrameExtensionPoint;
 import org.barrelorgandiscovery.gui.aprintng.extensionspoints.VirtualBookFrameExtensionPoints;
+import org.barrelorgandiscovery.gui.tools.APrintStatusBarHandling.StatusBarTransaction;
 import org.barrelorgandiscovery.instrument.Instrument;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
@@ -32,14 +37,12 @@ import org.barrelorgandiscovery.virtualbook.VirtualBook;
  * 
  * 
  */
-public abstract class BaseVirtualBookExtension extends BaseExtension implements
-		VirtualBookFrameExtensionPoints, ToolbarAddExtensionPoint,
-		InformCurrentInstrumentExtensionPoint,
-		InformCurrentVirtualBookExtensionPoint, LayersExtensionPoint,
-		InformVirtualBookFrameExtensionPoint {
+public abstract class BaseVirtualBookExtension extends BaseExtension
+		implements VirtualBookFrameExtensionPoints, ToolbarAddExtensionPoint, InformCurrentInstrumentExtensionPoint,
+		InformCurrentVirtualBookExtensionPoint, LayersExtensionPoint, InformVirtualBookFrameExtensionPoint,
+		InformStatusBarExtensionPoint, InformStatusBarTransactionalExtensionPoint {
 
-	private static Logger logger = Logger
-			.getLogger(BaseVirtualBookExtension.class);
+	private static Logger logger = Logger.getLogger(BaseVirtualBookExtension.class);
 
 	/**
 	 * Current Virtual Book Window Instrument
@@ -56,7 +59,47 @@ public abstract class BaseVirtualBookExtension extends BaseExtension implements
 	 */
 	protected APrintNGVirtualBookFrame currentFrame;
 
-	
+	/**
+	 * statusbar
+	 */
+	protected IStatusBarFeedback statusBar = new IStatusBarFeedback() {
+		@Override
+		public void generalInformation(String usertext) {
+			// nothing to do
+		}
+	};
+
+	/**
+	 * statusbar
+	 */
+	protected IStatusBarFeedBackTransactional statusBarTransactional = new IStatusBarFeedBackTransactional() {
+		@Override
+		public void generalInformation(String usertext) {
+			// nothing to do
+		}
+
+		@Override
+		public StatusBarTransaction startTransaction() {
+			return null;
+		}
+
+		@Override
+		public void transactionProgress(StatusBarTransaction transaction, double progress) {
+
+		}
+
+		@Override
+		public void transactionText(StatusBarTransaction transaction, String text) {
+
+		}
+
+		@Override
+		public void endTransaction(StatusBarTransaction transaction) {
+
+		}
+
+	};
+
 	/**
 	 * Constructor
 	 * 
@@ -67,30 +110,27 @@ public abstract class BaseVirtualBookExtension extends BaseExtension implements
 	}
 
 	@Override
-	protected void setupExtensionPoint(List<ExtensionPoint> initExtensionPoints)
-			throws Exception {
+	protected void setupExtensionPoint(List<ExtensionPoint> initExtensionPoints) throws Exception {
 
 		logger.debug("setupExtensionPoint");
 
 		super.setupExtensionPoint(initExtensionPoints);
 
-		initExtensionPoints
-				.add(createExtensionPoint(VirtualBookFrameExtensionPoints.class));
+		initExtensionPoints.add(createExtensionPoint(InformStatusBarExtensionPoint.class));
 
-		initExtensionPoints
-				.add(createExtensionPoint(InformCurrentVirtualBookExtensionPoint.class));
+		initExtensionPoints.add(createExtensionPoint(InformStatusBarTransactionalExtensionPoint.class));
 
-		initExtensionPoints
-				.add(createExtensionPoint(InformCurrentInstrumentExtensionPoint.class));
+		initExtensionPoints.add(createExtensionPoint(VirtualBookFrameExtensionPoints.class));
 
-		initExtensionPoints
-				.add(createExtensionPoint(LayersExtensionPoint.class));
+		initExtensionPoints.add(createExtensionPoint(InformCurrentVirtualBookExtensionPoint.class));
 
-		initExtensionPoints
-				.add(createExtensionPoint(ToolbarAddExtensionPoint.class));
+		initExtensionPoints.add(createExtensionPoint(InformCurrentInstrumentExtensionPoint.class));
 
-		initExtensionPoints
-				.add(createExtensionPoint(InformVirtualBookFrameExtensionPoint.class));
+		initExtensionPoints.add(createExtensionPoint(LayersExtensionPoint.class));
+
+		initExtensionPoints.add(createExtensionPoint(ToolbarAddExtensionPoint.class));
+
+		initExtensionPoints.add(createExtensionPoint(InformVirtualBookFrameExtensionPoint.class));
 
 	}
 
@@ -125,6 +165,18 @@ public abstract class BaseVirtualBookExtension extends BaseExtension implements
 		currentFrame = frame;
 	}
 
+	@Override
+	public void informStatusBar(IStatusBarFeedback statusbar) {
+		logger.debug("informStatusBar");
+		this.statusBar = statusbar;
+	}
+
+	@Override
+	public void informStatusBarTransactional(IStatusBarFeedBackTransactional statusbar) {
+		logger.debug("informStatusBarTransactional");
+		this.statusBarTransactional = statusbar;
+	}
+
 	/**
 	 * Override this method to add new layer on the book component
 	 */
@@ -138,18 +190,14 @@ public abstract class BaseVirtualBookExtension extends BaseExtension implements
 	/**
 	 * Internal method for ease the creation of a groovy script based button
 	 * 
-	 * @param closure
-	 *            closure to be launch with a hash in parameter containing the
-	 *            variable accessible (pianoroll, currentinstrument,
-	 *            virtualbook)
-	 * @param icon
-	 *            the icon of the button
-	 * @param text
-	 *            the text of the command
+	 * @param closure closure to be launch with a hash in parameter containing the
+	 *                variable accessible (pianoroll, currentinstrument,
+	 *                virtualbook)
+	 * @param icon    the icon of the button
+	 * @param text    the text of the command
 	 * @return the created button
 	 */
-	protected JButton createGroovyButton(final Closure closure, Image icon,
-			String text) {
+	protected JButton createGroovyButton(final Closure closure, Image icon, String text) {
 
 		JButton btn = new JButton();
 		if (icon != null) {
@@ -160,19 +208,17 @@ public abstract class BaseVirtualBookExtension extends BaseExtension implements
 		if (text != null)
 			btn.setText(text);
 
-		
 		btn.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
 				try {
-					
+
 					HashMap h = new HashMap();
 					h.put("services", application);
 					h.put("pianoroll", currentFrame.getPianoRoll());
 					h.put("virtualbook", currentFrame.getVirtualBook());
 					h.put("currentinstrument", currentFrame.getCurrentInstrument());
 
-					
 					logger.debug("launch groovy action");
 
 					closure.call(h);
@@ -180,9 +226,7 @@ public abstract class BaseVirtualBookExtension extends BaseExtension implements
 					logger.debug("done !");
 
 				} catch (Throwable t) {
-					logger.error(
-							"error in executing the groovy button :"
-									+ t.getMessage(), t);
+					logger.error("error in executing the groovy button :" + t.getMessage(), t);
 					JMessageBox.showError(currentFrame, t);
 				}
 

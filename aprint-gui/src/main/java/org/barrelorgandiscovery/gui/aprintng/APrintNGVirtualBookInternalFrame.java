@@ -21,7 +21,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.awt.image.BufferedImage;
 import java.awt.print.PageFormat;
 import java.awt.print.PrinterJob;
 import java.beans.PropertyChangeEvent;
@@ -57,6 +56,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -66,8 +66,9 @@ import javax.swing.JPopupMenu;
 import javax.swing.JSlider;
 import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.border.TitledBorder;
+import javax.swing.border.BevelBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -116,6 +117,7 @@ import org.barrelorgandiscovery.gui.aprint.PrintPreview;
 import org.barrelorgandiscovery.gui.aprint.SequencerTools;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.InformCurrentInstrumentExtensionPoint;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.InformCurrentVirtualBookExtensionPoint;
+import org.barrelorgandiscovery.gui.aprint.extensionspoints.InformStatusBarExtensionPoint;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.LayersExtensionPoint;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.ToolbarAddExtensionPoint;
 import org.barrelorgandiscovery.gui.aprint.extensionspoints.VirtualBookToolbarButtonsExtensionPoint;
@@ -132,7 +134,9 @@ import org.barrelorgandiscovery.gui.issues.IssueSelector;
 import org.barrelorgandiscovery.gui.issues.JIssuePresenter;
 import org.barrelorgandiscovery.gui.script.groovy.APrintGroovyConsolePanel;
 import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
+import org.barrelorgandiscovery.gui.tools.APrintStatusBarHandling;
 import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
+import org.barrelorgandiscovery.gui.tools.APrintStatusBarHandling.StatusBarTransaction;
 import org.barrelorgandiscovery.images.books.tools.ITiledImage;
 import org.barrelorgandiscovery.images.books.tools.RecognitionTiledImage;
 import org.barrelorgandiscovery.instrument.Instrument;
@@ -192,8 +196,8 @@ import groovy.ui.GroovyMain;
  *
  * @author Freydiere Patrice
  */
-public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
-		implements ActionListener, APrintNGVirtualBookFrame, ClipboardOwner {
+public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame implements ActionListener,
+		APrintNGVirtualBookFrame, ClipboardOwner, IStatusBarFeedback, IStatusBarFeedBackTransactional {
 
 	public static final String BACKGROUNDLAYER_INTERNALNAME = "BACKGROUNDLAYER";
 
@@ -244,7 +248,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 							tiledImage.setCurrentImageFamilyDisplay("renormed");
 
 							imageBackGroundLayer.setTiledBackgroundimage(tiledImage);
-							
+
 						} else {
 							logger.error("cannot display image " + f);
 						}
@@ -297,6 +301,8 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 	private JCheckBox showErrorsLayerCheckBox;
 
 	private int lastSavedVirtualBookHash = -1;
+
+	private JLabel statusLine = new JLabel();
 
 	private void clearVirtualBookState() {
 		lastSavedVirtualBookHash = computeVirtualBookHashCode();
@@ -448,6 +454,23 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 			try {
 				logger.debug("init " + vbextpoints); //$NON-NLS-1$
 				vbextpoints.init((APrintNG) services);
+				logger.debug("done "); //$NON-NLS-1$
+
+			} catch (Throwable t) {
+				logger.error("Extension " + vbextpoints // $NON-NLS-1$
+						+ " throw an exception", t); // $NON-NLS-1$
+				BugReporter.sendBugReport();
+			}
+		}
+
+		// status bar
+		InformStatusBarExtensionPoint[] extpointsStatusBar = ExtensionPointProvider
+				.getAllPoints(InformStatusBarExtensionPoint.class, exts);
+		for (int i = 0; i < extpointsStatusBar.length; i++) {
+			InformStatusBarExtensionPoint vbextpoints = extpointsStatusBar[i];
+			try {
+				logger.debug("init " + vbextpoints); //$NON-NLS-1$
+				vbextpoints.informStatusBar(this);
 				logger.debug("done "); //$NON-NLS-1$
 
 			} catch (Throwable t) {
@@ -1350,6 +1373,18 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		// getActionMap().put("PLAYBOOK", jouer.getAction());//$NON-NLS-1$
 
 		refreshToolbarMenu();
+
+		// status line
+
+		JPanel statusPanel = new JPanel();
+		statusPanel.setBorder(new BevelBorder(BevelBorder.LOWERED));
+		add(statusPanel, BorderLayout.SOUTH);
+		statusPanel.setPreferredSize(new Dimension(getWidth(), 16));
+		statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.X_AXIS));
+
+		statusLine.setHorizontalAlignment(SwingConstants.LEFT);
+		statusPanel.add(statusLine);
+
 	}
 
 	private void loadToolbarPreferences() {
@@ -2542,7 +2577,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 	}
 
 	private void savetoMP3() throws InvalidMidiDataException, IOException, Exception {
-		// demande du fichier � sauvegarder ...
+		// demande du fichier à sauvegarder ...
 		APrintFileChooser choose = new APrintFileChooser();
 
 		choose.setFileSelectionMode(APrintFileChooser.FILES_ONLY);
@@ -3370,5 +3405,40 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame
 		T[] allPoints = ExtensionPointProvider.getAllPoints(clazz, exts);
 		return allPoints;
 	}
+
+	/////////////////////////////////////////////////////////////////
+	// status bar handling
+
+	
+	APrintStatusBarHandling statusBarHandling = new APrintStatusBarHandling(statusLine);
+	
+	
+	@Override
+	public void generalInformation(String usertext) {
+		statusBarHandling.generalInformation(usertext);
+	}
+	
+	@Override
+	public StatusBarTransaction startTransaction() {
+		return statusBarHandling.startTransaction();
+	}
+	
+	@Override
+	public void transactionProgress(StatusBarTransaction transaction, double progress) {
+		statusBarHandling.transactionProgress(transaction, progress);
+	}
+	
+	@Override
+	public void transactionText(StatusBarTransaction transaction, String text) {
+		statusBarHandling.transactionText(transaction, text);
+	}
+	
+	@Override
+	public void endTransaction(StatusBarTransaction transaction) {
+		statusBarHandling.endTransaction(transaction);
+	}
+	
+	
+
 
 }
