@@ -12,6 +12,8 @@ import org.barrelorgandiscovery.repository.Repository2;
 
 public class JInstrumentTileViewerWithFilter extends JPanel {
 
+	private static final long serialVersionUID = 3893048737632587953L;
+
 	private JInstrumentTileViewer instrumentTileViewer;
 
 	private Repository2 repository;

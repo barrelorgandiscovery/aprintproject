@@ -4,15 +4,16 @@ import java.awt.BorderLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
+import java.awt.event.KeyEvent;
 import java.io.InputStream;
 import java.io.OutputStream;
 
 import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JOptionPane;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
 
 import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
@@ -26,6 +27,7 @@ import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.scale.io.ScaleIO;
+import org.barrelorgandiscovery.tools.ImageTools;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.VFSTools;
 
@@ -36,6 +38,8 @@ import org.barrelorgandiscovery.tools.VFSTools;
  * 
  */
 public class JRepositoryInstrumentEditorPanel extends JPanel {
+
+	private static final long serialVersionUID = -7612752846274572042L;
 
 	private static Logger logger = Logger.getLogger(JRepositoryInstrumentEditorPanel.class);
 
@@ -49,15 +53,27 @@ public class JRepositoryInstrumentEditorPanel extends JPanel {
 		initComponents();
 	}
 
+	JMenuBar menuBar;
+
+	public JMenuBar getMenuBar() {
+		return menuBar;
+	}
+
 	private void initComponents() throws Exception {
+
 		editorPanel = new JInstrumentEditorPanel(owner);
 		setLayout(new BorderLayout());
 		add(editorPanel, BorderLayout.CENTER);
 
-		JToolBar mb = new JToolBar();
+		menuBar = new JMenuBar();
 
-		JButton save = new JButton(Messages.getString("JRepositoryInstrumentEditorPanel.0")); //$NON-NLS-1$
-		save.setIcon(new ImageIcon(getClass().getResource("filesave.png"))); //$NON-NLS-1$
+		JMenuItem save = new JMenuItem();
+		ImageIcon saveImageIcon = new ImageIcon(
+				ImageTools.loadImageAndCrop(getClass().getResourceAsStream("filesave.png"), 16, 16));//$NON-NLS-1$
+		save.setIcon(saveImageIcon);
+		
+		save.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, ActionEvent.CTRL_MASK));
+		
 		save.setToolTipText(Messages.getString("JRepositoryInstrumentEditorPanel.20")); //$NON-NLS-1$
 		save.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -74,36 +90,14 @@ public class JRepositoryInstrumentEditorPanel extends JPanel {
 			}
 		});
 
-		mb.add(save);
+		menuBar.add(save);
 
-		JButton delete = new JButton(Messages.getString("JRepositoryInstrumentEditorPanel.4")); //$NON-NLS-1$
-		delete.setIcon(new ImageIcon(getClass().getResource("cancel.png"))); //$NON-NLS-1$
-		delete.setToolTipText(Messages.getString("JRepositoryInstrumentEditorPanel.21")); //$NON-NLS-1$
+		JMenuItem exportInstrument = new JMenuItem();
 
-		delete.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
+		ImageIcon exportImageIcon = new ImageIcon(
+				ImageTools.loadImageAndCrop(getClass().getResourceAsStream("revert.png"), 16, 16));//$NON-NLS-1$
+		exportInstrument.setIcon(exportImageIcon);
 
-				try {
-
-					if (JOptionPane.showConfirmDialog(JRepositoryInstrumentEditorPanel.this,
-							Messages.getString("JRepositoryInstrumentEditorPanel.6")) == JOptionPane.YES_OPTION) { //$NON-NLS-1$
-						deleteCurrent();
-					}
-
-				} catch (Exception ex) {
-					logger.error("error in deleting instrument .... " //$NON-NLS-1$
-							+ ex.getMessage(), ex);
-					JMessageBox.showMessage(owner, Messages.getString("JRepositoryInstrumentEditorPanel.8") //$NON-NLS-1$
-							+ ex.getMessage());
-				}
-
-			}
-		});
-
-		mb.add(delete);
-
-		JButton exportInstrument = new JButton(Messages.getString("JRepositoryInstrumentEditorPanel.1")); //$NON-NLS-1$
-		exportInstrument.setIcon(new ImageIcon(getClass().getResource("revert.png"))); //$NON-NLS-1$
 		exportInstrument.setToolTipText(Messages.getString("JRepositoryInstrumentEditorPanel.2")); //$NON-NLS-1$
 		exportInstrument.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -134,7 +128,7 @@ public class JRepositoryInstrumentEditorPanel extends JPanel {
 						IEditableInstrument ei = editorPanel.getModel();
 						EditableInstrumentStorage editableInstrumentStorage = new EditableInstrumentStorage();
 
-						OutputStream fos = VFSTools.transactionalWrite( choosenFile);
+						OutputStream fos = VFSTools.transactionalWrite(choosenFile);
 						try {
 
 							editableInstrumentStorage.save(ei, fos);
@@ -156,9 +150,12 @@ public class JRepositoryInstrumentEditorPanel extends JPanel {
 			}
 		});
 
-		mb.add(exportInstrument);
+		menuBar.add(exportInstrument);
 
-		JButton importScaleFromFile = new JButton(Messages.getString("JRepositoryInstrumentEditorPanel.12")); //$NON-NLS-1$
+		JMenu scaleMenu = new JMenu("Scale ...");
+		menuBar.add(scaleMenu);
+
+		JMenuItem importScaleFromFile = new JMenuItem(Messages.getString("JRepositoryInstrumentEditorPanel.12")); //$NON-NLS-1$
 		importScaleFromFile.setToolTipText(Messages.getString("JRepositoryInstrumentEditorPanel.13")); //$NON-NLS-1$
 		importScaleFromFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -196,9 +193,9 @@ public class JRepositoryInstrumentEditorPanel extends JPanel {
 			}
 		});
 
-		mb.add(importScaleFromFile);
+		scaleMenu.add(importScaleFromFile);
 
-		JButton exportScaleToFile = new JButton(Messages.getString("JRepositoryInstrumentEditorPanel.30")); //$NON-NLS-1$
+		JMenuItem exportScaleToFile = new JMenuItem(Messages.getString("JRepositoryInstrumentEditorPanel.30")); //$NON-NLS-1$
 		exportScaleToFile.setToolTipText(Messages.getString("JRepositoryInstrumentEditorPanel.31")); //$NON-NLS-1$
 		exportScaleToFile.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -242,9 +239,7 @@ public class JRepositoryInstrumentEditorPanel extends JPanel {
 			}
 		});
 
-		mb.add(exportScaleToFile);
-
-		add(mb, BorderLayout.NORTH);
+		scaleMenu.add(exportScaleToFile);
 
 	}
 

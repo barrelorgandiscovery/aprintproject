@@ -78,6 +78,10 @@ public class ModifyInstrumentAction extends RepositoryAbstractAction {
 									contentPane.add(p, BorderLayout.CENTER);
 
 									f.setSize(1024, 768);
+									
+									// add menu panel
+									f.getRootPane().setJMenuBar(p.getMenuBar());
+									
 									SwingUtils.center(f);
 									p.edit(editableInstrument, null, iem);
 
