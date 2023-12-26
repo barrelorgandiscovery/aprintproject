@@ -2640,8 +2640,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 	public APrintNGModelFrame openModelEditor() throws Exception {
 		logger.debug("open model editor");
 		APrintNGModelFrame f = new APrintNGModelFrame(getProperties(), this);
-
-		// f.setSize(800, 600);
+		
 		f.setVisible(true);
 		addNewInternalFrame(f);
 
