@@ -18,7 +18,7 @@ import org.barrelorgandiscovery.scale.PipeStopListReference;
 import org.barrelorgandiscovery.scale.Scale;
 
 /**
- * Classe permettant l'import de gamme issues de midiboek
+ * import midiboek files
  * 
  * @author Freydiere Patrice
  */

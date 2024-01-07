@@ -4,8 +4,5 @@ public class TrackTypeMismatched extends TrackDiff {
 
 	public TrackTypeMismatched(int sourceTrack) {
 		super(sourceTrack);
-	}
-
-	
-	
+	}	
 }

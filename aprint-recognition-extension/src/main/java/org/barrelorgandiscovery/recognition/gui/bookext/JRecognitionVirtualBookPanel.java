@@ -1035,6 +1035,8 @@ public class JRecognitionVirtualBookPanel extends JPanel implements Disposable, 
 		modelChoosen.thenApply((IRecognitionStrategy strategy) -> {
 
 			this.current = strategy;
+			
+			final IRecognitionStrategy localcurrent = strategy;
 
 			// clear
 			recognitionDisplay.setHoles(null);

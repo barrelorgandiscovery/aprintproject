@@ -9,7 +9,7 @@ import org.apache.log4j.Logger;
 
 /**
  * Parser of a midiboek file
- * @author use
+ * @author pfreydiere
  *
  */
 public class MidiBoekFileParser {

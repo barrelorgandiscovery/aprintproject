@@ -14,7 +14,8 @@ import org.barrelorgandiscovery.gui.ProgressIndicator;
 import org.barrelorgandiscovery.tools.ImageTools;
 
 /**
- * Book Image Creation Tools, 
+ * Book Image Creation Tools,
+ * 
  * @author pfreydiere
  *
  */
@@ -23,10 +24,13 @@ public class BookImageIO {
 	private static final Logger logger = Logger.getLogger(BookImageIO.class);
 
 	/**
-	 * Create a book image
+	 * Create a book image file, from a single in-memory image, the book image is
+	 * suffixes with .bookimage, and il a zip file containing horizontally indexed
+	 * images (to speed up the display, and limit the load)
 	 * 
-	 * @param bufferedImage
-	 * @param rotate
+	 * @param bufferedImage the source image
+	 * @param destinationBookImage output file to generate
+	 * @param rotate is the source image is vertically or horizontally presented
 	 * @throws Exception
 	 */
 	public static void createBookImage(BufferedImage bufferedImage, File destinationBookImage, boolean rotate,
@@ -71,7 +75,7 @@ public class BookImageIO {
 						AffineTransform t = AffineTransform.getTranslateInstance(-sx, -sy);
 
 						if (rotate) {
-							
+
 							t.preConcatenate(AffineTransform.getRotateInstance(-Math.PI / 2));
 							t.preConcatenate(AffineTransform.getTranslateInstance(0, height));
 						}

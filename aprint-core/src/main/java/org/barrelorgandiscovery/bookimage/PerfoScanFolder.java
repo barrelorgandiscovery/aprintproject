@@ -10,7 +10,7 @@ import javax.imageio.ImageIO;
 import org.barrelorgandiscovery.tools.ImageTools;
 
 /**
- * this is a utility class for folder in wich the images are taken
+ * this is a utility class for folder in which the images are taken
  * 
  * @author pfreydiere
  *
