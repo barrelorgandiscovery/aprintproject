@@ -1,0 +1,1 @@
+package org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.generic.lasergcode;

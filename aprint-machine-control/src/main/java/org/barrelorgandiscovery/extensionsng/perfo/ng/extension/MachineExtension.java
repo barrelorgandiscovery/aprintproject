@@ -5,6 +5,7 @@ import org.barrelorgandiscovery.extensions.ExtensionPoint;
 import org.barrelorgandiscovery.extensions.IExtension;
 import org.barrelorgandiscovery.extensions.SimpleExtensionPoint;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachineParameters;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.generic.lasergcode.GenericLazerMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLLazerMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl.GRBLPunchMachineParameters;
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.lazer.mock.MockLazerMachineParameters;
@@ -38,11 +39,12 @@ public class MachineExtension implements IExtension, MachineExtensionPoint {
 
 		GRBLPunchMachineParameters grblpunchpachineparameters = new GRBLPunchMachineParameters();
 		GRBLLazerMachineParameters grblLazerMachineParameters = new GRBLLazerMachineParameters();
+		GenericLazerMachineParameters genericLazerMachineParameters = new GenericLazerMachineParameters();
 		MockMachineParameters mockMachine = new MockMachineParameters();
 		MockLazerMachineParameters mockMachineLazer = new MockLazerMachineParameters();
 
-		return new AbstractMachineParameters[] { grblpunchpachineparameters, grblLazerMachineParameters, mockMachine,
-				mockMachineLazer };
+		return new AbstractMachineParameters[] { grblpunchpachineparameters, grblLazerMachineParameters,
+				genericLazerMachineParameters, mockMachine, mockMachineLazer };
 
 	}
 

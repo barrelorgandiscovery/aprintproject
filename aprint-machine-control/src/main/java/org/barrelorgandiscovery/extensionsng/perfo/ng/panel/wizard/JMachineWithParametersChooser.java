@@ -158,7 +158,8 @@ public class JMachineWithParametersChooser extends JPanel {
 					Container cp = dialog.getContentPane();
 					cp.setLayout(new BorderLayout());
 					cp.add(panelParameter, BorderLayout.CENTER);
-					dialog.setSize(500, 300);
+					dialog.pack();
+					// dialog.setSize(500, 300);
 					SwingUtils.center(dialog);
 
 					dialog.addWindowListener(new WindowAdapter() {
