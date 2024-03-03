@@ -73,5 +73,15 @@ public class PunchStatisticCollector {
 	public double getDistanceLeft() {
 		return this.distance;
 	}
+	
+	
+	public synchronized double totalTime() {
+		double total = 0.0;
+		for (Double d: punchTime) {
+			if (d == null) continue;
+			total += d;
+		}
+		return total;
+	}
 
 }

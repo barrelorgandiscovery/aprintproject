@@ -36,10 +36,11 @@ public class PunchController implements PositionPanelListener, Disposable {
 	private MachineCommandStream machineCommandStream;
 
 	private PunchStatisticCollector punchStatisticCollector = new PunchStatisticCollector(19);
-	
+
 	private PauseTimerGetter pauseTimerGetter;
 
 	private String timeLeft = "--:--:--"; //$NON-NLS-1$
+	private String totalTime = "--:--:--"; //$NON-NLS-1$
 	private String distanceLeft = "----- m"; //$NON-NLS-1$
 	private String bookDistanceLeft = "----- m"; //$NON-NLS-1$
 	private String bookMetersDone = "----- m"; //$NON-NLS-1$
@@ -74,12 +75,10 @@ public class PunchController implements PositionPanelListener, Disposable {
 		assert machineControl != null;
 		this.machineControl = machineControl;
 	}
-	
+
 	public void setPauseTimerGetter(PauseTimerGetter pauseTimerGetter) {
 		this.pauseTimerGetter = pauseTimerGetter;
 	}
-	
-	
 
 	/**
 	 * 
@@ -92,7 +91,7 @@ public class PunchController implements PositionPanelListener, Disposable {
 		int allcmds = punchPlan.getCommandsByRef().size();
 
 		posPanel.updateState(currentPos, allcmds, currentPos > 0 && !isRunning(), currentPos < allcmds && !isRunning(),
-				timeLeft, distanceLeft, bookDistanceLeft, bookMetersDone);
+				timeLeft, totalTime,  distanceLeft, bookDistanceLeft, bookMetersDone);
 
 		posPanel.setPlayState(isRunning());
 
@@ -237,6 +236,8 @@ public class PunchController implements PositionPanelListener, Disposable {
 								// every 10 position, update
 								timeLeft = formatDuration(Duration.ofMillis((long) (nboperationsleft
 										* punchStatisticCollector.getMeanTimePerPunch() * 1000)));
+								totalTime = formatDuration(
+										Duration.ofMillis((long) (punchStatisticCollector.totalTime() * 1000)));
 							}
 
 							PunchController.this.distanceLeft = String.format("%1$6.3f m", //$NON-NLS-1$
@@ -306,12 +307,12 @@ public class PunchController implements PositionPanelListener, Disposable {
 			punchStatisticCollector.resetDistance(distanceLeft);
 			// start
 			punchStatisticCollector.informStartPunch();
-			
+
 			if (pauseTimerGetter != null) {
 				PauseTimerState timerState = pauseTimerGetter.getNullOrConstructedTimer();
 				machineCommandStream.setPauseTimerState(timerState);
 			}
-			
+
 			machineCommandStream.startStreamFrom(pos);
 			updatePosPanel();
 
