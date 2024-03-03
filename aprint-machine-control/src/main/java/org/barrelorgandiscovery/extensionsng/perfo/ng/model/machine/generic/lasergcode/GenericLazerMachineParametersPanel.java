@@ -1,11 +1,13 @@
 package org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.generic.lasergcode;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.util.function.Consumer;
 
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
-import javax.swing.JTextField;
+import javax.swing.JTextArea;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -49,7 +51,7 @@ public class GenericLazerMachineParametersPanel extends JPanel {
 		initComponents();
 	}
 
-	private void registerChange(JTextField field, Consumer<JTextField> f) {
+	private void registerChange(JTextArea field, Consumer<JTextArea> f) {
 		field.getDocument().addDocumentListener(new DocumentListener() {
 
 			@Override
@@ -110,98 +112,97 @@ public class GenericLazerMachineParametersPanel extends JPanel {
 
 		// label translation
 		f.getLabel("lblendBookPrecommands") //$NON-NLS-1$
-		.setText(Messages.getString("GenericLazerMachineParametersPanel.0")); //$NON-NLS-1$
+				.setText(Messages.getString("GenericLazerMachineParametersPanel.0")); //$NON-NLS-1$
 
-		JTextField endBookPrecommands = (JTextField) f.getComponentByName("endBookPrecommands");//$NON-NLS-1$
+		JTextArea endBookPrecommands = (JTextArea) f.getComponentByName("endBookPrecommands");//$NON-NLS-1$
 		endBookPrecommands.setText(parameters.getEndBookPrecommands());
 		registerChange(endBookPrecommands, (e) -> {
 			parameters.setEndBookPrecommands(e.getText());
 		});
 
 		f.getLabel("lblhomingCommands") //$NON-NLS-1$
-		.setText(Messages.getString("GenericLazerMachineParametersPanel.1")); //$NON-NLS-1$
+				.setText(Messages.getString("GenericLazerMachineParametersPanel.1")); //$NON-NLS-1$
 
-		JTextField homingCommands = (JTextField) f.getComponentByName("homingCommands");//$NON-NLS-1$
+		JTextArea homingCommands = (JTextArea) f.getComponentByName("homingCommands");//$NON-NLS-1$
 		homingCommands.setText(parameters.getHomingCommands());
 		registerChange(homingCommands, (e) -> {
 			parameters.setHomingCommands(e.getText());
 		});
 
 		f.getLabel("lblstartBookPrecommands") //$NON-NLS-1$
-		.setText(Messages.getString("GenericLazerMachineParametersPanel.2")); //$NON-NLS-1$
+				.setText(Messages.getString("GenericLazerMachineParametersPanel.2")); //$NON-NLS-1$
 
-		
-		JTextField startBookPrecommands = (JTextField) f.getComponentByName("startBookPrecommands");//$NON-NLS-1$
+		JTextArea startBookPrecommands = (JTextArea) f.getComponentByName("startBookPrecommands");//$NON-NLS-1$
 		startBookPrecommands.setText(parameters.getStartBookPrecommands());
 		registerChange(startBookPrecommands, (e) -> {
 			parameters.setStartBookPrecommands(e.getText());
 		});
-		
+
 		f.getLabel("lbldisplacementPreCommand") //$NON-NLS-1$
-		.setText(Messages.getString("GenericLazerMachineParametersPanel.3")); //$NON-NLS-1$
+				.setText(Messages.getString("GenericLazerMachineParametersPanel.3")); //$NON-NLS-1$
 
-
-		JTextField displacementPreCommand = (JTextField) f.getComponentByName("displacementPreCommand");
+		JTextArea displacementPreCommand = (JTextArea) f.getComponentByName("displacementPreCommand");
 		displacementPreCommand.setText(parameters.getDisplacementPreCommand());
 		registerChange(displacementPreCommand, (e) -> {
 			parameters.setDisplacementPreCommand(e.getText());
 		});
-		
-		f.getLabel("lbldisplacementCommandPattern") //$NON-NLS-1$
-		.setText(Messages.getString("GenericLazerMachineParametersPanel.4")); //$NON-NLS-1$
 
-		JTextField displacementCommandPattern = (JTextField) f.getComponentByName("displacementCommandPattern");
+		f.getLabel("lbldisplacementCommandPattern") //$NON-NLS-1$
+				.setText(Messages.getString("GenericLazerMachineParametersPanel.4")); //$NON-NLS-1$
+
+		JTextArea displacementCommandPattern = (JTextArea) f.getComponentByName("displacementCommandPattern");
 		displacementCommandPattern.setText(parameters.getDisplacementCommandPattern());
 		registerChange(displacementCommandPattern, (e) -> {
 			parameters.setDisplacementCommandPattern(e.getText());
 		});
 		f.getLabel("lbldisplacementPostCommand") //$NON-NLS-1$
-		.setText(Messages.getString("GenericLazerMachineParametersPanel.5")); //$NON-NLS-1$
+				.setText(Messages.getString("GenericLazerMachineParametersPanel.5")); //$NON-NLS-1$
 
-		JTextField displacementPostCommand = (JTextField) f.getComponentByName("displacementPostCommand");
+		JTextArea displacementPostCommand = (JTextArea) f.getComponentByName("displacementPostCommand");
 		displacementPostCommand.setText(parameters.getDisplacementPostCommand());
 		registerChange(displacementPostCommand, (e) -> {
 			parameters.setDisplacementPostCommand(e.getText());
 		});
-		
-		f.getLabel("lblcuttingPreCommand") //$NON-NLS-1$
-		.setText(Messages.getString("GenericLazerMachineParametersPanel.6")); //$NON-NLS-1$
 
-		JTextField cuttingPreCommand = (JTextField) f.getComponentByName("cuttingPreCommand");
+		f.getLabel("lblcuttingPreCommand") //$NON-NLS-1$
+				.setText(Messages.getString("GenericLazerMachineParametersPanel.6")); //$NON-NLS-1$
+
+		JTextArea cuttingPreCommand = (JTextArea) f.getComponentByName("cuttingPreCommand");
 		cuttingPreCommand.setText(parameters.getCuttingPreCommand());
 		registerChange(cuttingPreCommand, (e) -> {
 			parameters.setCuttingPreCommand(e.getText());
 		});
 		f.getLabel("lblcuttingToCommandPattern") //$NON-NLS-1$
-		.setText(Messages.getString("GenericLazerMachineParametersPanel.7")); //$NON-NLS-1$
+				.setText(Messages.getString("GenericLazerMachineParametersPanel.7")); //$NON-NLS-1$
 
-		JTextField cuttingToCommandPattern = (JTextField) f.getComponentByName("cuttingToCommandPattern");
+		JTextArea cuttingToCommandPattern = (JTextArea) f.getComponentByName("cuttingToCommandPattern");
 		cuttingToCommandPattern.setText(parameters.getCuttingToCommandPattern());
 		registerChange(cuttingToCommandPattern, (e) -> {
 			parameters.setCuttingToCommandPattern(e.getText());
 		});
-		
-		f.getLabel("lblcuttingPostCommand") //$NON-NLS-1$
-		.setText(Messages.getString("GenericLazerMachineParametersPanel.8")); //$NON-NLS-1$
 
-		JTextField cuttingPostCommand = (JTextField) f.getComponentByName("cuttingPostCommand");
+		f.getLabel("lblcuttingPostCommand") //$NON-NLS-1$
+				.setText(Messages.getString("GenericLazerMachineParametersPanel.8")); //$NON-NLS-1$
+
+		JTextArea cuttingPostCommand = (JTextArea) f.getComponentByName("cuttingPostCommand");
 		cuttingPostCommand.setText(parameters.getCuttingPostCommand());
 		registerChange(cuttingPostCommand, (e) -> {
 			parameters.setCuttingPostCommand(e.getText());
 		});
-		
-		f.getLabel("lblpowerChangeCommand") //$NON-NLS-1$
-		.setText(Messages.getString("GenericLazerMachineParametersPanel.9")); //$NON-NLS-1$
 
-		JTextField powerChangeCommand = (JTextField) f.getComponentByName("powerChangeCommand");
+		f.getLabel("lblpowerChangeCommand") //$NON-NLS-1$
+				.setText(Messages.getString("GenericLazerMachineParametersPanel.9")); //$NON-NLS-1$
+
+		JTextArea powerChangeCommand = (JTextArea) f.getComponentByName("powerChangeCommand");
 		powerChangeCommand.setText(parameters.getPowerChangeCommand());
 		registerChange(powerChangeCommand, (e) -> {
 			parameters.setPowerChangeCommand(e.getText());
 		});
 
 		setLayout(new BorderLayout());
-
-		add(f, BorderLayout.CENTER);
+		JScrollPane sp = new JScrollPane(f);
+		sp.setPreferredSize(new Dimension(800,500));
+		add(sp, BorderLayout.CENTER);
 	}
 
 }
