@@ -1,21 +1,25 @@
 package org.barrelorgandiscovery.gui.tools;
 
 import java.awt.Component;
+import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.HeadlessException;
 import java.io.File;
 
+import javax.swing.JDialog;
+
 import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
-import org.apache.commons.vfs2.FileSystemManager;
-import org.apache.commons.vfs2.VFS;
-import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.gui.aprint.APrintProperties;
+import org.barrelorgandiscovery.prefs.FilePrefsStorage;
+import org.barrelorgandiscovery.prefs.IPrefsStorage;
+import org.barrelorgandiscovery.prefs.PrefixedNamePrefsStorage;
 import org.barrelorgandiscovery.tools.VFSTools;
 
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser.RETURN_TYPE;
 import com.googlecode.vfsjfilechooser2.VFSJFileChooser.SELECTION_MODE;
-import com.googlecode.vfsjfilechooser2.filechooser.AbstractVFSFileSystemView;
 
 /**
  * contain the JFileChooser, to permit bootstrap file selection and creation
@@ -77,18 +81,54 @@ public class APrintFileChooser {
 	 */
 	public static final int ERROR_OPTION = -1;
 
-	VFSJFileChooser fileChooser = null;
+	CustomVFS fileChooser = null;
+
+	class CustomVFS extends VFSJFileChooser {
+
+		public CustomVFS(File dir) {
+			super(dir);
+		}
+
+		public CustomVFS() {
+			super();
+		}
+
+		public void trySetDimensions(Dialog dialog) {
+			APrintProperties properties = APrintProperties.getLastDefinedProperties();
+			initPrefsStorage(new PrefixedNamePrefsStorage("windows_properties", //$NON-NLS-1$
+					new FilePrefsStorage(new File(properties.getAprintFolder(), "aprintfilewindows.properties"))));//$NON-NLS-1$
+
+			try {
+				Dimension dimensions = prefixedNamePrefsStorage.getDimension("windowfilesimensions");
+				if (dimensions != null) {
+					int width = (int) Math.max(800.0, dimensions.getWidth());
+					int height = (int) Math.max(500.0, dimensions.getHeight());
+					dialog.setSize(new Dimension(width, height));
+				}
+			} catch (RuntimeException ex) {
+				logger.debug("fail to set component dimension" + ex.getMessage(), ex);
+			}
+		}
+
+		@Override
+		protected JDialog createDialog(Component parent) throws HeadlessException {
+			JDialog dialog = super.createDialog(parent);
+			trySetDimensions(dialog);
+			return dialog;
+		}
+
+	}
 
 	public APrintFileChooser() {
-		this.fileChooser = new VFSJFileChooser();
+		this.fileChooser = new CustomVFS();
 		customizeFileView();
 	}
 
 	public APrintFileChooser(File currentDir) {
 		if (currentDir != null) {
-			this.fileChooser = new VFSJFileChooser(currentDir);
+			this.fileChooser = new CustomVFS(currentDir);
 		} else {
-			this.fileChooser = new VFSJFileChooser();
+			this.fileChooser = new CustomVFS();
 		}
 		customizeFileView();
 	}
@@ -190,10 +230,44 @@ public class APrintFileChooser {
 		fileChooser.setApproveButtonMnemonic(buttonMnemonic);
 	}
 
+	/** Save the users preferences */
+	protected PrefixedNamePrefsStorage prefixedNamePrefsStorage;
+
+	/**
+	 * This function get the internal name of the frame for preferences by default,
+	 * take the name of the current class
+	 *
+	 * @return
+	 */
+	protected String getInternalFrameNameForPreferences() {
+		return getClass().getSimpleName();
+	}
+
+	protected void initPrefsStorage(IPrefsStorage prefsStorage) {
+		prefixedNamePrefsStorage = new PrefixedNamePrefsStorage(getInternalFrameNameForPreferences(), prefsStorage);
+		try {
+			prefixedNamePrefsStorage.load();
+		} catch (Exception ex) {
+			logger.error("error in loading prefs :" + ex.getMessage(), ex); //$NON-NLS-1$
+		}
+	}
+
 	public int showOpenDialog(Component parentComponent) {
 		// tolerant to null
 		RETURN_TYPE ret = fileChooser.showOpenDialog(parentComponent);
+		trySaveDimensions();
+
 		return convertToFileChooserOption(ret);
+	}
+
+	public void trySaveDimensions() {
+		try {
+			Dimension dimensions = fileChooser.getSize();
+			prefixedNamePrefsStorage.setDimension("windowfilesimensions", dimensions);
+			prefixedNamePrefsStorage.save();
+		} catch (RuntimeException ex) {
+			logger.debug("fail to save component dimension" + ex.getMessage(), ex);
+		}
 	}
 
 	private int convertToFileChooserOption(RETURN_TYPE ret) {
@@ -215,11 +289,17 @@ public class APrintFileChooser {
 	}
 
 	public int showSaveDialog(Component parentComponent) {
-		return convertToFileChooserOption(fileChooser.showSaveDialog(parentComponent));
+
+		int retvalue = convertToFileChooserOption(fileChooser.showSaveDialog(parentComponent));
+		trySaveDimensions();
+		return retvalue;
 	}
 
 	public int showDialog(Component parentComponent, String label) {
-		return convertToFileChooserOption(fileChooser.showDialog(parentComponent, label));
+
+		int convertToFileChooserOption = convertToFileChooserOption(fileChooser.showDialog(parentComponent, label));
+		trySaveDimensions();
+		return convertToFileChooserOption;
 	}
 
 	public AbstractFileObject getSelectedFile() {
