@@ -304,7 +304,7 @@ public class ModelBridge {
     try {
       return ImageTools.loadIconIfExists(modelStepClass, simpleName + ".png"); //$NON-NLS-1$
     } catch (Exception ex) {
-      logger.error("error :" + ex.getMessage(), ex); //$NON-NLS-1$
+      logger.warn("warning :" + ex.getMessage(), ex); //$NON-NLS-1$
       return null;
     }
   }
