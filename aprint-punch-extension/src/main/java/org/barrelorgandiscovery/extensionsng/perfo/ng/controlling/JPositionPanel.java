@@ -41,6 +41,7 @@ public class JPositionPanel extends JPanel {
 	private JButton playPause;
 	private JLabel position;
 	private JLabel timeLeft;
+	private JLabel totalTime;
 	private JLabel displacementmetersleft;
 	private JLabel bookDisplacementLeft;
 	private JLabel bookMetersDone;
@@ -94,6 +95,9 @@ public class JPositionPanel extends JPanel {
 		position = panel.getLabel("labelposition"); //$NON-NLS-1$
 
 		timeLeft = panel.getLabel("timeleft"); //$NON-NLS-1$
+		
+		totalTime = panel.getLabel("totalTime"); //$NON-NLS-1$
+		
 
 		displacementmetersleft = panel.getLabel("metersleft"); //$NON-NLS-1$
 
@@ -128,6 +132,7 @@ public class JPositionPanel extends JPanel {
 	 * @param displacementmetersleft
 	 */
 	public void updateState(int position, int nbcommands, boolean enablePrevious, boolean enableNext, String timeLeft,
+			String totalTime,
 			String displacementmetersleft, String bookMetersLeft, String bookMetersDone) {
 
 		this.position.setText(Integer.toString(position) + "/" + nbcommands); //$NON-NLS-1$
@@ -135,6 +140,7 @@ public class JPositionPanel extends JPanel {
 		this.next.setEnabled(enableNext);
 
 		this.timeLeft.setText(timeLeft);
+		this.totalTime.setText(totalTime);
 		this.displacementmetersleft.setText(displacementmetersleft);
 		this.bookDisplacementLeft.setText(bookMetersLeft);
 		this.bookMetersDone.setText(bookMetersDone);
