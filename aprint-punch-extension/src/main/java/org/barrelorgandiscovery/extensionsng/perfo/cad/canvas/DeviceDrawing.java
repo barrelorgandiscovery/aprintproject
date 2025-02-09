@@ -7,6 +7,7 @@ import java.util.List;
 
 import org.barrelorgandiscovery.extensionsng.perfo.cad.math.Line;
 import org.barrelorgandiscovery.extensionsng.perfo.cad.math.Vect;
+import org.barrelorgandiscovery.scale.Scale;
 
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.Geometry;
@@ -234,6 +235,27 @@ public abstract class DeviceDrawing {
 
 	}
 
+	/**
+	 * put the dash inside the tracks boundaries
+	 * 
+	 * @param x
+	 * @param device
+	 * @param bookscale
+	 */
+	public void drawDottedLinesAccordinglyToBook(double x, DeviceDrawing device , Scale bookscale) {
+
+		double first = bookscale.getFirstTrackAxis();
+		double dash_size = bookscale.getIntertrackHeight() / 2;
+		double shift = - bookscale.getIntertrackHeight() / 4;
+		for(int i=0 ; i < bookscale.getTrackNb(); i ++) {
+			double y1 = first + i * bookscale.getIntertrackHeight() + shift;
+			device.moveTo(x, y1);
+			device.drawTo(x, y1 + dash_size);
+		}
+		
+	}
+	
+	
 	/**
 	 * draw a rectangle hole
 	 * 

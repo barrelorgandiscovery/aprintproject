@@ -70,7 +70,7 @@ public class CADVirtualBookExporter {
 	/**
 	 * Exporte un carton en fichier DXF
 	 * 
-	 * @param vb          le carton � exporter
+	 * @param vb          le carton a exporter
 	 * @param mecanique   booleen indiquant si le type est mecanique
 	 * @param tailleTrous taille des trous dans le cas du pneumatique
 	 * @param ponts       taille des ponts pour le pneumatique
@@ -109,12 +109,12 @@ public class CADVirtualBookExporter {
 		// startBook can be negative ...
 
 		double vbend = vb.getLength() * xratio;
-		
+
 		double endPageSize = p.getNombreDePlisAAjouterFin() * p.getTaillePagePourPliure();
-		
+
 		// round the end to a integer value of the page size
-		vbend = (Math.ceil((vbend - startBook) / p.getTaillePagePourPliure()) + p.getNombreDePlisAAjouterFin()) * p.getTaillePagePourPliure()
-				 + startBook;
+		vbend = (Math.ceil((vbend - startBook) / p.getTaillePagePourPliure()) + p.getNombreDePlisAAjouterFin())
+				* p.getTaillePagePourPliure() + startBook;
 
 		if (p.isExportDecoupeDesBords()) {
 
@@ -182,7 +182,11 @@ public class CADVirtualBookExporter {
 				if (p.getTypePliure() == TypePliure.POINTILLEE) {
 					device.startGroup();
 					try {
-						device.drawImprovedDottedLines(start, 0, start, scale.getWidth(), 2, 5);
+						if (p.isPointillesDansPiste()) {
+							device.drawDottedLinesAccordinglyToBook(start, device, vb.getScale());
+						} else {
+							device.drawImprovedDottedLines(start, 0, start, scale.getWidth(), 2, 5);
+						}
 					} finally {
 						device.endGroup();
 					}
@@ -201,14 +205,18 @@ public class CADVirtualBookExporter {
 					}
 				} else if (p.getTypePliure() == TypePliure.ALTERNE_CONTINU_POINTILLEE) {
 
-					// pointill�s avec non d�oupe au bord des deux cot�s, sur 5mm (sinon,
+					// pointilles avec non decoupe au bord des deux cotes, sur 5mm (sinon,
 					// fragilise carton)
 					double startNoDots = 5.0;
 					double endDotsWidth = scale.getWidth() - 5.0;
 					assert scale.getWidth() > 10.0;
 					device.startGroup();
 					try {
-						device.drawImprovedDottedLines(start, startNoDots, start, endDotsWidth, 2, 5);
+						if (p.isPointillesDansPiste()) {
+							device.drawDottedLinesAccordinglyToBook(start, device, vb.getScale());
+						} else {
+							device.drawImprovedDottedLines(start, startNoDots, start, endDotsWidth, 2, 5);
+						}
 					} finally {
 						device.endGroup();
 					}
@@ -218,7 +226,7 @@ public class CADVirtualBookExporter {
 				start += p.getTaillePagePourPliure() * 2;
 			}
 
-			// fin d'�criture des pliures dans la layer concern�e
+			// fin d'ecriture des pliures dans la layer concernee
 
 			start = startBook + p.getTaillePagePourPliure();
 			while (start <= vbend + 1) {
@@ -226,7 +234,11 @@ public class CADVirtualBookExporter {
 				if (p.getTypePliure() == TypePliure.POINTILLEE) {
 					device.startGroup();
 					try {
-						device.drawImprovedDottedLines(start, 0, start, scale.getWidth(), 2, 5);
+						if (p.isPointillesDansPiste()) {
+							device.drawDottedLinesAccordinglyToBook(start, device, vb.getScale());
+						} else {
+							device.drawImprovedDottedLines(start, 0, start, scale.getWidth(), 2, 5);
+						}
 					} finally {
 						device.endGroup();
 					}
@@ -320,7 +332,7 @@ public class CADVirtualBookExporter {
 
 		BasicConfigurator.configure(new ConsoleAppender(new PatternLayout()));
 		MidiFile midiFile = MidiFileIO
-				.read(new File("C:/Projets/APrintPerfoExtension/doc/Per�age_Lazer/BEER essai.mid"));
+				.read(new File("C:/Projets/APrintPerfoExtension/doc/Perçage_Lazer/BEER essai.mid"));
 
 		Properties properties = new Properties();
 		properties.setProperty("folder", "C:/Projets/APrint/gammes");
