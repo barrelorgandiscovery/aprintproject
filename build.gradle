@@ -26,7 +26,7 @@ subprojects {
     // put sources into jar
     jar {
         from sourceSets.main.allSource
-	duplicatesStrategy(DuplicatesStrategy.EXCLUDE) 
+	    duplicatesStrategy(DuplicatesStrategy.EXCLUDE) 
     }
 
 

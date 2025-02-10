@@ -19,7 +19,6 @@ import org.barrelorgandiscovery.virtualbook.VirtualBook;
 
 import gervill.SoftSynthesizer;
 
-
 @Deprecated
 public class GervillPlaySubSystem implements PlaySubSystem, NeedInstrument {
 
@@ -31,15 +30,20 @@ public class GervillPlaySubSystem implements PlaySubSystem, NeedInstrument {
 
 	private org.barrelorgandiscovery.instrument.Instrument currentInstrument = null;
 
-	/* (non-Javadoc)
-	 * @see fr.freydierepatrice.playsubsystem.NeedInstrument#setCurrentInstrument(fr.freydierepatrice.instrument.Instrument)
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see
+	 * fr.freydierepatrice.playsubsystem.NeedInstrument#setCurrentInstrument(fr.
+	 * freydierepatrice.instrument.Instrument)
 	 */
-	public void setCurrentInstrument(
-			org.barrelorgandiscovery.instrument.Instrument ins) {
+	public void setCurrentInstrument(org.barrelorgandiscovery.instrument.Instrument ins) {
 		this.currentInstrument = ins;
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see fr.freydierepatrice.playsubsystem.NeedInstrument#getCurrentInstrument()
 	 */
 	public org.barrelorgandiscovery.instrument.Instrument getCurrentInstrument() {
@@ -63,19 +67,17 @@ public class GervillPlaySubSystem implements PlaySubSystem, NeedInstrument {
 	 * The current play owner
 	 */
 	private Object owner = null;
-	
-	public PlayControl play(Object owner, final VirtualBook transposedCarton,
-			final IPlaySubSystemFeedBack feedBack, final long startAt)
-			throws Exception {
+
+	public PlayControl play(Object owner, final VirtualBook transposedCarton, final IPlaySubSystemFeedBack feedBack,
+			final long startAt) throws Exception {
 
 		this.owner = owner;
-		
+
 		sequencer = MidiSystem.getSequencer();
 
 		Sequence seq = EcouteConverter.convert(transposedCarton);
 
 		sequencer.setSequence(seq);
-		
 
 		if (currentInstrument != null) {
 			// play with custom sound ...
@@ -133,8 +135,7 @@ public class GervillPlaySubSystem implements PlaySubSystem, NeedInstrument {
 
 				logger.debug("remap the instrument"); //$NON-NLS-1$
 
-				if (!synth.remapInstrument(defaultbank.getInstruments()[0], sb
-						.getInstruments()[0])) {
+				if (!synth.remapInstrument(defaultbank.getInstruments()[0], sb.getInstruments()[0])) {
 					logger.error("fail to remap instrument"); //$NON-NLS-1$
 
 				}
@@ -142,8 +143,7 @@ public class GervillPlaySubSystem implements PlaySubSystem, NeedInstrument {
 				logger.debug("bank - " //$NON-NLS-1$
 						+ defaultbank.getInstruments()[0].getPatch().getBank());
 				logger.debug("program - " //$NON-NLS-1$
-						+ defaultbank.getInstruments()[0].getPatch()
-								.getProgram());
+						+ defaultbank.getInstruments()[0].getPatch().getProgram());
 			} else {
 				throw new Exception(Messages.getString("APrint.72")); //$NON-NLS-1$
 
@@ -171,8 +171,6 @@ public class GervillPlaySubSystem implements PlaySubSystem, NeedInstrument {
 		sequencer.start();
 
 		fb = feedBack;
-
-		
 
 		// start At ....
 
@@ -217,7 +215,7 @@ public class GervillPlaySubSystem implements PlaySubSystem, NeedInstrument {
 							timer = 40; // limit the CPU
 
 					}
-					
+
 				} catch (Throwable ex) {
 
 					sequencer.stop();
@@ -230,21 +228,21 @@ public class GervillPlaySubSystem implements PlaySubSystem, NeedInstrument {
 		});
 
 		Thread oldOne = currentPlayingThread.getAndSet(t);
-		
+
 		fb.playStarted();
-		
+
 		if (oldOne != null)
 			oldOne.stop();
 
 		t.start();
-		
+
 		return new PlayControl() {
-			
+
 			@Override
 			public void setTempo(float newTempo) {
 				sequencer.setTempoFactor(newTempo);
 			}
-			
+
 			@Override
 			public float getTempo() {
 				return sequencer.getTempoFactor();
@@ -256,12 +254,15 @@ public class GervillPlaySubSystem implements PlaySubSystem, NeedInstrument {
 	public void stop() throws Exception {
 		Thread oldOne = currentPlayingThread.getAndSet(null);
 		if (oldOne != null) {
-			oldOne.stop();
-			
+			try {
+				oldOne.stop();
+			} catch (Throwable t) {
+			}
+
 		}
 
 		owner = null;
-		
+
 		if (fb != null)
 			fb.playStopped();
 	}
@@ -269,5 +270,5 @@ public class GervillPlaySubSystem implements PlaySubSystem, NeedInstrument {
 	public Object getOwner() {
 		return owner;
 	}
-	
+
 }

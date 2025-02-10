@@ -17,11 +17,9 @@ import org.barrelorgandiscovery.listeningconverter.EcouteConverter;
 import org.barrelorgandiscovery.listeningconverter.MIDIListeningConverter;
 import org.barrelorgandiscovery.virtualbook.VirtualBook;
 
-public class MidiDevicePlaySubSystem implements PlaySubSystem,
-		NeedMidiListeningConverter {
+public class MidiDevicePlaySubSystem implements PlaySubSystem, NeedMidiListeningConverter {
 
-	private static Logger logger = Logger
-			.getLogger(MidiDevicePlaySubSystem.class);
+	private static Logger logger = Logger.getLogger(MidiDevicePlaySubSystem.class);
 
 	public MidiDevicePlaySubSystem() {
 
@@ -36,8 +34,7 @@ public class MidiDevicePlaySubSystem implements PlaySubSystem,
 
 	private MidiDevice midiDevice = null;
 
-	private AtomicReference<Thread> currentPlayingThread = 
-		new AtomicReference<Thread>();
+	private AtomicReference<Thread> currentPlayingThread = new AtomicReference<Thread>();
 
 	private IPlaySubSystemFeedBackWrapper fb = null;
 
@@ -52,11 +49,10 @@ public class MidiDevicePlaySubSystem implements PlaySubSystem,
 		this.midiDeviceName = mididevice;
 	}
 
-	public Info getCurrentMidiDevice()
-	{
+	public Info getCurrentMidiDevice() {
 		return this.midiDeviceName;
 	}
-	
+
 	/**
 	 * Midi canal used for the play
 	 */
@@ -64,6 +60,7 @@ public class MidiDevicePlaySubSystem implements PlaySubSystem,
 
 	/**
 	 * set the midi canal used for the play
+	 * 
 	 * @param midiCanal
 	 */
 	public void setMidiCanal(int midiCanal) {
@@ -72,6 +69,7 @@ public class MidiDevicePlaySubSystem implements PlaySubSystem,
 
 	/**
 	 * Get the midi canal
+	 * 
 	 * @return
 	 */
 	public int getMidiCanal() {
@@ -80,14 +78,17 @@ public class MidiDevicePlaySubSystem implements PlaySubSystem,
 
 	/*
 	 * (non-Javadoc)
-	 * @see org.barrelorgandiscovery.playsubsystem.PlaySubSystem#play(java.lang.Object, org.barrelorgandiscovery.virtualbook.VirtualBook, org.barrelorgandiscovery.playsubsystem.IPlaySubSystemFeedBack, long)
+	 * 
+	 * @see
+	 * org.barrelorgandiscovery.playsubsystem.PlaySubSystem#play(java.lang.Object,
+	 * org.barrelorgandiscovery.virtualbook.VirtualBook,
+	 * org.barrelorgandiscovery.playsubsystem.IPlaySubSystemFeedBack, long)
 	 */
 	public PlayControl play(Object owner, final VirtualBook transposedCarton,
-			final IPlaySubSystemFeedBack feedBackinterface, final long startAt)
-			throws Exception {
+			final IPlaySubSystemFeedBack feedBackinterface, final long startAt) throws Exception {
 
 		this.owner = owner;
-		
+
 		this.fb = new IPlaySubSystemFeedBackWrapper(feedBackinterface);
 
 		Info selectedInfo = null;
@@ -104,13 +105,13 @@ public class MidiDevicePlaySubSystem implements PlaySubSystem,
 		for (int i = 0; i < infos.length; i++) {
 
 			Info info = infos[i];
-			
+
 			if (selectedInfo == null)
 				selectedInfo = info;
 
 			logger.debug(info.getName() + " - " + info.getDescription());
 			if (info.equals(midiDeviceName)) {
-				
+
 				logger.debug("found midi device ...");
 				selectedInfo = info;
 				break;
@@ -123,8 +124,7 @@ public class MidiDevicePlaySubSystem implements PlaySubSystem,
 		logger.debug("current one :" + selectedInfo.getName());
 
 		MidiDevice md = MidiSystem.getMidiDevice(selectedInfo);
-	
-		
+
 		md.open();
 		try {
 
@@ -132,9 +132,8 @@ public class MidiDevicePlaySubSystem implements PlaySubSystem,
 
 			Sequence seq = convertToMidiSequence(transposedCarton);
 
-			final long sequenceLenghtInMicroseconds = seq
-			.getMicrosecondLength();
-			
+			final long sequenceLenghtInMicroseconds = seq.getMicrosecondLength();
+
 			sequencer.setSequence(seq);
 
 			logger.debug("Liste des transmitters"); //$NON-NLS-1$
@@ -176,18 +175,15 @@ public class MidiDevicePlaySubSystem implements PlaySubSystem,
 
 							long n = fb.informCurrentPlayPosition(pos);
 
-							
 							if (pos >= sequenceLenghtInMicroseconds - 100) {
 								stop();
 								fb.playFinished();
 							}
-							
+
 							long nanotime = System.nanoTime() - startnano;
 
 							if (n > 0)
 								nanotime += n;
-							
-							
 
 							int credit = (int) (nanotime / 1000000);
 							credit *= 2;
@@ -224,14 +220,14 @@ public class MidiDevicePlaySubSystem implements PlaySubSystem,
 			t.start();
 
 			logger.debug("tread started");
-			
+
 			return new PlayControl() {
-				
+
 				@Override
 				public void setTempo(float newTempo) {
 					sequencer.setTempoFactor(newTempo);
 				}
-				
+
 				@Override
 				public float getTempo() {
 					return sequencer.getTempoFactor();
@@ -246,8 +242,7 @@ public class MidiDevicePlaySubSystem implements PlaySubSystem,
 
 	}
 
-	protected Sequence convertToMidiSequence(final VirtualBook transposedCarton)
-			throws Exception {
+	protected Sequence convertToMidiSequence(final VirtualBook transposedCarton) throws Exception {
 
 		if (currentConverter != null) {
 			return currentConverter.convert(transposedCarton);
@@ -260,7 +255,10 @@ public class MidiDevicePlaySubSystem implements PlaySubSystem,
 	public void stop() throws Exception {
 		Thread oldOne = currentPlayingThread.getAndSet(null);
 		if (oldOne != null) {
-			oldOne.stop();
+			try {
+				oldOne.stop();
+			} catch (Throwable t) {
+			}
 		}
 
 		this.owner = null;
@@ -285,20 +283,18 @@ public class MidiDevicePlaySubSystem implements PlaySubSystem,
 
 	private MIDIListeningConverter currentConverter = null;
 
-	public void setCurrentMidiListeningConverter(
-			MIDIListeningConverter converter) {
+	public void setCurrentMidiListeningConverter(MIDIListeningConverter converter) {
 		logger.debug("setting converter :" + converter);
 		this.currentConverter = converter;
 
 	}
 
-	public MIDIListeningConverter getCurrentMidiListeningConverter()
-	{
+	public MIDIListeningConverter getCurrentMidiListeningConverter() {
 		return this.currentConverter;
 	}
-	
+
 	public boolean isSupportMidiListeningConverter() {
-		
+
 		return true;
 	}
 }

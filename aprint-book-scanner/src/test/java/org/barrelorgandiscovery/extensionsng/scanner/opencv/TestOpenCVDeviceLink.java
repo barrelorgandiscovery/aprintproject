@@ -1,25 +1,5 @@
 package org.barrelorgandiscovery.extensionsng.scanner.opencv;
 
-import java.awt.BorderLayout;
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
-import java.awt.image.DataBufferInt;
-
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.SwingUtilities;
-
-import org.bytedeco.javacpp.Loader;
-import org.bytedeco.opencv.opencv_java;
-import org.bytedeco.opencv.opencv_core.Size2d;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.opencv.core.Mat;
-import org.opencv.core.Size;
-import org.opencv.imgproc.Imgproc;
-import org.opencv.videoio.VideoCapture;
-
 public class TestOpenCVDeviceLink {
 //
 //	@BeforeClass

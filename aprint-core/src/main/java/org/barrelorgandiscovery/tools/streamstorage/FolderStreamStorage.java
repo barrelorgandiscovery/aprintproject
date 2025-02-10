@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidParameterException;
 import java.security.MessageDigest;
+import java.security.Provider;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.Vector;
@@ -141,6 +142,7 @@ public class FolderStreamStorage implements StreamStorage {
 		try {
 
 			MessageDigest md = MessageDigest.getInstance("SHA1");
+			
 			md.reset();
 
 			byte[] c = new byte[10000];
@@ -149,7 +151,8 @@ public class FolderStreamStorage implements StreamStorage {
 				md.update(c, 0, cpt);
 			}
 
-			byte[] digest = Base64Tools.encodeToBytes(md.digest());
+			byte[] digestbytes = md.digest();
+			byte[] digest = Base64Tools.encodeToBytes(digestbytes);
 
 			try {
 

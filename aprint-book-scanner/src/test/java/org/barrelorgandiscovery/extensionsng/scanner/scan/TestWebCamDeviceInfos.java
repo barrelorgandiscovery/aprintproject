@@ -2,8 +2,6 @@ package org.barrelorgandiscovery.extensionsng.scanner.scan;
 
 import java.util.List;
 
-import org.junit.Test;
-
 import com.github.sarxos.webcam.Webcam;
 
 public class TestWebCamDeviceInfos {

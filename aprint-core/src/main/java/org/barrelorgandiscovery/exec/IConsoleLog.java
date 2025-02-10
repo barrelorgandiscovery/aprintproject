@@ -1,7 +1,7 @@
 package org.barrelorgandiscovery.exec;
 
 /**
- * log object
+ * consol log interface, permit to log in specific console execution
  * 
  * @author pfreydiere
  *

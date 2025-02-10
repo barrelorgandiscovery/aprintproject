@@ -41,6 +41,10 @@ public class JExplorer extends JPanel implements Explorer {
 
 	private Vector<ExplorerListener> listeners = new Vector<>();
 
+	protected JTree tree;
+
+	private Object owner;
+	
 	/**
 	 * loadable node
 	 *
@@ -131,6 +135,9 @@ public class JExplorer extends JPanel implements Explorer {
 			loaded = true;
 		}
 
+		/**
+		 * reload the tree
+		 */
 		public boolean reload() throws FileSystemException {
 			this.removeAllChildren();
 			FileObject[] childrens = fo.getChildren();
@@ -197,9 +204,6 @@ public class JExplorer extends JPanel implements Explorer {
 		
 	}
 
-	protected JTree tree;
-
-	private Object owner;
 	
 	/**
 	 * constructor

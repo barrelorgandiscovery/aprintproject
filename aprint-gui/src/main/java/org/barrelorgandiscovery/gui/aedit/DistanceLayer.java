@@ -24,7 +24,6 @@ public class DistanceLayer implements VirtualBookComponentLayer,
 	private static Logger logger = Logger.getLogger(DistanceLayer.class);
 
 	public DistanceLayer() {
-
 	}
 
 	@Override

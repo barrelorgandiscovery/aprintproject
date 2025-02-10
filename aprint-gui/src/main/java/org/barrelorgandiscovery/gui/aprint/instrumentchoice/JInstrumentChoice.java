@@ -1,5 +1,6 @@
 package org.barrelorgandiscovery.gui.aprint.instrumentchoice;
 
+import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -308,7 +309,7 @@ public class JInstrumentChoice extends JPanel implements IInstrumentChoice {
 		if (ins == null)
 			return;
 
-		Image iimage = getCurrentInstrument().getThumbnail();
+		Image iimage = ins.getThumbnail();
 		if (iimage != null) {
 			imageInstrument.setIcon(new ImageIcon(iimage));
 		} else {
@@ -424,6 +425,7 @@ public class JInstrumentChoice extends JPanel implements IInstrumentChoice {
 	public Instrument getCurrentInstrument() {
 
 		InstrumentDisplayer o = ((InstrumentDisplayer) choixInstrument.getSelectedItem());
+
 		if (o == null)
 			return null;
 
@@ -444,12 +446,21 @@ public class JInstrumentChoice extends JPanel implements IInstrumentChoice {
 		Repository2 repository2 = Repository2Factory.create(p, properties);
 
 		JFrame f = new JFrame();
-		f.getContentPane().add(new JInstrumentChoice(repository2, new IInstrumentChoiceListener() {
+		f.getContentPane().setLayout(new BorderLayout());
+		JInstrumentChoice instrumentChoice = new JInstrumentChoice(repository2, new IInstrumentChoiceListener() {
 			@Override
 			public void instrumentChanged(Instrument newInstrument) {
 				System.out.println("selected instrument :" + newInstrument);
 			}
-		}));
+		});
+		f.getContentPane().add(instrumentChoice, BorderLayout.CENTER);
+
+		JButton validationButton = new JButton("Ok");
+		validationButton.addActionListener( (e) -> {
+			System.out.println(instrumentChoice.getCurrentInstrument());
+		});
+		f.getContentPane().add(validationButton, BorderLayout.SOUTH);
+
 		f.setSize(new Dimension(500, 400));
 		f.setVisible(true);
 

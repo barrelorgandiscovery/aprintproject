@@ -13,7 +13,9 @@ import org.barrelorgandiscovery.scale.Scale;
 import org.barrelorgandiscovery.scale.eval.Note;
 
 /**
- * Comparateur de gamme
+ * Compare scales, given two scales, this object compare the characteristics and
+ * return a list of Diff objects.
+ * 
  * 
  * @author pfreydiere
  * 
@@ -66,6 +68,13 @@ public class ScaleDifferentiator {
 		return r;
 	}
 
+	/**
+	 * create differences (diffs), given two scales
+	 * @param s1 scale 1
+	 * @param s2 scale 2
+	 * @return
+	 * @throws Exception
+	 */
 	public List<AbstractDiffElement> diff(Scale s1, Scale s2) throws Exception {
 
 		assert s1 != null;

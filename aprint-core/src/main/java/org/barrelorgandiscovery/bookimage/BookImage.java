@@ -7,7 +7,8 @@ import org.barrelorgandiscovery.images.books.tools.ITiledImage;
 import org.barrelorgandiscovery.scale.Scale;
 
 /**
- * book image reading implementation
+ * Book image reading abstract (or base) implementation.
+ * for more informations about the bookimage, see documentation
  * 
  * @author pfreydiere
  * 

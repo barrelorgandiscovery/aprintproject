@@ -1,6 +1,5 @@
 package org.barrelorgandiscovery.recognition.gui.bookext;
 
-import java.awt.BorderLayout;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Rectangle2D;
@@ -10,10 +9,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
 
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.images.books.tools.IFamilyImageSeekerTiledImage;
@@ -28,6 +23,12 @@ import ij.process.ImageProcessor;
 import trainableSegmentation.WekaSegmentation;
 import weka.core.Instances;
 
+/**
+ * recognition algorithm using ML algorithms
+ * 
+ * @author pfreydiere
+ *
+ */
 public class WekaRecognitionStrategy implements IRecognitionStrategy {
 
 	private static Logger logger = Logger.getLogger(WekaRecognitionStrategy.class);
@@ -44,7 +45,7 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 
 	public void reset() {
 		currentlyUsed = null;
-		
+
 	}
 
 	private Map<Integer, List<ClassROI>> perTileShapes = new HashMap<>();
@@ -88,11 +89,8 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 			List<Rectangle2D.Double> freeHolesRects, IFamilyImageSeekerTiledImage familyTiledImage) throws Exception {
 
 		perTileShapes.clear();
-		
-		Instances instances = null;
 
-		assert bookHoles != null;
-		assert holesHoles != null;
+		Instances instances = null;
 
 		if (bookHoles != null) {
 			for (Hole h : bookHoles) {
@@ -152,7 +150,7 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 //		.add(new JLabel(new ImageIcon(whole)), BorderLayout.CENTER);
 //		t.pack();
 //		t.setVisible(true);
-		
+
 		WekaSegmentation ws = new WekaSegmentation(trainingImage);
 
 		cpt = 0;
@@ -215,7 +213,7 @@ public class WekaRecognitionStrategy implements IRecognitionStrategy {
 //		ws.setClassifier(mcc);
 //		
 
-	ws.setClassBalance(true);
+		ws.setClassBalance(true);
 
 //		boolean[] enabledFeatures = ws.getEnabledFeatures();
 //		for (int i = 0 ; i < enabledFeatures.length ; i ++) {

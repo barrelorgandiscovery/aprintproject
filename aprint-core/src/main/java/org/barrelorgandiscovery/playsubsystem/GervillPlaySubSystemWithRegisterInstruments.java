@@ -26,11 +26,10 @@ import gervill.SF2Instrument;
 import gervill.SF2Soundbank;
 import gervill.SoftSynthesizer;
 
-public class GervillPlaySubSystemWithRegisterInstruments implements
-		PlaySubSystem, NeedInstrument, IPreparedCapableSubSystem {
+public class GervillPlaySubSystemWithRegisterInstruments
+		implements PlaySubSystem, NeedInstrument, IPreparedCapableSubSystem {
 
-	private static Logger logger = Logger
-			.getLogger(GervillPlaySubSystemWithRegisterInstruments.class);
+	private static Logger logger = Logger.getLogger(GervillPlaySubSystemWithRegisterInstruments.class);
 
 	public GervillPlaySubSystemWithRegisterInstruments() {
 
@@ -41,20 +40,17 @@ public class GervillPlaySubSystemWithRegisterInstruments implements
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * fr.freydierepatrice.playsubsystem.NeedInstrument#setCurrentInstrument
+	 * @see fr.freydierepatrice.playsubsystem.NeedInstrument#setCurrentInstrument
 	 * (fr.freydierepatrice.instrument.Instrument)
 	 */
-	public void setCurrentInstrument(
-			org.barrelorgandiscovery.instrument.Instrument ins) {
+	public void setCurrentInstrument(org.barrelorgandiscovery.instrument.Instrument ins) {
 		this.currentInstrument = ins;
 	}
 
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see
-	 * fr.freydierepatrice.playsubsystem.NeedInstrument#getCurrentInstrument()
+	 * @see fr.freydierepatrice.playsubsystem.NeedInstrument#getCurrentInstrument()
 	 */
 	public org.barrelorgandiscovery.instrument.Instrument getCurrentInstrument() {
 		return this.currentInstrument;
@@ -103,20 +99,16 @@ public class GervillPlaySubSystemWithRegisterInstruments implements
 	 * #preparePlaying(org.barrelorgandiscovery.virtualbook.VirtualBook,
 	 * org.barrelorgandiscovery.playsubsystem.prepared.ISubSystemPlayParameters)
 	 */
-	public IPreparedPlaying preparePlaying(VirtualBook transposedVirtualBook,
-			ISubSystemPlayParameters params) throws Exception {
+	public IPreparedPlaying preparePlaying(VirtualBook transposedVirtualBook, ISubSystemPlayParameters params)
+			throws Exception {
 
-		if (params == null
-				|| !(params instanceof GervillPlaySubSystemPreparedParameters))
-			throw new Exception(
-					"bad parameters, must be not null, must be an instance of "
-							+ GervillPlaySubSystemPreparedParameters.class
-									.getName());
+		if (params == null || !(params instanceof GervillPlaySubSystemPreparedParameters))
+			throw new Exception("bad parameters, must be not null, must be an instance of "
+					+ GervillPlaySubSystemPreparedParameters.class.getName());
 		GervillPlaySubSystemPreparedParameters gp = (GervillPlaySubSystemPreparedParameters) params;
-		
-		VirtualBookToMidiConverter vbmc = new VirtualBookToMidiConverter(
-				gp.instrument);
-		
+
+		VirtualBookToMidiConverter vbmc = new VirtualBookToMidiConverter(gp.instrument);
+
 		Sequence seq = vbmc.convert(transposedVirtualBook);
 
 		GervillPlaySubSystemPreparedPlay gpp = new GervillPlaySubSystemPreparedPlay();
@@ -136,14 +128,12 @@ public class GervillPlaySubSystemWithRegisterInstruments implements
 	 * org.barrelorgandiscovery.playsubsystem.prepared.IPreparedPlaying,
 	 * org.barrelorgandiscovery.playsubsystem.IPlaySubSystemFeedBack, long)
 	 */
-	public PlayControl playPrepared(Object owner, IPreparedPlaying pp,
-			IPlaySubSystemFeedBack feedBackinterface, final long startAt)
-			throws Exception {
+	public PlayControl playPrepared(Object owner, IPreparedPlaying pp, IPlaySubSystemFeedBack feedBackinterface,
+			final long startAt) throws Exception {
 
 		this.owner = owner;
 
-		final IPlaySubSystemFeedBackWrapper feedBack = new IPlaySubSystemFeedBackWrapper(
-				feedBackinterface);
+		final IPlaySubSystemFeedBackWrapper feedBack = new IPlaySubSystemFeedBackWrapper(feedBackinterface);
 
 		if (!(pp instanceof GervillPlaySubSystemPreparedPlay))
 			throw new Exception("preparedplay is not of the proper kind");
@@ -169,11 +159,9 @@ public class GervillPlaySubSystemWithRegisterInstruments implements
 
 		sequencer = MidiSystem.getSequencer(); // open the line implicitly
 
-		final long sequenceLenghtInMicroseconds = gpp.sequenceToPlay
-				.getMicrosecondLength();
+		final long sequenceLenghtInMicroseconds = gpp.sequenceToPlay.getMicrosecondLength();
 
 		sequencer.setSequence(gpp.sequenceToPlay);
-		
 
 		if (gpp.instrument != null && lastplayedinstrument != gpp.instrument) {
 			// play with custom sound ...
@@ -208,8 +196,7 @@ public class GervillPlaySubSystemWithRegisterInstruments implements
 
 				int p = i;
 
-				if (!synth.remapInstrument(synth.getDefaultSoundbank()
-						.getInstruments()[p], instrument2)) {
+				if (!synth.remapInstrument(synth.getDefaultSoundbank().getInstruments()[p], instrument2)) {
 
 					logger.error("fail to remap instrument"); //$NON-NLS-1$
 
@@ -269,7 +256,7 @@ public class GervillPlaySubSystemWithRegisterInstruments implements
 					int timer = 40;
 
 					sequencer.setMicrosecondPosition(startAt);
-				
+
 					while (true) {
 						// every 100ms we evaluate the position :-)
 						Thread.sleep(timer);
@@ -278,9 +265,8 @@ public class GervillPlaySubSystemWithRegisterInstruments implements
 
 						long pos = sequencer.getMicrosecondPosition();
 
-						
-						if (pos >= sequenceLenghtInMicroseconds
-								|| !sequencer.isRunning() || sequencer.getLoopCount() > 0) {
+						if (pos >= sequenceLenghtInMicroseconds || !sequencer.isRunning()
+								|| sequencer.getLoopCount() > 0) {
 							try {
 								Thread.sleep(1000); // because there might be some delays in the wav output streams
 								stop();
@@ -311,19 +297,28 @@ public class GervillPlaySubSystemWithRegisterInstruments implements
 							timer = 40; // limit the CPU
 
 					}
-				} catch(Throwable ex) {
-					
-				}
-				
-				finally
-				
-				
-				 {
+				} catch (Throwable ex) {
 
-					sequencer.stop();
-					sequencer.close();
-					if (sourceDataLine != null)
-						sourceDataLine.close();
+				}
+
+				finally
+
+				{
+
+					try {
+						sequencer.stop();
+					} catch (Throwable t) {
+					}
+					try {
+						sequencer.close();
+					} catch (Throwable t) {
+					}
+					if (sourceDataLine != null) {
+						try {
+							sourceDataLine.close();
+						} catch (Throwable t) {
+						}
+					}
 					sourceDataLine = null;
 
 					GervillPlaySubSystemWithRegisterInstruments.this.owner = null;
@@ -360,13 +355,12 @@ public class GervillPlaySubSystemWithRegisterInstruments implements
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * org.barrelorgandiscovery.playsubsystem.PlaySubSystem#play(java.lang.Object
-	 * , org.barrelorgandiscovery.virtualbook.VirtualBook,
+	 * org.barrelorgandiscovery.playsubsystem.PlaySubSystem#play(java.lang.Object ,
+	 * org.barrelorgandiscovery.virtualbook.VirtualBook,
 	 * org.barrelorgandiscovery.playsubsystem.IPlaySubSystemFeedBack, long)
 	 */
-	public PlayControl play(Object owner, final VirtualBook transposedCarton,
-			final IPlaySubSystemFeedBack feedBack, final long startAt)
-			throws Exception {
+	public PlayControl play(Object owner, final VirtualBook transposedCarton, final IPlaySubSystemFeedBack feedBack,
+			final long startAt) throws Exception {
 
 		logger.debug("play");
 
@@ -404,9 +398,9 @@ public class GervillPlaySubSystemWithRegisterInstruments implements
 		Thread oldOne = currentPlayingThread.getAndSet(null);
 		if (oldOne != null) {
 			try {
-			oldOne.stop();
-			} catch(Throwable t) {
-				
+				oldOne.stop();
+			} catch (Throwable t) {
+
 			}
 		}
 		owner = null;
@@ -416,7 +410,11 @@ public class GervillPlaySubSystemWithRegisterInstruments implements
 		}
 
 		if (sourceDataLine != null) {
-			sourceDataLine.close();
+			try {
+				sourceDataLine.close();
+			} catch (Throwable t) {
+
+			}
 			sourceDataLine = null;
 		}
 	}

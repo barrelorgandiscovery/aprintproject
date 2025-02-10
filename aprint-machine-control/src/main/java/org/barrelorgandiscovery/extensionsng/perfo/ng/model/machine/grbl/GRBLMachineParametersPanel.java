@@ -22,6 +22,8 @@ import com.jeta.forms.components.panel.FormPanel;
  */
 public class GRBLMachineParametersPanel extends JPanel {
 
+	private static final long serialVersionUID = 6734078668752040962L;
+
 	private static Logger logger = Logger
 			.getLogger(GRBLMachineParametersPanel.class);
 

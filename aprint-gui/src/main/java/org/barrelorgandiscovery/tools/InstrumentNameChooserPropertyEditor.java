@@ -50,7 +50,8 @@ public class InstrumentNameChooserPropertyEditor extends AbstractPropertyEditor 
 
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				selectInstrument();
+				Instrument s = selectInstrument();
+				changeInstrument(s);
 			}
 		});
 		((JPanel) editor).add(cancelButton = ComponentFactory.Helper
@@ -63,23 +64,18 @@ public class InstrumentNameChooserPropertyEditor extends AbstractPropertyEditor 
 		});
 	}
 
-	private void selectInstrument() {
+	private Instrument selectInstrument() {
 
 		JDialog f = new JDialog((Frame)null);
 		
 		JInstrumentChoice instrumentChoice = new JInstrumentChoice(repository2, 
-				new IInstrumentChoiceListener() {					
-					@Override
-					public void instrumentChanged(Instrument newInstrument) {
-						changeInstrument(newInstrument);
-					}
-				});
+				null);
 
 		f.getContentPane().add(instrumentChoice,  BorderLayout.CENTER);
 		f.pack();
 		f.setModalityType(ModalityType.APPLICATION_MODAL);
 		f.setVisible(true);
-
+		return instrumentChoice.getCurrentInstrument();
 	}
 
 	private void selectNullInstrument() {

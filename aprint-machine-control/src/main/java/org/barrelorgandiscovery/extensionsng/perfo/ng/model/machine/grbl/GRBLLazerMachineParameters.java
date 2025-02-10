@@ -1,6 +1,7 @@
 package org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.grbl;
 
 import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.AbstractMachineParameters;
+import org.barrelorgandiscovery.extensionsng.perfo.ng.model.machine.generic.lasergcode.GenericLazerGCodeParameterGeneration;
 import org.barrelorgandiscovery.prefs.IPrefsStorage;
 
 /**
@@ -11,6 +12,7 @@ import org.barrelorgandiscovery.prefs.IPrefsStorage;
  */
 public class GRBLLazerMachineParameters extends AbstractMachineParameters {
 
+	
 	/**
 	 * 
 	 */
@@ -86,5 +88,6 @@ public class GRBLLazerMachineParameters extends AbstractMachineParameters {
 		ps.setIntegerProperty(MAX_POWER, maxPower);
 		
 	}
+
 
 }

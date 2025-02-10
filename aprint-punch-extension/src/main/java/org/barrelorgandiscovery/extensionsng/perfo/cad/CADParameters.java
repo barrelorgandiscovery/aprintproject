@@ -40,6 +40,16 @@ public class CADParameters implements Serializable, Externalizable {
 	
 	private boolean exportTrous = true;
 	
+	private boolean pointillesDansPiste = false;
+	
+	
+	public void setPointillesDansPiste(boolean pointillesDansPiste) {
+		this.pointillesDansPiste = pointillesDansPiste;
+	}
+	
+	public boolean isPointillesDansPiste() {
+		return pointillesDansPiste;
+	}
 	
 
 	public void setNombreDePlisAAjouterAuDebut(int nombreDePlisAAjouterAuDebut) {
@@ -207,6 +217,12 @@ public class CADParameters implements Serializable, Externalizable {
 			nombreDePlisAAjouterFin = in.readInt();
 		}catch(Exception ex) {
 		}
+		
+		try {
+			pointillesDansPiste = in.readBoolean();
+		} catch(Exception ex) {
+			
+		}
 
 	}
 
@@ -227,6 +243,7 @@ public class CADParameters implements Serializable, Externalizable {
 		out.writeBoolean(surchargeLargeurTrous);
 		out.writeDouble(largeurTrous);
 		out.writeInt(nombreDePlisAAjouterFin);
+		out.writeBoolean(pointillesDansPiste);
 		
 	}
 

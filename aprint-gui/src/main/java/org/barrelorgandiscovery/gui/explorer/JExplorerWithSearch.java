@@ -1,7 +1,9 @@
 package org.barrelorgandiscovery.gui.explorer;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Rectangle;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.net.URL;
@@ -11,6 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JToolBar;
+import javax.swing.Scrollable;
 
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
@@ -43,12 +46,42 @@ public class JExplorerWithSearch extends JPanel {
 		this.services = services;
 		initComponents();
 	}
+	
+	static class TreeScrollPane extends JPanel implements Scrollable {
+
+		@Override
+		public Dimension getPreferredScrollableViewportSize() {
+			return getPreferredSize();
+		}
+
+		@Override
+		public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) {
+			return 50;
+		}
+
+		@Override
+		public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+			return 50;
+		}
+
+		@Override
+		public boolean getScrollableTracksViewportWidth() {
+			return true;
+		}
+
+		@Override
+		public boolean getScrollableTracksViewportHeight() {
+			return false;
+		}
+		
+	}
+	
 
 	protected void initComponents() throws Exception {
 		setLayout(new BorderLayout());
 		explorer = new JExplorer(services.getOwnerForDialog());
 
-		JPanel explorerPanelWithTools = new JPanel();
+		JPanel explorerPanelWithTools = new TreeScrollPane();
 		explorerPanelWithTools.setLayout(new BorderLayout());
 		explorerPanelWithTools.add(explorer, BorderLayout.CENTER);
 
@@ -69,7 +102,9 @@ public class JExplorerWithSearch extends JPanel {
 
 		sp = new SearchPanel(bookIndexing, props, services, this);
 
-		JSplitPane spane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, new JScrollPane(explorerPanelWithTools), sp);
+		JScrollPane scrollPaneExplorer = new JScrollPane(explorerPanelWithTools);
+		
+		JSplitPane spane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, scrollPaneExplorer, sp);
 		add(spane, BorderLayout.CENTER);
 
 		sp.setSearchPanelListener(new ISearchPanelListener() {

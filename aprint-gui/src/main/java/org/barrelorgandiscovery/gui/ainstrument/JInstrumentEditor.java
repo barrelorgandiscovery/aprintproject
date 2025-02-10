@@ -45,6 +45,8 @@ import com.birosoft.liquid.LiquidLookAndFeel;
 
 /**
  * This is a component, including the view and the controller ...
+ * Not directly used
+ * 
  * 
  * @author Freydiere Patrice
  * 
@@ -459,6 +461,7 @@ public class JInstrumentEditor extends JFrame {
 	 * Test function ...
 	 * 
 	 * @param args
+	 * 
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
@@ -471,7 +474,7 @@ public class JInstrumentEditor extends JFrame {
 		// model.setScale(ScaleIO.readGamme(new File("gammes/52li.gamme")));
 
 		StreamStorageEditableInstrumentManager stm = new StreamStorageEditableInstrumentManager(new FolderStreamStorage(
-				new File("C:\\Documents and Settings\\Freydiere Patrice\\Mes documents\\monrepertoiredegammes"))); //$NON-NLS-1$
+				new File("/home/use/projets/APrint/reference_instruments"))); //$NON-NLS-1$
 
 		JInstrumentEditor editor = new JInstrumentEditor(stm);
 		editor.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

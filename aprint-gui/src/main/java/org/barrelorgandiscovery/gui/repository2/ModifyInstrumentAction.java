@@ -25,6 +25,8 @@ import org.barrelorgandiscovery.tools.bugsreports.BugReporter;
 
 public class ModifyInstrumentAction extends RepositoryAbstractAction {
 
+	private static final long serialVersionUID = 3895429106900710829L;
+	
 	private static Logger logger = Logger.getLogger(ModifyInstrumentAction.class);
 
 	public ModifyInstrumentAction(Object parent, CurrentRepositoryInformations infos) {
@@ -76,6 +78,10 @@ public class ModifyInstrumentAction extends RepositoryAbstractAction {
 									contentPane.add(p, BorderLayout.CENTER);
 
 									f.setSize(1024, 768);
+									
+									// add menu panel
+									f.getRootPane().setJMenuBar(p.getMenuBar());
+									
 									SwingUtils.center(f);
 									p.edit(editableInstrument, null, iem);
 

@@ -3,12 +3,9 @@ package org.barrelorgandiscovery.gui.etl.steps;
 import org.barrelorgandiscovery.repository.Repository2;
 
 /**
- * Environnement UI permettant à une classe Step de créer son composant visuel
- * de configuration, cet objet est passé en paramètre du panel pour la saisie de
- * la configuration d'un step
+ * UI definition for a step class to create associated configuration panel.
  * 
  * @author pfreydiere
- * 
  */
 public class JConfigurePanelEnvironment {
 

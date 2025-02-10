@@ -1,5 +1,6 @@
 package org.barrelorgandiscovery.gaerepositoryclient;
 
+@Deprecated
 public class RepositoryInstrument {
 
 	private String name;

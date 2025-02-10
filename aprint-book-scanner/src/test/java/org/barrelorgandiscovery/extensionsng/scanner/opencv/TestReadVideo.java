@@ -1,11 +1,5 @@
 package org.barrelorgandiscovery.extensionsng.scanner.opencv;
 
-import org.bytedeco.javacpp.Loader;
-import org.bytedeco.opencv.opencv_java;
-import org.opencv.core.Mat;
-import org.opencv.highgui.HighGui;
-import org.opencv.videoio.VideoCapture;
-
 public class TestReadVideo {
 //	
 //	public static void main(String[] args) throws Exception {

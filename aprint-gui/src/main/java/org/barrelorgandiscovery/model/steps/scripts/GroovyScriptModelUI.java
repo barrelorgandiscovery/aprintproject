@@ -58,9 +58,11 @@ public class GroovyScriptModelUI extends JConfigurePanel {
 		fileMenu.add(newEmptyFromTemplate);
 		newEmptyFromTemplate.addActionListener((e) -> {
 			try {
-
+				// default content
 				String scriptContent = "import org.barrelorgandiscovery.model.steps.scripts.*;\n"
 						+ "import org.barrelorgandiscovery.model.*;\n"
+						+ "import org.barrelorgandiscovery.model.type.*;\n"
+						+ "import org.barrelorgandiscovery.timed.*;\n"
 						+ "import org.barrelorgandiscovery.virtualbook.*\n" + "import org.barrelorgandiscovery.xml.*\n"
 						+ "\n" + "import java.io.File;\n" + "\n" + "class T extends ModelGroovyScript {\n" + "\n"
 						+ "   def console\n" + "\n" + "   String getLabel() { \"Hello Script\" }" + "\n"

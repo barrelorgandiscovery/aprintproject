@@ -60,12 +60,10 @@ public class InstrumentChooserPropertyEditor extends AbstractPropertyEditor {
 	}
 
 	private void selectInstrument() {
-
 		JInstrumentChoice instrumentChoice = new JInstrumentChoice(repository2, null);
 		instrumentChoice.setVisible(true);
 		
 		changeInstrument(instrumentChoice.getCurrentInstrument());
-
 	}
 
 	private void selectNullInstrument() {
@@ -75,13 +73,14 @@ public class InstrumentChooserPropertyEditor extends AbstractPropertyEditor {
 		firePropertyChange(oldImage, null);
 	}
 
-	private void changeInstrument(Instrument scale) {
-		Object oldImage = getValue();
-		this.scale = scale;
+	private void changeInstrument(Instrument instrument) {
+		Object oldValue = getValue();
+		this.scale = instrument;
 		scaleName.setText("");
-		if (scale != null)
-			scaleName.setText(scale.getName());
-		firePropertyChange(oldImage, scale);
+		if (instrument != null)
+			scaleName.setText(instrument.getName());
+
+		firePropertyChange(oldValue, instrument);
 	}
 
 	public Object getValue() {

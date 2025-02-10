@@ -1,12 +1,5 @@
 package org.barrelorgandiscovery.extensionsng.scannerperfo;
 
-import java.awt.image.BufferedImage;
-import java.io.File;
-
-import javax.imageio.ImageIO;
-
-import org.junit.Test;
-
 public class TestLargeImages {
 
 //	public TestLargeImages() {

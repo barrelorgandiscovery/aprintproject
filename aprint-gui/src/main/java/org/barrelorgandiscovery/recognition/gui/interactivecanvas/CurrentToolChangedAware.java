@@ -9,8 +9,16 @@ import org.barrelorgandiscovery.gui.aedit.CurrentToolChanged;
  */
 public interface CurrentToolChangedAware {
 
+	/**
+	 * add a listener for the tool change
+	 * @param listener
+	 */
 	public void addCurrentToolChangedListener(CurrentToolChanged listener);
 
+	/** 
+	 * remove the listener reference
+	 * @param listener
+	 */
 	public void removeCurrentToolChangedListener(CurrentToolChanged listener);
 
 }

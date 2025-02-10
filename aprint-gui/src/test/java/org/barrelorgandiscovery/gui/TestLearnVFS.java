@@ -5,8 +5,7 @@ import java.io.File;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.VFS;
 import org.barrelorgandiscovery.tools.VFSTools;
-import org.barrelorgandiscovery.vfs2.provider.BodProvider;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TestLearnVFS {
 

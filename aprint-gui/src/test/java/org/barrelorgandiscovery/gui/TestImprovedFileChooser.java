@@ -1,25 +1,10 @@
 package org.barrelorgandiscovery.gui;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 
-import javax.swing.JButton;
-import javax.swing.JFrame;
-
-import org.apache.commons.vfs2.Capability;
 import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemManager;
 import org.apache.commons.vfs2.VFS;
-import org.apache.commons.vfs2.impl.StandardFileSystemManager;
 import org.apache.commons.vfs2.provider.AbstractFileObject;
-// import org.apache.commons.vfs2.provider.webdav4s.Webdav4sFileProvider;
-import org.barrelorgandiscovery.gui.tools.BookmarkPanel;
-
-import com.googlecode.vfsjfilechooser2.VFSJFileChooser;
-import com.googlecode.vfsjfilechooser2.VFSJFileChooser.RETURN_TYPE;
-import com.googlecode.vfsjfilechooser2.accessories.DefaultAccessoriesPanel;
-import com.googlecode.vfsjfilechooser2.accessories.bookmarks.BookmarksDialog;
 
 public class TestImprovedFileChooser {
 

@@ -110,11 +110,9 @@ public class JRepositoryTileFrame extends JFrameWaitable {
 					}
 
 					public void scalesChanged() {
-
 					}
 
 					public void transformationAndImporterChanged() {
-
 					}
 				});
 
@@ -370,6 +368,13 @@ public class JRepositoryTileFrame extends JFrameWaitable {
 			}
 		});
 		
+	
+	}
+	
+	public void setFocusOnFilter() {
+		// focus on the filter first
+		boolean gainFocus = filter.requestFocusInWindow();
+		logger.debug(gainFocus);
 	}
 
 	/**

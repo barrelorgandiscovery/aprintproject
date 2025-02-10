@@ -3,8 +3,8 @@ package org.barrelorgandiscovery.exec;
 import java.util.Map;
 
 /**
- * interface for executing a model or script, 
- * this unify transforms done using a script or a model
+ * interface for executing a model or script,
+ * This is an abstraction for either executing script or a modeleditor
  * 
  * @author pfreydiere
  *

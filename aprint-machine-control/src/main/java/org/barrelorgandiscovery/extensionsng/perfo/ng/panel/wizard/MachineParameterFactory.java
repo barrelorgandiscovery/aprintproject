@@ -23,13 +23,12 @@ public class MachineParameterFactory {
 	private IExtension[] extensionManager;
 
 	public MachineParameterFactory(IExtension[] extensions) {
-		
-		// add this extension 
+
+		// add this extension
 		MachineExtension me = new MachineExtension();
 		this.extensionManager = Arrays.copyOf(extensions, extensions.length + 1);
 		this.extensionManager[extensions.length] = me;
-		
-		
+
 	}
 
 	public AbstractMachineParameters[] createAllMachineParameters() {

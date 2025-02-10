@@ -4,9 +4,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -100,6 +102,13 @@ public class APrintApplication {
 
 			Properties sysprop = System.getProperties();
 			String mainFolder = sysprop.getProperty(APrintApplicationBootStrap.MAINFOLDER_SYSPROP, null);
+			if (mainFolder == null) {
+				mainFolder = sysprop.getProperty("jpackage.app-path", null);
+				if (mainFolder != null) {
+					File root = new File(mainFolder).getParentFile().getParentFile();
+					mainFolder = new File(root, "lib/app").getAbsolutePath();
+				}
+			}
 
 			String commandline_mainfolderValue = cmd.getOptionValue('m');
 			if (commandline_mainfolderValue != null && !commandline_mainfolderValue.isEmpty()) {
@@ -138,6 +147,23 @@ public class APrintApplication {
 			final APrintProperties prop = new APrintProperties("aprintstudio", //$NON-NLS-1$
 					isbeta, mainFolder);
 
+
+			File aprintFolder = prop.getAprintFolder();
+			// check write permission in aprint folder
+			try {
+				
+				File writeTestFile = new File(aprintFolder, "writeTest.file");
+				try(var fw = new FileWriter(writeTestFile)) {
+					fw.write("testwrite");
+				}
+				
+			} catch(Exception ex) {
+				logger.error("error checking the write permissions :" + ex.getMessage(), ex);
+				JOptionPane.showConfirmDialog(null, "Fail to write in " + aprintFolder + ", check folder permissions");
+				return;
+			}	
+			
+			
 			// splash
 			showSplash();
 
@@ -154,13 +180,15 @@ public class APrintApplication {
 			System.setSecurityManager(null);
 
 			logger.debug("adding native library folder");
-			File aprintFolder = prop.getAprintFolder();
+			
 			if (aprintFolder != null) {
 				File nl = new File(aprintFolder, "pluginnativelibraries");
-				if (!nl.exists())
+				if (!nl.exists()) {
 					nl.mkdirs();
+				}
 
 				addToJavaLibraryPath(nl);
+
 			}
 
 			initLanguageWithProperties(prop);
@@ -174,6 +202,7 @@ public class APrintApplication {
 			}
 
 			boolean restart = true;
+			boolean first = true;
 
 			while (restart) {
 
@@ -186,20 +215,19 @@ public class APrintApplication {
 				try {
 					Bookmarks b = new Bookmarks();
 					boolean found = false;
-					for (int i = 0 ; i < b.getSize() ; i ++ ) {
+					for (int i = 0; i < b.getSize(); i++) {
 						String title = b.getTitle(i);
 						if ("Web Library".equals(title)) {
 							found = true;
 							break;
 						}
 					}
-					
+
 					if (!found) {
-						b.add(new TitledURLEntry("Web Library", "bod://www.barrel-organ-discovery.org:80/READONLY_WEB_SITE_CONTENT"));
+						b.add(new TitledURLEntry("Web Library",
+								"bod://www.barrel-organ-discovery.org:80/READONLY_WEB_SITE_CONTENT"));
 						b.save();
 					}
-					
-					
 
 				} catch (Throwable t) {
 					logger.error("fail to check bookmarks :" + t.getMessage(), t);
@@ -256,6 +284,23 @@ public class APrintApplication {
 				} else {
 					logger.debug("external instruments has already been downloaded");
 				}
+				
+				if (first) {
+					
+					List<String> filesToOpen = cmd.getArgList();
+					// handle file opening from command line
+					for (String s: filesToOpen) {
+						try {
+						p.handleDropFileTarget(new File(s));
+						} catch (Exception ex) {
+							JMessageBox.showMessage(p, "Fail to open " + s + ": " + ex.getMessage());
+							ex.printStackTrace();
+						}
+					}
+					
+					first = false;
+				}
+				
 
 				// main loop
 				while (p.isVisible()) {

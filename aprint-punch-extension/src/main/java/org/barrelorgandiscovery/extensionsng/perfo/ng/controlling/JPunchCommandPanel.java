@@ -704,7 +704,7 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 		int nbCommandsToSend = punchPlan.getCommandsByRef().size();
 
 		positionPanel.updateState(index, nbCommandsToSend, index > 0, index < nbCommandsToSend - 1, "--", "--", "--", //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				"--");
+				"--", "--");
 	}
 
 	// ///////////////////////////////////////////////////////////////
@@ -774,7 +774,7 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 
 		@Override
 		public void rawElementReceived(String commandReceived) {
-			
+
 		}
 
 		@Override
@@ -806,7 +806,7 @@ public class JPunchCommandPanel extends JPanel implements Disposable {
 							// "Machine Position X:" + mx + " Y:"
 							// + my + " ,
 							updateStatus(status, mx // $NON-NLS-1$
-							, my); // $NON-NLS-1$
+									, my); // $NON-NLS-1$
 							lastpositionMachineY = my;
 
 							// we don't display the yshift

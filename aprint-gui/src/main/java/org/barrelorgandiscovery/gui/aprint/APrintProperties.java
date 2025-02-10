@@ -78,7 +78,7 @@ public class APrintProperties {
 	}
 
 	public APrintProperties(String softwareName, boolean isbeta, String mainFolder) throws Exception {
-		// R�cup�ration de l'emplacement du r�pertoire de l'utilisateur ...
+		// Récupération de l'emplacement du répertoire de l'utilisateur ...
 
 		this.isbeta = isbeta;
 
@@ -109,8 +109,15 @@ public class APrintProperties {
 
 		if (propertiesfile.exists())
 			ps.load();
+		
+		lastDefinedProperties = this;
 	}
 
+	static APrintProperties lastDefinedProperties = null;
+	public static APrintProperties getLastDefinedProperties() {
+		return lastDefinedProperties;
+	}
+	
 	/**
 	 * Construction de l'objet, en prenant pour fichier de propriété le fichier
 	 * aprint.properties dans le répertoire de l'utilisateur

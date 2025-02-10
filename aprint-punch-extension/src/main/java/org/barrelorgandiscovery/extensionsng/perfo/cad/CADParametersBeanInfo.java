@@ -107,6 +107,12 @@ public class CADParametersBeanInfo extends BaseBeanInfo {
 		exportDecoupeDesBords.setShortDescription("Export de la découpe des bords");
 		exportDecoupeDesBords.setDisplayName("Export Bords du carton");
 		exportDecoupeDesBords.setCategory("Export");
+		
+		ExtendedPropertyDescriptor pointillesDansPiste = addProperty("pointillesDansPiste");
+		pointillesDansPiste.setShortDescription("Pointilles dans Pistes");
+		pointillesDansPiste.setDisplayName("Pointilles dans les pistes");
+		pointillesDansPiste.setCategory("Pliures");
+		
 
 	}
 

@@ -1,24 +1,5 @@
 package org.barrelorgandiscovery.extensionsng.scanner.opencv;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-//
-//import org.bytedeco.ffmpeg.avcodec.AVCodec;
-//import org.bytedeco.ffmpeg.avcodec.AVCodecContext;
-//import org.bytedeco.ffmpeg.avcodec.AVPacket;
-//import org.bytedeco.ffmpeg.avformat.AVFormatContext;
-//import org.bytedeco.ffmpeg.avutil.AVFrame;
-//import org.bytedeco.ffmpeg.swscale.SwsContext;
-//import org.bytedeco.javacpp.BytePointer;
-//import org.bytedeco.javacpp.DoublePointer;
-//import org.bytedeco.javacpp.PointerPointer;
-//
-//import static org.bytedeco.ffmpeg.global.avcodec.*;
-//import static org.bytedeco.ffmpeg.global.avformat.*;
-//import static org.bytedeco.ffmpeg.global.avutil.*;
-//import static org.bytedeco.ffmpeg.global.swscale.*;
-
 public class TestFFMpeg {
 //	/**
 //	 * Write image data using simple image format ppm

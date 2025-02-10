@@ -1,7 +1,6 @@
 package org.barrelorgandiscovery.gui;
 
-import org.apache.commons.vfs2.provider.sftp.SftpFileSystemConfigBuilder;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class TestVFSHttpDirectory {
 
