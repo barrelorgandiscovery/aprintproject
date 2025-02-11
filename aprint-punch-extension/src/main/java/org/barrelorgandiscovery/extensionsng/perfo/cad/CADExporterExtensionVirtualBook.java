@@ -312,6 +312,8 @@ public class CADExporterExtensionVirtualBook extends BaseVirtualBookExtension
 					dxfParameters.getStartBookAdjustementFromBeginning());
 
 			ps.setBooleanProperty("exportpliures", dxfParameters.isExportPliures());//$NON-NLS-1$
+			
+			ps.setBooleanProperty("pointillesdanspistes", dxfParameters.isPointillesDansPiste()); //$NON-NLS-1$
 
 		} catch (Throwable t) {
 			logger.error("error in saving preferences :" + t.getMessage(), t);//$NON-NLS-1$
@@ -352,6 +354,8 @@ public class CADExporterExtensionVirtualBook extends BaseVirtualBookExtension
 					.getStartBookAdjustementFromBeginning()));
 
 			dxfParameters.setExportPliures(ps.getBooleanProperty("exportpliures", dxfParameters.isExportPliures()));//$NON-NLS-1$
+			
+			dxfParameters.setPointillesDansPiste(ps.getBooleanProperty("pointillesdanspistes", dxfParameters.isPointillesDansPiste())); //$NON-NLS-1$
 
 		} catch (Exception ex) {
 			logger.error("error in loading parameters :" + ex.getMessage(), ex);//$NON-NLS-1$

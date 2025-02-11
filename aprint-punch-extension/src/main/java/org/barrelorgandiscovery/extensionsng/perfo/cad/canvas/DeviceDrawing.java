@@ -68,15 +68,14 @@ public abstract class DeviceDrawing {
 	public String getCurrentLayer() {
 		return this.currentLayer;
 	}
-	
-	
+
 	public void startGroup() {
-		
+
 	}
-	
+
 	public void endGroup() {
 		flushLine();
-		
+
 	}
 
 	Coordinate computeCircularPos(double xcenter, double ycenter, double radius, double angle) {
@@ -242,20 +241,26 @@ public abstract class DeviceDrawing {
 	 * @param device
 	 * @param bookscale
 	 */
-	public void drawDottedLinesAccordinglyToBook(double x, DeviceDrawing device , Scale bookscale) {
+	public void drawDottedLinesAccordinglyToBook(double x, DeviceDrawing device, Scale bookscale) {
 
 		double first = bookscale.getFirstTrackAxis();
-		double dash_size = bookscale.getIntertrackHeight() / 2;
-		double shift = - bookscale.getIntertrackHeight() / 4;
-		for(int i=0 ; i < bookscale.getTrackNb(); i ++) {
+		double dash_size = bookscale.getTrackWidth() / 2;
+		boolean inverted = !bookscale.isPreferredViewedInversed();
+
+		for (int i = 0; i < bookscale.getTrackNb(); i++) {
+
+			double shift = -bookscale.getTrackWidth() / 4;
 			double y1 = first + i * bookscale.getIntertrackHeight() + shift;
+			if (inverted) {
+				y1 = bookscale.getWidth() - y1;
+			}
+
 			device.moveTo(x, y1);
-			device.drawTo(x, y1 + dash_size);
+			device.drawTo(x, y1 + (inverted ? -dash_size : dash_size));
 		}
-		
+
 	}
-	
-	
+
 	/**
 	 * draw a rectangle hole
 	 * 
@@ -323,9 +328,9 @@ public abstract class DeviceDrawing {
 	/**
 	 * draw an arrow
 	 * 
-	 * @param vector vector for the arrow
+	 * @param vector      vector for the arrow
 	 * @param arroworigin origin of the arrow
-	 * @param width  lengths of the arrow borders
+	 * @param width       lengths of the arrow borders
 	 */
 	public void drawArrow(Vect vector, Coordinate arroworigin, double width) {
 
@@ -333,7 +338,7 @@ public abstract class DeviceDrawing {
 
 		Vect v = vector.orthoNorme().scale(width);
 		Vect inverted = v.rotateOrigin(Math.PI);
-		
+
 		Vect o1 = inverted.rotateOrigin(Math.PI / 180.0 * 15);
 		Vect o2 = inverted.rotateOrigin(-Math.PI / 180.0 * 15);
 
@@ -346,8 +351,6 @@ public abstract class DeviceDrawing {
 
 		moveTo(end);
 		drawTo(o2.plus(end));
-		
-		
 
 	}
 
@@ -370,10 +373,11 @@ public abstract class DeviceDrawing {
 	public abstract void write(OutputStream outStream, String[] layers) throws Exception;
 
 	/**
-	 * does the export needs to ignore the reference ?
-	 * some export needs to not rotation the book
+	 * does the export needs to ignore the reference ? some export needs to not
+	 * rotation the book
+	 * 
 	 * @return
 	 */
 	public abstract boolean ignoreReference();
-	
+
 }
