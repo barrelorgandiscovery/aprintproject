@@ -185,7 +185,7 @@ public class CADVirtualBookExporter {
 						if (p.isPointillesDansPiste()) {
 							device.drawDottedLinesAccordinglyToBook(start, device, vb.getScale());
 						} else {
-							device.drawImprovedDottedLines(start, 0, start, scale.getWidth(), 2, 5);
+							device.drawImprovedDottedLines(start, p.getMargePliureBords(), start, scale.getWidth() - p.getMargePliureBords(), 2, 5);
 						}
 					} finally {
 						device.endGroup();
@@ -196,19 +196,20 @@ public class CADVirtualBookExporter {
 					try {
 						device.startGroup();
 						try {
-							device.drawLine(start, 0, start, scale.getWidth());
+							device.drawLine(start, p.getMargePliureBords(), start, scale.getWidth()- p.getMargePliureBords());
 						} finally {
 							device.endGroup();
 						}
 					} finally {
 						device.setCurrentLayer(LAYER_PLIURES_VERSO);
 					}
+
 				} else if (p.getTypePliure() == TypePliure.ALTERNE_CONTINU_POINTILLEE) {
 
 					// pointilles avec non decoupe au bord des deux cotes, sur 5mm (sinon,
 					// fragilise carton)
-					double startNoDots = 5.0;
-					double endDotsWidth = scale.getWidth() - 5.0;
+					double startNoDots = p.getMargePliureBords();
+					double endDotsWidth = scale.getWidth() - p.getMargePliureBords();
 					assert scale.getWidth() > 10.0;
 					device.startGroup();
 					try {
@@ -237,7 +238,8 @@ public class CADVirtualBookExporter {
 						if (p.isPointillesDansPiste()) {
 							device.drawDottedLinesAccordinglyToBook(start, device, vb.getScale());
 						} else {
-							device.drawImprovedDottedLines(start, 0, start, scale.getWidth(), 2, 5);
+							device.drawImprovedDottedLines(start, p.getMargePliureBords(), start,
+									scale.getWidth() - p.getMargePliureBords(), 2, 5);
 						}
 					} finally {
 						device.endGroup();
@@ -247,7 +249,8 @@ public class CADVirtualBookExporter {
 					device.setCurrentLayer(LAYER_PLIURES_NON_CUT);
 					device.startGroup();
 					try {
-						device.drawLine(start, 0, start, scale.getWidth());
+						device.drawLine(start, p.getMargePliureBords(), start,
+								scale.getWidth() - p.getMargePliureBords());
 					} finally {
 						device.endGroup();
 					}
@@ -258,7 +261,8 @@ public class CADVirtualBookExporter {
 
 					device.startGroup();
 					try {
-						device.drawLine(start, 0, start, scale.getWidth());
+						device.drawLine(start, p.getMargePliureBords(), start,
+								scale.getWidth() - p.getMargePliureBords());
 					} finally {
 						device.endGroup();
 					}

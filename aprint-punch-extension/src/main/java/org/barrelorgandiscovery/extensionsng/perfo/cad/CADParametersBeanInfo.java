@@ -113,6 +113,11 @@ public class CADParametersBeanInfo extends BaseBeanInfo {
 		pointillesDansPiste.setDisplayName("Pointilles dans les pistes");
 		pointillesDansPiste.setCategory("Pliures");
 		
+		ExtendedPropertyDescriptor margePliureLigne = addProperty("margePliureBords");
+		margePliureLigne.setShortDescription("Marge Bords pliure");
+		margePliureLigne.setDisplayName("Marge Bord pour pliures");
+		margePliureLigne.setCategory("Pliures");
+		
 
 	}
 

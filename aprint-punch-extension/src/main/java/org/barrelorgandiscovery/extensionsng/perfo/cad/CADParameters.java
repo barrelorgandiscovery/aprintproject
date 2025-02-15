@@ -42,6 +42,14 @@ public class CADParameters implements Serializable, Externalizable {
 	
 	private boolean pointillesDansPiste = false;
 	
+	private double margePliureBords = 5.0;
+	
+	public void setMargePliureBords(double margePliureBords) {
+		this.margePliureBords = margePliureBords;
+	}
+	public double getMargePliureBords() {
+		return margePliureBords;
+	}
 	
 	public void setPointillesDansPiste(boolean pointillesDansPiste) {
 		this.pointillesDansPiste = pointillesDansPiste;
@@ -223,6 +231,12 @@ public class CADParameters implements Serializable, Externalizable {
 		} catch(Exception ex) {
 			
 		}
+		
+		try {
+			margePliureBords = in.readDouble(); 
+		} catch (Exception ex) {
+			
+		}
 
 	}
 
@@ -244,6 +258,7 @@ public class CADParameters implements Serializable, Externalizable {
 		out.writeDouble(largeurTrous);
 		out.writeInt(nombreDePlisAAjouterFin);
 		out.writeBoolean(pointillesDansPiste);
+		out.writeDouble(margePliureBords);
 		
 	}
 
