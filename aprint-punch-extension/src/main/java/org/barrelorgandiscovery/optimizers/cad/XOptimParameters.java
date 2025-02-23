@@ -16,7 +16,7 @@ public class XOptimParameters implements Serializable {
 	private static final long serialVersionUID = 7295413239681833891L;
 
 	/**
-	 * Formes de trous pour les trous généraux
+	 * Formes de trous pour les trous gï¿½nï¿½raux
 	 */
 	private TrouType typeTrous = TrouType.TROUS_RECTANGULAIRES;
 
@@ -57,7 +57,7 @@ public class XOptimParameters implements Serializable {
 
 	private double speedFractionMultiplePass = 1.0;
 
-	private double optimPageSize = 5.0; // 5 cm par défaut
+	private double optimPageSize = 5.0; // 5 cm par dï¿½faut
 
 	private double largeurTrous = 3.0;
 
@@ -242,14 +242,12 @@ public class XOptimParameters implements Serializable {
 	}
 	
 	
-	
-	
 	// reglage des passes pour les pliures
-	private double powerFractionPliures = 1.0;
+	private double powerFractionPliures = 0.5;
 	private double speedFractionPliures = 1.0;
 	private boolean pliureMultipass = false;
 	private int pliuresMultipassPassNumber = 1;
-	private double pliuresMultipassPowerFraction = 1.0;
+	private double pliuresMultipassPowerFraction = 0.5;
 	private double pliuresMultipassSpeedFraction = 1.0;
 	
 	

@@ -83,7 +83,7 @@ public class GenericLazerCompilerVisitor extends GCodeCompiler {
 	@Override
 	public void visit(int index, DisplacementCommand displacementCommand) throws Exception {
 		if (!checkSamePositionOtherwiseUpdateCurrentPosition(displacementCommand)) {
-			
+
 			addCommand(generationParameters.displacementPreCommand);
 			String commandGeneration = String.format(Locale.ENGLISH, generationParameters.displacementCommandPattern, // $NON-NLS-1$
 					displacementCommand.getY(), displacementCommand.getX());

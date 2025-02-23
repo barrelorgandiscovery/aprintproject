@@ -48,6 +48,10 @@ public class PunchPlanDeviceDrawing extends DeviceDrawing {
 		this.currentFractionSpeed = currentFractionSpeed;
 	}
 
+	/**
+	 * callback definition for power and speed definition for layers
+	 * @param powerCallBack
+	 */
 	public void setPowerCallBack(PowerCallBack powerCallBack) {
 		this.powerCallBack = powerCallBack;
 	}

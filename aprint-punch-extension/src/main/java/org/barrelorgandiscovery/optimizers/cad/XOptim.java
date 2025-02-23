@@ -190,8 +190,10 @@ public class XOptim implements Optimizer<OptimizedObject> {
 						|| CADVirtualBookExporter.LAYER_PLIURES_VERSO_NON_CUT.equals(layer)) {
 					return parameters.getHalfCutPower();
 				} else if (CADVirtualBookExporter.LAYER_PLIURES.equals(layer)) {
+					// this cut
 					return parameters.getPowerFractionPliures();
 				}
+				// for holes
 				return parameters.getPowerFractionPass1();
 			}
 
@@ -199,12 +201,11 @@ public class XOptim implements Optimizer<OptimizedObject> {
 			public double getSpeedForLayer(String layer) {
 				
 				if (CADVirtualBookExporter.LAYER_PLIURES_NON_CUT.equals(layer)
-						|| CADVirtualBookExporter.LAYER_PLIURES_VERSO_NON_CUT.equals(layer)) {
-					return parameters.getHalfCutPower();
-				} else if (CADVirtualBookExporter.LAYER_PLIURES.equals(layer)) {
+						|| CADVirtualBookExporter.LAYER_PLIURES_VERSO_NON_CUT.equals(layer)
+						|| CADVirtualBookExporter.LAYER_PLIURES.equals(layer)) {
 					return parameters.getSpeedFractionPliures();
-				}
-				
+				} 
+				// for holes
 				return parameters.getSpeedFractionPass1();
 			}
 		};
@@ -288,14 +289,14 @@ public class XOptim implements Optimizer<OptimizedObject> {
 								return null;
 							gs.doOneGenerationModified();
 							if (j % 100 == 0) {
-								logger.debug("longueur du tracé :" //$NON-NLS-1$
+								logger.debug("longueur du tracÃ© :" //$NON-NLS-1$
 										+ gs.getSolution().getLength());
 							}
 						}
 
 						Path path = gs.getSolution();
 
-						// on ajoute le résultat
+						// on ajoute le rÃ©sultat
 						int cpt = 0;
 						while (path.getPath()[cpt % path.getPath().length] != 0)
 							cpt++;
