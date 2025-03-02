@@ -38,7 +38,9 @@ public class CompositeType implements ModelType {
 				s = s.substring(5);
 				String[] nameDescription = s.split(INFO_SEPARATOR);
 				name = nameDescription[0];
-				description = nameDescription[1];
+				if (nameDescription.length >= 2) {
+					description = nameDescription[1];
+				}
 			} else {
 				ret.add(typeserdeser.deserialize(s));
 			}
