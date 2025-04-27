@@ -38,11 +38,20 @@ public class StringTools {
 		return newname;
 
 	}
-
+	
 	public static String convertToPhysicalName(String s) {
 		return convertToPhysicalName(s, false);
 	}
 
+	public static String spaces(int space) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0 ; i < space; i ++) {
+			sb.append(" ");
+		}
+		return sb.toString();
+	}
+	
+	
 	public static String convertToPhysicalName(String s, boolean nospace) {
 		if (s == null)
 			return null;

@@ -14,6 +14,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -101,7 +102,7 @@ import com.mxgraph.view.mxGraph;
 import com.mxgraph.view.mxMultiplicity;
 
 /**
- * Model editor component 
+ * Model editor component
  * 
  * @author pfreydiere
  *
@@ -899,7 +900,13 @@ public class ModelEditor extends JPanel {
 	public List<String> validateState() throws Exception {
 
 		// validation des connections, connections manquantes
-		Model m = bridge.constructModelFromGraph(mxGraph);
+		Model m;
+		try {
+			m = bridge.constructModelFromGraph(mxGraph);
+		} catch (Exception ex) {
+			logger.error(ex.getMessage(), ex);
+			return Arrays.asList(new String[] { "invalid graph :" + ex.getMessage() });
+		}
 		m.schedule();
 
 		ModelStateChecker msc = new ModelStateChecker();
@@ -1255,6 +1262,7 @@ public class ModelEditor extends JPanel {
 
 	/**
 	 * is the current model runner, running ?
+	 * 
 	 * @return
 	 */
 	public boolean isRunning() {

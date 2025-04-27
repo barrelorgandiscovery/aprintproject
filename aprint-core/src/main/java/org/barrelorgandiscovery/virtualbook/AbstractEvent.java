@@ -12,6 +12,8 @@ import java.io.Serializable;
 public abstract class AbstractEvent implements Comparable<AbstractEvent>,
 		Serializable {
 
+	private static final long serialVersionUID = -260018256654983201L;
+	
 	private long timestamp;
 
 	public AbstractEvent(long timestamp) {
