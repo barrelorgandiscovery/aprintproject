@@ -1,7 +1,5 @@
 import java.text.*
 
-
-
 subprojects {
 
     apply plugin: 'eclipse'
@@ -73,6 +71,78 @@ task testReport(type: TestReport) {
   destinationDir = file("$buildDir/reports/allTests")
   // Combine all 'test' task results into a single HTML report
   reportOn subprojects.collect { it.tasks.withType(Test) }
+}
+
+// Task to run the APrint GUI application
+task runAPrint(type: JavaExec, dependsOn: ':aprint-gui:classes') {
+    group = 'application'
+    description = 'Runs the APrint Studio GUI application'
+    
+    // Use the runtime classpath from aprint-gui project
+    classpath = project(':aprint-gui').sourceSets.main.runtimeClasspath
+    
+    // Main class
+    main = 'org.barrelorgandiscovery.gui.aprintng.APrintApplicationBootStrap'
+    
+    // JVM arguments
+    jvmArgs = [
+        '-Xmx2g',
+        '-server',
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.desktop/javax.swing.text=ALL-UNNAMED',
+        '--add-opens', 'java.desktop/javax.swing=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.util=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.io=ALL-UNNAMED',
+        '--add-opens', 'java.desktop/java.awt=ALL-UNNAMED'
+    ]
+    
+    // System properties (can be overridden via -P)
+    systemProperty 'aprint.mcp.enabled', project.hasProperty('mcp.enabled') ? project.property('mcp.enabled') : 'false'
+    systemProperty 'aprint.mcp.mode', project.hasProperty('mcp.mode') ? project.property('mcp.mode') : 'http'
+    systemProperty 'aprint.mcp.port', project.hasProperty('mcp.port') ? project.property('mcp.port') : '8080'
+    
+    // Pass through any additional system properties
+    if (project.hasProperty('mainfolder')) {
+        systemProperty 'mainfolder', project.property('mainfolder')
+    }
+    
+    // Standard input/output
+    standardInput = System.in
+    standardOutput = System.out
+    errorOutput = System.err
+}
+
+// Task to run APrint with MCP server enabled
+task runAPrintWithMCP(type: JavaExec, dependsOn: ':aprint-gui:classes') {
+    group = 'application'
+    description = 'Runs the APrint Studio GUI application with MCP server enabled'
+    
+    classpath = project(':aprint-gui').sourceSets.main.runtimeClasspath
+    main = 'org.barrelorgandiscovery.gui.aprintng.APrintApplicationBootStrap'
+    
+    jvmArgs = [
+        '-Xmx2g',
+        '-server',
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.desktop/javax.swing.text=ALL-UNNAMED',
+        '--add-opens', 'java.desktop/javax.swing=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.util=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.io=ALL-UNNAMED',
+        '--add-opens', 'java.desktop/java.awt=ALL-UNNAMED'
+    ]
+    
+    // Enable MCP server
+    systemProperty 'aprint.mcp.enabled', 'true'
+    systemProperty 'aprint.mcp.mode', project.hasProperty('mcp.mode') ? project.property('mcp.mode') : 'http'
+    systemProperty 'aprint.mcp.port', project.hasProperty('mcp.port') ? project.property('mcp.port') : '8080'
+    
+    if (project.hasProperty('mainfolder')) {
+        systemProperty 'mainfolder', project.property('mainfolder')
+    }
+    
+    standardInput = System.in
+    standardOutput = System.out
+    errorOutput = System.err
 }
 
 

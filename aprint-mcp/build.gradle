@@ -1,0 +1,229 @@
+import java.text.*
+
+// Apply the java plugin to add support for Java
+apply plugin: 'java-library'
+
+// In this section you declare where to find the dependencies of your project
+repositories {
+	// Local Maven repository (for MCP SDK built from source)
+	mavenLocal()
+	// Use Maven Central (jcenter is deprecated)
+	mavenCentral()
+	// Fallback to jcenter for legacy dependencies
+	jcenter()
+}
+
+// In this section you declare the dependencies for your production and test code
+dependencies {
+	api project(':aprint-core')
+	// aprint-mcp depends on aprint-gui for the extension mechanism and interfaces
+	// The extension is loaded at runtime, breaking the compile-time circular dependency
+	implementation project(':aprint-gui')
+	
+	// Official MCP Java SDK - built from source automatically
+	// The buildMcpSdk task will clone and build the SDK if needed
+	// Supports STDIO, HTTP SSE streaming, and Spring WebFlux/WebMVC
+	// Documentation: https://github.com/modelcontextprotocol/java-sdk
+	def mcpSdkVersion = '0.18.0-SNAPSHOT'
+	implementation group: 'io.modelcontextprotocol.sdk', name: 'mcp', version: mcpSdkVersion
+	
+	// JSON library for MCP server (keep for backward compatibility)
+	api group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
+	
+	testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+	testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+sourceSets {
+	main {
+		java {
+			srcDir 'src/main/java'
+		}
+		resources {
+			srcDir 'src/main/resources'
+		}
+	}
+	test {
+		java {
+			srcDir 'src/test/java'
+		}
+		resources {
+			srcDir 'src/test/resources'
+		}
+	}
+}
+
+processResources {
+	duplicatesStrategy = DuplicatesStrategy.WARN
+}
+
+sourcesJar {
+	duplicatesStrategy = DuplicatesStrategy.WARN
+}
+
+test {
+	useJUnitPlatform()
+}
+
+// ============================================================================
+// MCP SDK Build from Source - Automated
+// ============================================================================
+
+def mcpSdkDir = new File(project.rootProject.projectDir, 'libs/java-sdk')
+def mcpSdkVersion = '0.18.0-SNAPSHOT'
+def mcpSdkRepo = 'https://github.com/modelcontextprotocol/java-sdk.git'
+
+// Task to clone the MCP SDK repository
+task cloneMcpSdk(type: Exec) {
+	group = 'mcp-sdk'
+	description = 'Clones the MCP Java SDK repository from GitHub'
+	
+	onlyIf { !mcpSdkDir.exists() }
+	
+	doFirst {
+		mkdir mcpSdkDir.parentFile
+		println "Cloning MCP Java SDK to ${mcpSdkDir}..."
+	}
+	
+	commandLine 'git', 'clone', '--depth', '1', mcpSdkRepo, mcpSdkDir.absolutePath
+	
+	doLast {
+		println "MCP SDK cloned successfully to ${mcpSdkDir}"
+	}
+}
+
+// Task to update the MCP SDK repository
+task updateMcpSdk(type: Exec) {
+	group = 'mcp-sdk'
+	description = 'Updates the MCP Java SDK repository'
+	
+	onlyIf { mcpSdkDir.exists() }
+	
+	workingDir mcpSdkDir
+	
+	commandLine 'git', 'pull', 'origin', 'main'
+	
+	doLast {
+		println "MCP SDK updated successfully"
+	}
+}
+
+// Task to build the MCP SDK with Maven
+task buildMcpSdk {
+	group = 'mcp-sdk'
+	description = 'Builds the MCP Java SDK from source and installs to local Maven repository'
+	
+	dependsOn cloneMcpSdk
+	
+	doLast {
+		def mvnw = new File(mcpSdkDir, 'mvnw')
+		def mvnwBat = new File(mcpSdkDir, 'mvnw.cmd')
+		def isWindows = System.getProperty('os.name').toLowerCase().contains('windows')
+		def mvnCommand
+		
+		// Determine Maven command
+		if (!isWindows && mvnw.exists()) {
+			mvnCommand = './mvnw'
+			mvnw.setExecutable(true)
+		} else if (isWindows && mvnwBat.exists()) {
+			mvnCommand = 'mvnw.cmd'
+		} else {
+			mvnCommand = 'mvn'
+		}
+		
+		println "Building MCP Java SDK from source..."
+		println "Working directory: ${mcpSdkDir}"
+		println "Maven command: ${mvnCommand}"
+		
+		// Set up Java environment
+		def setenvScript = new File(System.getProperty('user.home'), 'java/setenv17.sh')
+		def javaHome = System.getenv('JAVA_HOME')
+		
+		// Execute Maven build
+		if (!isWindows && setenvScript.exists()) {
+			// Source the Java 17 environment script for Unix-like systems
+			exec {
+				workingDir mcpSdkDir
+				commandLine 'bash', '-c', "source ${setenvScript.absolutePath} && ${mvnCommand} clean install -DskipTests"
+			}
+		} else {
+			// Use system Maven with JAVA_HOME if set
+			exec {
+				workingDir mcpSdkDir
+				if (javaHome != null && !javaHome.isEmpty()) {
+					environment 'JAVA_HOME', javaHome
+				}
+				commandLine mvnCommand, 'clean', 'install', '-DskipTests'
+			}
+		}
+		
+		println "MCP SDK built and installed to local Maven repository"
+		println "You can now use: io.modelcontextprotocol.sdk:mcp:${mcpSdkVersion}"
+	}
+}
+
+// Task to clean the MCP SDK build
+task cleanMcpSdk(type: Delete) {
+	group = 'mcp-sdk'
+	description = 'Cleans the MCP SDK build directory'
+	
+	delete mcpSdkDir
+}
+
+// Check if SDK is installed in local Maven repository
+def sdkArtifactPath = new File(System.getProperty('user.home'), 
+	".m2/repository/io/modelcontextprotocol/sdk/mcp/${mcpSdkVersion}/mcp-${mcpSdkVersion}.jar")
+
+// Make SDK build a dependency of compilation tasks
+// This ensures SDK is built and installed to local Maven repo before compilation
+compileJava.dependsOn buildMcpSdk
+classes.dependsOn buildMcpSdk
+jar.dependsOn buildMcpSdk
+
+// Task to run APrint with MCP extension enabled for testing
+task runAPrintWithMCP(type: JavaExec, dependsOn: [':aprint-gui:fatJar', 'jar']) {
+	group = 'application'
+	description = 'Runs the APrint Studio GUI application with MCP server enabled for testing'
+	
+	// Include the fatJar from aprint-gui and the MCP jar
+	classpath = files(
+		project(':aprint-gui').tasks.fatJar.outputs.files,
+		jar.archiveFile,
+		configurations.runtimeClasspath
+	)
+	
+	main = 'org.barrelorgandiscovery.gui.aprintng.APrintApplicationBootStrap'
+	
+	jvmArgs = [
+		'-Xmx2g',
+		'-server',
+		'--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+		'--add-opens', 'java.desktop/javax.swing.text=ALL-UNNAMED',
+		'--add-opens', 'java.desktop/javax.swing=ALL-UNNAMED',
+		'--add-opens', 'java.base/java.util=ALL-UNNAMED',
+		'--add-opens', 'java.base/java.io=ALL-UNNAMED',
+		'--add-opens', 'java.desktop/java.awt=ALL-UNNAMED'
+	]
+	
+	// Enable MCP extension
+	systemProperty 'aprint.mcp.enabled', 'true'
+	
+	// Allow configuration of MCP mode and port via project properties
+	if (project.hasProperty('mcp.mode')) {
+		systemProperty 'aprint.mcp.mode', project.property('mcp.mode')
+	} else {
+		systemProperty 'aprint.mcp.mode', 'http'
+	}
+	
+	if (project.hasProperty('mcp.port')) {
+		systemProperty 'aprint.mcp.port', project.property('mcp.port')
+	} else {
+		systemProperty 'aprint.mcp.port', '9090'
+	}
+	
+	// Allow mainfolder to be configured
+	if (project.hasProperty('mainfolder')) {
+		systemProperty 'mainfolder', project.property('mainfolder')
+	}
+}
+

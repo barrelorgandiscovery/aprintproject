@@ -18,6 +18,11 @@ apply plugin: 'groovy'
 
 // In this section you declare where to find the dependencies of your project
 repositories {
+    // Local Maven repository (for MCP SDK built from source)
+    mavenLocal()
+    // Use Maven Central
+    mavenCentral()
+    // Fallback to jcenter for legacy dependencies
     jcenter()
 }
 
@@ -29,6 +34,10 @@ sourcesJar {
 // In this section you declare the dependencies for your production and test code
 dependencies {
     api project(':aprint-machine-control')
+    // aprint-mcp is loaded as an extension at runtime
+    // This breaks the circular dependency - the extension mechanism loads it dynamically
+    // We include it as runtimeOnly so it's in the classpath but not needed at compile time
+    runtimeOnly project(':aprint-mcp')
     api files(fileTree(dir:"${projectDir}/libs" , include:['**/*.jar']).toList())
     
     // https://mvnrepository.com/artifact/org.anarres.vfsjfilechooser/filechooser-core
@@ -107,7 +116,7 @@ task fatJar(type: com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar, de
     exclude 'module-info.class'
     exclude "**/module-info.class"
 
-  configurations = [project.configurations.compileClasspath] 
+  configurations = [project.configurations.runtimeClasspath] 
   
   manifest {
 	  attributes 'Implementation-Title': 'APrint Studio',

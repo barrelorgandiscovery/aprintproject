@@ -253,6 +253,9 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		// loader
 		// ...
 
+		// Initialize extensions array
+		exts = new IExtension[0];
+		
 		if (extensionfolder != null) {
 
 			em = new ExtensionManager(extensionfolder, "extensionsng.properties"); //$NON-NLS-1$
@@ -265,7 +268,52 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 					logger.info("Extension " + exts[i].getName() + " loaded"); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 			}
+		} else {
+			// Load extensions from classpath even if no extension folder exists
+			logger.info("No extension folder configured, attempting to load extensions from classpath");
+			try {
+				logger.debug("Looking for extensionsng.properties in classpath");
+				// Try extensionsng.properties first (for MCP and other new extensions)
+				java.io.InputStream is = getClass().getClassLoader().getResourceAsStream("extensionsng.properties");
+				if (is != null) {
+					logger.info("Found extensionsng.properties in classpath");
+					java.util.Properties p = new java.util.Properties();
+					p.load(is);
+					is.close();
+					String extClasses = p.getProperty("extensions");
+					logger.info("Extensions property value: " + extClasses);
+					if (extClasses != null) {
+						java.util.ArrayList<IExtension> classpathExts = new java.util.ArrayList<IExtension>();
+						String[] classes = extClasses.split(",");
+						logger.info("Found " + classes.length + " extension class(es) to load");
+						for (String className : classes) {
+							className = className.trim();
+							if (className.isEmpty()) continue;
+							logger.info("Attempting to load extension class: " + className);
+							try {
+								IExtension ext = (IExtension) Class.forName(className).newInstance();
+								classpathExts.add(ext);
+								logger.info("SUCCESS: Extension '" + ext.getName() + "' loaded from classpath (class: " + className + ")");
+							} catch (ClassNotFoundException e) {
+								logger.error("FAILED: Extension class not found: " + className, e);
+							} catch (Exception e) {
+								logger.error("FAILED: Error loading extension from classpath: " + className, e);
+							}
+						}
+						exts = classpathExts.toArray(new IExtension[0]);
+						logger.info("Total extensions loaded from classpath: " + exts.length);
+					} else {
+						logger.warn("No 'extensions' property found in extensionsng.properties");
+					}
+				} else {
+					logger.warn("extensionsng.properties not found in classpath");
+				}
+			} catch (Exception e) {
+				logger.error("Error loading extensions from classpath", e);
+			}
 		}
+		
+		logger.info("Total extensions loaded: " + exts.length);
 
 		InitNGExtensionPoint[] allInitPoints = ExtensionPointProvider.getAllPoints(InitNGExtensionPoint.class, exts);
 		for (int i = 0; i < allInitPoints.length; i++) {
