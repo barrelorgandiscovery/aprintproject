@@ -9,6 +9,7 @@ import java.awt.event.ComponentListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import javax.swing.Timer;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -39,6 +40,8 @@ public class APrintNGInternalFrame extends JFrame implements IAPrintWait, Dirtya
 	private static final long serialVersionUID = 1074513965929037352L;
 
 	private static Logger logger = Logger.getLogger(APrintNGInternalFrame.class);
+
+	private Dimension defaultSize = new Dimension(800, 600);
 
 	/**
 	 * This function get the internal name of the frame for preferences by default,
@@ -87,6 +90,9 @@ public class APrintNGInternalFrame extends JFrame implements IAPrintWait, Dirtya
 
 	/** Save the users preferences */
 	protected PrefixedNamePrefsStorage prefixedNamePrefsStorage;
+	
+	/** Timer to debounce preference saving during resize */
+	private Timer savePreferencesTimer;
 
 	protected void initPrefsStorage(IPrefsStorage prefsStorage) {
 		prefixedNamePrefsStorage = new PrefixedNamePrefsStorage(getInternalFrameNameForPreferences(), prefsStorage);
@@ -112,17 +118,76 @@ public class APrintNGInternalFrame extends JFrame implements IAPrintWait, Dirtya
 			SwingUtils.center(this);
 		}
 
-		Dimension d = prefixedNamePrefsStorage.getDimension("window"); //$NON-NLS-1$
+		// Ensure frame is resizable
+		setResizable(true);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Frame set to resizable: " + getClass().getSimpleName());
+		}
+		
+		// Ensure no maximum size constraint (allow unlimited resizing)
+		setMaximumSize(null);
+		if (logger.isDebugEnabled()) {
+			logger.debug("Frame maximum size set to null (unlimited): " + getClass().getSimpleName());
+		}
+		
+
+		Dimension d = prefixedNamePrefsStorage.getDimension("windowsize"); //$NON-NLS-1$
 		if (d != null) {
-			setSize(d);
+			// Always warn if loading a dimension with width at minimum
+			if (d.width == defaultSize.width) {
+				logger.warn(String.format(
+					"⚠️ Loading saved dimension with width at minimum (%dpx)! %s: %dx%d - This may cause resize issues!",
+					defaultSize.width,
+					getClass().getSimpleName(), d.width, d.height
+				));
+				logger.warn("Consider deleting the saved dimension from preferences to reset to default size.");
+			}
+			
+			if (logger.isDebugEnabled()) {
+				logger.debug(String.format(
+					"Loaded saved dimension from preferences: %dx%d",
+					d.width, d.height
+				));
+			}
+			// Validate dimension to ensure it's not too small
+			int minWidth = defaultSize.width;
+			int minHeight = defaultSize.height;
+			if (d.width < minWidth || d.height < minHeight) {
+				// Use default size if saved dimension is too small
+				logger.warn(String.format(
+					"Saved dimension too small (%dx%d), using default %dx%d",
+					d.width, d.height, defaultSize.width, defaultSize.height
+				));
+				setSize(defaultSize);
+			} else if (d.width == minWidth) {
+				// Warn if width is exactly at minimum - this will prevent horizontal resizing
+				logger.warn(String.format(
+					"⚠️ Saved dimension width is exactly at minimum (%dpx)! Using default %dx%d instead to allow resizing.",
+					minWidth, defaultSize.width, defaultSize.height					
+				));
+				setSize(defaultSize);
+			} else {
+				setSize(d);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Set frame size to saved dimension: " + d);
+				}
+			}
 		} else {
 			// default
-			setSize(800, 600);
+			if (logger.isDebugEnabled()) {
+				logger.warn("No saved dimension found, using default 800x600");
+			}
+			setSize(defaultSize);
 		}
 
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
 		// add hooks for windows preference saving
+		// Use debounced save to avoid interfering with resize operations
+		savePreferencesTimer = new Timer(500, e -> {
+			saveDimensionPreferences();
+		});
+		savePreferencesTimer.setRepeats(false); // Only fire once after delay
 
 		addComponentListener(new ComponentListener() {
 
@@ -130,10 +195,19 @@ public class APrintNGInternalFrame extends JFrame implements IAPrintWait, Dirtya
 			}
 
 			public void componentMoved(ComponentEvent e) {
+				// Save position immediately on move
+				if (savePreferencesTimer != null) {
+					savePreferencesTimer.restart();
+				}
 			}
 
 			public void componentResized(ComponentEvent e) {
-				saveDimensionPreferences();
+				
+				// Debounce the save - only save after resize completes
+				// This prevents interference with the resize drag operation
+				if (savePreferencesTimer != null) {
+					savePreferencesTimer.restart();
+				}
 			}
 
 			public void componentShown(ComponentEvent e) {
@@ -253,7 +327,11 @@ public class APrintNGInternalFrame extends JFrame implements IAPrintWait, Dirtya
 
 	/** */
 	protected void saveDimensionPreferences() {
-		prefixedNamePrefsStorage.setDimension("window", getSize()); //$NON-NLS-1$
+
+		Dimension currentSize = getSize();
+		if (currentSize != null && currentSize.width > defaultSize.width && currentSize.height > defaultSize.height) {
+			prefixedNamePrefsStorage.setDimension("windowsize", currentSize);
+		}
 		prefixedNamePrefsStorage.setPoint("windowposition", getLocation()); //$NON-NLS-1$
 		prefixedNamePrefsStorage.save();
 	}
@@ -270,6 +348,25 @@ public class APrintNGInternalFrame extends JFrame implements IAPrintWait, Dirtya
 
 	public void toggleDirty() {
 		isWindowDirty = true;
+	}
+
+	@Override
+	public Dimension getPreferredSize() {
+		Dimension preferredSize = super.getPreferredSize();
+		if (preferredSize != null) {
+			logger.debug("getPreferredSize - Loading preferred size from super: " + preferredSize);
+			return preferredSize;
+		}
+
+		// load from preferences
+		Dimension savedSize = prefixedNamePrefsStorage.getDimension("windowsize");
+		if (savedSize != null) {
+			logger.debug("getPreferredSize - Loading saved size from preferences: " + savedSize);
+			return savedSize;
+		}
+
+		logger.debug("getPreferredSize - No saved size found, using default " + defaultSize);
+		return defaultSize;
 	}
 
 	/**
@@ -300,6 +397,12 @@ public class APrintNGInternalFrame extends JFrame implements IAPrintWait, Dirtya
 	public void dispose() {
 		logger.debug("dispose frame");
 
+		// Stop and cleanup the save timer
+		if (savePreferencesTimer != null) {
+			savePreferencesTimer.stop();
+			savePreferencesTimer = null;
+		}
+
 		removeWindowListener(wadapter);
 
 		try {
@@ -328,5 +431,26 @@ public class APrintNGInternalFrame extends JFrame implements IAPrintWait, Dirtya
 	public boolean isDisposed() {
 		return frameDisposed;
 	}
+
+	@Override
+	public void setSize(int width, int height) {
+
+		// trigger timer to save the size to the preferences
+		if (savePreferencesTimer != null) {
+			savePreferencesTimer.restart();
+		}
+		super.setSize(width, height);
+	}
+
+	@Override
+	public void setSize(Dimension d) {
+		if (d != null) {
+			setSize(d.width, d.height);
+		} else {
+			// save the size to the preferences
+			super.setSize(d);
+		}
+	}
+
 
 }

@@ -74,16 +74,23 @@ public class ListVirtualBookFramesTool {
 				}
 				
 				APrintNG aprintNG = (APrintNG) app;
-				APrintNGInternalFrame[] frames = aprintNG.listInternalFrames();
+				// Use listVirtualBookFrames() to get frames with their IDs
+				Map<String, APrintNGVirtualBookFrame> framesMap = aprintNG.listVirtualBookFrames();
 				
 				List<Map<String, Object>> frameList = new ArrayList<>();
 				
-				for (APrintNGInternalFrame frame : frames) {
-					if (frame instanceof APrintNGVirtualBookFrame) {
-						APrintNGVirtualBookFrame vbFrame = (APrintNGVirtualBookFrame) frame;
+				for (Map.Entry<String, APrintNGVirtualBookFrame> entry : framesMap.entrySet()) {
+					String frameId = entry.getKey();
+					APrintNGVirtualBookFrame vbFrame = entry.getValue();
+					
+					if (vbFrame != null) {
 						Map<String, Object> frameInfo = new HashMap<>();
 						
-						frameInfo.put("title", frame.getTitle());
+						// Include the frame ID for MCP operations
+						frameInfo.put("frameId", frameId);
+						frameInfo.put("title", vbFrame instanceof APrintNGInternalFrame 
+							? ((APrintNGInternalFrame) vbFrame).getTitle() 
+							: "Unknown");
 						frameInfo.put("hasVirtualBook", vbFrame.getVirtualBook() != null);
 						
 						if (vbFrame.getVirtualBook() != null) {

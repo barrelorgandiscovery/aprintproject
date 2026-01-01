@@ -425,5 +425,31 @@ public class VirtualBookScriptConsole extends JDialog {
 							.getString("APrintNGVirtualBookInternalFrame.1019")); //$NON-NLS-1$
 		}
 	}
+	
+	/**
+	 * Obtient le panel de console Groovy
+	 * @return Le panel de console
+	 */
+	public APrintGroovyConsolePanel getConsolePanel() {
+		return p;
+	}
+	
+	/**
+	 * Définit le contenu du script
+	 * @param scriptContent Le contenu du script
+	 */
+	public void setScriptContent(String scriptContent) {
+		if (p != null) {
+			p.setScriptContent(scriptContent);
+		}
+	}
+	
+	/**
+	 * Obtient le contenu du script
+	 * @return Le contenu du script
+	 */
+	public String getScriptContent() {
+		return p != null ? p.getScriptContent() : "";
+	}
 
 }

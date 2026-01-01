@@ -120,4 +120,92 @@ public interface APrintNGGeneralServices {
 	 * @since 2012.6.prerelease.239
 	 */
 	IPrefsStorage getPrefsStorage(String name);
+	
+	/**
+	 * Get information about the currently active window (VirtualBookFrame or Script Console).
+	 * 
+	 * @return ActiveWindowInfo with details about the active window, or null if no window is active
+	 */
+	ActiveWindowInfo getActiveWindow();
+	
+	/**
+	 * Get information about a Swing component in a window
+	 * @param windowId ID of the window (frameId or console resource URI)
+	 * @param componentPath Path to the component (e.g., "frame_1/toolbarPanel/button_0")
+	 * @return Component information or null if not found
+	 */
+	SwingComponentInfo getComponentInfo(String windowId, String componentPath);
+	
+	/**
+	 * List all components in a window
+	 * @param windowId ID of the window
+	 * @param filterType Optional filter by component type (e.g., "JButton")
+	 * @param maxDepth Maximum depth to traverse (default: 10)
+	 * @return List of component information
+	 */
+	java.util.List<SwingComponentInfo> listComponents(String windowId, String filterType, int maxDepth);
+	
+	/**
+	 * Find components matching criteria
+	 * @param windowId ID of the window
+	 * @param criteria Search criteria
+	 * @return List of matching components
+	 */
+	java.util.List<SwingComponentInfo> findComponents(String windowId, ComponentSearchCriteria criteria);
+	
+	/**
+	 * Get the value of a component
+	 * @param windowId ID of the window
+	 * @param componentPath Path to the component
+	 * @return Component value (text, selection, etc.) or null
+	 */
+	Object getComponentValue(String windowId, String componentPath);
+	
+	/**
+	 * Get a specific property of a component
+	 * @param windowId ID of the window
+	 * @param componentPath Path to the component
+	 * @param propertyName Name of the property
+	 * @return Property value or null
+	 */
+	Object getComponentProperty(String windowId, String componentPath, String propertyName);
+	
+	/**
+	 * List all open windows (VirtualBookFrames, consoles, etc.)
+	 * @return List of window information ordered by most recent usage
+	 */
+	java.util.List<ActiveWindowInfo> listAllWindows();
+	
+	/**
+	 * Activate/focus a window by its ID
+	 * @param windowId ID of the window to activate
+	 * @return true if window was found and activated, false otherwise
+	 */
+	boolean activateWindow(String windowId);
+	
+	/**
+	 * Register a window for usage tracking (to determine most recently used window)
+	 * @param window The window to register
+	 */
+	void registerWindowForTracking(java.awt.Window window);
+	
+	/**
+	 * Get the window activation history
+	 * @param limit Maximum number of events to return (0 for all)
+	 * @return List of activation events (most recent first)
+	 */
+	java.util.List<WindowActivationHistory.ActivationEvent> getWindowActivationHistory(int limit);
+	
+	/**
+	 * Get activation history for a specific window
+	 * @param windowId ID of the window
+	 * @return List of activation events for that window
+	 */
+	java.util.List<WindowActivationHistory.ActivationEvent> getWindowActivationHistoryForWindow(String windowId);
+	
+	/**
+	 * Get the current active window from history
+	 * @return Current active window event or null
+	 */
+	WindowActivationHistory.ActivationEvent getCurrentActiveWindowFromHistory();
 }

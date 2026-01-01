@@ -5,9 +5,33 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.AsyncJobsManager;
 import org.barrelorgandiscovery.gui.aprintng.APrintNGGeneralServices;
+import org.barrelorgandiscovery.mcp.tools.CreateQuickscriptTool;
+import org.barrelorgandiscovery.mcp.tools.CreateFrameSnapshotTool;
+import org.barrelorgandiscovery.mcp.tools.ExecuteConsoleScriptTool;
 import org.barrelorgandiscovery.mcp.tools.ExecuteGroovyScriptTool;
+import org.barrelorgandiscovery.mcp.tools.ExecuteScriptOnFrameTool;
+import org.barrelorgandiscovery.mcp.tools.ActivateWindowTool;
+import org.barrelorgandiscovery.mcp.tools.FindComponentsTool;
+import org.barrelorgandiscovery.mcp.tools.GetActiveWindowTool;
+import org.barrelorgandiscovery.mcp.tools.GetComponentInfoTool;
+import org.barrelorgandiscovery.mcp.tools.GetComponentPropertyTool;
+import org.barrelorgandiscovery.mcp.tools.GetComponentValueTool;
+import org.barrelorgandiscovery.mcp.tools.GetConsoleScriptTool;
+import org.barrelorgandiscovery.mcp.tools.GetInstrumentInfoTool;
+import org.barrelorgandiscovery.mcp.tools.GetScaleInfoTool;
+import org.barrelorgandiscovery.mcp.tools.GetScriptContextTool;
 import org.barrelorgandiscovery.mcp.tools.GetVirtualBookInfoTool;
+import org.barrelorgandiscovery.mcp.tools.GetWindowActivationHistoryTool;
+import org.barrelorgandiscovery.mcp.tools.ListAllWindowsTool;
+import org.barrelorgandiscovery.mcp.tools.ListComponentsTool;
+import org.barrelorgandiscovery.mcp.tools.ListInstrumentsTool;
+import org.barrelorgandiscovery.mcp.tools.ListQuickscriptsTool;
+import org.barrelorgandiscovery.mcp.tools.ListScalesTool;
 import org.barrelorgandiscovery.mcp.tools.ListVirtualBookFramesTool;
+import org.barrelorgandiscovery.mcp.tools.OpenQuickscriptEditorTool;
+import org.barrelorgandiscovery.mcp.tools.OpenScriptConsoleTool;
+import org.barrelorgandiscovery.mcp.tools.ReadQuickscriptTool;
+import org.barrelorgandiscovery.mcp.tools.SetConsoleScriptTool;
 import org.barrelorgandiscovery.mcp.tools.TriggerPlayTool;
 import org.barrelorgandiscovery.mcp.tools.TriggerStopTool;
 import org.barrelorgandiscovery.mcp.transport.HttpServerSseTransportProvider;
@@ -97,14 +121,66 @@ public class MCPServerManager {
 					
 					// Build MCP server FIRST - this sets the session factory on the transport provider
 					logger.info("Registering tools with SDK...");
-					mcpServer = McpServer.sync(transportProvider)
+					
+					// Register existing tools
+					McpServer.SyncSpecification<?> serverBuilder = McpServer.sync(transportProvider)
 						.serverInfo("aprint-mcp-server", "1.0.0")
 						.toolCall(ExecuteGroovyScriptTool.createTool(), ExecuteGroovyScriptTool.createHandler(context))
 						.toolCall(GetVirtualBookInfoTool.createTool(), GetVirtualBookInfoTool.createHandler(context))
 						.toolCall(TriggerPlayTool.createTool(), TriggerPlayTool.createHandler(context))
 						.toolCall(TriggerStopTool.createTool(), TriggerStopTool.createHandler(context))
-						.toolCall(ListVirtualBookFramesTool.createTool(), ListVirtualBookFramesTool.createHandler(context))
-						.build();
+						.toolCall(ListVirtualBookFramesTool.createTool(), ListVirtualBookFramesTool.createHandler(context));
+					
+					// Register quickscript tools (interactive with script window)
+					logger.info("Registering quickscript tools...");
+					serverBuilder
+						.toolCall(ListQuickscriptsTool.createTool(), ListQuickscriptsTool.createHandler(context))
+						.toolCall(ReadQuickscriptTool.createTool(), ReadQuickscriptTool.createHandler(context))
+						.toolCall(OpenQuickscriptEditorTool.createTool(), OpenQuickscriptEditorTool.createHandler(context))
+						.toolCall(CreateQuickscriptTool.createTool(), CreateQuickscriptTool.createHandler(context))
+						.toolCall(OpenScriptConsoleTool.createTool(), OpenScriptConsoleTool.createHandler(context));
+					
+					// Register console management tools
+					serverBuilder
+						.toolCall(SetConsoleScriptTool.createTool(), SetConsoleScriptTool.createHandler(context))
+						.toolCall(ExecuteConsoleScriptTool.createTool(), ExecuteConsoleScriptTool.createHandler(context));
+					
+					// Register direct execution tools (for AI)
+					serverBuilder
+						.toolCall(GetScriptContextTool.createTool(), GetScriptContextTool.createHandler(context))
+						.toolCall(ExecuteScriptOnFrameTool.createTool(), ExecuteScriptOnFrameTool.createHandler(context));
+					
+					// Register window and console access tools
+					serverBuilder
+						.toolCall(GetActiveWindowTool.createTool(), GetActiveWindowTool.createHandler(context))
+						.toolCall(GetConsoleScriptTool.createTool(), GetConsoleScriptTool.createHandler(context))
+						.toolCall(ListAllWindowsTool.createTool(), ListAllWindowsTool.createHandler(context))
+						.toolCall(ActivateWindowTool.createTool(), ActivateWindowTool.createHandler(context))
+						.toolCall(GetWindowActivationHistoryTool.createTool(), GetWindowActivationHistoryTool.createHandler(context));
+					
+					// Register instrument and scale management tools
+					serverBuilder
+						.toolCall(ListInstrumentsTool.createTool(), ListInstrumentsTool.createHandler(context))
+						.toolCall(GetInstrumentInfoTool.createTool(), GetInstrumentInfoTool.createHandler(context))
+						.toolCall(ListScalesTool.createTool(), ListScalesTool.createHandler(context))
+						.toolCall(GetScaleInfoTool.createTool(), GetScaleInfoTool.createHandler(context));
+					
+					// Register Swing introspection tools
+					serverBuilder
+						.toolCall(ListComponentsTool.createTool(), ListComponentsTool.createHandler(context))
+						.toolCall(GetComponentInfoTool.createTool(), GetComponentInfoTool.createHandler(context))
+						.toolCall(FindComponentsTool.createTool(), FindComponentsTool.createHandler(context))
+						.toolCall(GetComponentValueTool.createTool(), GetComponentValueTool.createHandler(context))
+						.toolCall(GetComponentPropertyTool.createTool(), GetComponentPropertyTool.createHandler(context))
+						.toolCall(CreateFrameSnapshotTool.createTool(), CreateFrameSnapshotTool.createHandler(context));
+					
+					// Register resources for console management
+					// Note: Resources are dynamic (consoles can be opened/closed)
+					// We need to register a resource template that can list all open consoles
+					logger.info("Console resources are managed dynamically via ConsoleResourceManager");
+					// Resources will be listed via the ConsoleResourceManager when requested
+					
+					mcpServer = serverBuilder.build();
 					
 					logger.info("MCP server built successfully (session factory should now be set)");
 					

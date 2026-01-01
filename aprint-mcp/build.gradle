@@ -108,12 +108,30 @@ task updateMcpSdk(type: Exec) {
 	}
 }
 
+// Check if SDK is installed in local Maven repository
+def sdkArtifactPath = new File(System.getProperty('user.home'), 
+	".m2/repository/io/modelcontextprotocol/sdk/mcp/${mcpSdkVersion}/mcp-${mcpSdkVersion}.jar")
+
 // Task to build the MCP SDK with Maven
 task buildMcpSdk {
 	group = 'mcp-sdk'
 	description = 'Builds the MCP Java SDK from source and installs to local Maven repository'
 	
 	dependsOn cloneMcpSdk
+	
+	// Skip build if SDK already exists in local Maven repository
+	onlyIf { 
+		if (sdkArtifactPath.exists()) {
+			println "MCP SDK already exists in local Maven repository at ${sdkArtifactPath}"
+			println "Skipping build. To force rebuild, run: ./gradlew :aprint-mcp:cleanMcpSdkFromMaven"
+			return false
+		}
+		return true
+	}
+	
+	doFirst {
+		println "MCP SDK not found in local Maven repository. Building from source..."
+	}
 	
 	doLast {
 		def mvnw = new File(mcpSdkDir, 'mvnw')
@@ -170,15 +188,24 @@ task cleanMcpSdk(type: Delete) {
 	delete mcpSdkDir
 }
 
-// Check if SDK is installed in local Maven repository
-def sdkArtifactPath = new File(System.getProperty('user.home'), 
-	".m2/repository/io/modelcontextprotocol/sdk/mcp/${mcpSdkVersion}/mcp-${mcpSdkVersion}.jar")
+// Task to clean the SDK from local Maven repository (forces rebuild)
+task cleanMcpSdkFromMaven(type: Delete) {
+	group = 'mcp-sdk'
+	description = 'Removes the MCP SDK from local Maven repository to force rebuild'
+	
+	delete sdkArtifactPath.parentFile
+}
 
 // Make SDK build a dependency of compilation tasks
 // This ensures SDK is built and installed to local Maven repo before compilation
 compileJava.dependsOn buildMcpSdk
 classes.dependsOn buildMcpSdk
 jar.dependsOn buildMcpSdk
+
+
+
+// ./gradlew :aprint-mcp:runAPrintWithMCP
+
 
 // Task to run APrint with MCP extension enabled for testing
 task runAPrintWithMCP(type: JavaExec, dependsOn: [':aprint-gui:fatJar', 'jar']) {
@@ -193,6 +220,9 @@ task runAPrintWithMCP(type: JavaExec, dependsOn: [':aprint-gui:fatJar', 'jar']) 
 	)
 	
 	main = 'org.barrelorgandiscovery.gui.aprintng.APrintApplicationBootStrap'
+	
+	// Enable develop mode for console logging (-d flag)
+	args = ['-d']
 	
 	jvmArgs = [
 		'-Xmx2g',
@@ -225,5 +255,12 @@ task runAPrintWithMCP(type: JavaExec, dependsOn: [':aprint-gui:fatJar', 'jar']) 
 	if (project.hasProperty('mainfolder')) {
 		systemProperty 'mainfolder', project.property('mainfolder')
 	}
+	
+	// Enable console logging
+	// The -d argument enables develop mode which activates debug logging and console output
+	// Explicitly set stdout/stderr to ensure output is printed to console
+	standardInput = System.in
+	standardOutput = System.out
+	errorOutput = System.err
 }
 

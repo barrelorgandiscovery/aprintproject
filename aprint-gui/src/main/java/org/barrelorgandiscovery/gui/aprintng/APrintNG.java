@@ -66,6 +66,7 @@ import javax.swing.KeyStroke;
 import javax.swing.LookAndFeel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.UIManager.LookAndFeelInfo;
 
@@ -208,6 +209,9 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 	// private final JDesktopPane desktopPane = new JDesktopPane();
 
 	private QuickScriptManager scriptManager = null;
+	
+	/** Timer to debounce frame size saving during resize */
+	private Timer saveFrameSizeTimer;
 
 	static boolean ENABLE_MODELEDITOR = true;
 
@@ -348,7 +352,124 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 
 		setJMenuBar(constructMenu());
 
-		setSize(aprintproperties.getAPrintFrameSize());
+		// Ensure frame is resizable (both horizontally and vertically)
+		setResizable(true);
+		
+		// Ensure no maximum size constraint (allow unlimited resizing)
+		setMaximumSize(null);
+		
+		// Set minimum size to prevent frame from collapsing
+		setMinimumSize(new Dimension(600, 400));
+
+		// Validate and set frame size
+		Dimension frameSize = aprintproperties.getAPrintFrameSize();
+		if (frameSize != null) {
+			// Always warn if loading a dimension with width at minimum
+			if (frameSize.width == 600) {
+				logger.warn(String.format(
+					"⚠️ Loading saved main window dimension with width at minimum (600px)! %dx%d - This may cause resize issues!",
+					frameSize.width, frameSize.height
+				));
+			}
+			
+			// Validate dimension to ensure it's not too small
+			int minWidth = 600;
+			int minHeight = 400;
+			if (frameSize.width < minWidth || frameSize.height < minHeight) {
+				// Use default size if saved dimension is too small
+				logger.warn(String.format(
+					"Saved main window dimension too small (%dx%d), using default 1024x768",
+					frameSize.width, frameSize.height
+				));
+				setSize(1024, 768);
+			} else if (frameSize.width == minWidth) {
+				// Warn if width is exactly at minimum - this will prevent horizontal resizing
+				logger.warn(String.format(
+					"⚠️ Saved main window dimension width is exactly at minimum (%dpx)! Using default 1024x768 instead to allow resizing.",
+					minWidth
+				));
+				setSize(1024, 768);
+			} else {
+				setSize(frameSize);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Set main window size to saved dimension: " + frameSize);
+				}
+			}
+		} else {
+			// default
+			if (logger.isDebugEnabled()) {
+				logger.debug("No saved main window dimension found, using default 1024x768");
+			}
+			setSize(1024, 768);
+		}
+
+		// Use debounced save to avoid interfering with resize operations
+		saveFrameSizeTimer = new Timer(500, e -> {
+			Dimension currentSize = getSize();
+			Dimension minSize = getMinimumSize();
+			int minWidth = minSize != null ? minSize.width : 600;
+			
+			// Only save if size is valid (not too small AND not exactly at minimum width)
+			// Saving width exactly at minimum prevents horizontal resizing
+			if (currentSize != null && currentSize.width > minWidth && currentSize.height >= 400) {
+				aprintproperties.setAPrintFrameSize(currentSize);
+				if (logger.isDebugEnabled()) {
+					logger.debug("Saved main window dimension: " + currentSize);
+				}
+			} else {
+				// Don't save invalid dimensions, but preserve the last good size
+				if (currentSize != null && currentSize.width == minWidth) {
+					logger.warn(String.format(
+						"⚠️ Skipped saving main window dimension with width at minimum (%dpx) - preserving last good size. Current: %dx%d",
+						minWidth, currentSize.width, currentSize.height
+					));
+					// Check if there's a saved dimension - if not, set a default to prevent null
+					Dimension savedDim = aprintproperties.getAPrintFrameSize();
+					if (savedDim == null || savedDim.width <= minWidth) {
+						// No valid saved dimension exists - set a reasonable default to prevent null
+						Dimension defaultSize = new Dimension(1024, 768);
+						aprintproperties.setAPrintFrameSize(defaultSize);
+						logger.warn(String.format(
+							"  -> No valid saved dimension found, setting default: %dx%d",
+							defaultSize.width, defaultSize.height
+						));
+					}
+				} else if (logger.isDebugEnabled()) {
+					logger.debug(String.format(
+						"Skipped saving main window dimension (too small): %s",
+						currentSize != null ? String.format("%dx%d", currentSize.width, currentSize.height) : "null"
+					));
+				}
+			}
+		});
+		saveFrameSizeTimer.setRepeats(false); // Only fire once after delay
+
+		// Check if main window is stuck at minimum width and expand it
+		// This must happen after all initialization is complete
+		Dimension currentSize = getSize();
+		Dimension minSize = getMinimumSize();
+		if (currentSize != null && minSize != null && currentSize.width == minSize.width) {
+			logger.warn(String.format(
+				"⚠️ Main window (APrintNG) is at minimum width (%dpx)! Expanding to 1024px to allow resizing.",
+				minSize.width
+			));
+			// Force a larger size to break out of minimum width constraint
+			setSize(1024, Math.max(currentSize.height, 768));
+			// Force validation to apply the new size
+			validate();
+			Dimension afterSize = getSize();
+			if (afterSize.width == minSize.width) {
+				logger.error(String.format(
+					"❌ Failed to expand main window from minimum width! Still at %dpx.",
+					afterSize.width
+				));
+			} else {
+				logger.warn(String.format(
+					"✅ Successfully expanded main window from %dpx to %dpx",
+					currentSize.width, afterSize.width
+				));
+			}
+		}
 
 		addComponentListener(new ComponentListener() {
 
@@ -356,11 +477,18 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 			}
 
 			public void componentMoved(ComponentEvent e) {
+				// Save position immediately on move
+				if (saveFrameSizeTimer != null) {
+					saveFrameSizeTimer.restart();
+				}
 			}
 
 			public void componentResized(ComponentEvent e) {
-				APrintNG a = (APrintNG) e.getComponent();
-				aprintproperties.setAPrintFrameSize(a.getSize());
+				// Debounce the save - only save after resize completes
+				// This prevents interference with the resize drag operation
+				if (saveFrameSizeTimer != null) {
+					saveFrameSizeTimer.restart();
+				}
 			}
 
 			public void componentShown(ComponentEvent e) {
@@ -1558,6 +1686,12 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 
 	@Override
 	public void dispose() {
+		// Stop and cleanup the save timer
+		if (saveFrameSizeTimer != null) {
+			saveFrameSizeTimer.stop();
+			saveFrameSizeTimer = null;
+		}
+		
 		if (asyncJobsManager != null) {
 			this.asyncJobsManager.dispose();
 		}
@@ -2056,12 +2190,15 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 				virtualBook, virtualBookFile, collection, instrument, aprintproperties, currentPlaySubSystemManager,
 				virtualbookviewExtensionPoint.toArray(new IExtension[0]), this, this, asyncJobsManager, scriptManager);
 
-		// TODO perfs on resizing the window
-
 		// printNGVirtualBookInternalFrame.setSize(aprintproperties
 		// .getAPrintNGVirtualBookFrameSize());
 
+		// EXISTANT : Enregistrement dans la liste générale des frames
 		addNewInternalFrame(printNGVirtualBookInternalFrame);
+		
+		// NOUVEAU : Enregistrement dans le registre MCP avec ID stable
+		String frameId = registerVirtualBookFrame(printNGVirtualBookInternalFrame);
+		printNGVirtualBookInternalFrame.setMCPFrameId(frameId);
 
 		printNGVirtualBookInternalFrame.setVisible(true);
 
@@ -2262,6 +2399,95 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 
 	// weak references to the dialogs
 	ArrayList<WeakReference<APrintNGInternalFrame>> internalFrames = new ArrayList<WeakReference<APrintNGInternalFrame>>();
+	
+	// /////////////////////////////////////////////////////////////////////////
+	// Frame Registry for MCP (VirtualBookFrame with stable IDs)
+	
+	// Registre spécifique pour les VirtualBookFrame avec IDs stables (pour MCP)
+	private final java.util.Map<String, java.lang.ref.WeakReference<APrintNGVirtualBookFrame>> virtualBookFrameRegistry = new java.util.concurrent.ConcurrentHashMap<String, java.lang.ref.WeakReference<APrintNGVirtualBookFrame>>();
+	private final java.util.concurrent.atomic.AtomicLong frameIdCounter = new java.util.concurrent.atomic.AtomicLong(0);
+	
+	// /////////////////////////////////////////////////////////////////////////
+	// Window Usage Tracker (for most recently used window)
+	
+	private final WindowUsageTracker windowUsageTracker = new WindowUsageTracker();
+	
+	// /////////////////////////////////////////////////////////////////////////
+	// Window Activation History (for MCP to track user activity)
+	
+	private final WindowActivationHistory windowActivationHistory = new WindowActivationHistory();
+	
+	/**
+	 * Enregistre une VirtualBookFrame dans le registre MCP et retourne son ID unique
+	 * Cette méthode est appelée en complément de addNewInternalFrame()
+	 * 
+	 * @param frame La frame à enregistrer
+	 * @return L'ID unique de la frame
+	 */
+	public String registerVirtualBookFrame(APrintNGVirtualBookFrame frame) {
+		String frameId = "frame_" + frameIdCounter.incrementAndGet() + "_" + System.currentTimeMillis();
+		virtualBookFrameRegistry.put(frameId, new java.lang.ref.WeakReference<APrintNGVirtualBookFrame>(frame));
+		logger.debug("Registered VirtualBookFrame with MCP ID: " + frameId);
+		return frameId;
+	}
+	
+	/**
+	 * Retire une frame du registre MCP (appelé lors de la fermeture)
+	 * 
+	 * @param frameId L'ID de la frame à retirer
+	 */
+	public void unregisterVirtualBookFrame(String frameId) {
+		virtualBookFrameRegistry.remove(frameId);
+		logger.debug("Unregistered VirtualBookFrame with MCP ID: " + frameId);
+	}
+	
+	/**
+	 * Récupère une VirtualBookFrame par son ID MCP
+	 * 
+	 * @param frameId L'ID de la frame
+	 * @return La frame ou null si elle n'existe pas ou est fermée
+	 */
+	public APrintNGVirtualBookFrame getVirtualBookFrame(String frameId) {
+		java.lang.ref.WeakReference<APrintNGVirtualBookFrame> ref = virtualBookFrameRegistry.get(frameId);
+		if (ref == null) {
+			return null;
+		}
+		APrintNGVirtualBookFrame frame = ref.get();
+		if (frame == null || (frame instanceof APrintNGInternalFrame && ((APrintNGInternalFrame) frame).isDisposed())) {
+			// Frame a été garbage collectée ou disposée, retirer du registre
+			virtualBookFrameRegistry.remove(frameId);
+			return null;
+		}
+		return frame;
+	}
+	
+	/**
+	 * Liste toutes les VirtualBookFrame actuellement ouvertes avec leurs IDs MCP
+	 * Utilise le système existant listInternalFrames() et filtre pour les VirtualBookFrame
+	 * 
+	 * @return Map de frameId -> APrintNGVirtualBookFrame
+	 */
+	public java.util.Map<String, APrintNGVirtualBookFrame> listVirtualBookFrames() {
+		java.util.Map<String, APrintNGVirtualBookFrame> result = new java.util.HashMap<String, APrintNGVirtualBookFrame>();
+		java.util.List<String> toRemove = new java.util.ArrayList<String>();
+		
+		// Nettoyer le registre des références mortes
+		for (java.util.Map.Entry<String, java.lang.ref.WeakReference<APrintNGVirtualBookFrame>> entry : virtualBookFrameRegistry.entrySet()) {
+			APrintNGVirtualBookFrame frame = entry.getValue().get();
+			if (frame == null || (frame instanceof APrintNGInternalFrame && ((APrintNGInternalFrame) frame).isDisposed())) {
+				toRemove.add(entry.getKey());
+			} else {
+				result.put(entry.getKey(), frame);
+			}
+		}
+		
+		// Nettoyer les références mortes
+		for (String frameId : toRemove) {
+			virtualBookFrameRegistry.remove(frameId);
+		}
+		
+		return result;
+	}
 
 	private void cleanUp() {
 		int cpt = 0;
@@ -2284,6 +2510,10 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 			return;
 
 		internalFrames.add(new WeakReference<APrintNGInternalFrame>(internalFrame));
+		
+		// Enregistrer automatiquement la fenêtre pour le tracking MCP
+		windowUsageTracker.registerWindow(internalFrame);
+		windowUsageTracker.markWindowUsed(internalFrame);
 	}
 
 	public APrintNGInternalFrame[] listInternalFrames() {
@@ -2302,6 +2532,655 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		return ret.toArray(new APrintNGInternalFrame[0]);
 	}
 
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.barrelorgandiscovery.gui.aprintng.APrintNGGeneralServices#
+	 * getActiveWindow()
+	 */
+	@Override
+	public ActiveWindowInfo getActiveWindow() {
+		// First, try to get the most recently used window from our tracker
+		java.awt.Window activeWindow = windowUsageTracker.getMostRecentlyUsedWindow();
+		
+		// Fallback: try focused window
+		if (activeWindow == null) {
+			java.awt.Component focusedComponent = java.awt.KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusOwner();
+			if (focusedComponent != null) {
+				activeWindow = javax.swing.SwingUtilities.getWindowAncestor(focusedComponent);
+			}
+		}
+		
+		if (activeWindow == null) {
+			activeWindow = java.awt.KeyboardFocusManager.getCurrentKeyboardFocusManager().getFocusedWindow();
+		}
+		
+		if (activeWindow == null) {
+			// Try to get the active window from all windows
+			java.awt.Window[] windows = java.awt.Window.getWindows();
+			for (java.awt.Window w : windows) {
+				if (w.isActive() && w.isVisible()) {
+					activeWindow = w;
+					break;
+				}
+			}
+		}
+		
+		if (activeWindow == null) {
+			return null;
+		}
+		
+		// Check if it's a VirtualBookFrame (APrintNGInternalFrame extends JFrame which extends Window)
+		Map<String, APrintNGVirtualBookFrame> frames = listVirtualBookFrames();
+		
+		ActiveWindowInfo result = null;
+		
+		// First, check VirtualBookFrames
+		for (Map.Entry<String, APrintNGVirtualBookFrame> entry : frames.entrySet()) {
+			APrintNGVirtualBookFrame frame = entry.getValue();
+			// Check if the active window is the frame itself (APrintNGInternalFrame is a Window)
+			if (frame instanceof APrintNGInternalFrame && frame == activeWindow) {
+				String title = ((APrintNGInternalFrame) frame).getTitle();
+				result = new ActiveWindowInfo(
+					ActiveWindowInfo.WindowType.VIRTUAL_BOOK_FRAME,
+					entry.getKey(),
+					title,
+					entry.getKey(),
+					null
+				);
+				break;
+			}
+			
+			// Check if it's a script console associated with this frame
+			if (frame instanceof APrintNGVirtualBookInternalFrame) {
+				APrintNGVirtualBookInternalFrame vbf = (APrintNGVirtualBookInternalFrame) frame;
+				java.util.List<VirtualBookScriptConsole> consoles = vbf.listOpenScriptConsoles();
+				for (VirtualBookScriptConsole console : consoles) {
+					if (console == activeWindow) {
+						// Find the resource URI for this console (if tracked by MCP)
+						// For now, we'll generate a simple identifier
+						String resourceUri = "aprint://console/" + entry.getKey() + "_" + console.getTitle();
+						result = new ActiveWindowInfo(
+							ActiveWindowInfo.WindowType.SCRIPT_CONSOLE,
+							resourceUri,
+							console.getTitle(),
+							entry.getKey(),
+							resourceUri
+						);
+						break;
+					}
+				}
+				if (result != null) {
+					break;
+				}
+			}
+		}
+		
+		// Check if it's a VirtualBookScriptConsole (direct check)
+		if (result == null && activeWindow instanceof VirtualBookScriptConsole) {
+			VirtualBookScriptConsole console = (VirtualBookScriptConsole) activeWindow;
+			// Try to find which frame owns this console
+			for (Map.Entry<String, APrintNGVirtualBookFrame> entry : frames.entrySet()) {
+				if (entry.getValue() instanceof APrintNGVirtualBookInternalFrame) {
+					APrintNGVirtualBookInternalFrame vbf = (APrintNGVirtualBookInternalFrame) entry.getValue();
+					if (vbf.listOpenScriptConsoles().contains(console)) {
+						String resourceUri = "aprint://console/" + entry.getKey() + "_" + console.getTitle();
+						result = new ActiveWindowInfo(
+							ActiveWindowInfo.WindowType.SCRIPT_CONSOLE,
+							resourceUri,
+							console.getTitle(),
+							entry.getKey(),
+							resourceUri
+						);
+						break;
+					}
+				}
+			}
+		}
+		
+		// Check if it's any other APrintNGInternalFrame (Model Editor, Instrument Editor, etc.)
+		if (result == null && activeWindow instanceof APrintNGInternalFrame) {
+			APrintNGInternalFrame frame = (APrintNGInternalFrame) activeWindow;
+			String title = frame.getTitle();
+			String windowId = generateWindowId(frame);
+			
+			// Determine window type based on class
+			ActiveWindowInfo.WindowType windowType = ActiveWindowInfo.WindowType.UNKNOWN;
+			if (frame instanceof APrintNGModelFrame) {
+				windowType = ActiveWindowInfo.WindowType.UNKNOWN; // Could add MODEL_EDITOR type later
+			} else if (frame.getClass().getName().contains("Repository")) {
+				windowType = ActiveWindowInfo.WindowType.UNKNOWN; // Could add INSTRUMENT_EDITOR type later
+			}
+			
+			result = new ActiveWindowInfo(
+				windowType,
+				windowId,
+				title != null ? title : frame.getClass().getSimpleName(),
+				null,
+				null
+			);
+		}
+		
+		// Unknown window type (fallback)
+		if (result == null) {
+			String title = activeWindow instanceof javax.swing.JFrame ? 
+				((javax.swing.JFrame) activeWindow).getTitle() : 
+				(activeWindow instanceof javax.swing.JDialog ? 
+					((javax.swing.JDialog) activeWindow).getTitle() : 
+					activeWindow.toString());
+			
+			String windowId = activeWindow.getName();
+			if (windowId == null || windowId.isEmpty()) {
+				windowId = activeWindow.getClass().getSimpleName() + "_" + 
+					Integer.toHexString(System.identityHashCode(activeWindow));
+			}
+			
+			result = new ActiveWindowInfo(
+				ActiveWindowInfo.WindowType.UNKNOWN,
+				windowId,
+				title,
+				null,
+				null
+			);
+		}
+		
+		// Record activation in history
+		if (result != null) {
+			String windowTypeStr = result.getType().name();
+			windowActivationHistory.recordActivation(
+				result.getWindowId(),
+				windowTypeStr,
+				result.getTitle(),
+				result.getFrameId(),
+				result.getResourceUri()
+			);
+		}
+		
+		return result;
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.barrelorgandiscovery.gui.aprintng.APrintNGGeneralServices#
+	 * getComponentInfo()
+	 */
+	@Override
+	public SwingComponentInfo getComponentInfo(String windowId, String componentPath) {
+		java.awt.Component window = getWindowById(windowId);
+		if (window == null) {
+			return null;
+		}
+		
+		final java.awt.Component[] componentRef = new java.awt.Component[1];
+		final Exception[] exceptionRef = new Exception[1];
+		
+		try {
+			javax.swing.SwingUtilities.invokeAndWait(() -> {
+				try {
+					componentRef[0] = SwingIntrospectionHelper.getComponentByPath(window, componentPath);
+				} catch (Exception e) {
+					exceptionRef[0] = e;
+				}
+			});
+		} catch (Exception e) {
+			logger.error("Error getting component info", e);
+			return null;
+		}
+		
+		if (componentRef[0] == null) {
+			return null;
+		}
+		
+		return SwingIntrospectionHelper.componentToInfo(componentRef[0], 
+			componentPath.substring(componentPath.lastIndexOf('/') + 1),
+			componentPath, null);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.barrelorgandiscovery.gui.aprintng.APrintNGGeneralServices#
+	 * listComponents()
+	 */
+	@Override
+	public java.util.List<SwingComponentInfo> listComponents(String windowId, String filterType, int maxDepth) {
+		java.awt.Component window = getWindowById(windowId);
+		if (window == null) {
+			return new java.util.ArrayList<>();
+		}
+		
+		final java.util.List<SwingComponentInfo>[] resultRef = new java.util.List[1];
+		final Exception[] exceptionRef = new Exception[1];
+		
+		try {
+			javax.swing.SwingUtilities.invokeAndWait(() -> {
+				try {
+					String rootPath = windowId;
+					resultRef[0] = SwingIntrospectionHelper.traverseComponents(window, rootPath, filterType, maxDepth);
+				} catch (Exception e) {
+					exceptionRef[0] = e;
+				}
+			});
+		} catch (Exception e) {
+			logger.error("Error listing components", e);
+			return new java.util.ArrayList<>();
+		}
+		
+		return resultRef[0] != null ? resultRef[0] : new java.util.ArrayList<>();
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.barrelorgandiscovery.gui.aprintng.APrintNGGeneralServices#
+	 * findComponents()
+	 */
+	@Override
+	public java.util.List<SwingComponentInfo> findComponents(String windowId, ComponentSearchCriteria criteria) {
+		java.awt.Component window = getWindowById(windowId);
+		if (window == null) {
+			return new java.util.ArrayList<>();
+		}
+		
+		final java.util.List<SwingComponentInfo>[] resultRef = new java.util.List[1];
+		final Exception[] exceptionRef = new Exception[1];
+		
+		try {
+			javax.swing.SwingUtilities.invokeAndWait(() -> {
+				try {
+					String rootPath = windowId;
+					resultRef[0] = SwingIntrospectionHelper.findComponents(window, rootPath, criteria);
+				} catch (Exception e) {
+					exceptionRef[0] = e;
+				}
+			});
+		} catch (Exception e) {
+			logger.error("Error finding components", e);
+			return new java.util.ArrayList<>();
+		}
+		
+		return resultRef[0] != null ? resultRef[0] : new java.util.ArrayList<>();
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.barrelorgandiscovery.gui.aprintng.APrintNGGeneralServices#
+	 * getComponentValue()
+	 */
+	@Override
+	public Object getComponentValue(String windowId, String componentPath) {
+		java.awt.Component window = getWindowById(windowId);
+		if (window == null) {
+			logger.warn("Window not found for windowId: " + windowId);
+			return null;
+		}
+		
+		final java.awt.Component[] componentRef = new java.awt.Component[1];
+		final Object[] valueRef = new Object[1];
+		final Exception[] exceptionRef = new Exception[1];
+		
+		try {
+			javax.swing.SwingUtilities.invokeAndWait(() -> {
+				try {
+					componentRef[0] = SwingIntrospectionHelper.getComponentByPath(window, componentPath);
+					if (componentRef[0] == null) {
+						logger.warn("Component not found: windowId=" + windowId + ", componentPath=" + componentPath);
+						return;
+					}
+					valueRef[0] = SwingIntrospectionHelper.getComponentValue(componentRef[0]);
+					if (valueRef[0] == null) {
+						logger.debug("Component value is null: windowId=" + windowId + ", componentPath=" + componentPath + 
+									", componentType=" + componentRef[0].getClass().getName());
+					}
+				} catch (Exception e) {
+					exceptionRef[0] = e;
+				}
+			});
+		} catch (Exception e) {
+			logger.error("Error getting component value", e);
+			return null;
+		}
+		
+		if (exceptionRef[0] != null) {
+			logger.error("Exception in getComponentValue", exceptionRef[0]);
+		}
+		
+		return valueRef[0];
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.barrelorgandiscovery.gui.aprintng.APrintNGGeneralServices#
+	 * getComponentProperty()
+	 */
+	@Override
+	public Object getComponentProperty(String windowId, String componentPath, String propertyName) {
+		java.awt.Component window = getWindowById(windowId);
+		if (window == null) {
+			logger.warn("Window not found for windowId: " + windowId);
+			return null;
+		}
+		
+		final java.awt.Component[] componentRef = new java.awt.Component[1];
+		final Object[] propertyRef = new Object[1];
+		final Exception[] exceptionRef = new Exception[1];
+		
+		try {
+			javax.swing.SwingUtilities.invokeAndWait(() -> {
+				try {
+					componentRef[0] = SwingIntrospectionHelper.getComponentByPath(window, componentPath);
+					if (componentRef[0] == null) {
+						logger.warn("Component not found: windowId=" + windowId + ", componentPath=" + componentPath);
+						return;
+					}
+					propertyRef[0] = SwingIntrospectionHelper.getComponentProperty(componentRef[0], propertyName);
+					if (propertyRef[0] == null) {
+						logger.debug("Component property is null: windowId=" + windowId + ", componentPath=" + componentPath + 
+									", propertyName=" + propertyName + ", componentType=" + componentRef[0].getClass().getName());
+					}
+				} catch (Exception e) {
+					exceptionRef[0] = e;
+				}
+			});
+		} catch (Exception e) {
+			logger.error("Error getting component property", e);
+			return null;
+		}
+		
+		if (exceptionRef[0] != null) {
+			logger.error("Exception in getComponentProperty", exceptionRef[0]);
+		}
+		
+		return propertyRef[0];
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.barrelorgandiscovery.gui.aprintng.APrintNGGeneralServices#
+	 * listAllWindows()
+	 */
+	@Override
+	public java.util.List<ActiveWindowInfo> listAllWindows() {
+		java.util.List<ActiveWindowInfo> result = new java.util.ArrayList<>();
+		java.util.Set<String> addedWindowIds = new java.util.HashSet<>();
+		
+		// Get all VirtualBookFrames (with their IDs)
+		Map<String, APrintNGVirtualBookFrame> frames = listVirtualBookFrames();
+		
+		// Add VirtualBookFrames
+		for (Map.Entry<String, APrintNGVirtualBookFrame> entry : frames.entrySet()) {
+			APrintNGVirtualBookFrame frame = entry.getValue();
+			if (frame instanceof APrintNGInternalFrame && ((APrintNGInternalFrame) frame).isVisible()) {
+				String title = ((APrintNGInternalFrame) frame).getTitle();
+				result.add(new ActiveWindowInfo(
+					ActiveWindowInfo.WindowType.VIRTUAL_BOOK_FRAME,
+					entry.getKey(),
+					title,
+					entry.getKey(),
+					null
+				));
+				addedWindowIds.add(entry.getKey());
+			}
+			
+			// Add script consoles for this frame
+			if (frame instanceof APrintNGVirtualBookInternalFrame) {
+				APrintNGVirtualBookInternalFrame vbf = (APrintNGVirtualBookInternalFrame) frame;
+				java.util.List<VirtualBookScriptConsole> consoles = vbf.listOpenScriptConsoles();
+				for (VirtualBookScriptConsole console : consoles) {
+					if (console.isVisible()) {
+						String resourceUri = "aprint://console/" + entry.getKey() + "_" + console.getTitle();
+						String consoleId = resourceUri;
+						if (!addedWindowIds.contains(consoleId)) {
+							result.add(new ActiveWindowInfo(
+								ActiveWindowInfo.WindowType.SCRIPT_CONSOLE,
+								consoleId,
+								console.getTitle(),
+								entry.getKey(),
+								resourceUri
+							));
+							addedWindowIds.add(consoleId);
+						}
+					}
+				}
+			}
+		}
+		
+		// Add all other internal frames (Model Editor, Instrument Editor, etc.)
+		APrintNGInternalFrame[] allInternalFrames = listInternalFrames();
+		for (APrintNGInternalFrame frame : allInternalFrames) {
+			if (frame != null && frame.isVisible() && !frame.isDisposed()) {
+				// Skip if already added as VirtualBookFrame
+				boolean alreadyAdded = false;
+				for (APrintNGVirtualBookFrame vbf : frames.values()) {
+					if (vbf == frame) {
+						alreadyAdded = true;
+						break;
+					}
+				}
+				
+				if (!alreadyAdded) {
+					String title = frame.getTitle();
+					String windowId = generateWindowId(frame);
+					
+					if (!addedWindowIds.contains(windowId)) {
+						// Determine window type
+						ActiveWindowInfo.WindowType windowType = ActiveWindowInfo.WindowType.UNKNOWN;
+						if (frame instanceof APrintNGModelFrame) {
+							windowType = ActiveWindowInfo.WindowType.UNKNOWN; // Could add MODEL_EDITOR type later
+						} else if (frame.getClass().getName().contains("Repository")) {
+							windowType = ActiveWindowInfo.WindowType.UNKNOWN; // Could add INSTRUMENT_EDITOR type later
+						}
+						
+						result.add(new ActiveWindowInfo(
+							windowType,
+							windowId,
+							title != null ? title : frame.getClass().getSimpleName(),
+							null,
+							null
+						));
+						addedWindowIds.add(windowId);
+					}
+				}
+			}
+		}
+		
+		// Add main window if visible
+		if (this.isVisible()) {
+			result.add(new ActiveWindowInfo(
+				ActiveWindowInfo.WindowType.UNKNOWN,
+				"main",
+				this.getTitle(),
+				null,
+				null
+			));
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Generate a stable window ID for an internal frame
+	 */
+	private String generateWindowId(APrintNGInternalFrame frame) {
+		// Try to use frame name if available
+		String name = frame.getName();
+		if (name != null && !name.isEmpty()) {
+			return name;
+		}
+		
+		// Use class name and hash code for stability
+		String className = frame.getClass().getSimpleName();
+		int hashCode = System.identityHashCode(frame);
+		return className + "_" + Integer.toHexString(hashCode);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.barrelorgandiscovery.gui.aprintng.APrintNGGeneralServices#
+	 * activateWindow()
+	 */
+	@Override
+	public boolean activateWindow(String windowId) {
+		if (windowId == null || windowId.isEmpty()) {
+			return false;
+		}
+		
+		final boolean[] success = new boolean[1];
+		
+		try {
+			javax.swing.SwingUtilities.invokeAndWait(() -> {
+				// Try to get as VirtualBookFrame
+				Map<String, APrintNGVirtualBookFrame> frames = listVirtualBookFrames();
+				APrintNGVirtualBookFrame frame = frames.get(windowId);
+				
+				if (frame != null && frame instanceof java.awt.Window) {
+					java.awt.Window window = (java.awt.Window) frame;
+					window.toFront();
+					window.requestFocus();
+					windowUsageTracker.markWindowUsed(window);
+					success[0] = true;
+					return;
+				}
+				
+				// Try main window
+				if (windowId.equals("main") || windowId.equals("aprintng")) {
+					this.toFront();
+					this.requestFocus();
+					windowUsageTracker.markWindowUsed(this);
+					success[0] = true;
+					return;
+				}
+				
+				// Try to find in all windows
+				java.awt.Window[] allWindows = java.awt.Window.getWindows();
+				for (java.awt.Window w : allWindows) {
+					if (w.isVisible()) {
+						// Check if it matches by title or name
+						if (w instanceof javax.swing.JFrame) {
+							String title = ((javax.swing.JFrame) w).getTitle();
+							if (windowId.equals(title) || windowId.equals(w.getName())) {
+								w.toFront();
+								w.requestFocus();
+								windowUsageTracker.markWindowUsed(w);
+								success[0] = true;
+								return;
+							}
+						}
+					}
+				}
+				
+				success[0] = false;
+			});
+		} catch (Exception e) {
+			logger.error("Error activating window: " + windowId, e);
+			return false;
+		}
+		
+		return success[0];
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.barrelorgandiscovery.gui.aprintng.APrintNGGeneralServices#
+	 * registerWindowForTracking()
+	 */
+	@Override
+	public void registerWindowForTracking(java.awt.Window window) {
+		if (window != null) {
+			windowUsageTracker.registerWindow(window);
+		}
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.barrelorgandiscovery.gui.aprintng.APrintNGGeneralServices#
+	 * getWindowActivationHistory()
+	 */
+	@Override
+	public java.util.List<WindowActivationHistory.ActivationEvent> getWindowActivationHistory(int limit) {
+		return windowActivationHistory.getHistory(limit);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.barrelorgandiscovery.gui.aprintng.APrintNGGeneralServices#
+	 * getWindowActivationHistoryForWindow()
+	 */
+	@Override
+	public java.util.List<WindowActivationHistory.ActivationEvent> getWindowActivationHistoryForWindow(String windowId) {
+		return windowActivationHistory.getHistoryForWindow(windowId);
+	}
+	
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see org.barrelorgandiscovery.gui.aprintng.APrintNGGeneralServices#
+	 * getCurrentActiveWindowFromHistory()
+	 */
+	@Override
+	public WindowActivationHistory.ActivationEvent getCurrentActiveWindowFromHistory() {
+		return windowActivationHistory.getCurrentActiveWindow();
+	}
+	
+	/**
+	 * Helper method to get a window by its ID
+	 */
+	private java.awt.Component getWindowById(String windowId) {
+		if (windowId == null || windowId.isEmpty()) {
+			// Get active window
+			ActiveWindowInfo activeWindow = getActiveWindow();
+			if (activeWindow == null) {
+				return null;
+			}
+			windowId = activeWindow.getWindowId();
+		}
+		
+		// Try to get as VirtualBookFrame
+		Map<String, APrintNGVirtualBookFrame> frames = listVirtualBookFrames();
+		APrintNGVirtualBookFrame frame = frames.get(windowId);
+		if (frame != null && frame instanceof java.awt.Component) {
+			return (java.awt.Component) frame;
+		}
+		
+		// Try to get as console (check if it's a console resource URI)
+		if (windowId.startsWith("aprint://console/")) {
+			// This would need to be handled via the console resource manager
+			// For now, return null - this will be handled in MCP layer
+			return null;
+		}
+		
+		// Try to get as this window itself
+		if (windowId.equals("main") || windowId.equals("aprintng")) {
+			return this;
+		}
+		
+		// Try to find in all InternalFrames (Model Editor, Instrument Editor, etc.)
+		APrintNGInternalFrame[] allInternalFrames = listInternalFrames();
+		for (APrintNGInternalFrame internalFrame : allInternalFrames) {
+			if (internalFrame != null && !internalFrame.isDisposed()) {
+				String frameWindowId = generateWindowId(internalFrame);
+				if (windowId.equals(frameWindowId)) {
+					return internalFrame;
+				}
+				// Also check by name
+				String frameName = internalFrame.getName();
+				if (frameName != null && frameName.equals(windowId)) {
+					return internalFrame;
+				}
+			}
+		}
+		
+		return null;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 *
