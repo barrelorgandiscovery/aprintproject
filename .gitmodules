@@ -1,0 +1,3 @@
+[submodule "libs/java-sdk"]
+	path = libs/java-sdk
+	url = https://github.com/modelcontextprotocol/java-sdk.git
