@@ -185,7 +185,13 @@ public class PrefixedNamePrefsStorage implements IPrefsStorage {
 	 * org.barrelorgandiscovery.prefs.IPrefsStorage#getDimension(java.lang.String )
 	 */
 	public Dimension getDimension(String propertyName) {
-		return ps.getDimension(constructKey(propertyName));
+		Dimension d = ps.getDimension(constructKey(propertyName)); 
+		if (d == null) {
+			logger.info("No dimension found for property: " + propertyName);
+			return null;
+		}
+		logger.info("Dimension found for property: " + propertyName + " - " + d);
+		return d;
 	}
 
 	/*

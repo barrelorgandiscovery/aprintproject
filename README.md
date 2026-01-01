@@ -37,9 +37,25 @@ gradlew createMacOsAndLinuxBundle
 
 #### Running the project from command line
 
+**Important**: When running directly with `java`, you must include the `--add-opens` flags to avoid module access errors:
 
 ```
-java -Xmx2g -server -Dmainfolder="C:\Users\use\Documents\.." -cp aprint.jar org.barrelorgandiscovery.gui.aprintng.APrintApplicationBootStrap
+java -Xmx2g -server \
+  --add-opens java.base/java.lang=ALL-UNNAMED \
+  --add-opens java.base/java.lang.reflect=ALL-UNNAMED \
+  --add-opens java.base/java.util=ALL-UNNAMED \
+  --add-opens java.base/java.io=ALL-UNNAMED \
+  --add-opens java.desktop/java.awt=ALL-UNNAMED \
+  --add-opens java.desktop/javax.swing=ALL-UNNAMED \
+  --add-opens java.desktop/javax.swing.text=ALL-UNNAMED \
+  --add-opens jdk.proxy1/jdk.proxy1=ALL-UNNAMED \
+  -Dmainfolder="C:\Users\use\Documents\.." \
+  -cp aprint.jar org.barrelorgandiscovery.gui.aprintng.APrintApplicationBootStrap
+```
+
+**Recommended**: Use Gradle tasks instead, which automatically include all required JVM arguments:
+```
+./gradlew runAPrint
 ```
 
 see documentation for more information about the command line parameters

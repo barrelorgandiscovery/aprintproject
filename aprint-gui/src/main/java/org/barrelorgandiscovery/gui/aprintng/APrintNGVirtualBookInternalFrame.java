@@ -6,6 +6,7 @@ import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Frame;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
@@ -156,6 +157,7 @@ import org.barrelorgandiscovery.playsubsystem.PlayControl;
 import org.barrelorgandiscovery.playsubsystem.PlaySubSystem;
 import org.barrelorgandiscovery.playsubsystem.prepared.IPreparedCapableSubSystem;
 import org.barrelorgandiscovery.playsubsystem.prepared.IPreparedPlaying;
+import org.barrelorgandiscovery.prefs.DummyPrefsStorage;
 import org.barrelorgandiscovery.prefs.PrefixedNamePrefsStorage;
 import org.barrelorgandiscovery.repository.Repository2;
 import org.barrelorgandiscovery.repository.Repository2Collection;
@@ -369,7 +371,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame impl
 	 * tool window manager
 	 */
 	private MyDoggyToolWindowManager toolWindowManager;
-	
+
 	/**
 	 * MCP Frame ID for tracking in the MCP registry
 	 */
@@ -391,6 +393,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame impl
 				+ " " //$NON-NLS-1$
 				+ Messages.getString("APrintNGVirtualBookInternalFrame.2000")//$NON-NLS-1$
 				+ instrument.getName(), true, true, true, true);
+
 		assert vb != null;
 
 		this.waitininterface = this;
@@ -1072,6 +1075,11 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame impl
 		MyDoggyToolWindowManager myDoggyToolWindowManager = new MyDoggyToolWindowManager();
 		this.toolWindowManager = myDoggyToolWindowManager;
 
+		// Add tool window manager to pianorollpanel BEFORE configuring tool windows
+		// This ensures the manager has a proper container for size calculations
+		// The manager needs to be in the component hierarchy for proper initialization
+		pianorollpanel.add(toolWindowManager, BorderLayout.CENTER);
+
 		// issue window
 		ToolWindow tw = toolWindowManager.registerToolWindow(
 				Messages.getString("APrintNGVirtualBookInternalFrame.2100"), // Id //$NON-NLS-1$
@@ -1083,11 +1091,8 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame impl
 		ToolWindowTools.defineProperties(tw);
 
 		logger.debug("register marker tool window");
-		// change width - use flexible sizing instead of fixed 400px to allow frame resizing
-		DockedTypeDescriptor desc = (DockedTypeDescriptor) tw.getTypeDescriptor(ToolWindowType.DOCKED);
 		// Don't set a fixed dock length - let it be flexible to allow frame resizing
 		// The tool window will size based on its content and available space
-		desc.setDockLength(400); // REMOVED: This was preventing frame from resizing smaller than 400px + tool window width
 
 		tw = toolWindowManager.registerToolWindow(Messages.getString("APrintNGVirtualBookInternalFrame.3101"), //$NON-NLS-1$
 				Messages.getString("APrintNGVirtualBookInternalFrame.3102"), //$NON-NLS-1$
@@ -1105,9 +1110,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame impl
 		tw = toolWindowManager.registerToolWindow("Propriétés du carton", "Propriétés du carton", null,
 				bookPropertiesPanel, ToolWindowAnchor.LEFT);
 
-		// change width
-		desc = (DockedTypeDescriptor) tw.getTypeDescriptor(ToolWindowType.DOCKED);
-		desc.setDockLength(480);
+		ToolWindowTools.defineProperties(tw);
 
 		logger.debug("add extensions register tool windows");
 		VirtualBookFrameToolRegister[] allVBTool = ExtensionPointProvider
@@ -1125,17 +1128,46 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame impl
 			}
 		}
 
-		// Made all tools available
+		// Add the main content (pianoroll) to the tool window manager
+		// This must be done before adding the manager to the container
+		toolWindowManager.getContentManager().addContent(Messages.getString("APrintNGVirtualBookInternalFrame.2102"), //$NON-NLS-1$
+				null, null, pianoroll);
+
+		// Made all tools available and configure them for flexible resizing
+		// This must be done AFTER the manager is added to the container AND after
+		// extensions register their tool windows
+		// to override any fixed dock lengths they may have set
+		// The manager needs to be in the component hierarchy for proper size
+		// calculations
 		for (ToolWindow window : toolWindowManager.getToolWindows()) {
 			window.setAvailable(true);
 			window.setAutoHide(false);
 			window.setLockedOnAnchor(true);
+
+			// Configure tool windows to allow flexible resizing
+			// This prevents the frame from collapsing when dragging from the right
+			// Extensions may set fixed dock lengths (e.g., 550px), which causes
+			// the frame to collapse to 150px when resizing from the right side
+			DockedTypeDescriptor dockedDesc = (DockedTypeDescriptor) window.getTypeDescriptor(ToolWindowType.DOCKED);
+			if (dockedDesc != null) {
+				// Override any fixed dock lengths set by extensions
+				// Extensions often set large fixed dock lengths (e.g., 550px) which prevent
+				// proper frame resizing. We override this to allow flexible sizing.
+				// Set a reasonable dock length that allows the tool window to shrink
+				// but still be usable. This prevents the frame from collapsing to 150px.
+				int currentDockLength = dockedDesc.getDockLength();
+				if (currentDockLength > 300) {
+					// If extension set a large dock length, override it with a more reasonable one
+					// that still allows the tool window to be functional but doesn't prevent
+					// resizing
+					dockedDesc.setDockLength(300);
+					if (logger.isDebugEnabled()) {
+						logger.debug("Overriding tool window dock length from " + currentDockLength + " to 300 for "
+								+ window.getId());
+					}
+				}
+			}
 		}
-
-		toolWindowManager.getContentManager().addContent(Messages.getString("APrintNGVirtualBookInternalFrame.2102"), //$NON-NLS-1$
-				null, null, pianoroll);
-
-		pianorollpanel.add(toolWindowManager, BorderLayout.CENTER);
 
 		// boutons de visualisation du pianoroll ...
 
@@ -1302,19 +1334,6 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame impl
 
 		groovyButton.setToolTipText("Open Script Console");
 
-		// JButton modify = new JButton("Modify");
-		// modify.addActionListener(new ActionListener() {
-		// public void actionPerformed(ActionEvent e) {
-		//
-		//
-		//
-		// pianoroll.setCurrentTool(tool);
-		//
-		// }
-		// });
-		//
-		// editingToolbar.add(modify);
-
 		editingToolbar.add(createQuickScriptAccess());
 
 		toolbarPanel.add(editingToolbar);
@@ -1328,60 +1347,15 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame impl
 
 		pianorollpanel.add(toolbarPanel, BorderLayout.NORTH);
 
+		// Set up panelPrincipal as the main container
 		panelPrincipal.setLayout(new BorderLayout());
+		panelPrincipal.add(pianorollpanel, BorderLayout.CENTER);
 
-		setLayout(new BorderLayout());
-		getContentPane().add(pianorollpanel, BorderLayout.CENTER);
+		// Ensure content pane has BorderLayout (default, but being explicit)
+		getContentPane().setLayout(new BorderLayout());
+		getContentPane().add(panelPrincipal, BorderLayout.CENTER);
 
 		pianoroll.setVirtualBook(virtualBook);
-		
-		// Check content pane and its components
-		// Container contentPane = getContentPane();
-		// if (contentPane != null) {
-		// 	Component[] components = contentPane.getComponents();
-		// 	for (Component comp : components) {
-		// 		Dimension compMin = comp.getMinimumSize();
-		// 		Dimension compPref = comp.getPreferredSize();
-		// 		Dimension compMax = comp.getMaximumSize();
-		// 		if (compMin != null && compMin.width >= 600) {
-		// 			logger.warn(String.format(
-		// 				"⚠️ Component %s has minimum width >= 600: min=%s, pref=%s, max=%s",
-		// 				comp.getClass().getSimpleName(),
-		// 				compMin != null ? String.format("%dx%d", compMin.width, compMin.height) : "null",
-		// 				compPref != null ? String.format("%dx%d", compPref.width, compPref.height) : "null",
-		// 				compMax != null ? String.format("%dx%d", compMax.width, compMax.height) : "null"
-		// 			));
-		// 		}
-		// 	}
-		// }
-		
-		// Check if tool window manager might be constraining
-		// if (toolWindowManager != null) {
-		// 	Container toolWindowContainer = toolWindowManager.getMainContainer();
-		// 	if (toolWindowContainer != null) {
-		// 		Dimension twMin = toolWindowContainer.getMinimumSize();
-		// 		Dimension twPref = toolWindowContainer.getPreferredSize();
-		// 		if (twMin != null && twMin.width >= 600) {
-		// 			logger.warn(String.format(
-		// 				"⚠️ ToolWindowManager container has minimum width >= 600: min=%s, pref=%s - This may prevent resizing!",
-		// 				twMin != null ? String.format("%dx%d", twMin.width, twMin.height) : "null",
-		// 				twPref != null ? String.format("%dx%d", twPref.width, twPref.height) : "null"
-		// 			));
-		// 			// Try to reduce the minimum size constraint to allow frame resizing
-		// 			if (twMin.width > 200) {
-		// 				logger.warn(String.format(
-		// 					"  -> Attempting to reduce ToolWindowManager minimum width from %d to 200 to allow frame resizing",
-		// 					twMin.width
-		// 				));
-		// 				toolWindowContainer.setMinimumSize(new Dimension(200, twMin.height));
-		// 			}
-		// 		}
-		// 	}
-		// }
-
-		int width = getWidth();
-
-		logger.debug("width :" + width); //$NON-NLS-1$
 
 		il.setIssueCollection(ic, virtualBook);
 
@@ -1418,18 +1392,16 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame impl
 		// ne montre pas les erreurs par d�faut
 		il.setVisible(aprintproperties.isErrorsVisible());
 
-		// getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0),
-		// "PLAYBOOK");//$NON-NLS-1$
-		// getActionMap().put("PLAYBOOK", jouer.getAction());//$NON-NLS-1$
-
 		refreshToolbarMenu();
 
 		// status line
 
 		JPanel statusPanel = new JPanel();
 		statusPanel.setBorder(new BevelBorder(BevelBorder.LOWERED));
-		add(statusPanel, BorderLayout.SOUTH);
-		statusPanel.setPreferredSize(new Dimension(getWidth(), 16));
+		getContentPane().add(statusPanel, BorderLayout.SOUTH);
+		// Don't set a fixed preferred size based on getWidth() - this prevents resizing
+		// Let the status panel size naturally based on its content
+		statusPanel.setPreferredSize(new Dimension(0, 16)); // Height only, width will expand
 		statusPanel.setLayout(new BoxLayout(statusPanel, BoxLayout.X_AXIS));
 
 		statusLine.setHorizontalAlignment(SwingConstants.LEFT);
@@ -1438,8 +1410,19 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame impl
 		// Ensure frame is resizable and has no maximum size constraints
 		// This must be done after all components are initialized
 		setResizable(true);
-		// setMaximumSize(null);
-		
+		setMaximumSize(null);
+
+		// Set a reasonable minimum size to prevent frame from collapsing
+		// This is critical for preventing the 150px collapse issue when dragging from
+		// the right
+		// The minimum width must account for tool windows and main content area
+		Dimension minSize = new Dimension(600, 400);
+		setMinimumSize(minSize);
+
+		// Validate and fix window size after all components are initialized
+		// This handles invalid saved sizes and multi-monitor setups
+		// The parent class handles the actual validation logic
+		validateAndFixWindowSize(minSize);
 	}
 
 	private void loadToolbarPreferences() {
@@ -2886,7 +2869,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame impl
 			}
 			this.exts = null;
 		}
-		
+
 		// NOUVEAU : Désenregistrer du registre MCP lors de la fermeture
 		if (mcpFrameId != null && services instanceof APrintNG) {
 			((APrintNG) services).unregisterVirtualBookFrame(mcpFrameId);
@@ -2894,7 +2877,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame impl
 
 		super.dispose();
 	}
-	
+
 	/**
 	 * Set the MCP Frame ID for tracking in the MCP registry
 	 * 
@@ -2958,9 +2941,10 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame impl
 		createScriptConsole(null, null, Messages.getString("APrintNGVirtualBookInternalFrame.17") //$NON-NLS-1$
 				+ pianoroll.getVirtualBook().getName());
 	}
-	
+
 	/**
 	 * Liste toutes les consoles de script ouvertes associées à cette frame
+	 * 
 	 * @return Liste des consoles (VirtualBookScriptConsole)
 	 */
 	public java.util.List<VirtualBookScriptConsole> listOpenScriptConsoles() {
@@ -2974,33 +2958,36 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame impl
 		}
 		return consoles;
 	}
-	
+
 	/**
 	 * Crée une nouvelle console de script associée à cette frame
-	 * @param scriptName Nom du script à charger (optionnel, null pour console vide)
-	 * @param scriptContent Contenu initial du script (optionnel, utilisé si scriptName est null)
-	 * @param title Titre de la fenêtre (optionnel)
+	 * 
+	 * @param scriptName    Nom du script à charger (optionnel, null pour console
+	 *                      vide)
+	 * @param scriptContent Contenu initial du script (optionnel, utilisé si
+	 *                      scriptName est null)
+	 * @param title         Titre de la fenêtre (optionnel)
 	 * @return La console créée
 	 */
 	public VirtualBookScriptConsole createScriptConsole(String scriptName, String scriptContent, String title) {
-		String finalTitle = title != null ? title : 
-			Messages.getString("APrintNGVirtualBookInternalFrame.17") + pianoroll.getVirtualBook().getName(); //$NON-NLS-1$
-		
+		String finalTitle = title != null ? title
+				: Messages.getString("APrintNGVirtualBookInternalFrame.17") + pianoroll.getVirtualBook().getName(); //$NON-NLS-1$
+
 		VirtualBookScriptConsole console = new VirtualBookScriptConsole(
-			(Frame) this, finalTitle, pianoroll, toolbarPanel, 
-			asyncJobsManager, services, instrument, aprintproperties, scriptManager);
-		
+				(Frame) this, finalTitle, pianoroll, toolbarPanel,
+				asyncJobsManager, services, instrument, aprintproperties, scriptManager);
+
 		console.setModal(false);
 		org.barrelorgandiscovery.tools.SwingUtils.center(console);
 		associatedFrames.add(console);
-		
+
 		// Enregistrer la console pour le tracking d'utilisation
 		if (services != null) {
 			services.registerWindowForTracking(console);
 		}
-		
+
 		console.setVisible(true);
-		
+
 		// Charger le script si fourni
 		if (scriptName != null && scriptManager != null) {
 			try {
@@ -3012,28 +2999,32 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame impl
 		} else if (scriptContent != null) {
 			console.setScriptContent(scriptContent);
 		}
-		
+
 		return console;
 	}
-	
+
 	/**
 	 * Obtient le panel de console Groovy d'une console de script
+	 * 
 	 * @param console La console de script
 	 * @return Le panel Groovy ou null
 	 */
-	public org.barrelorgandiscovery.gui.script.groovy.APrintGroovyConsolePanel getConsolePanel(VirtualBookScriptConsole console) {
+	public org.barrelorgandiscovery.gui.script.groovy.APrintGroovyConsolePanel getConsolePanel(
+			VirtualBookScriptConsole console) {
 		return console != null ? console.getConsolePanel() : null;
 	}
-	
+
 	/**
 	 * Obtient ou crée la console MCP dédiée pour cette frame.
 	 * Il n'y a qu'une seule console MCP par VirtualBookFrame.
+	 * 
 	 * @return La console MCP existante ou une nouvelle console si elle n'existe pas
 	 */
 	public VirtualBookScriptConsole getOrCreateMCPConsole() {
 		// Chercher une console existante avec le titre MCP
-		String mcpTitle = "MCP Console - " + (pianoroll.getVirtualBook() != null ? pianoroll.getVirtualBook().getName() : "Virtual Book");
-		
+		String mcpTitle = "MCP Console - "
+				+ (pianoroll.getVirtualBook() != null ? pianoroll.getVirtualBook().getName() : "Virtual Book");
+
 		java.util.List<VirtualBookScriptConsole> existingConsoles = listOpenScriptConsoles();
 		for (VirtualBookScriptConsole console : existingConsoles) {
 			// Vérifier si c'est la console MCP (par titre ou par un identifiant)
@@ -3046,11 +3037,11 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame impl
 				return console;
 			}
 		}
-		
+
 		// Créer une nouvelle console MCP si elle n'existe pas
 		return createScriptConsole(null, null, mcpTitle);
 	}
-	
+
 	/**
 	 * Obtient l'ID MCP de cette frame
 	 * 
@@ -3181,13 +3172,13 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame impl
 						// inderlying repaint ..
 						pianoroll.setXoffset(posx - pianoroll.pixelToMM(d.width / 2));
 
-//                if (pos >= stop - 10000)
-//                  SwingUtilities.invokeLater(
-//                      new Runnable() {
-//                        public void run() {
-//                          actionPerformed(new ActionEvent(this, 0, "STOP")); //$NON-NLS-1$
-//                        }
-//                      });
+						// if (pos >= stop - 10000)
+						// SwingUtilities.invokeLater(
+						// new Runnable() {
+						// public void run() {
+						// actionPerformed(new ActionEvent(this, 0, "STOP")); //$NON-NLS-1$
+						// }
+						// });
 
 						nanoDiplayTime = pianoroll.getDisplayNanos();
 					}
@@ -3568,36 +3559,31 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame impl
 	/////////////////////////////////////////////////////////////////
 	// status bar handling
 
-	
 	APrintStatusBarHandling statusBarHandling = new APrintStatusBarHandling(statusLine);
-	
-	
+
 	@Override
 	public void generalInformation(String usertext) {
 		statusBarHandling.generalInformation(usertext);
 	}
-	
+
 	@Override
 	public StatusBarTransaction startTransaction() {
 		return statusBarHandling.startTransaction();
 	}
-	
+
 	@Override
 	public void transactionProgress(StatusBarTransaction transaction, double progress) {
 		statusBarHandling.transactionProgress(transaction, progress);
 	}
-	
+
 	@Override
 	public void transactionText(StatusBarTransaction transaction, String text) {
 		statusBarHandling.transactionText(transaction, text);
 	}
-	
+
 	@Override
 	public void endTransaction(StatusBarTransaction transaction) {
 		statusBarHandling.endTransaction(transaction);
 	}
-	
-	
-
 
 }

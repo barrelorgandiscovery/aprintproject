@@ -89,11 +89,16 @@ task runAPrint(type: JavaExec, dependsOn: ':aprint-gui:classes') {
         '-Xmx2g',
         '-server',
         '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.lang.reflect=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.lang.invoke=ALL-UNNAMED',
+        '--add-opens', 'java.base/jdk.proxy1=ALL-UNNAMED',
         '--add-opens', 'java.desktop/javax.swing.text=ALL-UNNAMED',
         '--add-opens', 'java.desktop/javax.swing=ALL-UNNAMED',
         '--add-opens', 'java.base/java.util=ALL-UNNAMED',
         '--add-opens', 'java.base/java.io=ALL-UNNAMED',
-        '--add-opens', 'java.desktop/java.awt=ALL-UNNAMED'
+        '--add-opens', 'java.desktop/java.awt=ALL-UNNAMED',
+        '--add-opens', 'jdk.proxy1/jdk.proxy1=ALL-UNNAMED',
+        '--add-exports', 'jdk.proxy1/jdk.proxy1=ALL-UNNAMED'
     ]
     
     // System properties (can be overridden via -P)
@@ -124,11 +129,16 @@ task runAPrintWithMCP(type: JavaExec, dependsOn: ':aprint-gui:classes') {
         '-Xmx2g',
         '-server',
         '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.lang.reflect=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.lang.invoke=ALL-UNNAMED',
+        '--add-opens', 'java.base/jdk.proxy1=ALL-UNNAMED',
         '--add-opens', 'java.desktop/javax.swing.text=ALL-UNNAMED',
         '--add-opens', 'java.desktop/javax.swing=ALL-UNNAMED',
         '--add-opens', 'java.base/java.util=ALL-UNNAMED',
         '--add-opens', 'java.base/java.io=ALL-UNNAMED',
-        '--add-opens', 'java.desktop/java.awt=ALL-UNNAMED'
+        '--add-opens', 'java.desktop/java.awt=ALL-UNNAMED',
+        '--add-opens', 'jdk.proxy1/jdk.proxy1=ALL-UNNAMED',
+        '--add-exports', 'jdk.proxy1/jdk.proxy1=ALL-UNNAMED'
     ]
     
     // Enable MCP server

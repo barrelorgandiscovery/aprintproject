@@ -819,6 +819,7 @@ public class JVirtualBookComponent extends JComponent {
 		logger.debug("fitToComponentSize"); //$NON-NLS-1$
 
 		Dimension r = getSize();
+		logger.info("fitToComponentSize - size: " + r);
 
 		if (r != null && r.getHeight() == 0 && r.getWidth() == 0) {
 			SwingUtilities.invokeLater(new Runnable() {

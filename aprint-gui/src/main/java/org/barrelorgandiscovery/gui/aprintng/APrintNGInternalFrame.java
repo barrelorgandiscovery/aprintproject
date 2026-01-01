@@ -42,6 +42,7 @@ public class APrintNGInternalFrame extends JFrame implements IAPrintWait, Dirtya
 	private static Logger logger = Logger.getLogger(APrintNGInternalFrame.class);
 
 	private Dimension defaultSize = new Dimension(800, 600);
+	private Dimension preferredSize = defaultSize;
 
 	/**
 	 * This function get the internal name of the frame for preferences by default,
@@ -90,7 +91,7 @@ public class APrintNGInternalFrame extends JFrame implements IAPrintWait, Dirtya
 
 	/** Save the users preferences */
 	protected PrefixedNamePrefsStorage prefixedNamePrefsStorage;
-	
+
 	/** Timer to debounce preference saving during resize */
 	private Timer savePreferencesTimer;
 
@@ -108,6 +109,7 @@ public class APrintNGInternalFrame extends JFrame implements IAPrintWait, Dirtya
 	}
 
 	protected void initializeComponents() throws Exception {
+
 		setupIcon();
 		setGlassPane(infiniteprogresspanel);
 
@@ -118,66 +120,23 @@ public class APrintNGInternalFrame extends JFrame implements IAPrintWait, Dirtya
 			SwingUtils.center(this);
 		}
 
+		Dimension windowSize = prefixedNamePrefsStorage.getDimension("windowsize"); //$NON-NLS-1$
+		if (windowSize != null) {
+			setSize(windowSize);
+		} else {
+			setSize(defaultSize);
+		}
+
 		// Ensure frame is resizable
 		setResizable(true);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Frame set to resizable: " + getClass().getSimpleName());
 		}
-		
+
 		// Ensure no maximum size constraint (allow unlimited resizing)
 		setMaximumSize(null);
 		if (logger.isDebugEnabled()) {
 			logger.debug("Frame maximum size set to null (unlimited): " + getClass().getSimpleName());
-		}
-		
-
-		Dimension d = prefixedNamePrefsStorage.getDimension("windowsize"); //$NON-NLS-1$
-		if (d != null) {
-			// Always warn if loading a dimension with width at minimum
-			if (d.width == defaultSize.width) {
-				logger.warn(String.format(
-					"⚠️ Loading saved dimension with width at minimum (%dpx)! %s: %dx%d - This may cause resize issues!",
-					defaultSize.width,
-					getClass().getSimpleName(), d.width, d.height
-				));
-				logger.warn("Consider deleting the saved dimension from preferences to reset to default size.");
-			}
-			
-			if (logger.isDebugEnabled()) {
-				logger.debug(String.format(
-					"Loaded saved dimension from preferences: %dx%d",
-					d.width, d.height
-				));
-			}
-			// Validate dimension to ensure it's not too small
-			int minWidth = defaultSize.width;
-			int minHeight = defaultSize.height;
-			if (d.width < minWidth || d.height < minHeight) {
-				// Use default size if saved dimension is too small
-				logger.warn(String.format(
-					"Saved dimension too small (%dx%d), using default %dx%d",
-					d.width, d.height, defaultSize.width, defaultSize.height
-				));
-				setSize(defaultSize);
-			} else if (d.width == minWidth) {
-				// Warn if width is exactly at minimum - this will prevent horizontal resizing
-				logger.warn(String.format(
-					"⚠️ Saved dimension width is exactly at minimum (%dpx)! Using default %dx%d instead to allow resizing.",
-					minWidth, defaultSize.width, defaultSize.height					
-				));
-				setSize(defaultSize);
-			} else {
-				setSize(d);
-				if (logger.isDebugEnabled()) {
-					logger.debug("Set frame size to saved dimension: " + d);
-				}
-			}
-		} else {
-			// default
-			if (logger.isDebugEnabled()) {
-				logger.warn("No saved dimension found, using default 800x600");
-			}
-			setSize(defaultSize);
 		}
 
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
@@ -195,18 +154,59 @@ public class APrintNGInternalFrame extends JFrame implements IAPrintWait, Dirtya
 			}
 
 			public void componentMoved(ComponentEvent e) {
-				// Save position immediately on move
-				if (savePreferencesTimer != null) {
-					savePreferencesTimer.restart();
+				try {
+					// Save position immediately on move
+					if (savePreferencesTimer != null) {
+						savePreferencesTimer.restart();
+					}
+					
+					// FlatLaf-specific fix: When moved to a different screen, force repaint
+					// FlatLaf can have issues when windows are moved between monitors with different DPI
+					java.awt.GraphicsConfiguration newGC = getGraphicsConfiguration();
+					if (newGC != null) {
+						SwingUtilities.invokeLater(new Runnable() {
+							@Override
+							public void run() {
+								// Force a complete repaint when moving between screens
+								// This ensures FlatLaf renders correctly on the new screen
+								invalidate();
+								validate();
+								repaint();
+								
+								// Also repaint the content pane
+								Container contentPane = getContentPane();
+								if (contentPane != null) {
+									contentPane.invalidate();
+									contentPane.validate();
+									contentPane.repaint();
+								}
+							}
+						});
+					}
+				} catch (Exception ex) {
+					logger.error("error in componentMoved :" + ex.getMessage(), ex); //$NON-NLS-1$
 				}
 			}
 
 			public void componentResized(ComponentEvent e) {
-				
-				// Debounce the save - only save after resize completes
-				// This prevents interference with the resize drag operation
-				if (savePreferencesTimer != null) {
-					savePreferencesTimer.restart();
+				try {
+					// Debounce the save - only save after resize completes
+					// This prevents interference with the resize drag operation
+					if (savePreferencesTimer != null) {
+						savePreferencesTimer.restart();
+					}
+					
+					// FlatLaf-specific fix: When resized, ensure proper repainting
+					// This helps with multi-monitor setups where DPI/scaling may differ
+					SwingUtilities.invokeLater(new Runnable() {
+						@Override
+						public void run() {
+							revalidate();
+							repaint();
+						}
+					});
+				} catch (Exception ex) {
+					logger.error("error in componentResized :" + ex.getMessage(), ex); //$NON-NLS-1$
 				}
 			}
 
@@ -223,7 +223,6 @@ public class APrintNGInternalFrame extends JFrame implements IAPrintWait, Dirtya
 				if (!askForClose()) {
 					// keep the window
 					// setVisible(true);
-						
 
 				} else {
 					try {
@@ -327,13 +326,138 @@ public class APrintNGInternalFrame extends JFrame implements IAPrintWait, Dirtya
 
 	/** */
 	protected void saveDimensionPreferences() {
+		try {
+			Dimension currentSize = getSize();
+			logger.debug("saveDimensionPreferences - currentSize: " + currentSize); //$NON-NLS-1$
+			if (currentSize != null && currentSize.width > defaultSize.width
+					&& currentSize.height > defaultSize.height) {
+				logger.debug("saveDimensionPreferences - currentSize is valid: " + currentSize); //$NON-NLS-1$
+				prefixedNamePrefsStorage.setDimension("windowsize", currentSize);
+			}
+			prefixedNamePrefsStorage.setPoint("windowposition", getLocation()); //$NON-NLS-1$
+			prefixedNamePrefsStorage.save();
+		} catch (Exception ex) {
+			logger.error("error in saving dimension preferences :" + ex.getMessage(), ex); //$NON-NLS-1$
+		}
+	}
+
+	/**
+	 * Validates and corrects the window size and position after components are initialized.
+	 * This method should be called by child classes after all components are set up and
+	 * minimum size constraints are applied.
+	 * 
+	 * This handles:
+	 * - Invalid saved sizes (below minimum)
+	 * - Sizes too close to minimum that prevent resizing
+	 * - Multi-monitor setups (validates position/size against current screen)
+	 * 
+	 * @param minSize The minimum size that should be enforced (can be null to use frame's minimum)
+	 */
+	protected void validateAndFixWindowSize(Dimension minSize) {
+		// Use provided minimum size or get from frame
+		Dimension actualMinSize = minSize != null ? minSize : getMinimumSize();
+		if (actualMinSize == null) {
+			actualMinSize = defaultSize;
+		}
 
 		Dimension currentSize = getSize();
-		if (currentSize != null && currentSize.width > defaultSize.width && currentSize.height > defaultSize.height) {
-			prefixedNamePrefsStorage.setDimension("windowsize", currentSize);
+		Dimension savedSize = prefixedNamePrefsStorage.getDimension("windowsize"); //$NON-NLS-1$
+
+		// Get the screen bounds for the screen where this window is located
+		// This is critical for multi-monitor setups
+		java.awt.GraphicsConfiguration gc = getGraphicsConfiguration();
+		java.awt.Rectangle screenBounds;
+		if (gc != null) {
+			screenBounds = gc.getBounds();
+		} else {
+			java.awt.Dimension screenSize = java.awt.Toolkit.getDefaultToolkit().getScreenSize();
+			screenBounds = new java.awt.Rectangle(0, 0, screenSize.width, screenSize.height);
 		}
-		prefixedNamePrefsStorage.setPoint("windowposition", getLocation()); //$NON-NLS-1$
-		prefixedNamePrefsStorage.save();
+
+		if (savedSize != null && currentSize != null) {
+			// Check if the current size (loaded from preferences) is valid
+			// If it's below minimum or matches the problematic saved size, fix it
+			if (currentSize.width < actualMinSize.width || currentSize.height < actualMinSize.height) {
+				logger.warn("Saved window size (" + currentSize.width + "x" + currentSize.height + 
+					") is below minimum (" + actualMinSize.width + "x" + actualMinSize.height + 
+					"). Setting to default size.");
+				// Set a reasonable default size that fits on the current screen
+				Dimension defaultSize = new Dimension(
+					Math.min(1000, screenBounds.width - 50), 
+					Math.min(700, screenBounds.height - 100));
+				setSize(defaultSize);
+				currentSize = defaultSize; // Update for position validation
+			} else if (currentSize.width == savedSize.width && currentSize.height == savedSize.height) {
+				// If current size matches saved size exactly, validate it's reasonable
+				// Sometimes saved sizes can cause layout issues if they're at exact boundaries
+				if (currentSize.width <= actualMinSize.width + 10) {
+					// Too close to minimum - expand it to allow proper resizing
+					// But ensure it fits on the current screen
+					int newWidth = Math.min(Math.max(1000, currentSize.width + 100), screenBounds.width - 50);
+					logger.debug("Window size (" + currentSize.width + "x" + currentSize.height + 
+						") is too close to minimum. Expanding to " + newWidth + "x" + currentSize.height + 
+						" (screen: " + screenBounds.width + "x" + screenBounds.height + ")");
+					setSize(newWidth, currentSize.height);
+					currentSize = new Dimension(newWidth, currentSize.height); // Update for position validation
+				}
+			}
+
+			// Validate that the window position and size are within the current screen bounds
+			// This is important for multi-monitor setups where the window might be on a secondary screen
+			Point currentLocation = getLocation();
+			if (currentLocation != null && currentSize != null) {
+				// Check if window is partially or completely outside the current screen
+				boolean needsReposition = false;
+				if (currentLocation.x + currentSize.width > screenBounds.x + screenBounds.width) {
+					needsReposition = true;
+				}
+				if (currentLocation.y + currentSize.height > screenBounds.y + screenBounds.height) {
+					needsReposition = true;
+				}
+				if (currentLocation.x < screenBounds.x) {
+					needsReposition = true;
+				}
+				if (currentLocation.y < screenBounds.y) {
+					needsReposition = true;
+				}
+
+				if (needsReposition) {
+					logger.debug("Window position (" + currentLocation.x + "," + currentLocation.y + 
+						") is outside screen bounds. Adjusting to fit on screen.");
+					// Reposition to fit on the current screen
+					int newX = Math.max(screenBounds.x, 
+						Math.min(currentLocation.x, screenBounds.x + screenBounds.width - currentSize.width));
+					int newY = Math.max(screenBounds.y, 
+						Math.min(currentLocation.y, screenBounds.y + screenBounds.height - currentSize.height));
+					setLocation(newX, newY);
+				}
+			}
+		} else if (currentSize == null || currentSize.width < actualMinSize.width || currentSize.height < actualMinSize.height) {
+			// No valid size set - use default that fits on current screen
+			Dimension defaultSize = new Dimension(
+				Math.min(1000, screenBounds.width - 50), 
+				Math.min(700, screenBounds.height - 100));
+			setSize(defaultSize);
+		}
+
+		// Force validation to ensure layout is correct
+		// Use SwingUtilities.invokeLater to ensure this happens after the window is fully initialized
+		// This is especially important for multi-monitor setups and FlatLaf
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				validate();
+				repaint();
+				
+				// Additional FlatLaf-specific fixes for multi-monitor setups
+				// Ensure components are properly repainted when moved between screens
+				Container contentPane = getContentPane();
+				if (contentPane != null) {
+					contentPane.revalidate();
+					contentPane.repaint();
+				}
+			}
+		});
 	}
 
 	private boolean isWindowDirty = false;
@@ -350,28 +474,10 @@ public class APrintNGInternalFrame extends JFrame implements IAPrintWait, Dirtya
 		isWindowDirty = true;
 	}
 
-	@Override
-	public Dimension getPreferredSize() {
-		Dimension preferredSize = super.getPreferredSize();
-		if (preferredSize != null) {
-			logger.debug("getPreferredSize - Loading preferred size from super: " + preferredSize);
-			return preferredSize;
-		}
-
-		// load from preferences
-		Dimension savedSize = prefixedNamePrefsStorage.getDimension("windowsize");
-		if (savedSize != null) {
-			logger.debug("getPreferredSize - Loading saved size from preferences: " + savedSize);
-			return savedSize;
-		}
-
-		logger.debug("getPreferredSize - No saved size found, using default " + defaultSize);
-		return defaultSize;
-	}
-
 	/**
 	 * This method is called when the window is closing, by default, it is called
 	 * when the window is closing
+	 * 
 	 * @return false if user ask to Not Close the frame
 	 */
 	protected boolean askForClose() {
@@ -451,6 +557,5 @@ public class APrintNGInternalFrame extends JFrame implements IAPrintWait, Dirtya
 			super.setSize(d);
 		}
 	}
-
 
 }

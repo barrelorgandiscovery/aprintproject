@@ -239,8 +239,39 @@ public class APrintApplication {
 
 					String lnf = prop.getLookAndFeel();
 					if (lnf == null || lnf.isBlank()) {
-						javax.swing.UIManager
-								.setLookAndFeel((LookAndFeel) com.formdev.flatlaf.FlatLightLaf.class.newInstance());
+						// Configure FlatLaf for multi-monitor support
+						// Fix for Windows 11 repaint issues with Direct3D
+						// This prevents rendering issues when moving windows between monitors
+						String osName = System.getProperty("os.name", "").toLowerCase();
+						if (osName.contains("windows")) {
+							// Disable Direct3D onscreen surfaces to fix repaint issues on Windows
+							// This is especially important for multi-monitor setups
+							System.setProperty("sun.java2d.d3d", "false");
+							if (logger.isDebugEnabled()) {
+								logger.debug("Disabled Direct3D for Windows to fix multi-monitor repaint issues");
+							}
+						}
+						
+						// Set FlatLaf as the look and feel
+						LookAndFeel flatLaf = (LookAndFeel) com.formdev.flatlaf.FlatLightLaf.class.newInstance();
+						javax.swing.UIManager.setLookAndFeel(flatLaf);
+						
+						// Configure FlatLaf for better multi-monitor support
+						// Use native window decorations for better multi-monitor behavior
+						// This ensures proper handling of window decorations across different screens
+						try {
+							// Check if FlatLaf has the setUseNativeWindowDecorations method (available in newer versions)
+							java.lang.reflect.Method method = flatLaf.getClass().getMethod("setUseNativeWindowDecorations", boolean.class);
+							method.invoke(null, false); // Use custom decorations for better control
+							if (logger.isDebugEnabled()) {
+								logger.debug("Configured FlatLaf window decorations for multi-monitor support");
+							}
+						} catch (NoSuchMethodException e) {
+							// Method not available in this version, skip
+							if (logger.isDebugEnabled()) {
+								logger.debug("FlatLaf version doesn't support setUseNativeWindowDecorations, using defaults");
+							}
+						}
 					} else if ("swing".equals(lnf)) { //$NON-NLS-1$
 						javax.swing.UIManager
 								.setLookAndFeel(javax.swing.UIManager.getCrossPlatformLookAndFeelClassName());
