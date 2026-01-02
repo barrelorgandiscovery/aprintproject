@@ -9,13 +9,13 @@ import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.gui.aprintng.APrintNGVirtualBookFrame;
 import org.barrelorgandiscovery.gui.script.groovy.APrintGroovyConsolePanel;
 import org.barrelorgandiscovery.mcp.APrintMCPContext;
+import org.barrelorgandiscovery.mcp.McpJsonMapperProvider;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import groovy.lang.Binding;
 import io.modelcontextprotocol.json.McpJsonMapper;
-import io.modelcontextprotocol.json.McpJsonMapperSupplier;
 import io.modelcontextprotocol.server.McpSyncServerExchange;
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
@@ -26,7 +26,6 @@ import io.modelcontextprotocol.spec.McpSchema.TextContent;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.ServiceLoader;
 
 /**
  * Tool for executing Groovy scripts in the APrint application context.
@@ -71,7 +70,7 @@ public class ExecuteGroovyScriptTool {
 	public static java.util.function.BiFunction<McpSyncServerExchange, CallToolRequest, CallToolResult> 
 			createHandler(APrintMCPContext context) {
 		return (exchange, request) -> {
-			McpJsonMapper jsonMapper = getJsonMapper();
+			McpJsonMapper jsonMapper = McpJsonMapperProvider.get();
 			try {
 				logger.info("Executing Groovy script via MCP");
 				
@@ -150,14 +149,5 @@ public class ExecuteGroovyScriptTool {
 				}
 			}
 		};
-	}
-	
-	private static McpJsonMapper getJsonMapper() {
-		return ServiceLoader.load(McpJsonMapperSupplier.class)
-			.stream()
-			.findFirst()
-			.map(ServiceLoader.Provider::get)
-			.map(McpJsonMapperSupplier::get)
-			.orElseThrow(() -> new IllegalStateException("No McpJsonMapperSupplier found on classpath"));
 	}
 }

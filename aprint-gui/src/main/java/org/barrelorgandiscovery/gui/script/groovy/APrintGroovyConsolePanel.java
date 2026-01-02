@@ -2,7 +2,7 @@ package org.barrelorgandiscovery.gui.script.groovy;
 
 import groovy.lang.Binding;
 import groovy.lang.GroovyShell;
-import groovy.ui.ConsoleTextEditor;
+import org.barrelorgandiscovery.gui.script.groovy.ConsoleTextEditor;
 
 import java.awt.BorderLayout;
 import java.awt.Color;

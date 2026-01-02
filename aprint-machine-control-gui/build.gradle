@@ -64,7 +64,7 @@ sourceSets {
 
 
 task fatJar(type: Jar, dependsOn: jar) {
-  baseName = new SimpleDateFormat("YYYY.MM.dd").format(new Date()) + "-APrintPerfoCommander"
+  archiveBaseName = new SimpleDateFormat("YYYY.MM.dd").format(new Date()) + "-APrintPerfoCommander"
   def conf = configurations.runtimeClasspath
   def l = conf.findAll { !it.name.startsWith("APrint.jar") }
   def deps = l.collect { it.isDirectory() ? it : zipTree(it) }

@@ -20,7 +20,7 @@ import org.barrelorgandiscovery.gui.tools.VFSFileNameExtensionFilter;
 import org.barrelorgandiscovery.tools.JMessageBox;
 import org.barrelorgandiscovery.tools.StreamsTools;
 
-import groovy.ui.ConsoleTextEditor;
+import org.barrelorgandiscovery.gui.script.groovy.ConsoleTextEditor;
 
 /**
  * UI for modifying a groovy script

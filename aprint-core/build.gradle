@@ -67,8 +67,13 @@ dependencies {
 
 	api project(':aprint-gervill')
 	
+	// Groovy 4.0.21 - compatible with Java 21 and module system
+	// Note: groovy-all-1.7.3.jar is excluded from libs
+	api 'org.apache.groovy:groovy:4.0.21'
+	
 	// compile "xml-apis:xml-apis"
-	api files(fileTree(dir:"${projectDir}/libs" , include:['**/*.jar']).toList())
+	// Exclude old groovy-all-1.7.3.jar from libs
+	api files(fileTree(dir:"${projectDir}/libs" , include:['**/*.jar'], exclude:['**/groovyembeddable/**']).toList())
 	
 	// https://mvnrepository.com/artifact/log4j/log4j
 	api group: 'log4j', name: 'log4j', version: '1.2.14'

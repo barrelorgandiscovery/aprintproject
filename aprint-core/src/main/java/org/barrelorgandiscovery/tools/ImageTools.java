@@ -37,6 +37,9 @@ public class ImageTools {
 	 * @throws Exception
 	 */
 	public static BufferedImage loadImageAndCrop(URL imageUrl, int maxwidth, int maxheight) throws Exception {
+		if (imageUrl == null) {
+			throw new Exception("null image URL passed for loading the image");
+		}
 		Image image = Toolkit.getDefaultToolkit().createImage(imageUrl);
 
 		JLabel l = new JLabel();
@@ -198,6 +201,45 @@ public class ImageTools {
 			return new ImageIcon(image);
 		}
 		return null;
+	}
+
+	/**
+	 * Safely create an ImageIcon from a resource URL.
+	 * Returns null if the resource is not found (prevents NullPointerException in Java 21).
+	 * 
+	 * @param associatedClass the class to use for resource loading
+	 * @param resourceName the resource name
+	 * @return ImageIcon or null if resource not found
+	 */
+	public static ImageIcon createIconSafe(Class<?> associatedClass, String resourceName) {
+		if (associatedClass == null || resourceName == null) {
+			return null;
+		}
+		URL resourceUrl = associatedClass.getResource(resourceName);
+		if (resourceUrl == null) {
+			return null;
+		}
+		return new ImageIcon(resourceUrl);
+	}
+
+	/**
+	 * Safely create an ImageIcon from a resource URL with description.
+	 * Returns null if the resource is not found (prevents NullPointerException in Java 21).
+	 * 
+	 * @param associatedClass the class to use for resource loading
+	 * @param resourceName the resource name
+	 * @param description the description
+	 * @return ImageIcon or null if resource not found
+	 */
+	public static ImageIcon createIconSafe(Class<?> associatedClass, String resourceName, String description) {
+		if (associatedClass == null || resourceName == null) {
+			return null;
+		}
+		URL resourceUrl = associatedClass.getResource(resourceName);
+		if (resourceUrl == null) {
+			return null;
+		}
+		return new ImageIcon(resourceUrl, description);
 	}
 
 	public static BufferedImage loadImage(URL url) throws Exception {

@@ -17,6 +17,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.log4j.Logger;
+import org.barrelorgandiscovery.mcp.McpJsonMapperProvider;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -24,13 +25,10 @@ import com.sun.net.httpserver.HttpServer;
 
 import io.modelcontextprotocol.common.McpTransportContext;
 import io.modelcontextprotocol.json.McpJsonMapper;
-import io.modelcontextprotocol.json.McpJsonMapperSupplier;
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpServerSession;
 import io.modelcontextprotocol.spec.McpServerTransportProvider;
 import reactor.core.publisher.Mono;
-
-import java.util.ServiceLoader;
 
 /**
  * HTTP Server-Sent Events (SSE) transport provider for MCP using Java's built-in HttpServer.
@@ -84,21 +82,9 @@ public class HttpServerSseTransportProvider implements McpServerTransportProvide
 		this.port = port;
 		this.sseEndpoint = sseEndpoint != null ? sseEndpoint : "/mcp/sse";
 		this.messageEndpoint = messageEndpoint != null ? messageEndpoint : "/mcp/message";
-		this.jsonMapper = getDefaultJsonMapper();
+		this.jsonMapper = McpJsonMapperProvider.get();
 		logger.info("HttpServerSseTransportProvider created: port=" + port + 
 			", sseEndpoint=" + this.sseEndpoint + ", messageEndpoint=" + this.messageEndpoint);
-	}
-	
-	/**
-	 * Gets the default JSON mapper using ServiceLoader.
-	 */
-	private static McpJsonMapper getDefaultJsonMapper() {
-		return ServiceLoader.load(McpJsonMapperSupplier.class)
-			.stream()
-			.findFirst()
-			.map(ServiceLoader.Provider::get)
-			.map(McpJsonMapperSupplier::get)
-			.orElseThrow(() -> new IllegalStateException("No McpJsonMapperSupplier found on classpath"));
 	}
 	
 	/**

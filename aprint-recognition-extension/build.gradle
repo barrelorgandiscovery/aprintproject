@@ -74,8 +74,8 @@ dependencies {
 }
 
 task fatJar(type: Jar, dependsOn: jar) {
-  baseName = project.name + '-all'
-  extension="extension"
+  archiveBaseName = project.name + '-all'
+  archiveExtension = "extension"
   def conf = configurations.runtimeClasspath
   def l = conf.findAll { !it.name.startsWith("APrint.jar") }
   def deps = l.collect { it.isDirectory() ? it : zipTree(it) }

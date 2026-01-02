@@ -3,14 +3,13 @@ package org.barrelorgandiscovery.mcp.tools;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ServiceLoader;
 
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.mcp.APrintMCPContext;
+import org.barrelorgandiscovery.mcp.McpJsonMapperProvider;
 import org.barrelorgandiscovery.mcp.WindowActivationEvent;
 
 import io.modelcontextprotocol.json.McpJsonMapper;
-import io.modelcontextprotocol.json.McpJsonMapperSupplier;
 import io.modelcontextprotocol.server.McpSyncServerExchange;
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
@@ -63,7 +62,7 @@ public class GetWindowActivationHistoryTool {
 	public static java.util.function.BiFunction<McpSyncServerExchange, CallToolRequest, CallToolResult> 
 			createHandler(APrintMCPContext context) {
 		return (exchange, request) -> {
-			McpJsonMapper jsonMapper = getJsonMapper();
+			McpJsonMapper jsonMapper = McpJsonMapperProvider.get();
 			try {
 				Map<String, Object> args = request.arguments();
 				int limit = args != null && args.containsKey("limit") ? 
@@ -124,13 +123,6 @@ public class GetWindowActivationHistoryTool {
 		};
 	}
 	
-	private static McpJsonMapper getJsonMapper() {
-		return ServiceLoader.load(McpJsonMapperSupplier.class)
-			.stream()
-			.findFirst()
-			.map(ServiceLoader.Provider::get)
-			.map(McpJsonMapperSupplier::get)
-			.orElseThrow(() -> new IllegalStateException("No McpJsonMapperSupplier found on classpath"));
-	}
-}
+	
 
+}

@@ -1329,7 +1329,7 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame impl
 				showScriptConsoleAssociatedWithVirtualBook();
 			}
 		}, "", // "Groovy",//$NON-NLS-1$
-				new ImageIcon(ImageTools.loadImageAndCrop(GroovyMain.class.getResource("ConsoleIcon.png"), //$NON-NLS-1$
+				new ImageIcon(ImageTools.loadImageAndCrop(APrintNGVirtualBookInternalFrame.class.getResource("groovy.png"), //$NON-NLS-1$
 						22, 22)));
 
 		groovyButton.setToolTipText("Open Script Console");

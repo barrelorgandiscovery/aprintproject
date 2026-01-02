@@ -87,14 +87,14 @@ task listJars() {
 
 
 task bootstrapJar(type: Jar, dependsOn: jar) {
-  baseName = project.name + '-all'
-  extension="extension"
+  archiveBaseName = project.name + '-all'
+  archiveExtension = "extension"
   with jar
 }
 
 task fatJar(type: Jar, dependsOn: [jar, bootstrapJar, ":aprint-machine-control:jar"]) {
-  baseName = project.name + '-all'
-  extension="extensionlazy"
+  archiveBaseName = project.name + '-all'
+  archiveExtension = "extensionlazy"
   def conf = configurations.runtimeClasspath
   def l = conf.findAll { ! (it.name.toLowerCase().startsWith("aprint-core") || it.name.toLowerCase().startsWith("aprint-gui")) }
   def deps = l.collect { it.isDirectory() ? it : zipTree(it) }

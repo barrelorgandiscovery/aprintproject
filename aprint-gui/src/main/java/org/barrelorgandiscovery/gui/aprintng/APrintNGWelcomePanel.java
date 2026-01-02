@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.FileFilter;
+import java.net.URL;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -59,7 +60,11 @@ public class APrintNGWelcomePanel extends JPanel {
 	}
 
 	private ImageIcon resize(String resourcename) throws Exception {
-		return new ImageIcon(ImageTools.loadImageAndCrop(getClass().getResource(resourcename), 40, 40));
+		URL resourceUrl = getClass().getResource(resourcename);
+		if (resourceUrl == null) {
+			return null;
+		}
+		return new ImageIcon(ImageTools.loadImageAndCrop(resourceUrl, 40, 40));
 	}
 
 	private void initComponents() throws Exception {

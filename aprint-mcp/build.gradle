@@ -241,6 +241,9 @@ task runAPrintWithMCP(type: JavaExec, dependsOn: [':aprint-gui:fatJar', 'jar']) 
 		'--add-opens', 'java.base/java.text=ALL-UNNAMED',
 		'--add-opens', 'java.base/java.time=ALL-UNNAMED',
 		'--add-opens', 'java.base/java.security=ALL-UNNAMED',
+		'--add-opens', 'java.base/java.util.concurrent=ALL-UNNAMED',  // Pour ServiceLoader et MCP
+		'--add-opens', 'java.base/java.util.concurrent.atomic=ALL-UNNAMED',  // Pour ServiceLoader
+		'--add-opens', 'java.base/java.util.spi=ALL-UNNAMED',  // Pour ServiceLoader
 		'--add-opens', 'java.logging/java.util.logging=ALL-UNNAMED',
 		'--add-opens', 'java.desktop/java.awt=ALL-UNNAMED',
 		'--add-opens', 'java.desktop/java.awt.event=ALL-UNNAMED',
@@ -261,7 +264,9 @@ task runAPrintWithMCP(type: JavaExec, dependsOn: [':aprint-gui:fatJar', 'jar']) 
 		'--add-opens', 'java.desktop/sun.awt=ALL-UNNAMED',
 		'--add-opens', 'java.desktop/sun.java2d=ALL-UNNAMED',
 		'--add-opens', 'jdk.proxy1/jdk.proxy1=ALL-UNNAMED',
-		'--add-exports', 'jdk.proxy1/jdk.proxy1=ALL-UNNAMED'
+		'--add-exports', 'jdk.proxy1/jdk.proxy1=ALL-UNNAMED',
+		// Pour MCP et ServiceLoader - permettre l'accès aux classes non-modulaires
+		'--add-opens', 'java.base/java.util.stream=ALL-UNNAMED'  // Pour les streams utilisés par ServiceLoader
 	]
 	
 	// Enable MCP extension

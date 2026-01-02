@@ -8,9 +8,9 @@ import java.util.Map;
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.gui.aprintng.APrintNGVirtualBookFrame;
 import org.barrelorgandiscovery.mcp.APrintMCPContext;
+import org.barrelorgandiscovery.mcp.McpJsonMapperProvider;
 
 import io.modelcontextprotocol.json.McpJsonMapper;
-import io.modelcontextprotocol.json.McpJsonMapperSupplier;
 import io.modelcontextprotocol.server.McpSyncServerExchange;
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpSchema.CallToolRequest;
@@ -20,7 +20,6 @@ import io.modelcontextprotocol.spec.McpSchema.JsonSchema;
 import io.modelcontextprotocol.spec.McpSchema.TextContent;
 
 import java.io.IOException;
-import java.util.ServiceLoader;
 
 /**
  * Tool for triggering playback of the current virtual book.
@@ -51,7 +50,7 @@ public class TriggerPlayTool {
 	public static java.util.function.BiFunction<McpSyncServerExchange, CallToolRequest, CallToolResult> 
 			createHandler(APrintMCPContext context) {
 		return (exchange, request) -> {
-			McpJsonMapper jsonMapper = getJsonMapper();
+			McpJsonMapper jsonMapper = McpJsonMapperProvider.get();
 			try {
 				APrintNGVirtualBookFrame frame = context.getCurrentVirtualBookFrame();
 				
@@ -101,14 +100,5 @@ public class TriggerPlayTool {
 				}
 			}
 		};
-	}
-	
-	private static McpJsonMapper getJsonMapper() {
-		return ServiceLoader.load(McpJsonMapperSupplier.class)
-			.stream()
-			.findFirst()
-			.map(ServiceLoader.Provider::get)
-			.map(McpJsonMapperSupplier::get)
-			.orElseThrow(() -> new IllegalStateException("No McpJsonMapperSupplier found on classpath"));
 	}
 }

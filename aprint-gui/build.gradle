@@ -15,6 +15,12 @@ buildscript {
 apply plugin: 'java-library'
 apply plugin: 'groovy'
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
 
 // In this section you declare where to find the dependencies of your project
 repositories {
@@ -38,7 +44,14 @@ dependencies {
     // This breaks the circular dependency - the extension mechanism loads it dynamically
     // We include it as runtimeOnly so it's in the classpath but not needed at compile time
     runtimeOnly project(':aprint-mcp')
-    api files(fileTree(dir:"${projectDir}/libs" , include:['**/*.jar']).toList())
+    
+    // Groovy 4.0.21 - compatible with Java 21 and module system
+    api 'org.apache.groovy:groovy:4.0.21'
+    api 'org.apache.groovy:groovy-swing:4.0.21'  // For SwingBuilder
+    api 'org.apache.groovy:groovy-xml:4.0.21'    // For XML processing if used
+    
+    // Exclude old groovy-all-1.7.3.jar from libs
+    api files(fileTree(dir:"${projectDir}/libs" , include:['**/*.jar'], exclude:['**/groovyembeddable/**']).toList())
     
     // https://mvnrepository.com/artifact/org.anarres.vfsjfilechooser/filechooser-core
 	// compile group: 'org.anarres.vfsjfilechooser', name: 'filechooser-core', version: '1.0.0'
@@ -102,7 +115,7 @@ task listJars() {
 
 task fatJar(type: com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar, dependsOn: jar) {
 
-  baseName = "aprint"
+  archiveBaseName = "aprint"
   mergeServiceFiles()  
   
   from(sourceSets.main.output)

@@ -673,7 +673,11 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 	}
 
 	private ImageIcon resize(String resourcename) throws Exception {
-		return new ImageIcon(ImageTools.loadImageAndCrop(getClass().getResource(resourcename), 32, 32));
+		URL resourceUrl = getClass().getResource(resourcename);
+		if (resourceUrl == null) {
+			return null;
+		}
+		return new ImageIcon(ImageTools.loadImageAndCrop(resourceUrl, 32, 32));
 	}
 
 	/**
@@ -716,8 +720,15 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 
 		JMenuItem modelEditor = new JMenuItem();
 		modelEditor.setText("Model Editor");
-		modelEditor.setIcon(new ImageIcon(
-				ImageTools.loadImageAndCrop(JModelEditorPanel.class.getResource("model-editor.png"), 32, 32)));
+		URL modelEditorIconUrl = JModelEditorPanel.class.getResource("model-editor.png");
+		if (modelEditorIconUrl != null) {
+			try {
+				modelEditor.setIcon(new ImageIcon(
+						ImageTools.loadImageAndCrop(modelEditorIconUrl, 32, 32)));
+			} catch (Exception ex) {
+				logger.warn("Could not load model-editor.png", ex);
+			}
+		}
 
 		modelEditor.addActionListener(e -> {
 			try {
@@ -734,8 +745,15 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		menu.add(toolsMenu);
 
 		JMenuItem groovyScriptConsole = new JMenuItem(Messages.getString("APrint.317")); //$NON-NLS-1$
-		groovyScriptConsole.setIcon(
-				new ImageIcon(ImageTools.loadImageAndCrop(GroovyMain.class.getResource("ConsoleIcon.png"), 32, 32))); //$NON-NLS-1$
+		URL consoleIconUrl = GroovyMain.class.getResource("ConsoleIcon.png"); //$NON-NLS-1$
+		if (consoleIconUrl != null) {
+			try {
+				groovyScriptConsole.setIcon(
+						new ImageIcon(ImageTools.loadImageAndCrop(consoleIconUrl, 32, 32)));
+			} catch (Exception ex) {
+				logger.warn("Could not load ConsoleIcon.png", ex); //$NON-NLS-1$
+			}
+		}
 		groovyScriptConsole.setAccelerator(KeyStroke.getKeyStroke("control G")); //$NON-NLS-1$
 		groovyScriptConsole.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
