@@ -10,6 +10,7 @@ import org.barrelorgandiscovery.mcp.tools.CreateFrameSnapshotTool;
 import org.barrelorgandiscovery.mcp.tools.ExecuteConsoleScriptTool;
 import org.barrelorgandiscovery.mcp.tools.ExecuteGroovyScriptTool;
 import org.barrelorgandiscovery.mcp.tools.ExecuteScriptOnFrameTool;
+import org.barrelorgandiscovery.mcp.tools.ExtractTuneFeaturesTool;
 import org.barrelorgandiscovery.mcp.tools.ActivateWindowTool;
 import org.barrelorgandiscovery.mcp.tools.FindComponentsTool;
 import org.barrelorgandiscovery.mcp.tools.GetActiveWindowTool;
@@ -58,6 +59,7 @@ public class MCPServerManager {
 	private final APrintNGGeneralServices application;
 	private final AsyncJobsManager asyncJobsManager;
 	private final int httpPort;
+	private APrintMCPContext context;
 	
 	public MCPServerManager(APrintNGGeneralServices application, AsyncJobsManager asyncJobsManager) {
 		logger.info("=== MCPServerManager constructor (SDK-based) ===");
@@ -104,8 +106,8 @@ public class MCPServerManager {
 		try {
 			// Create MCP context
 			logger.info("Creating MCP context using factory...");
-			APrintMCPContext context = MCPContextFactory.createContext(application, asyncJobsManager);
-			logger.info("MCP context created: " + (context != null ? "OK" : "NULL"));
+			this.context = MCPContextFactory.createContext(application, asyncJobsManager);
+			logger.info("MCP context created: " + (this.context != null ? "OK" : "NULL"));
 			
 			// Start server in a separate thread
 			logger.info("Creating server thread...");
@@ -164,6 +166,11 @@ public class MCPServerManager {
 						.toolCall(GetInstrumentInfoTool.createTool(), GetInstrumentInfoTool.createHandler(context))
 						.toolCall(ListScalesTool.createTool(), ListScalesTool.createHandler(context))
 						.toolCall(GetScaleInfoTool.createTool(), GetScaleInfoTool.createHandler(context));
+					
+					// Register music analysis tools
+					logger.info("Registering music analysis tools...");
+					serverBuilder
+						.toolCall(ExtractTuneFeaturesTool.createTool(), ExtractTuneFeaturesTool.createHandler(context));
 					
 					// Register Swing introspection tools
 					serverBuilder
@@ -276,5 +283,14 @@ public class MCPServerManager {
 	 */
 	public int getHttpPort() {
 		return transportProvider != null ? httpPort : -1;
+	}
+	
+	/**
+	 * Get the MCP context. Returns null if the server hasn't started yet.
+	 * 
+	 * @return The MCP context, or null if not available
+	 */
+	public APrintMCPContext getContext() {
+		return context;
 	}
 }

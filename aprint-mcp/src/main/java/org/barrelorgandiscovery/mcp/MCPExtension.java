@@ -20,6 +20,9 @@ public class MCPExtension implements IExtension, InitNGExtensionPoint {
 	
 	private MCPServerManager mcpServerManager;
 	
+	// Static reference to the extension instance for easy access
+	private static MCPExtension instance;
+	
 	@Override
 	public String getName() {
 		return "APrint MCP Server Extension";
@@ -41,6 +44,9 @@ public class MCPExtension implements IExtension, InitNGExtensionPoint {
 	public void init(APrintNG aprintNG) {
 		logger.info("=== MCP Extension init() called ===");
 		logger.info("Extension name: " + getName());
+		
+		// Store instance for static access
+		instance = this;
 		
 		// Check if MCP server is enabled
 		String mcpEnabled = System.getProperty("aprint.mcp.enabled", "false");
@@ -100,6 +106,38 @@ public class MCPExtension implements IExtension, InitNGExtensionPoint {
 			e.printStackTrace();
 		}
 		logger.info("=== MCP Extension init() completed ===");
+	}
+	
+	/**
+	 * Get the MCP context. This allows scripts to access MCP functionality.
+	 * Returns null if MCP is not enabled or server hasn't started.
+	 * 
+	 * @return The MCP context, or null if not available
+	 */
+	public APrintMCPContext getContext() {
+		if (mcpServerManager == null) {
+			return null;
+		}
+		return mcpServerManager.getContext();
+	}
+	
+	/**
+	 * Get the MCP server manager instance.
+	 * 
+	 * @return The MCP server manager, or null if not initialized
+	 */
+	public MCPServerManager getServerManager() {
+		return mcpServerManager;
+	}
+	
+	/**
+	 * Get the MCP extension instance (static access).
+	 * This allows scripts and other code to access the MCP context.
+	 * 
+	 * @return The MCP extension instance, or null if not initialized
+	 */
+	public static MCPExtension getInstance() {
+		return instance;
 	}
 }
 

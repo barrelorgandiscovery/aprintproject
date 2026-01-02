@@ -80,7 +80,11 @@ public class APrintGroovyConsolePanel extends JPanel implements IScriptConsole,
 	 * Construct visual beans
 	 */
 	private void initComponents() {
-		cte = new ConsoleTextEditor();
+		// Create binding first so we can pass it to the editor for autocompletion
+		binding = new Binding();
+		
+		// Create editor with binding for autocompletion support
+		cte = new ConsoleTextEditor(binding);
 
 		cte.getTextEditor().getDocument()
 				.addDocumentListener(new DocumentListener() {
@@ -98,9 +102,6 @@ public class APrintGroovyConsolePanel extends JPanel implements IScriptConsole,
 				});
 		
 		cte.getTextEditor().setComponentPopupMenu(createPopupMenu());
-		
-
-		binding = new Binding();
 		// binding for the output in the console ...
 		binding.setProperty("console", this);
 		binding.setProperty("out", new PrintStream(new OutputStream() { //$NON-NLS-1$
@@ -206,6 +207,16 @@ public class APrintGroovyConsolePanel extends JPanel implements IScriptConsole,
 	 */
 	public Binding getCurrentBindingRef() {
 		return binding;
+	}
+	
+	/**
+	 * Update the editor's autocompletion with current binding variables
+	 * Call this after adding variables to the binding
+	 */
+	public void updateAutocompletion() {
+		if (cte != null) {
+			cte.updateBinding(binding);
+		}
 	}
 
 	private ExecutorService e = Executors.newSingleThreadExecutor();

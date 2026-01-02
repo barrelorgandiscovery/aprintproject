@@ -234,6 +234,8 @@ public class APrintNGInternalFrame extends JFrame implements IAPrintWait, Dirtya
 			}
 		};
 		addWindowListener(wadapter);
+
+	
 	}
 
 	/*

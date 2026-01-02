@@ -1329,8 +1329,9 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame impl
 				showScriptConsoleAssociatedWithVirtualBook();
 			}
 		}, "", // "Groovy",//$NON-NLS-1$
-				new ImageIcon(ImageTools.loadImageAndCrop(APrintNGVirtualBookInternalFrame.class.getResource("groovy.png"), //$NON-NLS-1$
-						22, 22)));
+				new ImageIcon(
+						ImageTools.loadImageAndCrop(APrintNGVirtualBookInternalFrame.class.getResource("groovy.png"), //$NON-NLS-1$
+								22, 22)));
 
 		groovyButton.setToolTipText("Open Script Console");
 
@@ -1897,8 +1898,11 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame impl
 
 	public void play() throws Exception {
 		final PlaySubSystem currentPlaySubSystem = this.playsubsystem.getCurrent();
+        
+		assert currentPlaySubSystem != null;
 
 		if (currentPlaySubSystem.isPlaying()) {
+			logger.debug("stop current play subsystem"); //$NON-NLS-1$
 			currentPlaySubSystem.stop();
 		}
 
@@ -3100,26 +3104,32 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame impl
 				logger.debug("play stopped"); //$NON-NLS-1$
 				Runnable runnable = new Runnable() {
 					public void run() {
-
-						// pianoroll.setUseFastDrawing(false);
-
-						jouer.setText(Messages.getString("APrint.31")); //$NON-NLS-1$
-						jouer.setActionCommand("JOUER"); //$NON-NLS-1$
-						jouer.setIcon(new ImageIcon(getClass().getResource("noatunplay.png"), //$NON-NLS-1$
-								Messages.getString("APrint.80"))); //$NON-NLS-1$
-
 						try {
-							checkState();
-						} catch (Throwable t) {
-							logger.error("error in stopping playing :" //$NON-NLS-1$
-									+ t.getMessage(), t);
+
+							// pianoroll.setUseFastDrawing(false);
+							jouer.setText(Messages.getString("APrint.31")); //$NON-NLS-1$
+							jouer.setActionCommand("JOUER"); //$NON-NLS-1$
+							jouer.setIcon(new ImageIcon(getClass().getResource("noatunplay.png"), //$NON-NLS-1$
+									Messages.getString("APrint.80"))); //$NON-NLS-1$
+
+							try {
+								checkState();
+							} catch (Throwable t) {
+								logger.error("error in stopping playing :" //$NON-NLS-1$
+										+ t.getMessage(), t);
+							}
+						} catch (Exception ex) {
+							logger.error("error in playstopped :" //$NON-NLS-1$
+									+ ex.getMessage(), ex);
 						}
 					}
 				};
 
 				if (SwingUtilities.isEventDispatchThread()) {
+					logger.debug("runnable in event dispatch thread"); //$NON-NLS-1$
 					runnable.run();
 				} else {
+					logger.debug("invoke and wait in play stopped"); //$NON-NLS-1$
 					SwingUtilities.invokeAndWait(runnable);
 				}
 
@@ -3297,6 +3307,24 @@ public class APrintNGVirtualBookInternalFrame extends APrintNGInternalFrame impl
 								b.setProperty("currentinstrument", instrument); //$NON-NLS-1$
 								// toolbars panel, permit to add new JToolbars
 								b.setProperty("toolbarspanel", pianorollbutton); //$NON-NLS-1$
+								
+								// Expose MCP context to scripts if available (using reflection to avoid compile-time dependency)
+								try {
+									Class<?> mcpExtensionClass = Class.forName("org.barrelorgandiscovery.mcp.MCPExtension");
+									java.lang.reflect.Method getInstanceMethod = mcpExtensionClass.getMethod("getInstance");
+									Object mcpExtension = getInstanceMethod.invoke(null);
+									if (mcpExtension != null) {
+										java.lang.reflect.Method getContextMethod = mcpExtensionClass.getMethod("getContext");
+										Object mcpContext = getContextMethod.invoke(mcpExtension);
+										if (mcpContext != null) {
+											b.setProperty("mcpcontext", mcpContext); //$NON-NLS-1$
+										}
+									}
+								} catch (ClassNotFoundException e) {
+									// MCP extension not available - this is OK
+								} catch (Exception e) {
+									// Ignore if MCP is not available
+								}
 								p.clearConsole();
 
 								try {

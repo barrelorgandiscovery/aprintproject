@@ -64,6 +64,11 @@ dependencies {
     
     
     implementation 'com.formdev:flatlaf:3.7'
+     
+    // RSyntaxTextArea for syntax highlighting and code completion
+    // Available on Maven Central under com.fifesoft group
+    implementation group: 'com.fifesoft', name: 'rsyntaxtextarea', version: '3.6.1'
+    implementation group: 'com.fifesoft', name: 'autocomplete', version: '3.3.2'
     
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'

@@ -88,7 +88,6 @@ dependencies {
 	   // https://mvnrepository.com/artifact/org.apache.jackrabbit/jackrabbit-webdav
 	api group: 'org.apache.jackrabbit', name: 'jackrabbit-webdav', version: '2.21.9'
    
-	
 	// https://mvnrepository.com/artifact/org.apache.xmlbeans/xmlbeans
 	xmlbean 'org.apache.xmlbeans:xmlbeans:5.1.1'
 	api 'org.apache.xmlbeans:xmlbeans:5.1.1'

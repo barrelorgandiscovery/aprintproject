@@ -146,7 +146,7 @@ class RegistrationSection implements Serializable {
 	 * @param register
 	 */
 	void removeRegister(String registerset, String register) throws Exception {
-		logger.debug("removeRegister " + registerset + " -> " + register);
+		logger.trace("removeRegister " + registerset + " -> " + register);
 		assert registerset != null;
 		assert register != null;
 		assert checkRegisterExist(registerset, register);
@@ -167,7 +167,7 @@ class RegistrationSection implements Serializable {
 	}
 
 	void removeRegisters(String registerset) throws Exception {
-		logger.debug("removeRegisters in " + registerset);
+		logger.trace("removeRegisters in " + registerset);
 		assert registerset != null;
 
 		PipeStopGroup safeRegisterSet = getSafeRegisterSet(registerset);
@@ -187,7 +187,7 @@ class RegistrationSection implements Serializable {
 	 * @return
 	 */
 	String[] getRegisters(String registerset) throws Exception {
-		logger.debug("getRegisters " + registerset);
+		logger.trace("getRegisters " + registerset);
 		assert registerset != null;
 
 		PipeStopGroup safeRegisterSet = getSafeRegisterSet(registerset);

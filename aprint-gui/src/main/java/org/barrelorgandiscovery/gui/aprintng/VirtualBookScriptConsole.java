@@ -3,31 +3,39 @@ package org.barrelorgandiscovery.gui.aprintng;
 import groovy.lang.Binding;
 
 import java.awt.BorderLayout;
-import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Frame;
-import java.awt.GraphicsConfiguration;
 import java.awt.HeadlessException;
+import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.concurrent.Future;
 
+import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JSeparator;
 import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
 
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.AsyncJobsManager;
 import org.barrelorgandiscovery.JobEvent;
 import org.barrelorgandiscovery.gui.aedit.GlobalVirtualBookUndoOperation;
 import org.barrelorgandiscovery.gui.aedit.JEditableVirtualBookComponent;
-import org.barrelorgandiscovery.gui.aedit.JVirtualBookScrollableComponent;
 import org.barrelorgandiscovery.gui.aprint.APrintProperties;
 import org.barrelorgandiscovery.gui.script.groovy.APrintGroovyConsolePanel;
 import org.barrelorgandiscovery.instrument.Instrument;
@@ -60,6 +68,9 @@ public class VirtualBookScriptConsole extends JDialog {
 	private String currentEditedScript = null;
 
 	private APrintGroovyConsolePanel p;
+	
+	private JLabel statusLabel;
+	private JButton executeButton;
 
 	public VirtualBookScriptConsole(Frame owner, String title,
 			JEditableVirtualBookComponent pianoroll,
@@ -68,7 +79,7 @@ public class VirtualBookScriptConsole extends JDialog {
 			APrintNGGeneralServices services, Instrument instrument,
 			APrintProperties aPrintProperties, QuickScriptManager scriptManager)
 			throws HeadlessException {
-		super(owner, title);
+		super(owner, title, false); // Non-modal dialog
 
 		this.pianoroll = pianoroll;
 		this.toolbarsPanel = toolbarsPanel;
@@ -80,6 +91,7 @@ public class VirtualBookScriptConsole extends JDialog {
 		this.scriptManager = scriptManager;
 
 		initComponents();
+		setupDialogProperties();
 	}
 
 	private void initComponents() {
@@ -112,15 +124,30 @@ public class VirtualBookScriptConsole extends JDialog {
 			logger.error("fail to output variables in console", ex); //$NON-NLS-1$
 		}
 
+		// Main toolbar panel with better spacing
 		JPanel buttonPanel = new JPanel();
-		buttonPanel.setLayout(new WrappingLayout());
+		buttonPanel.setLayout(new WrappingLayout(WrappingLayout.LEFT, 8, 8));
+		buttonPanel.setBorder(new EmptyBorder(8, 8, 8, 8));
 
 		JToolBar scriptToolbar = new JToolBar();
+		scriptToolbar.setFloatable(false);
+		scriptToolbar.setBorderPainted(true);
+		scriptToolbar.setBorder(new EmptyBorder(4, 4, 4, 4));
 
-		JButton execute = new JButton(
+		executeButton = new JButton(
 				Messages.getString("APrintNGVirtualBookInternalFrame.27")); //$NON-NLS-1$
-		execute.setIcon(new ImageIcon(getClass().getResource("misc.png")));
-		execute.addActionListener(new ActionListener() {
+		executeButton.setIcon(new ImageIcon(getClass().getResource("misc.png")));
+		executeButton.setToolTipText("Execute the script (Ctrl+Enter)");
+		// Add keyboard shortcut
+		executeButton.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+			.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()), "execute");
+		executeButton.getActionMap().put("execute", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				executeButton.doClick();
+			}
+		});
+		executeButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				try {
 
@@ -131,8 +158,33 @@ public class VirtualBookScriptConsole extends JDialog {
 					b.setProperty("services", services); //$NON-NLS-1$
 					b.setProperty("currentinstrument", currentInstrument); //$NON-NLS-1$
 					b.setProperty("toolbarspanel", toolbarsPanel); //$NON-NLS-1$
+					
+					// Expose MCP context to scripts if available (using reflection to avoid compile-time dependency)
+					try {
+						Class<?> mcpExtensionClass = Class.forName("org.barrelorgandiscovery.mcp.MCPExtension");
+						java.lang.reflect.Method getInstanceMethod = mcpExtensionClass.getMethod("getInstance");
+						Object mcpExtension = getInstanceMethod.invoke(null);
+						if (mcpExtension != null) {
+							java.lang.reflect.Method getContextMethod = mcpExtensionClass.getMethod("getContext");
+							Object mcpContext = getContextMethod.invoke(mcpExtension);
+							if (mcpContext != null) {
+								b.setProperty("mcpcontext", mcpContext); //$NON-NLS-1$
+								logger.debug("MCP context exposed to script as 'mcpcontext'");
+							}
+						}
+					} catch (ClassNotFoundException cnfe) {
+						// MCP extension not available - this is OK
+						logger.debug("MCP extension not found, context not exposed to script");
+					} catch (Exception mcpEx) {
+						logger.debug("Could not expose MCP context to script: " + mcpEx.getMessage());
+					}
+
+					// Update autocompletion with new binding variables
+					p.updateAutocompletion();
 
 					p.clearConsole();
+					updateStatus("Executing script...");
+					executeButton.setEnabled(false);
 
 					try {
 
@@ -143,13 +195,15 @@ public class VirtualBookScriptConsole extends JDialog {
 
 						pianoroll.getUndoStack().push(gvb);
 
-						Future f = p.run();
+						Future<?> f = p.run();
 						pianoroll.startEventTransaction();
 						asyncJobsManager.submitAlreadyExecutedJobToTrack(f,
 								new JobEvent() {
 									public void jobAborted() {
 										// TODO Auto-generated method stub
 										pianoroll.endEventTransaction();
+										updateStatus("Script execution aborted");
+										executeButton.setEnabled(true);
 									}
 
 									public void jobError(Throwable t) {
@@ -159,11 +213,13 @@ public class VirtualBookScriptConsole extends JDialog {
 													"error while executing script :" //$NON-NLS-1$
 															+ t.getMessage(), t);
 											p.appendOutput(t);
+											updateStatus("Error: " + t.getMessage());
 
 										} catch (Exception x) {
 											logger.debug(x);
 										}
 										pianoroll.endEventTransaction();
+										executeButton.setEnabled(true);
 									}
 
 									public void jobFinished(Object result) {
@@ -172,14 +228,17 @@ public class VirtualBookScriptConsole extends JDialog {
 													result == null ? "null" //$NON-NLS-1$
 															: result.toString(),
 													null);
+											updateStatus("Script executed successfully");
 
 										} catch (Exception ex) {
 											logger.error(
 													"error in executing script :" //$NON-NLS-1$
 															+ ex.getMessage(),
 													ex);
+											updateStatus("Error displaying result");
 										}
 										pianoroll.endEventTransaction();
+										executeButton.setEnabled(true);
 									}
 
 								});
@@ -188,6 +247,8 @@ public class VirtualBookScriptConsole extends JDialog {
 						logger.error("error while executing script :" //$NON-NLS-1$
 								+ t.getMessage(), t);
 						p.appendOutput(t);
+						updateStatus("Error: " + t.getMessage());
+						executeButton.setEnabled(true);
 					}
 
 				} catch (Exception ex) {
@@ -196,175 +257,185 @@ public class VirtualBookScriptConsole extends JDialog {
 					JMessageBox.showMessage(services.getOwnerForDialog(),
 							"error while executing script :" //$NON-NLS-1$
 									+ ex.getMessage());
+					updateStatus("Error: " + ex.getMessage());
+					executeButton.setEnabled(true);
 				}
 
 			}
 		});
 
-		scriptToolbar.add(execute);
+		scriptToolbar.add(executeButton);
 
 		JButton clear = new JButton(
 				Messages.getString("APrintNGVirtualBookInternalFrame.36")); //$NON-NLS-1$
 		clear.setIcon(new ImageIcon(getClass().getResource("ark_new.png")));//$NON-NLS-1$
+		clear.setToolTipText("Clear the console output");
 		clear.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				p.clearConsole();
+				updateStatus("Console cleared");
 			}
 		});
 
 		scriptToolbar.add(clear);
 
 		buttonPanel.add(scriptToolbar);
+		
+		// Add visual separator
+		buttonPanel.add(new JSeparator(SwingConstants.VERTICAL));
 
 		// quick scripts ...
 
 		JToolBar quickScriptToolbar = new JToolBar();
+		quickScriptToolbar.setFloatable(false);
+		quickScriptToolbar.setBorderPainted(true);
+		quickScriptToolbar.setBorder(new EmptyBorder(4, 4, 4, 4));
 
 		final JButton quickScript = new JButton(
 				Messages.getString("APrintNGVirtualBookInternalFrame.1007")); //$NON-NLS-1$
 		quickScript.setIcon(new ImageIcon(getClass().getResource(
 				"tool_dock.png"))); //$NON-NLS-1$
+		quickScript.setToolTipText("Open Script Manager (Load, Save, Delete, Rename scripts)");
 		quickScript.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-
 				try {
-
-					File quickScriptFolder = aPrintProperties
-							.getBookQuickScriptFolder();
-					assert quickScriptFolder != null;
-
-					if (!quickScriptFolder.exists())
-						quickScriptFolder.mkdir();
-
-					String[] scripts = scriptManager.listQuickScripts();
-
-					JPopupMenu scriptsMenu = new JPopupMenu();
-					for (int i = 0; i < scripts.length; i++) {
-						final String scriptName = scripts[i];
-						try {
-							// sb contains the script content ...
-
-							JMenuItem item = new JMenuItem(scriptName);
-							item.addActionListener(new ActionListener() {
-								public void actionPerformed(ActionEvent e) {
-
-									try {
-										StringBuffer scriptContent = scriptManager
-												.loadScript(scriptName);
-
-										// ask for save ?
-
-										p.setScriptContent(scriptContent
-												.toString());
-										p.clearDirty();
-
-										currentEditedScript = scriptName;
-										logger.debug("current script :"
-												+ scriptName);
-
-									} catch (Exception ex) {
-										logger.error(
-												"fail to load script "
-														+ scriptName + ":"
-														+ ex.getMessage(), ex);
-										JMessageBox.showMessage(
-												services.getOwnerForDialog(),
-												"error while loading script :"
-														+ scriptName + "\n"
-														+ ex.getMessage());
-									}
-								};
-							});
-
-							scriptsMenu.add(item);
-
-						} catch (Exception ex) {
-							logger.error("error in reading script :" //$NON-NLS-1$
-									+ scriptName + " skipped"); //$NON-NLS-1$
+					// Open script manager dialog
+					ScriptManagerDialog dialog = new ScriptManagerDialog(
+						VirtualBookScriptConsole.this,
+						scriptManager,
+						new ScriptManagerDialog.ScriptManagerCallback() {
+							@Override
+							public void onLoadScript(String scriptName) {
+								try {
+									StringBuffer scriptContent = scriptManager.loadScript(scriptName);
+									p.setScriptContent(scriptContent.toString());
+									p.clearDirty();
+									currentEditedScript = scriptName;
+									logger.debug("current script :" + scriptName);
+									updateStatus("Loaded script: " + scriptName);
+								} catch (Exception ex) {
+									logger.error("fail to load script " + scriptName + ":" + ex.getMessage(), ex);
+									JMessageBox.showMessage(services.getOwnerForDialog(),
+										"error while loading script :" + scriptName + "\n" + ex.getMessage());
+								}
+							}
+							
+							@Override
+							public boolean onSaveScript(String scriptName) {
+								try {
+									scriptManager.saveScript(scriptName, new StringBuffer(p.getScriptContent()));
+									currentEditedScript = scriptName;
+									updateStatus("Script saved: " + scriptName);
+									return true;
+								} catch (Exception ex) {
+									logger.error("error writing quick scripts :" + ex.getMessage(), ex);
+									JMessageBox.showMessage(services.getOwnerForDialog(),
+										"error while saving script :" + scriptName + "\n" + ex.getMessage());
+									return false;
+								}
+							}
+							
+							@Override
+							public String getCurrentScriptContent() {
+								return p.getScriptContent();
+							}
+							
+							@Override
+							public String getCurrentScriptName() {
+								return currentEditedScript;
+							}
 						}
-					}
-
-					scriptsMenu.show(quickScript, 0, quickScript.getHeight());
-
+					);
+					dialog.setVisible(true);
 				} catch (Exception ex) {
-					logger.error(
-							"error in reading scripts :" + ex.getMessage(), ex); //$NON-NLS-1$
+					logger.error("error opening script manager :" + ex.getMessage(), ex);
 					BugReporter.sendBugReport();
-					JMessageBox.showMessage(
-							services.getOwnerForDialog(),
-							Messages.getString("APrintNGVirtualBookInternalFrame.1013")); //$NON-NLS-1$
+					JMessageBox.showMessage(services.getOwnerForDialog(),
+						Messages.getString("APrintNGVirtualBookInternalFrame.1013")); //$NON-NLS-1$
 				}
-
 			}
 		});
 
 		quickScriptToolbar.add(quickScript);
 
-		JButton saveQuickScript = new JButton(
-				Messages.getString("APrintNGVirtualBookInternalFrame.1014") + " ..."); //$NON-NLS-1$
-		saveQuickScript.setIcon(new ImageIcon(getClass().getResource(
-				"filesave.png"))); //$NON-NLS-1$
-		saveQuickScript.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				saveAs();
-			}
-		});
-
+		// Quick save button (still available for convenience)
 		JButton saveCurrentEditedQuickScript = new JButton("Save Script"); //$NON-NLS-1$
 		saveCurrentEditedQuickScript.setIcon(new ImageIcon(getClass()
 				.getResource("filesave.png"))); //$NON-NLS-1$
+		saveCurrentEditedQuickScript.setToolTipText("Save current script (Ctrl+S)");
+		// Add keyboard shortcut
+		saveCurrentEditedQuickScript.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+			.put(KeyStroke.getKeyStroke(KeyEvent.VK_S, Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx()), "save");
+		saveCurrentEditedQuickScript.getActionMap().put("save", new AbstractAction() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				saveCurrentEditedQuickScript.doClick();
+			}
+		});
 		saveCurrentEditedQuickScript.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				save();
 			}
 		});
 
-		quickScriptToolbar.add(saveQuickScript);
-
 		quickScriptToolbar.add(saveCurrentEditedQuickScript);
-
-		JButton removeQuickScript = new JButton(
-				Messages.getString("APrintNGVirtualBookInternalFrame.1020")); //$NON-NLS-1$
-		removeQuickScript.setIcon(new ImageIcon(getClass().getResource(
-				"stop.png"))); //$NON-NLS-1$
-		removeQuickScript.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-
-					String[] scripts = scriptManager.listQuickScripts();
-
-					Object o = JOptionPane.showInputDialog(
-							VirtualBookScriptConsole.this,
-							Messages.getString("APrintNGVirtualBookInternalFrame.1021"), Messages.getString("APrintNGVirtualBookInternalFrame.1022"), //$NON-NLS-1$ //$NON-NLS-2$
-							JOptionPane.QUESTION_MESSAGE, null, scripts,
-							(Object) null);
-
-					if (o != null) {
-						logger.debug("removing script");
-						scriptManager.deleteScript((String) o);
-					}
-
-				} catch (Exception ex) {
-					logger.error("error deleting quick scripts :" //$NON-NLS-1$
-							+ ex.getMessage(), ex);
-					BugReporter.sendBugReport();
-					JMessageBox.showMessage(
-							services.getOwnerForDialog(),
-							Messages.getString("APrintNGVirtualBookInternalFrame.1024")); //$NON-NLS-1$
-				}
-			}
-		});
-
-		quickScriptToolbar.add(removeQuickScript);
 
 		buttonPanel.add(quickScriptToolbar);
 
-		getContentPane().setLayout(new BorderLayout());
+		// Status bar at the bottom
+		statusLabel = new JLabel("Ready");
+		statusLabel.setBorder(new EmptyBorder(4, 8, 4, 8));
+		
+		JPanel statusPanel = new JPanel(new BorderLayout());
+		statusPanel.add(new JSeparator(), BorderLayout.NORTH);
+		statusPanel.add(statusLabel, BorderLayout.WEST);
+		statusPanel.setBorder(new EmptyBorder(0, 0, 0, 0));
+
+		// Main content layout
+		getContentPane().setLayout(new BorderLayout(0, 0));
 		getContentPane().add(buttonPanel, BorderLayout.NORTH);
 		getContentPane().add(p, BorderLayout.CENTER);
+		getContentPane().add(statusPanel, BorderLayout.SOUTH);
 
-		setPreferredSize(new Dimension(800, 600));
+		setPreferredSize(new Dimension(900, 650));
+		setMinimumSize(new Dimension(600, 400));
+	}
+	
+	/**
+	 * Setup dialog properties for better user experience
+	 */
+	private void setupDialogProperties() {
+		// Make dialog resizable
+		setResizable(true);
+		
+		// Center on screen if no owner, or relative to owner
+		if (getOwner() != null) {
+			Point ownerLocation = getOwner().getLocation();
+			Dimension ownerSize = getOwner().getSize();
+			Dimension dialogSize = getPreferredSize();
+			setLocation(
+				ownerLocation.x + (ownerSize.width - dialogSize.width) / 2,
+				ownerLocation.y + (ownerSize.height - dialogSize.height) / 2
+			);
+		} else {
+			setLocationRelativeTo(null);
+		}
+		
+		// Set default close operation
+		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		
 		pack();
+	}
+	
+	/**
+	 * Update status message
+	 */
+	private void updateStatus(String message) {
+		if (statusLabel != null) {
+			SwingUtilities.invokeLater(() -> {
+				statusLabel.setText(message);
+			});
+		}
 	}
 
 	@Override
@@ -384,6 +455,7 @@ public class VirtualBookScriptConsole extends JDialog {
 						p.getScriptContent()));
 
 				JOptionPane.showMessageDialog(this, "Script saved");
+				updateStatus("Script saved: " + currentEditedScript);
 
 			} catch (Exception ex) {
 				logger.error("error writing quick scripts :" //$NON-NLS-1$
@@ -414,6 +486,7 @@ public class VirtualBookScriptConsole extends JDialog {
 				currentEditedScript = scriptName;
 
 				JOptionPane.showMessageDialog(this, "Script saved");
+				updateStatus("Script saved: " + scriptName);
 
 			}
 		} catch (Exception ex) {

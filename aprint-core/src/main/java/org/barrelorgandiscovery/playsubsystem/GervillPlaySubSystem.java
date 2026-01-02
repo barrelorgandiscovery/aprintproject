@@ -1,6 +1,7 @@
 package org.barrelorgandiscovery.playsubsystem;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.sound.midi.Instrument;
@@ -59,9 +60,97 @@ public class GervillPlaySubSystem implements PlaySubSystem, NeedInstrument {
 
 	private Soundbank lastplayedinstrument = null;
 
-	private AtomicReference<Thread> currentPlayingThread = new AtomicReference<Thread>();
+	private AtomicReference<PlayThread> currentPlayingThread = new AtomicReference<PlayThread>();
 
 	private IPlaySubSystemFeedBack fb = null;
+
+
+
+	class PlayThread extends Thread {
+
+		AtomicBoolean stopped = new AtomicBoolean(false);
+
+		public void stopPlay() {
+			stopped.set(true);
+		}
+
+		public PlayThread(long startAt, IPlaySubSystemFeedBack feedBack) {
+			this.startAt = startAt;
+			this.feedBack = feedBack;
+		}
+
+		private long startAt;
+		private IPlaySubSystemFeedBack feedBack;
+
+		public void run() {
+			try {
+
+				try {
+
+					// adaptative fps
+					// by default : 1/25 -> every 40ms
+
+					int timer = 40;
+
+					sequencer.setMicrosecondPosition(startAt);
+
+					while (!stopped.get()) {
+						// every 100ms we evaluate the position :-)
+						Thread.sleep(timer);
+
+						long startnano = System.nanoTime();
+
+						long pos = sequencer.getMicrosecondPosition();
+
+						long n = feedBack.informCurrentPlayPosition(pos);
+
+						long nanotime = System.nanoTime() - startnano;
+
+						if (n > 0)
+							nanotime += n;
+
+						int credit = (int) (nanotime / 1000000);
+						credit *= 2;
+
+						if (credit > timer) {
+							timer *= 2;
+						} else if (credit / 2 < timer) {
+							timer /= 2;
+						}
+
+						if (timer < 40)
+							timer = 40; // limit the CPU
+
+					}
+
+				} catch (Throwable ex) {
+					logger.error("error in interrupt :" //$NON-NLS-1$
+							+ ex.getMessage(), ex);
+				} finally {
+
+					try {
+						sequencer.stop();
+						
+					} catch (Throwable ex) {
+						logger.error("error in finally :" //$NON-NLS-1$
+								+ ex.getMessage(), ex);
+					}
+
+					try {
+						sequencer.close();
+						GervillPlaySubSystem.this.owner = null;
+					} catch (Throwable ex) {
+						logger.error("error in finally :" //$NON-NLS-1$
+								+ ex.getMessage(), ex);
+					}
+				}
+			} catch (Throwable ex) {
+				logger.error("error in run :" //$NON-NLS-1$
+						+ ex.getMessage(), ex);
+			}
+		}
+	}
+
 
 	/**
 	 * The current play owner
@@ -173,66 +262,14 @@ public class GervillPlaySubSystem implements PlaySubSystem, NeedInstrument {
 		fb = feedBack;
 
 		// start At ....
+		PlayThread t = new PlayThread(startAt, feedBack);
 
-		Thread t = new Thread(new Runnable() {
-
-			public void run() {
-
-				try {
-
-					// adaptative fps
-					// by default : 1/25 -> every 40ms
-
-					int timer = 40;
-
-					sequencer.setMicrosecondPosition(startAt);
-
-					while (true) {
-						// every 100ms we evaluate the position :-)
-						Thread.sleep(timer);
-
-						long startnano = System.nanoTime();
-
-						long pos = sequencer.getMicrosecondPosition();
-
-						long n = feedBack.informCurrentPlayPosition(pos);
-
-						long nanotime = System.nanoTime() - startnano;
-
-						if (n > 0)
-							nanotime += n;
-
-						int credit = (int) (nanotime / 1000000);
-						credit *= 2;
-
-						if (credit > timer) {
-							timer *= 2;
-						} else if (credit / 2 < timer) {
-							timer /= 2;
-						}
-
-						if (timer < 40)
-							timer = 40; // limit the CPU
-
-					}
-
-				} catch (Throwable ex) {
-
-					sequencer.stop();
-					sequencer.close();
-					GervillPlaySubSystem.this.owner = null;
-
-				}
-
-			}
-		});
-
-		Thread oldOne = currentPlayingThread.getAndSet(t);
+		PlayThread oldOne = currentPlayingThread.getAndSet(t);
 
 		fb.playStarted();
 
 		if (oldOne != null)
-			oldOne.stop();
+			oldOne.stopPlay();
 
 		t.start();
 

@@ -3,6 +3,7 @@ package org.barrelorgandiscovery.playsubsystem;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javax.sound.midi.MidiSystem;
@@ -57,7 +58,7 @@ public class GervillPlaySubSystemWithRegisterInstruments
 	}
 
 	public boolean isPlaying() throws Exception {
-		Thread t = currentPlayingThread.get();
+		PlayThread t = currentPlayingThread.get();
 		return t != null;
 	}
 
@@ -65,7 +66,7 @@ public class GervillPlaySubSystemWithRegisterInstruments
 
 	private Soundbank lastplayedinstrument = null;
 
-	private AtomicReference<Thread> currentPlayingThread = new AtomicReference<Thread>();
+	private AtomicReference<PlayThread> currentPlayingThread = new AtomicReference<PlayThread>();
 
 	private IPlaySubSystemFeedBackWrapper fb = null;
 
@@ -73,6 +74,115 @@ public class GervillPlaySubSystemWithRegisterInstruments
 	 * The current play owner
 	 */
 	private Object owner = null;
+
+	class PlayThread extends Thread {
+
+		AtomicBoolean stopped = new AtomicBoolean(false);
+
+		public void stopPlay() {
+			stopped.set(true);
+		}
+
+		public PlayThread(long startAt, long sequenceLengthInMicroseconds, IPlaySubSystemFeedBackWrapper feedBack) {
+			this.startAt = startAt;
+			this.sequenceLengthInMicroseconds = sequenceLengthInMicroseconds;
+			this.feedBack = feedBack;
+		}
+
+		private long startAt;
+		private long sequenceLengthInMicroseconds;
+		private IPlaySubSystemFeedBackWrapper feedBack;
+
+		public void run() {
+			try {
+
+				try {
+
+					// adaptative fps
+					// by default : 1/25 -> every 40ms
+
+					int timer = 40;
+
+					sequencer.setMicrosecondPosition(startAt);
+
+					while (!stopped.get()) {
+						// every 100ms we evaluate the position :-)
+						Thread.sleep(timer);
+
+						long startnano = System.nanoTime();
+
+						long pos = sequencer.getMicrosecondPosition();
+
+						if (pos >= sequenceLengthInMicroseconds || !sequencer.isRunning()
+								|| sequencer.getLoopCount() > 0) {
+							try {
+								// Thread.sleep(1000); // because there might be some delays in the wav output streams
+								stopped.set(true); // Set flag to exit loop gracefully
+							} catch (Throwable t) {
+								logger.debug(t.getMessage(), t);
+							}
+							feedBack.playFinished();
+							//Thread.sleep(1000);
+							break;
+						}
+						long n = feedBack.informCurrentPlayPosition(pos);
+
+						long nanotime = System.nanoTime() - startnano;
+
+						if (n > 0)
+							nanotime += n;
+
+						int credit = (int) (nanotime / 1000000);
+						credit *= 2;
+
+						if (credit > timer) {
+							timer *= 2;
+						} else if (credit / 2 < timer) {
+							timer /= 2;
+						}
+
+						if (timer < 40)
+							timer = 40; // limit the CPU
+
+					}
+
+				} catch (Throwable ex) {
+					logger.error("error in interrupt :" //$NON-NLS-1$
+							+ ex.getMessage(), ex);
+				} finally {
+
+					try {
+						sequencer.stop();
+					} catch (Throwable ex) {
+						logger.error("error in finally :" //$NON-NLS-1$
+								+ ex.getMessage(), ex);
+					}
+
+					try {
+						sequencer.close();
+					} catch (Throwable ex) {
+						logger.error("error in finally :" //$NON-NLS-1$
+								+ ex.getMessage(), ex);
+					}
+
+					if (sourceDataLine != null) {
+						try {
+							sourceDataLine.close();
+						} catch (Throwable t) {
+							logger.error("error closing sourceDataLine :" //$NON-NLS-1$
+									+ t.getMessage(), t);
+						}
+					}
+					sourceDataLine = null;
+
+					GervillPlaySubSystemWithRegisterInstruments.this.owner = null;
+				}
+			} catch (Throwable ex) {
+				logger.error("error in run :" //$NON-NLS-1$
+						+ ex.getMessage(), ex);
+			}
+		}
+	}
 
 	private SourceDataLine sourceDataLine;
 
@@ -243,96 +353,14 @@ public class GervillPlaySubSystemWithRegisterInstruments
 		fb = feedBack;
 
 		// start At ....
+		PlayThread t = new PlayThread(startAt, sequenceLenghtInMicroseconds, feedBack);
 
-		Thread t = new Thread(new Runnable() {
-
-			public void run() {
-
-				try {
-
-					// adaptative fps
-					// by default : 1/25 -> every 40ms
-
-					int timer = 40;
-
-					sequencer.setMicrosecondPosition(startAt);
-
-					while (true) {
-						// every 100ms we evaluate the position :-)
-						Thread.sleep(timer);
-
-						long startnano = System.nanoTime();
-
-						long pos = sequencer.getMicrosecondPosition();
-
-						if (pos >= sequenceLenghtInMicroseconds || !sequencer.isRunning()
-								|| sequencer.getLoopCount() > 0) {
-							try {
-								Thread.sleep(1000); // because there might be some delays in the wav output streams
-								stop();
-							} catch (Throwable t) {
-								logger.debug(t.getMessage(), t);
-							}
-							feedBack.playFinished();
-							Thread.sleep(1000);
-							break;
-						}
-						long n = feedBack.informCurrentPlayPosition(pos);
-
-						long nanotime = System.nanoTime() - startnano;
-
-						if (n > 0)
-							nanotime += n;
-
-						int credit = (int) (nanotime / 1000000);
-						credit *= 2;
-
-						if (credit > timer) {
-							timer *= 2;
-						} else if (credit / 2 < timer) {
-							timer /= 2;
-						}
-
-						if (timer < 40)
-							timer = 40; // limit the CPU
-
-					}
-				} catch (Throwable ex) {
-
-				}
-
-				finally
-
-				{
-
-					try {
-						sequencer.stop();
-					} catch (Throwable t) {
-					}
-					try {
-						sequencer.close();
-					} catch (Throwable t) {
-					}
-					if (sourceDataLine != null) {
-						try {
-							sourceDataLine.close();
-						} catch (Throwable t) {
-						}
-					}
-					sourceDataLine = null;
-
-					GervillPlaySubSystemWithRegisterInstruments.this.owner = null;
-				}
-
-			}
-		});
-
-		Thread oldOne = currentPlayingThread.getAndSet(t);
+		PlayThread oldOne = currentPlayingThread.getAndSet(t);
 
 		// fb.playStarted();
 
 		if (oldOne != null)
-			oldOne.stop();
+			oldOne.stopPlay();
 
 		t.start();
 
@@ -395,10 +423,10 @@ public class GervillPlaySubSystemWithRegisterInstruments
 	 * @see org.barrelorgandiscovery.playsubsystem.PlaySubSystem#stop()
 	 */
 	public void stop() throws Exception {
-		Thread oldOne = currentPlayingThread.getAndSet(null);
+		PlayThread oldOne = currentPlayingThread.getAndSet(null);
 		if (oldOne != null) {
 			try {
-				oldOne.stop();
+				oldOne.stopPlay();
 			} catch (Throwable t) {
 
 			}
