@@ -3,7 +3,9 @@ package org.barrelorgandiscovery.gui.ascale.constraints;
 import java.awt.BorderLayout;
 import java.io.InputStream;
 
+import javax.swing.JComponent;
 import javax.swing.JSpinner;
+import javax.swing.JTextArea;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -59,10 +61,24 @@ public class MinimumHoleLengthConstraintComponent extends
 				fireConstraintChanged();
 			}});
 
+		JTextArea explanation = new JTextArea(getLongDescription());
+		ConstraintSketches.configureWrappingDescription(explanation);
 
-		setLayout(new BorderLayout());
+		setLayout(new BorderLayout(0, 8));
+		add(ConstraintSketches.buildNorthSection(explanation,
+				getDiagramComponent()), BorderLayout.NORTH);
 		add(p, BorderLayout.CENTER);
 
+	}
+
+	@Override
+	public JComponent getDiagramComponent() {
+		return ConstraintSketches.minimumHoleLengthDiagram();
+	}
+
+	@Override
+	public String getLongDescription() {
+		return Messages.getString("MinimumHoleLengthConstraintComponent.description"); //$NON-NLS-1$
 	}
 
 	@Override
@@ -75,6 +91,7 @@ public class MinimumHoleLengthConstraintComponent extends
 	public String getLabel() {
 		return Messages.getString("MinimumHoleLengthConstraintComponent.5"); //$NON-NLS-1$
 	}
+
 
 	@Override
 	public void load(AbstractScaleConstraint constraint) throws Exception {

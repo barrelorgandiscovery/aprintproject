@@ -902,6 +902,14 @@ public class ScaleComponent extends JComponent {
 	}
 
 	@Override
+	public Dimension getMinimumSize() {
+		// Preferred size is the full scale width in pixels; if the LAF or layout
+		// uses that as an implicit minimum, JSplitPane cannot shrink the diagram
+		// column and the divider appears to "not follow" the mouse.
+		return new Dimension(96, 72);
+	}
+
+	@Override
 	public void setPreferredSize(Dimension preferredSize) {
 		this.preferredSize = preferredSize;
 	}

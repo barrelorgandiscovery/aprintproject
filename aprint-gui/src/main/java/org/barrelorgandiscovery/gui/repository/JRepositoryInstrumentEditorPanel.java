@@ -152,7 +152,7 @@ public class JRepositoryInstrumentEditorPanel extends JPanel {
 
 		menuBar.add(exportInstrument);
 
-		JMenu scaleMenu = new JMenu("Scale ...");
+		JMenu scaleMenu = new JMenu(Messages.getString("JInstrumentEditor.77")); //$NON-NLS-1$
 		menuBar.add(scaleMenu);
 
 		JMenuItem importScaleFromFile = new JMenuItem(Messages.getString("JRepositoryInstrumentEditorPanel.12")); //$NON-NLS-1$

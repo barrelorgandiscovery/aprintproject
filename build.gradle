@@ -124,6 +124,64 @@ task runAPrint(type: JavaExec, dependsOn: ':aprint-gui:classes') {
     errorOutput = System.err
 }
 
+// Same as runAPrint but listens for a remote debugger (JDWP).
+// Attach your IDE to localhost:<port> (default 5005). Override: -PdebugPort=8787
+// Wait for debugger before starting: -PdebugSuspend=true
+// For Gradle’s own logging: ./gradlew runAPrintDebug --info  (or --debug)
+task runAPrintDebug(type: JavaExec, dependsOn: ':aprint-gui:classes') {
+    group = 'application'
+    description = 'Runs APrint with JDWP enabled (default port 5005, suspend=n). Use -PdebugPort= / -PdebugSuspend=true'
+
+    classpath = project(':aprint-gui').sourceSets.main.runtimeClasspath
+    main = 'org.barrelorgandiscovery.gui.aprintng.APrintApplicationBootStrap'
+
+    def debugPort = project.findProperty('debugPort') ?: '5005'
+    def debugSuspend = project.hasProperty('debugSuspend') && 'true'.equalsIgnoreCase(String.valueOf(project.property('debugSuspend')))
+
+    jvmArgs = [
+        "-agentlib:jdwp=transport=dt_socket,server=y,suspend=${debugSuspend ? 'y' : 'n'},address=*:${debugPort}",
+        // See full stack traces even when the same exception is thrown many times (HotSpot optimization)
+        '-XX:-OmitStackTraceInFastThrow',
+        '-ea',
+        '-Xmx2g',
+        '-server',
+        '--add-opens', 'java.base/java.lang=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.lang.reflect=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.lang.invoke=ALL-UNNAMED',
+        '--add-opens', 'java.base/jdk.proxy1=ALL-UNNAMED',
+        '--add-opens', 'java.desktop/javax.swing.text=ALL-UNNAMED',
+        '--add-opens', 'java.desktop/javax.swing=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.util=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.util.concurrent=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.util.concurrent.atomic=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.util.spi=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.util.stream=ALL-UNNAMED',
+        '--add-opens', 'java.base/java.io=ALL-UNNAMED',
+        '--add-opens', 'java.desktop/java.awt=ALL-UNNAMED',
+        '--add-opens', 'jdk.proxy1/jdk.proxy1=ALL-UNNAMED',
+        '--add-exports', 'jdk.proxy1/jdk.proxy1=ALL-UNNAMED'
+    ]
+
+    systemProperty 'aprint.mcp.enabled', project.hasProperty('mcp.enabled') ? project.property('mcp.enabled') : 'false'
+    systemProperty 'aprint.mcp.mode', project.hasProperty('mcp.mode') ? project.property('mcp.mode') : 'http'
+    systemProperty 'aprint.mcp.port', project.hasProperty('mcp.port') ? project.property('mcp.port') : '8080'
+    // Log4j 1.x: prints configuration diagnostics to stderr (helps when tracing logging / errors)
+    systemProperty 'log4j.debug', 'true'
+
+    if (project.hasProperty('mainfolder')) {
+        systemProperty 'mainfolder', project.property('mainfolder')
+    }
+
+    // APrintApplicationBootStrap / APrintApplication: -d (--develop) enables isdevelop,
+    // beta prefs, DEBUG root logger, and LF5 appender (when not profiling). Without this,
+    // launch() sets the root logger to ERROR and most exceptions are not logged.
+    args '-d'
+
+    standardInput = System.in
+    standardOutput = System.out
+    errorOutput = System.err
+}
+
 // Task to run APrint with MCP server enabled
 task runAPrintWithMCP(type: JavaExec, dependsOn: ':aprint-gui:classes') {
     group = 'application'

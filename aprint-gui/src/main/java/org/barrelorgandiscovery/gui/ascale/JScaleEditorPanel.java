@@ -2,6 +2,10 @@ package org.barrelorgandiscovery.gui.ascale;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.text.MessageFormat;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -9,6 +13,8 @@ import java.awt.event.ItemListener;
 import java.io.File;
 import java.util.HashMap;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -24,7 +30,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.CaretEvent;
@@ -40,6 +46,7 @@ import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.gui.aprintng.APrintNG;
 import org.barrelorgandiscovery.gui.ascale.constraints.ConstraintListChangeListener;
 import org.barrelorgandiscovery.gui.ascale.constraints.ConstraintPanel;
+import org.barrelorgandiscovery.gui.swing.ComboBoxPopupSafeguards;
 import org.barrelorgandiscovery.gui.tools.APrintFileChooser;
 import org.barrelorgandiscovery.messages.Messages;
 import org.barrelorgandiscovery.scale.AbstractTrackDef;
@@ -53,6 +60,7 @@ import org.barrelorgandiscovery.virtualbook.rendering.VirtualBookRendering;
 import org.barrelorgandiscovery.virtualbook.rendering.VirtualBookRenderingFactory;
 
 import com.jeta.forms.components.panel.FormPanel;
+import com.jeta.forms.gui.form.FormAccessor;
 
 public class JScaleEditorPanel extends JPanel {
 
@@ -60,6 +68,25 @@ public class JScaleEditorPanel extends JPanel {
 	 * 
 	 */
 	private static final long serialVersionUID = -8484645796626431335L;
+
+	/**
+	 * Bean name in {@code scaleEditorLeftPart.jfrm} for the general tab. Matches
+	 * Abeille strings and committed (working) code: {@code getComponentByName} +
+	 * {@code getParent().add(generalProperties)}.
+	 */
+	private static final String GENERAL_PROPERTIES_BEAN = "generalProperties"; //$NON-NLS-1$
+
+	/**
+	 * Wider than the LAF default (~5–7px) so the diagram|properties and
+	 * diagram|track-editor dividers are easier to grab and drag.
+	 */
+	private static final int SPLIT_DIVIDER_SIZE = 12;
+
+	/**
+	 * Low minimum for the diagram side so {@link JSplitPane} can move the
+	 * divider; children with huge implicit mins would otherwise pin the sash.
+	 */
+	private static final int SPLIT_MIN_SCALE_SIDE_PX = 120;
 
 	private static Logger logger = Logger.getLogger(JScaleEditorPanel.class);
 	//
@@ -81,6 +108,9 @@ public class JScaleEditorPanel extends JPanel {
 	private JSpinner spinnerspeed;
 	private JScrollPane scalecomponentscrollpane;
 	private ScaleComponent scalecomponent;
+
+	/** Zoom slider (toolbar); kept for sync after programmatic scale changes */
+	private JSlider zoomSlider;
 
 	private JSpinner spinnernbpistes;
 	private JLabel labelnbpistes;
@@ -116,12 +146,22 @@ public class JScaleEditorPanel extends JPanel {
 	 * Left Panel
 	 */
 	private FormPanel leftPanel = null;
+	/**
+	 * General tab content from {@code scaleEditorGeneralProperties.jfrm}, added
+	 * beside the {@link #GENERAL_PROPERTIES_BEAN} slot (same integration as git HEAD).
+	 */
 	private FormPanel generalProperties = null;
 	private JTabbedPane tab = null;
 
 	private FormPanel scalePanel = null;
 
 	private JComboBox bookType;
+
+	/** Labels from the form; kept for programmatic reflow of the General tab */
+	private JLabel labelScaleDescription;
+	private JLabel labelBookTypeCaption;
+	private JLabel labelInvertReference;
+	private JLabel labelInformationNotes;
 
 	private Object owner;
 
@@ -161,10 +201,27 @@ public class JScaleEditorPanel extends JPanel {
 		generalProperties = new FormPanel(getClass().getResourceAsStream(
 				"scaleEditorGeneralProperties.jfrm")); //$NON-NLS-1$
 
-		Component oldComp = leftPanel.getComponentByName("generalProperties"); //$NON-NLS-1$
+		// Identical to pre-refactor / git HEAD: first bean named generalProperties
+		// (duplicate label+grid in jfrm), parent.add(full form). Works with extension
+		// ClassLoader; replaceBean paths hit "Unable to find oldComp" there.
+		Component oldComp = leftPanel.getComponentByName(GENERAL_PROPERTIES_BEAN);
+		if (oldComp == null) {
+			throw new IllegalStateException(
+					"scaleEditorLeftPart: bean " + GENERAL_PROPERTIES_BEAN + " missing"); //$NON-NLS-1$
+		}
+		Container anchorParent = oldComp.getParent();
+		if (anchorParent == null) {
+			throw new IllegalStateException(
+					"scaleEditorLeftPart: no parent for bean " //$NON-NLS-1$
+							+ GENERAL_PROPERTIES_BEAN);
+		}
+		anchorParent.add(generalProperties);
+		if (logger.isInfoEnabled()) {
+			logger.info("general tab: legacy attach bean=" + GENERAL_PROPERTIES_BEAN //$NON-NLS-1$
+					+ " formParent=" //$NON-NLS-1$
+					+ generalProperties.getParent().getClass().getName());
+		}
 
-		oldComp.getParent().add(generalProperties);
-		
 		scalePanel = new FormPanel(getClass().getResourceAsStream(
 				"scaleEditorScaleEdit.jfrm")); //$NON-NLS-1$
 
@@ -191,9 +248,9 @@ public class JScaleEditorPanel extends JPanel {
 			}
 		});
 
-		JLabel labelPreferredViewInverted = (JLabel) generalProperties
+		labelInvertReference = (JLabel) generalProperties
 				.getComponentByName("labelInvertReference"); //$NON-NLS-1$
-		labelPreferredViewInverted.setText(Messages.getString("ScaleEditor.0")); //$NON-NLS-1$
+		labelInvertReference.setText(Messages.getString("ScaleEditor.0")); //$NON-NLS-1$
 		preferredViewInverted = (JCheckBox) generalProperties
 				.getComponentByName("invertReference"); //$NON-NLS-1$
 		preferredViewInverted.addChangeListener(new ChangeListener() {
@@ -274,9 +331,9 @@ public class JScaleEditorPanel extends JPanel {
 			}
 		});
 
-		JLabel labelScaleName = (JLabel) generalProperties
+		labelScaleDescription = (JLabel) generalProperties
 				.getComponentByName("labelScaleDescription"); //$NON-NLS-1$
-		labelScaleName.setText(Messages.getString("JScaleEditorPanel.18")); //$NON-NLS-1$
+		labelScaleDescription.setText(Messages.getString("JScaleEditorPanel.18")); //$NON-NLS-1$
 
 		scalename = (JTextField) generalProperties
 				.getComponentByName("scaleDescription"); //$NON-NLS-1$
@@ -395,9 +452,9 @@ public class JScaleEditorPanel extends JPanel {
 			}
 		});
 
-		JLabel labelBookType = (JLabel) generalProperties
+		labelBookTypeCaption = (JLabel) generalProperties
 				.getComponentByName("labelBookType"); //$NON-NLS-1$
-		labelBookType.setText(Messages.getString("JScaleEditorPanel.28")); //$NON-NLS-1$
+		labelBookTypeCaption.setText(Messages.getString("JScaleEditorPanel.28")); //$NON-NLS-1$
 
 		//
 		// parametreregistres = new JPanel();
@@ -493,146 +550,130 @@ public class JScaleEditorPanel extends JPanel {
 					}
 				});
 
+		tabbededitors.setBorder(new TitledBorder(Messages
+				.getString("GammeEditor.24"))); //$NON-NLS-1$
+		tabbededitors.setMinimumSize(new Dimension(0, 0));
+
 		// ==== Scale Viewer ====
 
 		scalecomponentscrollpane = new JScrollPane(scalecomponent,
-				JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-				JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
 		scalecomponentscrollpane.setAutoscrolls(true);
+		scalecomponentscrollpane.setMinimumSize(new Dimension(0, 0));
 
 		final double scalefactor = 1.3;
-
-		JToolBar tb = new JToolBar("tools"); //$NON-NLS-1$
-
 		final int SLIDER_MAX_VALUE = 30;
 		final int SLIDER_MIN_VALUE = 2;
 
-		final JSlider slider = new JSlider(JSlider.HORIZONTAL,
-				SLIDER_MIN_VALUE, SLIDER_MAX_VALUE, 10);
+		zoomSlider = new JSlider(JSlider.HORIZONTAL, SLIDER_MIN_VALUE,
+				SLIDER_MAX_VALUE, 10);
+		zoomSlider.setPreferredSize(new Dimension(220,
+				zoomSlider.getPreferredSize().height));
 
-		JButton zoomplus = new JButton(Messages.getString("GammeEditor.47")); //$NON-NLS-1$
-		zoomplus.setIcon(new ImageIcon(APrintNG.class.getResource("viewmag.png"))); //$NON-NLS-1$
+		JPanel editorToolBar = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
+		editorToolBar.setBorder(BorderFactory.createEmptyBorder(0, 0, 2, 0));
+
+		JButton zoomplus = new JButton();
+		zoomplus.setIcon(new ImageIcon(
+				APrintNG.class.getResource("viewmagplus.png"))); //$NON-NLS-1$
 		zoomplus.setToolTipText(Messages.getString("GammeEditor.49")); //$NON-NLS-1$
-		zoomplus.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				scalecomponent.setScale(scalecomponent.getScale() * scalefactor);
-				scalecomponent.revalidate();
-				scalecomponentscrollpane.revalidate();
-				scalecomponentscrollpane.repaint();
-
-				int sliderpos = (int) (scalecomponent.getScale() * 10);
-				if (sliderpos < SLIDER_MIN_VALUE)
-					sliderpos = SLIDER_MIN_VALUE;
-
-				if (sliderpos > SLIDER_MAX_VALUE)
-					sliderpos = SLIDER_MAX_VALUE;
-				slider.setValue(sliderpos);
-				slider.repaint();
-			}
+		zoomplus.addActionListener(e -> {
+			scalecomponent.setScale(scalecomponent.getScale() * scalefactor);
+			revalidateScaleViewAndSyncZoomSlider(SLIDER_MIN_VALUE,
+					SLIDER_MAX_VALUE);
 		});
-		tb.add(zoomplus);
-		JButton zoommoins = new JButton(Messages.getString("GammeEditor.50")); //$NON-NLS-1$
-		zoommoins
-				.setIcon(new ImageIcon(APrintNG.class.getResource("viewmag.png"))); //$NON-NLS-1$
+		editorToolBar.add(zoomplus);
+
+		JButton zoommoins = new JButton();
+		zoommoins.setIcon(new ImageIcon(
+				APrintNG.class.getResource("viewmagminus.png"))); //$NON-NLS-1$
 		zoommoins.setToolTipText(Messages.getString("GammeEditor.52")); //$NON-NLS-1$
-		zoommoins.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-
-				scalecomponent.setScale(scalecomponent.getScale() / scalefactor);
-				scalecomponent.revalidate();
-				scalecomponentscrollpane.revalidate();
-				scalecomponentscrollpane.repaint();
-
-				int sliderpos = (int) (scalecomponent.getScale() * 10);
-				if (sliderpos < SLIDER_MIN_VALUE)
-					sliderpos = SLIDER_MIN_VALUE;
-
-				if (sliderpos > SLIDER_MAX_VALUE)
-					sliderpos = SLIDER_MAX_VALUE;
-				slider.setValue(sliderpos);
-				slider.repaint();
-			}
+		zoommoins.addActionListener(e -> {
+			scalecomponent.setScale(scalecomponent.getScale() / scalefactor);
+			revalidateScaleViewAndSyncZoomSlider(SLIDER_MIN_VALUE,
+					SLIDER_MAX_VALUE);
 		});
-		tb.add(zoommoins);
+		editorToolBar.add(zoommoins);
 
-		slider.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				JSlider slider = (JSlider) e.getSource();
-				int value = slider.getValue();
-				scalecomponent.setScale((1.0 * value) / 10.0);
+		editorToolBar.add(Box.createHorizontalStrut(8));
+		editorToolBar.add(new JLabel(
+				Messages.getString("JScaleEditorPanel.zoomLabel"))); //$NON-NLS-1$
+		editorToolBar.add(zoomSlider);
 
-				scalecomponent.revalidate();
-				scalecomponentscrollpane.revalidate();
-				scalecomponentscrollpane.repaint();
-			}
+		zoomSlider.addChangeListener(e -> {
+			int value = zoomSlider.getValue();
+			scalecomponent.setScale(value / 10.0);
+			scalecomponent.revalidate();
+			scalecomponentscrollpane.revalidate();
+			scalecomponentscrollpane.repaint();
+			zoomSlider.setToolTipText(MessageFormat.format(
+					Messages.getString("JScaleEditorPanel.zoomFactorTooltip"), //$NON-NLS-1$
+					scalecomponent.getScale()));
 		});
+		syncZoomSliderFromScale(SLIDER_MIN_VALUE, SLIDER_MAX_VALUE);
 
-		tb.add(slider);
-
-		// Toolbar for modifying the scale
-		JToolBar modifierTb = new JToolBar();
+		editorToolBar.add(Box.createHorizontalStrut(8));
 
 		JButton addTrack = new JButton(
 				Messages.getString("JScaleEditorPanel.10000")); //$NON-NLS-1$
-		addTrack.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-
-				int selectedTrackDef = scalecomponent.getSelectedTrackDef();
-				if (selectedTrackDef != -1) {
-					scalecomponent.shiftTracksDown(selectedTrackDef);
-					scalecomponent.setSelectedTrackDef(selectedTrackDef); // refresh
-				}
-
+		addTrack.setToolTipText(Messages.getString("JScaleEditorPanel.10000")); //$NON-NLS-1$
+		addTrack.addActionListener(e -> {
+			int selectedTrackDef = scalecomponent.getSelectedTrackDef();
+			if (selectedTrackDef != -1) {
+				scalecomponent.shiftTracksDown(selectedTrackDef);
+				scalecomponent.setSelectedTrackDef(selectedTrackDef);
 			}
 		});
-		modifierTb.add(addTrack);
+		editorToolBar.add(addTrack);
+
 		JButton removeTrack = new JButton(
 				Messages.getString("JScaleEditorPanel.10001")); //$NON-NLS-1$
-
-		removeTrack.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				int selectedTrackDef = scalecomponent.getSelectedTrackDef();
-				if (selectedTrackDef != -1) {
-					scalecomponent.shiftTracksUp(selectedTrackDef);
-					scalecomponent.setSelectedTrackDef(selectedTrackDef); // refresh
-				}
+		removeTrack.setToolTipText(Messages.getString("JScaleEditorPanel.10001")); //$NON-NLS-1$
+		removeTrack.addActionListener(e -> {
+			int selectedTrackDef = scalecomponent.getSelectedTrackDef();
+			if (selectedTrackDef != -1) {
+				scalecomponent.shiftTracksUp(selectedTrackDef);
+				scalecomponent.setSelectedTrackDef(selectedTrackDef);
 			}
 		});
-		modifierTb.add(removeTrack);
+		editorToolBar.add(removeTrack);
 
-		JButton insererNotes = new JButton(Messages.getString("JScaleEditorPanel.1010")); //$NON-NLS-1$
+		JButton insererNotes = new JButton(
+				Messages.getString("JScaleEditorPanel.1010")); //$NON-NLS-1$
 		insererNotes.setToolTipText(Messages.getString("JScaleEditorPanel.1011")); //$NON-NLS-1$
-		insererNotes.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				try {
-
-					insertFollowingNotes();
-
-				} catch (Throwable t) {
-					logger.error("error in inserting notes " + t.getMessage(), //$NON-NLS-1$
-							t);
-				}
-
+		insererNotes.addActionListener(e -> {
+			try {
+				insertFollowingNotes();
+			} catch (Throwable t) {
+				logger.error("error in inserting notes " + t.getMessage(), //$NON-NLS-1$
+						t);
 			}
 		});
+		editorToolBar.add(insererNotes);
 
-		modifierTb.add(insererNotes);
+		JPanel diagramStack = new JPanel(new BorderLayout());
+		diagramStack.setMinimumSize(new Dimension(0, 0));
+		diagramStack.add(editorToolBar, BorderLayout.NORTH);
+		diagramStack.add(scalecomponentscrollpane, BorderLayout.CENTER);
 
-		JPanel toolbarPanel = new JPanel();
-		toolbarPanel.setLayout(new BorderLayout());
-		toolbarPanel.add(tb, BorderLayout.NORTH);
-		toolbarPanel.add(modifierTb, BorderLayout.SOUTH);
+		JSplitPane verticalSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT,
+				diagramStack, tabbededitors);
+		verticalSplit.setResizeWeight(0.68);
+		verticalSplit.setDividerSize(SPLIT_DIVIDER_SIZE);
+		verticalSplit.setOneTouchExpandable(true);
+		verticalSplit.setContinuousLayout(true);
+		verticalSplit.setBorder(BorderFactory.createEmptyBorder());
 
 		JPanel panelWithToolbarsAndScaleComponent = new JPanel(
 				new BorderLayout());
-		panelWithToolbarsAndScaleComponent.add(scalecomponentscrollpane,
+		panelWithToolbarsAndScaleComponent.add(verticalSplit,
 				BorderLayout.CENTER);
-		panelWithToolbarsAndScaleComponent
-				.add(toolbarPanel, BorderLayout.NORTH);
 
 		this.scalePanel.getFormAccessor().replaceBean(
 				scalePanel.getComponentByName("scalecomponent"), //$NON-NLS-1$
 				panelWithToolbarsAndScaleComponent);
+		scalePanel.setMinimumSize(new Dimension(SPLIT_MIN_SCALE_SIDE_PX, 80));
 
 		JPanel generalPanel = new JPanel(new BorderLayout());
 
@@ -653,23 +694,23 @@ public class JScaleEditorPanel extends JPanel {
 		// ---- label5 ----
 		labelvitesse.setText(Messages.getString("GammeEditor.23")); //$NON-NLS-1$
 
+		JPanel generalPropertiesColumn = wrapGeneralPropertiesColumn(leftPanel);
+
 		JSplitPane globalSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
-				scalePanel, leftPanel);
+				scalePanel, generalPropertiesColumn);
 
-		globalSplit.setResizeWeight(1.0);
+		globalSplit.setResizeWeight(0.58);
+		globalSplit.setDividerSize(SPLIT_DIVIDER_SIZE);
+		globalSplit.setOneTouchExpandable(true);
+		globalSplit.setContinuousLayout(true);
 
+		generalPanel.setBorder(BorderFactory.createEmptyBorder(4, 8, 8, 8));
 		generalPanel.add(globalSplit, BorderLayout.CENTER);
-
-		tabbededitors.setBorder(new TitledBorder(Messages
-				.getString("GammeEditor.24"))); //$NON-NLS-1$
-
-		panelWithToolbarsAndScaleComponent.add(tabbededitors,
-				BorderLayout.SOUTH);
 
 		infostextarea = (JTextArea) generalProperties
 				.getComponentByName("generalInformationsNotes"); //$NON-NLS-1$
 
-		JLabel labelInformationNotes = (JLabel) generalProperties
+		labelInformationNotes = (JLabel) generalProperties
 				.getComponentByName("labelGeneralInformationsNotes"); //$NON-NLS-1$
 		labelInformationNotes.setText(Messages.getString("GammeEditor.53")); //$NON-NLS-1$
 
@@ -678,6 +719,17 @@ public class JScaleEditorPanel extends JPanel {
 				scalecomponent.changeInfos(infostextarea.getText());
 			}
 		});
+
+		SwingUtilities.invokeLater(() -> {
+			refreshSpinnerEditorsAfterLayout();
+			if (logger.isInfoEnabled()) {
+				logger.info("after init layout: generalProperties size=" //$NON-NLS-1$
+						+ generalProperties.getSize() + " showing=" //$NON-NLS-1$
+						+ generalProperties.isShowing());
+			}
+		});
+
+		ComboBoxPopupSafeguards.installDeferredFlatComboPopupOnTreeLater(this);
 
 		this.setLayout(new BorderLayout());
 
@@ -689,6 +741,83 @@ public class JScaleEditorPanel extends JPanel {
 
 		// setSize(new Dimension(1024, 768));
 
+	}
+
+	private JPanel wrapGeneralPropertiesColumn(FormPanel inner) {
+		JPanel wrap = new JPanel(new BorderLayout(0, 0));
+		wrap.add(inner, BorderLayout.CENTER);
+		return wrap;
+	}
+
+	/**
+	 * Rebuilds spinner editors and re-applies model values so text fields show
+	 * correctly after layout (JDK / FlatLaf).
+	 */
+	private void refreshSpinnerEditorsAfterLayout() {
+		resyncSpinnerWithNumberEditor(spinneraxepremierepiste, "0.000"); //$NON-NLS-1$
+		resyncSpinnerWithNumberEditor(spinnerentreaxepiste, "0.000"); //$NON-NLS-1$
+		resyncSpinnerWithNumberEditor(spinnerlargeurpiste, "0.000"); //$NON-NLS-1$
+		resyncSpinnerPlain(spinnerlargeurcarton);
+		resyncSpinnerPlain(spinnernbpistes);
+		resyncSpinnerPlain(spinnerspeed);
+	}
+
+	private void resyncSpinnerWithNumberEditor(JSpinner spinner, String pattern) {
+		Object v = spinner.getValue();
+		spinner.setEditor(new JSpinner.NumberEditor(spinner, pattern));
+		spinner.setValue(v);
+		finishSpinnerResync(spinner);
+	}
+
+	private void resyncSpinnerPlain(JSpinner spinner) {
+		Object v = spinner.getValue();
+		spinner.setValue(v);
+		finishSpinnerResync(spinner);
+	}
+
+	private void finishSpinnerResync(JSpinner spinner) {
+		try {
+			spinner.commitEdit();
+		} catch (java.text.ParseException e) {
+			// keep current model value
+		}
+		if (spinner.getEditor() instanceof JSpinner.DefaultEditor) {
+			JSpinner.DefaultEditor de = (JSpinner.DefaultEditor) spinner
+					.getEditor();
+			JTextField tf = de.getTextField();
+			tf.setColumns(Math.max(8, tf.getColumns()));
+		}
+		Dimension pref = spinner.getPreferredSize();
+		spinner.setMinimumSize(
+				new Dimension(Math.max(96, pref.width), pref.height));
+		spinner.revalidate();
+		spinner.repaint();
+	}
+
+	private void revalidateScaleViewAndSyncZoomSlider(int min, int max) {
+		scalecomponent.revalidate();
+		scalecomponentscrollpane.revalidate();
+		scalecomponentscrollpane.repaint();
+		syncZoomSliderFromScale(min, max);
+	}
+
+	private void syncZoomSliderFromScale(int min, int max) {
+		if (zoomSlider == null) {
+			return;
+		}
+		int v = (int) Math.round(scalecomponent.getScale() * 10);
+		if (v < min) {
+			v = min;
+		}
+		if (v > max) {
+			v = max;
+		}
+		if (zoomSlider.getValue() != v) {
+			zoomSlider.setValue(v);
+		}
+		zoomSlider.setToolTipText(MessageFormat.format(
+				Messages.getString("JScaleEditorPanel.zoomFactorTooltip"), //$NON-NLS-1$
+				scalecomponent.getScale()));
 	}
 
 	protected void insertFollowingNotes() {
@@ -828,6 +957,7 @@ public class JScaleEditorPanel extends JPanel {
 
 		propertyHashEditor.setHash(g.getAllProperties());
 
+		SwingUtilities.invokeLater(() -> refreshSpinnerEditorsAfterLayout());
 	}
 
 	/**

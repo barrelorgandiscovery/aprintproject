@@ -17,7 +17,9 @@ public class PianoRenderingNote {
 	private Polygon polygon;
 
 	private int halfkeysizex = 8;
-	private int keysizey = 95;
+	/** White key height in pixels (shared layout constant for piano roll UI). */
+	public static final int KEYSIZE_Y = 95;
+	private int keysizey = KEYSIZE_Y;
 	private int halfblackkeysizex = 5;
 	private int blackkeysizey = 58;
 	private int midicode;

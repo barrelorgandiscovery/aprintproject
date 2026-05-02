@@ -1,5 +1,6 @@
 package org.barrelorgandiscovery.gui.ascale.constraints;
 
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 import org.apache.log4j.Logger;
@@ -32,6 +33,24 @@ public abstract class AbstractScaleConstraintComponent extends JPanel {
 	 * @return
 	 */
 	public abstract String getLabel();
+
+	/**
+	 * Short explanation (one or two sentences) for help text and the constraint
+	 * editor header; override in concrete types.
+	 */
+	public String getLongDescription() {
+		return ""; //$NON-NLS-1$
+	}
+
+	/**
+	 * Optional schematic drawn under {@link #getLongDescription()}; override when
+	 * adding a constraint type. Build the editor header with
+	 * {@link ConstraintSketches#buildNorthSection(javax.swing.JTextArea, JComponent)}
+	 * and {@link ConstraintSketches#configureWrappingDescription(javax.swing.JTextArea)}.
+	 */
+	public JComponent getDiagramComponent() {
+		return null;
+	}
 
 	/**
 	 * Load the content of the component from the contraint object

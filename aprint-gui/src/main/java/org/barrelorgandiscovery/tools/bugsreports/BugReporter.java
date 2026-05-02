@@ -33,6 +33,11 @@ public class BugReporter {
 	private static File reportfile = null;
 	private static String applicationname = null;
 
+	/**
+	 * Initializes Log4j file logging into a temp file (typically under
+	 * {@code java.io.tmpdir}, e.g. {@code /tmp/log*.log} on Linux). The same file is
+	 * zipped as {@code logreport.log} when {@link #sendBugReport()} runs.
+	 */
 	public static void init(String applicationname) throws Exception {
 
 		BugReporter.applicationname = applicationname;

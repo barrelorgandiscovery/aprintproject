@@ -282,6 +282,7 @@ public class StandAloneScaleEditor extends JFrame {
 		contentPane.add(this.scaleEditorPanel, BorderLayout.CENTER);
 
 		setSize(new Dimension(1024, 768));
+		setMinimumSize(new Dimension(780, 520));
 
 	}
 

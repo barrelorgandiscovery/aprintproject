@@ -1,12 +1,19 @@
 package org.barrelorgandiscovery.gui.ainstrument;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Insets;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Frame;
+import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -24,8 +31,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.prefs.Preferences;
 
 import javax.swing.AbstractCellEditor;
+import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -36,13 +45,14 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
+import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.border.Border;
-import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -56,6 +66,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
+import javax.swing.border.Border;
 
 import org.apache.commons.vfs2.provider.AbstractFileObject;
 import org.apache.log4j.Logger;
@@ -65,6 +76,8 @@ import org.barrelorgandiscovery.editableinstrument.InstrumentScript;
 import org.barrelorgandiscovery.editableinstrument.ScaleListener;
 import org.barrelorgandiscovery.editableinstrument.SoundSampleListListener;
 import org.barrelorgandiscovery.gui.ainstrument.pianoroll.JPianoRollComponent;
+import org.barrelorgandiscovery.gui.ainstrument.pianoroll.PianoRenderingNote;
+import org.barrelorgandiscovery.gui.ainstrument.pianoroll.PianoRollRangeEditListener;
 import org.barrelorgandiscovery.gui.ainstrument.pianoroll.PianoRenderingNote;
 import org.barrelorgandiscovery.gui.ascale.JScaleEditorPanel;
 import org.barrelorgandiscovery.gui.ascale.ScaleComponent;
@@ -111,6 +124,13 @@ public class JInstrumentEditorPanel extends JPanel {
 
 	private static int MAX_IMAGE_WIDTH = 300;
 	private static int MAX_IMAGE_HEIGHT = 300;
+
+	/** General tab: scroll viewport size for the instrument picture preview */
+	private static final int GENERAL_TAB_IMAGE_VIEWPORT_W = 320;
+	private static final int GENERAL_TAB_IMAGE_VIEWPORT_H = 280;
+
+	/** Lazy placeholder when no instrument image is set (gray box + label) */
+	private static ImageIcon noInstrumentPicturePlaceholder;
 
 	/**
 	 * The current modified instrument
@@ -181,14 +201,7 @@ public class JInstrumentEditorPanel extends JPanel {
 			});
 
 			instrumentDescription.setText(newModel.getInstrumentDescription());
-			Image i = newModel.getInstrumentPicture();
-			if (i != null) {
-				instrumentImage.setIcon(new ImageIcon(newModel.getInstrumentPicture()));
-				instrumentImage.revalidate();
-				instrumentImage.repaint();
-			} else {
-				instrumentImage.setIcon(null);
-			}
+			updateInstrumentPictureDisplay(newModel.getInstrumentPicture());
 
 			instrumentName.setText(newModel.getName());
 
@@ -236,7 +249,8 @@ public class JInstrumentEditorPanel extends JPanel {
 		 * 
 		 */
 		private static final long serialVersionUID = -5849635301564539640L;
-		private ImageIcon icon = new ImageIcon(SoundListRenderer.class.getResource("arts.png")); //$NON-NLS-1$
+		private ImageIcon icon = InstrumentToolbarIcons.patchToolbarIcon(
+				JInstrumentEditorPanel.class, "arts.png"); //$NON-NLS-1$
 
 		public SoundListRenderer() {
 			super();
@@ -299,7 +313,13 @@ public class JInstrumentEditorPanel extends JPanel {
 
 	private class PianoRollMouseHandler extends StatedPianoRollMouseHandler {
 
+		private boolean pianoRangeGesture = false;
+
 		public void mouseMoved(MouseEvent e) {
+
+			if (pianoroll.updateRangeHoverCursor(e)) {
+				return;
+			}
 
 			PianoRenderingNote currentSelectedNote2 = pianoroll.getCurrentSelectedNote();
 
@@ -319,6 +339,11 @@ public class JInstrumentEditorPanel extends JPanel {
 		private int firstPos = -1;
 
 		public void mouseDragged(MouseEvent e) {
+
+			if (pianoRangeGesture) {
+				pianoroll.continueRangeGesture(e);
+				return;
+			}
 
 			mouseMoved(e);
 
@@ -355,12 +380,17 @@ public class JInstrumentEditorPanel extends JPanel {
 
 		public void mouseExited(MouseEvent e) {
 			logger.debug("exited"); //$NON-NLS-1$
-
+			pianoroll.setCursor(Cursor.getDefaultCursor());
 		}
 
 		public void mousePressed(MouseEvent e) {
 			try {
 				logger.debug("pressed"); //$NON-NLS-1$
+
+				if (pianoroll.beginRangeGesture(e)) {
+					pianoRangeGesture = true;
+					return;
+				}
 
 				if (getCurrentSelectedSoundSample() == null) {
 					PianoRenderingNote searchForKey = pianoroll.searchForKey(e.getX(), e.getY());
@@ -377,6 +407,17 @@ public class JInstrumentEditorPanel extends JPanel {
 		public void mouseReleased(MouseEvent e) {
 
 			logger.debug("released"); //$NON-NLS-1$
+			if (pianoRangeGesture) {
+				pianoroll.finishRangeGesture(e);
+				pianoRangeGesture = false;
+				pianoroll.setCursor(Cursor.getDefaultCursor());
+				try {
+					player.stopNote();
+				} catch (Exception ex) {
+					logger.error(ex);
+				}
+				return;
+			}
 			if (state == 1) {
 				logger.debug("end of "); //$NON-NLS-1$
 				pianoroll.setCursor(Cursor.getDefaultCursor());
@@ -409,6 +450,20 @@ public class JInstrumentEditorPanel extends JPanel {
 
 	private JTabbedPane tabbedPane;
 
+	private static final Preferences MAPPING_SPLIT_PREFS = Preferences.userNodeForPackage(JInstrumentEditorPanel.class);
+	private static final String PREF_MAPPING_SPLIT_H = "mapping.split.horizontal.location"; //$NON-NLS-1$
+	/** Prevents the mapping-tab scale preview from consuming the whole row on wide windows. */
+	private static final int MAX_MAPPING_SCALE_PREVIEW_WIDTH = 520;
+
+	private JScrollPane mappingPianoScroll;
+	private JScrollPane mappingScaleScroll;
+	private JScrollPane mappingSoundsScroll;
+	private JSplitPane mappingListScaleSplit;
+	private JPanel mappingTabRoot;
+	private JLabel registrationLabel;
+	private JButton addFromCropFileButton;
+	private Component tabbedPreviousSelection;
+
 	private void initComponents() throws Exception {
 
 		setLayout(new BorderLayout());
@@ -431,7 +486,12 @@ public class JInstrumentEditorPanel extends JPanel {
 			throw new Exception(ex.getMessage(), ex);
 		}
 
-		tabbedPane.add(panelGeneral, Messages.getString("JInstrumentEditorPanel.1")); //$NON-NLS-1$
+		// Plain JPanel as the tab content — never removeAll/setLayout on the loaded
+		// FormPanel (same JGoodies NPE as scale editor: "component has not been added
+		// to the container").
+		final JPanel instrumentGeneralTabRoot = new JPanel(new BorderLayout(12, 12));
+		tabbedPane.add(instrumentGeneralTabRoot,
+				Messages.getString("JInstrumentEditorPanel.1")); //$NON-NLS-1$
 
 		logger.debug("adding the scale editor tab"); //$NON-NLS-1$
 		ScaleEditorPrefs p = new ScaleEditorPrefs(new DummyPrefsStorage());
@@ -453,8 +513,6 @@ public class JInstrumentEditorPanel extends JPanel {
 			throw new Exception(ex.getMessage(), ex);
 		}
 
-		tabbedPane.add(panelMapping, Messages.getString("JInstrumentEditorPanel.5")); //$NON-NLS-1$
-
 		FormPanel fpDrumSounds = null;
 		try {
 
@@ -470,9 +528,6 @@ public class JInstrumentEditorPanel extends JPanel {
 
 		drumsoundlist = (JTable) fpDrumSounds.getComponentByName("drumsoundlist"); //$NON-NLS-1$
 		JButton addDrumSound = (JButton) fpDrumSounds.getButton("setwavassociation"); //$NON-NLS-1$
-		addDrumSound.setText(Messages.getString("JInstrumentEditorPanel.202")); //$NON-NLS-1$
-		addDrumSound.setIcon(new ImageIcon(getClass().getResource("artsplus.png"))); //$NON-NLS-1$
-		addDrumSound.setToolTipText(Messages.getString("JInstrumentEditorPanel.204")); //$NON-NLS-1$
 
 		addDrumSound.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -481,9 +536,6 @@ public class JInstrumentEditorPanel extends JPanel {
 		});
 
 		JButton editDrumSound = (JButton) fpDrumSounds.getButton("update"); //$NON-NLS-1$
-		editDrumSound.setText(Messages.getString("JInstrumentEditorPanel.206")); //$NON-NLS-1$
-		editDrumSound.setIcon(new ImageIcon(getClass().getResource("arts.png"))); //$NON-NLS-1$
-		editDrumSound.setToolTipText(Messages.getString("JInstrumentEditorPanel.208")); //$NON-NLS-1$
 		editDrumSound.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				editDrumSoundSample();
@@ -491,9 +543,6 @@ public class JInstrumentEditorPanel extends JPanel {
 		});
 
 		JButton removeDrumSound = (JButton) fpDrumSounds.getButton("resetwavassociation"); //$NON-NLS-1$
-		removeDrumSound.setText(Messages.getString("JInstrumentEditorPanel.210")); //$NON-NLS-1$
-		removeDrumSound.setIcon(new ImageIcon(getClass().getResource("artsmoins.png"))); //$NON-NLS-1$
-		removeDrumSound.setToolTipText(Messages.getString("JInstrumentEditorPanel.212")); //$NON-NLS-1$
 		removeDrumSound.addActionListener(new ActionListener() {
 
 			public void actionPerformed(ActionEvent e) {
@@ -502,17 +551,42 @@ public class JInstrumentEditorPanel extends JPanel {
 		});
 
 		JButton playDrumSound = (JButton) fpDrumSounds.getButton("playdrum"); //$NON-NLS-1$
-		playDrumSound.setToolTipText(Messages.getString("JInstrumentEditorPanel.1001")); //$NON-NLS-1$
 		playDrumSound.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				playDrumSound();
 			}
 		});
-		playDrumSound.setIcon(new ImageIcon(getClass().getResource("arts.png"))); //$NON-NLS-1$
+
+		applyPatchToolbarButton(addDrumSound, "artsplus.png", //$NON-NLS-1$
+				Messages.getString("JInstrumentEditorPanel.204")); //$NON-NLS-1$
+		applyPatchToolbarButton(editDrumSound, "arts.png", //$NON-NLS-1$
+				Messages.getString("JInstrumentEditorPanel.208")); //$NON-NLS-1$
+		applyPatchToolbarButton(removeDrumSound, "artsmoins.png", //$NON-NLS-1$
+				Messages.getString("JInstrumentEditorPanel.212")); //$NON-NLS-1$
+		applyPatchToolbarButton(playDrumSound, "arts.png", //$NON-NLS-1$
+				Messages.getString("JInstrumentEditorPanel.1001")); //$NON-NLS-1$
+
+		detachFromParent(addDrumSound);
+		detachFromParent(editDrumSound);
+		detachFromParent(removeDrumSound);
+		detachFromParent(playDrumSound);
+
+		JToolBar drumToolbar = new JToolBar();
+		drumToolbar.setFloatable(false);
+		drumToolbar.setRollover(true);
+		drumToolbar.add(addDrumSound);
+		drumToolbar.add(editDrumSound);
+		drumToolbar.add(removeDrumSound);
+		drumToolbar.addSeparator();
+		drumToolbar.add(playDrumSound);
+
+		JPanel drumSoundsTab = new JPanel(new BorderLayout(0, 2));
+		drumSoundsTab.add(drumToolbar, BorderLayout.NORTH);
+		drumSoundsTab.add(fpDrumSounds, BorderLayout.CENTER);
 
 		updateDrumSoundList();
 
-		tabbedPane.add(fpDrumSounds, Messages.getString("JInstrumentEditorPanel.213")); //$NON-NLS-1$
+		tabbedPane.add(drumSoundsTab, Messages.getString("JInstrumentEditorPanel.213")); //$NON-NLS-1$
 
 		logger.debug("adding scripting panel ... "); //$NON-NLS-1$
 
@@ -567,6 +641,11 @@ public class JInstrumentEditorPanel extends JPanel {
 				Component selectedComponent = p.getSelectedComponent();
 				logger.debug("selected component : " + selectedComponent); //$NON-NLS-1$
 
+				if (tabbedPreviousSelection == mappingTabRoot) {
+					saveMappingSplitLocations();
+				}
+				tabbedPreviousSelection = selectedComponent;
+
 				if (selectedComponent != scaleEditorPanel) {
 					updateModelWithScaleInformations();
 					updateDrumSoundList();
@@ -580,9 +659,17 @@ public class JInstrumentEditorPanel extends JPanel {
 		logger.debug("adding the pianoroll component ..."); //$NON-NLS-1$
 
 		pianoroll = new JPianoRollComponent();
-		JScrollPane scPianoroll = new JScrollPane(pianoroll);
+		pianoroll.setRangeEditListener(new PianoRollRangeEditListener() {
+			public void rangeBoundsChangeCommitted(SelectedRange range, Object clientTag, int start, int end) {
+				if (clientTag instanceof SoundSample) {
+					model.setSampleMapping(getCurrentPipeStopGroup(), (SoundSample) clientTag, start, end);
+					sampleMappingChanged();
+				}
+			}
+		});
+		mappingPianoScroll = new JScrollPane(pianoroll);
 
-		panelMapping.getFormAccessor().replaceBean(panelMapping.getComponentByName("pianoroll"), scPianoroll); //$NON-NLS-1$
+		panelMapping.getFormAccessor().replaceBean(panelMapping.getComponentByName("pianoroll"), mappingPianoScroll); //$NON-NLS-1$
 
 		// register the events for the pianoroll ...
 
@@ -617,16 +704,14 @@ public class JInstrumentEditorPanel extends JPanel {
 
 		scalePreview.setSpeedDraw(true);
 
+		mappingScaleScroll = new JScrollPane(scalePreview);
 		panelMapping.getFormAccessor().replaceBean(panelMapping.getLabel("scalepreviewer"), //$NON-NLS-1$
-				new JScrollPane(scalePreview));
+				mappingScaleScroll);
 
-		Border bsoundsamplelist = ((JLabel) panelMapping.getFormAccessor("patchpanel") //$NON-NLS-1$
-				.getComponentByName("soundsamplelist")).getBorder(); //$NON-NLS-1$
+		mappingSoundsScroll = new JScrollPane(listSounds);
 
-		JScrollPane listSoundsScrollTable = new JScrollPane(listSounds);
-
-		listSoundsScrollTable.setColumnHeader(null);
-		listSoundsScrollTable.setMinimumSize(new Dimension(100, 200));
+		mappingSoundsScroll.setColumnHeader(null);
+		mappingSoundsScroll.setMinimumSize(new Dimension(120, 200));
 
 		listSounds.setShowGrid(true);
 
@@ -640,11 +725,14 @@ public class JInstrumentEditorPanel extends JPanel {
 			public void valueChanged(ListSelectionEvent e) {
 				logger.debug("selected sound sample changed ..."); //$NON-NLS-1$
 
-				int index = e.getFirstIndex();
-				if (index != -1) {
-					if (index < listSounds.getModel().getRowCount())
-						currentSelectedSoundSampleChanged((SoundSample) listSounds.getModel().getValueAt(index, 0));
+				if (e.getValueIsAdjusting()) {
+					return;
 				}
+				int row = listSounds.getSelectedRow();
+				if (row < 0 || row >= listSounds.getModel().getRowCount()) {
+					return;
+				}
+				currentSelectedSoundSampleChanged((SoundSample) listSounds.getModel().getValueAt(row, 0));
 			}
 		});
 
@@ -675,7 +763,7 @@ public class JInstrumentEditorPanel extends JPanel {
 
 		panelMapping.getFormAccessor("patchpanel").replaceBean( //$NON-NLS-1$
 				panelMapping.getComponentByName("soundsamplelist"), //$NON-NLS-1$
-				listSoundsScrollTable);
+				mappingSoundsScroll);
 
 		updateScale();
 
@@ -690,9 +778,8 @@ public class JInstrumentEditorPanel extends JPanel {
 				addSoundSampleInCurrentPipeStopGroup();
 			}
 		});
-		addSound.setToolTipText(Messages.getString("JInstrumentEditor.14")); //$NON-NLS-1$
-		addSound.setIcon(new ImageIcon(getClass().getResource("artsplus.png"))); //$NON-NLS-1$
-		addSound.setText(null);
+		applyPatchToolbarButton(addSound, "artsplus.png", //$NON-NLS-1$
+				Messages.getString("JInstrumentEditor.14")); //$NON-NLS-1$
 
 		modifySound = (JButton) panelMapping.getButton("modifysound"); //$NON-NLS-1$
 		modifySound.addActionListener(new ActionListener() {
@@ -700,9 +787,8 @@ public class JInstrumentEditorPanel extends JPanel {
 				modifyCurrentSelectedSoundSampleInCurrentPipeStopGroup();
 			}
 		});
-		modifySound.setToolTipText(Messages.getString("JInstrumentEditor.16")); //$NON-NLS-1$
-		modifySound.setIcon(new ImageIcon(getClass().getResource("artsbuilder.png"))); //$NON-NLS-1$
-		modifySound.setText(null);
+		applyPatchToolbarButton(modifySound, "artsbuilder.png", //$NON-NLS-1$
+				Messages.getString("JInstrumentEditor.16")); //$NON-NLS-1$
 
 		removeSoundMapping = (JButton) panelMapping.getButton("removeSoundMapping"); //$NON-NLS-1$
 		removeSoundMapping.addActionListener(new ActionListener() {
@@ -710,9 +796,8 @@ public class JInstrumentEditorPanel extends JPanel {
 				removeCurrentSelectedSampleSoundMapping();
 			}
 		});
-		removeSoundMapping.setToolTipText(Messages.getString("JInstrumentEditorPanel.16")); //$NON-NLS-1$
-		removeSoundMapping.setText(null);
-		removeSoundMapping.setIcon(new ImageIcon(getClass().getResource("arts-remove-mapping.png")));//$NON-NLS-1$
+		applyPatchToolbarButton(removeSoundMapping, "arts-remove-mapping.png", //$NON-NLS-1$
+				Messages.getString("JInstrumentEditorPanel.16")); //$NON-NLS-1$
 
 		removeSound = (JButton) panelMapping.getButton("removesound"); //$NON-NLS-1$
 		removeSound.addActionListener(new ActionListener() {
@@ -720,9 +805,8 @@ public class JInstrumentEditorPanel extends JPanel {
 				removeSoundSampleInCurrentPipeStopGroup();
 			}
 		});
-		removeSound.setText(null);
-		removeSound.setToolTipText(Messages.getString("JInstrumentEditor.18")); //$NON-NLS-1$
-		removeSound.setIcon(new ImageIcon(getClass().getResource("artsmoins.png"))); //$NON-NLS-1$
+		applyPatchToolbarButton(removeSound, "artsmoins.png", //$NON-NLS-1$
+				Messages.getString("JInstrumentEditor.18")); //$NON-NLS-1$
 
 		//
 		// buttonModifyScale = (JButton) panelMapping
@@ -736,15 +820,14 @@ public class JInstrumentEditorPanel extends JPanel {
 		// //$NON-NLS-1$
 		//
 
-		JButton addfromcropfile = (JButton) panelMapping.getButton("addfromcropfile"); //$NON-NLS-1$
-		addfromcropfile.setToolTipText(Messages.getString("JInstrumentEditor.79")); //$NON-NLS-1$
-		addfromcropfile.setIcon(new ImageIcon(getClass().getResource("artsplus.png"))); //$NON-NLS-1$
-		addfromcropfile.setText(null);
-		addfromcropfile.addActionListener(new ActionListener() {
+		addFromCropFileButton = (JButton) panelMapping.getButton("addfromcropfile"); //$NON-NLS-1$
+		addFromCropFileButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				addSampleMappingFromCroppedWav();
 			}
 		});
+		applyPatchToolbarButton(addFromCropFileButton, "artsplus.png", //$NON-NLS-1$
+				Messages.getString("JInstrumentEditor.79")); //$NON-NLS-1$
 
 		loadsoundsample = (JButton) panelMapping.getButton("loadsoundsample");//$NON-NLS-1$
 		loadsoundsample.addActionListener(new ActionListener() {
@@ -752,8 +835,8 @@ public class JInstrumentEditorPanel extends JPanel {
 				addLoadedSoundSampleInCurrentPipeStopGroup();
 			}
 		});
-		loadsoundsample.setToolTipText(Messages.getString("JInstrumentEditorPanel.1002")); //$NON-NLS-1$
-		loadsoundsample.setIcon(new ImageIcon(getClass().getResource("soundsampleload.png")));//$NON-NLS-1$
+		applyPatchToolbarButton(loadsoundsample, "soundsampleload.png", //$NON-NLS-1$
+				Messages.getString("JInstrumentEditorPanel.1002")); //$NON-NLS-1$
 
 		savesoundsample = (JButton) panelMapping.getButton("savesoundsample");//$NON-NLS-1$
 		savesoundsample.addActionListener(new ActionListener() {
@@ -761,8 +844,8 @@ public class JInstrumentEditorPanel extends JPanel {
 				saveCurrentlySelectedSoundSample();
 			}
 		});
-		savesoundsample.setToolTipText(Messages.getString("JInstrumentEditorPanel.1003")); //$NON-NLS-1$
-		savesoundsample.setIcon(new ImageIcon(getClass().getResource("soundsamplesave.png")));//$NON-NLS-1$
+		applyPatchToolbarButton(savesoundsample, "soundsamplesave.png", //$NON-NLS-1$
+				Messages.getString("JInstrumentEditorPanel.1003")); //$NON-NLS-1$
 
 		pipeStopGroupCombo = panelMapping.getComboBox("pipestopgroupcombo"); //$NON-NLS-1$
 		updatePipeStopGroupCombo();
@@ -779,9 +862,11 @@ public class JInstrumentEditorPanel extends JPanel {
 			}
 		});
 
-		clearSoundSampleSelection.setText(Messages.getString("JInstrumentEditor.23")); //$NON-NLS-1$
-		clearSoundSampleSelection.setToolTipText(Messages.getString("JInstrumentEditor.24")); //$NON-NLS-1$
-		clearSoundSampleSelection.setIcon(new ImageIcon(getClass().getResource("artsmidimanager.png"))); //$NON-NLS-1$
+		applyPatchToolbarButton(clearSoundSampleSelection, "artsmidimanager.png", //$NON-NLS-1$
+				"<html><body width=\"320px\">" //$NON-NLS-1$
+						+ Messages.getString("JInstrumentEditor.23") + "<br>" //$NON-NLS-1$ //$NON-NLS-2$
+						+ Messages.getString("JInstrumentEditor.24") //$NON-NLS-1$
+						+ "</body></html>"); //$NON-NLS-1$
 
 		instrumentName = (JTextField) panelGeneral.getTextField("instrumentname"); //$NON-NLS-1$
 		instrumentName.getDocument().addDocumentListener(new DocumentListener() {
@@ -844,15 +929,10 @@ public class JInstrumentEditorPanel extends JPanel {
 		JLabel labelinstrumentname = (JLabel) panelGeneral.getComponentByName("labelinstrumentname"); //$NON-NLS-1$
 		labelinstrumentname.setText(Messages.getString("JInstrumentEditor.61")); //$NON-NLS-1$
 
-		JLabel registrationlabel = (JLabel) panelMapping.getComponentByName("registrationlabel"); //$NON-NLS-1$
-		registrationlabel.setText(Messages.getString("JInstrumentEditor.62")); //$NON-NLS-1$
-
-		JComponent componentByName = (JComponent) panelGeneral.getComponentByName("descriptionform"); //$NON-NLS-1$
-		TitledBorder titledborder = (TitledBorder) componentByName.getBorder();
-		titledborder.setTitle(Messages.getString("JInstrumentEditor.64")); //$NON-NLS-1$
+		registrationLabel = (JLabel) panelMapping.getComponentByName("registrationlabel"); //$NON-NLS-1$
+		registrationLabel.setText(Messages.getString("JInstrumentEditor.62")); //$NON-NLS-1$
 
 		buttonchoicepicture = (JButton) panelGeneral.getButton("buttonchoicepicture"); //$NON-NLS-1$
-		buttonchoicepicture.setText(Messages.getString("JInstrumentEditor.1")); //$NON-NLS-1$
 
 		buttonchoicepicture.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -876,10 +956,7 @@ public class JInstrumentEditorPanel extends JPanel {
 										MAX_IMAGE_HEIGHT);
 
 								model.setInstrumentPicture(biimage);
-								instrumentImage.setIcon(new ImageIcon(biimage, "instrument picture")); //$NON-NLS-1$
-
-								instrumentImage.revalidate();
-								instrumentImage.repaint();
+								updateInstrumentPictureDisplay(biimage);
 							} finally {
 								stream.close();
 							}
@@ -891,12 +968,292 @@ public class JInstrumentEditorPanel extends JPanel {
 			}
 		});
 
+		applyGeneralTabLayout(instrumentGeneralTabRoot, panelGeneral,
+				labelinstrumentname, labelinstrumentpicture,
+				labelinstrumentdescription);
+
+		mappingTabRoot = buildInstrumentMappingTab();
+		tabbedPane.insertTab(Messages.getString("JInstrumentEditorPanel.5"), null, mappingTabRoot, null, 2); //$NON-NLS-1$
+
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				restoreMappingSplitLocations();
+			}
+		});
+
 		add(tabbedPane, BorderLayout.CENTER);
 
 		// install model events ....
 
 		updateContextualButtons();
 
+	}
+
+	private static void detachFromParent(Component c) {
+		if (c == null) {
+			return;
+		}
+		Container p = c.getParent();
+		if (p != null) {
+			p.remove(c);
+			p.revalidate();
+			p.repaint();
+		}
+	}
+
+	/**
+	 * Icon-only patch toolbar buttons: green-shifted compact icon, tooltip, no
+	 * text.
+	 */
+	private static void applyPatchToolbarButton(JButton b, String resourceName,
+			String tooltipText) {
+		b.setIcon(InstrumentToolbarIcons.patchToolbarIcon(
+				JInstrumentEditorPanel.class, resourceName));
+		b.setText(null);
+		b.setToolTipText(tooltipText);
+		b.setMargin(new Insets(2, 2, 2, 2));
+	}
+
+	private static synchronized ImageIcon getNoInstrumentPicturePlaceholderIcon() {
+		if (noInstrumentPicturePlaceholder == null) {
+			int w = Math.max(180, GENERAL_TAB_IMAGE_VIEWPORT_W - 40);
+			int h = Math.max(140, GENERAL_TAB_IMAGE_VIEWPORT_H - 40);
+			BufferedImage bi = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+			Graphics2D g = bi.createGraphics();
+			try {
+				g.setColor(new Color(245, 245, 245));
+				g.fillRect(0, 0, w, h);
+				g.setColor(new Color(208, 208, 208));
+				g.drawRect(0, 0, w - 1, h - 1);
+				g.setColor(new Color(120, 120, 120));
+				g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+						RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+				Font f = g.getFont().deriveFont(Font.PLAIN, 13f);
+				g.setFont(f);
+				String msg = Messages.getString("JInstrumentEditor.105"); //$NON-NLS-1$
+				FontMetrics fm = g.getFontMetrics();
+				int tw = fm.stringWidth(msg);
+				int x = Math.max(6, (w - tw) / 2);
+				int y = (h + fm.getAscent()) / 2 - 2;
+				g.drawString(msg, x, y);
+			} finally {
+				g.dispose();
+			}
+			noInstrumentPicturePlaceholder = new ImageIcon(bi);
+		}
+		return noInstrumentPicturePlaceholder;
+	}
+
+	/**
+	 * Shows the given picture, or a neutral placeholder when {@code picture} is
+	 * null.
+	 */
+	private void updateInstrumentPictureDisplay(Image picture) {
+		if (instrumentImage == null) {
+			return;
+		}
+		if (picture != null) {
+			instrumentImage.setIcon(new ImageIcon(picture));
+		} else {
+			instrumentImage.setIcon(getNoInstrumentPicturePlaceholderIcon());
+		}
+		instrumentImage.revalidate();
+		instrumentImage.repaint();
+	}
+
+	/**
+	 * Replaces the JETA form grid with a clear layout: name row, then a split with
+	 * a large picture preview and an editable description. Layout is applied to
+	 * {@code host} (a plain JPanel). {@code formLoader} is only used for
+	 * {@code getComponentByName("descriptionform")}; it must not be
+	 * {@code removeAll}'d — that breaks Abeille/JGoodies FormLayout maps.
+	 */
+	private void applyGeneralTabLayout(JPanel host, FormPanel formLoader,
+			JLabel labelinstrumentname, JLabel labelinstrumentpicture,
+			JLabel labelinstrumentdescription) {
+		JComponent descriptionForm = (JComponent) formLoader
+				.getComponentByName("descriptionform"); //$NON-NLS-1$
+
+		detachFromParent(instrumentName);
+		detachFromParent(instrumentDescription);
+		detachFromParent(instrumentImage);
+		detachFromParent(labelinstrumentname);
+		detachFromParent(labelinstrumentpicture);
+		detachFromParent(labelinstrumentdescription);
+		detachFromParent(buttonchoicepicture);
+		detachFromParent(descriptionForm);
+
+		host.removeAll();
+		host.setBorder(BorderFactory.createEmptyBorder(12, 16, 16, 16));
+
+		instrumentDescription.setLineWrap(true);
+		instrumentDescription.setWrapStyleWord(true);
+		instrumentDescription.setRows(12);
+		instrumentDescription.setTabSize(4);
+
+		JScrollPane descScroll = new JScrollPane(instrumentDescription);
+		descScroll.setVerticalScrollBarPolicy(
+				JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+		JPanel descColumn = new JPanel(new BorderLayout());
+		Border descPad = BorderFactory.createEmptyBorder(8, 10, 10, 10);
+		descColumn.setBorder(BorderFactory.createCompoundBorder(
+				BorderFactory.createTitledBorder(
+						BorderFactory.createEtchedBorder(),
+						Messages.getString("JInstrumentEditor.64")), //$NON-NLS-1$
+				descPad));
+		descColumn.add(descScroll, BorderLayout.CENTER);
+		descColumn.setMinimumSize(new Dimension(200, 120));
+
+		instrumentImage.setMinimumSize(new Dimension(64, 64));
+		JScrollPane imageScroll = new JScrollPane(instrumentImage);
+		imageScroll.setPreferredSize(new Dimension(
+				GENERAL_TAB_IMAGE_VIEWPORT_W, GENERAL_TAB_IMAGE_VIEWPORT_H));
+		imageScroll.getViewport().setBackground(new Color(250, 250, 250));
+		imageScroll.getVerticalScrollBar().setUnitIncrement(16);
+		imageScroll.getHorizontalScrollBar().setUnitIncrement(16);
+
+		JPanel pictureActions = new JPanel(new FlowLayout(FlowLayout.LEADING, 8, 4));
+		pictureActions.setBorder(BorderFactory.createEmptyBorder(4, 10, 2, 10));
+		buttonchoicepicture.setText(Messages.getString("JInstrumentEditor.103")); //$NON-NLS-1$
+		buttonchoicepicture.setToolTipText(
+				Messages.getString("JInstrumentEditor.104")); //$NON-NLS-1$
+		pictureActions.add(buttonchoicepicture);
+
+		String pictureSectionTitle = Messages.getString("JInstrumentEditor.57"); //$NON-NLS-1$
+		if (pictureSectionTitle.endsWith(":")) { //$NON-NLS-1$
+			pictureSectionTitle = pictureSectionTitle.substring(0,
+					pictureSectionTitle.length() - 1).trim();
+		}
+		Border pictureInnerPad = BorderFactory.createEmptyBorder(10, 12, 8, 12);
+		JPanel pictureColumn = new JPanel(new BorderLayout(0, 8));
+		pictureColumn.setBorder(BorderFactory.createCompoundBorder(
+				BorderFactory.createTitledBorder(
+						BorderFactory.createEtchedBorder(), pictureSectionTitle),
+				pictureInnerPad));
+		pictureColumn.add(imageScroll, BorderLayout.CENTER);
+		pictureColumn.add(pictureActions, BorderLayout.SOUTH);
+		pictureColumn.setMinimumSize(new Dimension(180, 160));
+
+		JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT,
+				pictureColumn, descColumn);
+		split.setResizeWeight(0.48);
+		split.setContinuousLayout(true);
+		split.setOneTouchExpandable(true);
+		split.setDividerSize(10);
+		split.setBorder(BorderFactory.createEmptyBorder());
+
+		JPanel nameRow = new JPanel(new BorderLayout(10, 0));
+		nameRow.setBorder(BorderFactory.createEmptyBorder(0, 0, 4, 0));
+		nameRow.add(labelinstrumentname, BorderLayout.WEST);
+		nameRow.add(instrumentName, BorderLayout.CENTER);
+
+		host.add(nameRow, BorderLayout.NORTH);
+		host.add(split, BorderLayout.CENTER);
+
+		if (model != null) {
+			updateInstrumentPictureDisplay(model.getInstrumentPicture());
+		} else {
+			updateInstrumentPictureDisplay(null);
+		}
+	}
+
+	private JPanel buildInstrumentMappingTab() {
+		detachFromParent(registrationLabel);
+		detachFromParent(pipeStopGroupCombo);
+		detachFromParent(clearSoundSampleSelection);
+		detachFromParent(addSound);
+		detachFromParent(modifySound);
+		detachFromParent(removeSoundMapping);
+		detachFromParent(removeSound);
+		detachFromParent(addFromCropFileButton);
+		detachFromParent(loadsoundsample);
+		detachFromParent(savesoundsample);
+
+		detachFromParent(mappingPianoScroll);
+		detachFromParent(mappingSoundsScroll);
+		detachFromParent(mappingScaleScroll);
+
+		JToolBar registrationToolbar = new JToolBar();
+		registrationToolbar.setFloatable(false);
+		registrationToolbar.setRollover(true);
+		registrationToolbar.add(registrationLabel);
+		registrationToolbar.addSeparator();
+		registrationToolbar.add(pipeStopGroupCombo);
+
+		JToolBar soundsToolbar = new JToolBar();
+		soundsToolbar.setFloatable(false);
+		soundsToolbar.setRollover(true);
+		soundsToolbar.add(clearSoundSampleSelection);
+		soundsToolbar.add(addSound);
+		soundsToolbar.add(modifySound);
+		soundsToolbar.add(removeSoundMapping);
+		soundsToolbar.add(removeSound);
+		soundsToolbar.addSeparator();
+		soundsToolbar.add(addFromCropFileButton);
+		soundsToolbar.add(loadsoundsample);
+		soundsToolbar.add(savesoundsample);
+
+		mappingSoundsScroll.setBorder(BorderFactory.createTitledBorder(
+				BorderFactory.createEtchedBorder(),
+				Messages.getString("JInstrumentEditorPanel.mappingSoundSamples"))); //$NON-NLS-1$
+		mappingScaleScroll.setBorder(BorderFactory.createTitledBorder(
+				BorderFactory.createEtchedBorder(),
+				Messages.getString("JInstrumentEditorPanel.mappingScalePreview"))); //$NON-NLS-1$
+
+		JPanel soundListColumn = new JPanel(new BorderLayout());
+		soundListColumn.add(soundsToolbar, BorderLayout.NORTH);
+		soundListColumn.add(mappingSoundsScroll, BorderLayout.CENTER);
+
+		mappingSoundsScroll.setMinimumSize(new Dimension(120, 160));
+		mappingScaleScroll.setMinimumSize(new Dimension(140, 140));
+
+		JPanel mappingScalePreviewCap = new JPanel(new BorderLayout(0, 0)) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public Dimension getMaximumSize() {
+				Dimension d = super.getMaximumSize();
+				return new Dimension(MAX_MAPPING_SCALE_PREVIEW_WIDTH, d.height);
+			}
+		};
+		mappingScalePreviewCap.add(mappingScaleScroll, BorderLayout.CENTER);
+
+		mappingListScaleSplit = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, soundListColumn,
+				mappingScalePreviewCap);
+		mappingListScaleSplit.setResizeWeight(0.45);
+		mappingListScaleSplit.setOneTouchExpandable(true);
+		mappingListScaleSplit.setContinuousLayout(true);
+		mappingListScaleSplit.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+
+		Dimension pianoPref = pianoroll.getPreferredSize();
+		int pianoH = (pianoPref != null ? pianoPref.height : PianoRenderingNote.KEYSIZE_Y) + 4;
+		mappingPianoScroll.setPreferredSize(new Dimension(
+				pianoPref != null ? pianoPref.width : 800, pianoH));
+		mappingPianoScroll.setMinimumSize(new Dimension(80, pianoH));
+		mappingPianoScroll.setMaximumSize(new Dimension(Integer.MAX_VALUE, pianoH));
+
+		JPanel root = new JPanel(new BorderLayout());
+		root.add(registrationToolbar, BorderLayout.NORTH);
+		root.add(mappingListScaleSplit, BorderLayout.CENTER);
+		root.add(mappingPianoScroll, BorderLayout.SOUTH);
+		return root;
+	}
+
+	private void saveMappingSplitLocations() {
+		if (mappingListScaleSplit == null) {
+			return;
+		}
+		MAPPING_SPLIT_PREFS.putInt(PREF_MAPPING_SPLIT_H, mappingListScaleSplit.getDividerLocation());
+	}
+
+	private void restoreMappingSplitLocations() {
+		if (mappingListScaleSplit == null) {
+			return;
+		}
+		int h = MAPPING_SPLIT_PREFS.getInt(PREF_MAPPING_SPLIT_H, -1);
+		if (h >= 0) {
+			mappingListScaleSplit.setDividerLocation(h);
+		}
 	}
 
 	/**
@@ -1110,7 +1467,7 @@ public class JInstrumentEditorPanel extends JPanel {
 
 				SelectedRange r = new SelectedRange(sampleMapping.getFirstMidiCode(), sampleMapping.getLastMidiCode());
 
-				pianoroll.addRange(r);
+				pianoroll.addRange(r, soundSample);
 				logger.debug("range added :" + r); //$NON-NLS-1$
 
 				if (getCurrentSelectedSoundSample() == soundSample)

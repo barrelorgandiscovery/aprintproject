@@ -3,6 +3,7 @@ package org.barrelorgandiscovery.gui.ascale;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -44,6 +45,9 @@ public class ScaleEditor extends JFrame {
 	private static final long serialVersionUID = -8484645796626431335L;
 
 	private static Logger logger = Logger.getLogger(ScaleEditor.class);
+
+	/** Fixed width for {@link JScaleEditorPanel} inside the frame content area. */
+	private static final int SCALE_EDITOR_HOST_WIDTH_PX = 600;
 
 	private JMenuBar barredemenu;
 	private JMenu menuFile;
@@ -258,9 +262,39 @@ public class ScaleEditor extends JFrame {
 
 		Container contentPane = getContentPane();
 		contentPane.setLayout(new BorderLayout());
-		contentPane.add(this.scaleEditorPanel, BorderLayout.CENTER);
+		JPanel scaleEditorHost = new JPanel(new BorderLayout(0, 0)) {
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public Dimension getPreferredSize() {
+				Dimension d = super.getPreferredSize();
+				return new Dimension(SCALE_EDITOR_HOST_WIDTH_PX, d.height);
+			}
+
+			@Override
+			public Dimension getMaximumSize() {
+				int h = super.getMaximumSize().height;
+				if (h <= 0) {
+					h = Integer.MAX_VALUE;
+				}
+				return new Dimension(SCALE_EDITOR_HOST_WIDTH_PX, h);
+			}
+
+			@Override
+			public Dimension getMinimumSize() {
+				return new Dimension(SCALE_EDITOR_HOST_WIDTH_PX,
+						super.getMinimumSize().height);
+			}
+		};
+		scaleEditorHost.add(this.scaleEditorPanel, BorderLayout.CENTER);
+		JPanel scaleEditorCentering = new JPanel(
+				new FlowLayout(FlowLayout.CENTER, 0, 0));
+		scaleEditorCentering.add(scaleEditorHost);
+		contentPane.add(scaleEditorCentering, BorderLayout.CENTER);
 
 		setSize(new Dimension(1024, 768));
+		// Diagram split minimum + divider + content border so the sash stays usable.
+		setMinimumSize(new Dimension(SCALE_EDITOR_HOST_WIDTH_PX, 520));
 
 	}
 

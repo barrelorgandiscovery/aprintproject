@@ -41,6 +41,7 @@ import com.birosoft.liquid.LiquidLookAndFeel;
 import com.easynth.lookandfeel.EaSynthLookAndFeel;
 import com.formdev.flatlaf.FlatLightLaf;
 import com.googlecode.vfsjfilechooser2.accessories.bookmarks.Bookmarks;
+import com.googlecode.vfsjfilechooser2.accessories.bookmarks.BookmarksLocation;
 import com.googlecode.vfsjfilechooser2.accessories.bookmarks.TitledURLEntry;
 import com.nilo.plaf.nimrod.NimRODLookAndFeel;
 
@@ -161,9 +162,11 @@ public class APrintApplication {
 				logger.error("error checking the write permissions :" + ex.getMessage(), ex);
 				JOptionPane.showConfirmDialog(null, "Fail to write in " + aprintFolder + ", check folder permissions");
 				return;
-			}	
-			
-			
+			}
+
+			// VFS file chooser bookmarks (favorites.xml) live in the APrint data folder
+			BookmarksLocation.setBookmarksStorageDirectory(aprintFolder);
+
 			// splash
 			showSplash();
 

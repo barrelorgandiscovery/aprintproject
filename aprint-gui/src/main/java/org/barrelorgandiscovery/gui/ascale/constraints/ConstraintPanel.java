@@ -1,20 +1,27 @@
 package org.barrelorgandiscovery.gui.ascale.constraints;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.TreeSet;
 
+import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -53,6 +60,8 @@ public class ConstraintPanel extends JPanel {
 
 	private JSplitPane splitPanel;
 
+	private JTextArea emptyHint;
+
 	private static class ConstraintItem {
 
 		private AbstractScaleConstraintComponent sc;
@@ -79,39 +88,22 @@ public class ConstraintPanel extends JPanel {
 
 		removeAll();
 
-		setLayout(new BorderLayout());
+		setLayout(new BorderLayout(0, 8));
+		setBorder(BorderFactory.createEmptyBorder(4, 4, 4, 4));
 
 		DefaultListModel lm = new DefaultListModel();
 
 		jconstraintList = new JList(lm);
-		jconstraintList.setBorder(new TitledBorder(Messages.getString("ConstraintPanel.0"))); //$NON-NLS-1$
+		jconstraintList.setVisibleRowCount(5);
+		jconstraintList.setBorder(new TitledBorder(
+				Messages.getString("ConstraintPanel.0"))); //$NON-NLS-1$
 
 		jconstraintList.addListSelectionListener(new ListSelectionListener() {
 			public void valueChanged(ListSelectionEvent e) {
-				logger.debug("valuechanged"); //$NON-NLS-1$
-
-				int itemindex = ((JList) e.getSource()).getSelectedIndex();
-
-				logger.debug("index :" + itemindex); //$NON-NLS-1$
-
-				panelConstraint.removeAll();
-
-				if (itemindex < getListModel().size() && itemindex >= 0) {
-					ConstraintItem constraintitem = (ConstraintItem) getListModel()
-							.getElementAt(itemindex);
-
-					panelConstraint.add(
-							constraintitem.getConstraintComponent(),
-							BorderLayout.CENTER);
-
-					logger.debug("constraintItem added"); //$NON-NLS-1$
-
+				if (e.getValueIsAdjusting()) {
+					return;
 				}
-
-				panelConstraint.invalidate();
-				panelConstraint.revalidate();
-				panelConstraint.repaint();
-
+				refreshParameterPanel();
 			}
 		});
 
@@ -129,6 +121,7 @@ public class ConstraintPanel extends JPanel {
 
 		addConstraint.setIcon(new ImageIcon(getClass().getResource(
 				"viewmag+.png"))); //$NON-NLS-1$
+		addConstraint.setText(Messages.getString("ConstraintPanel.addButton")); //$NON-NLS-1$
 		addConstraint.setToolTipText(Messages.getString("ConstraintPanel.5")); //$NON-NLS-1$
 
 		JButton removeConstraint = new JButton();
@@ -144,30 +137,116 @@ public class ConstraintPanel extends JPanel {
 
 		removeConstraint.setIcon(new ImageIcon(getClass().getResource(
 				"cancel.png"))); //$NON-NLS-1$
+		removeConstraint.setText(Messages.getString("ConstraintPanel.removeButton")); //$NON-NLS-1$
 		removeConstraint.setToolTipText(Messages.getString("ConstraintPanel.8")); //$NON-NLS-1$
 
 		comboAddConstraint = new JComboBox(new DefaultComboBoxModel());
+		comboAddConstraint.setPreferredSize(new Dimension(280, 30));
+		comboAddConstraint.setToolTipText(Messages.getString("ConstraintPanel.comboTooltip")); //$NON-NLS-1$
 
 		panelConstraint = new JPanel();
 		panelConstraint.setLayout(new BorderLayout());
-		panelConstraint.setBorder(new TitledBorder(Messages.getString("ConstraintPanel.9"))); //$NON-NLS-1$
+		panelConstraint.setBorder(new TitledBorder(
+				Messages.getString("ConstraintPanel.9"))); //$NON-NLS-1$
 
-		splitPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, jconstraintList,
+		emptyHint = new JTextArea();
+		emptyHint.setEditable(false);
+		emptyHint.setOpaque(false);
+		emptyHint.setLineWrap(true);
+		emptyHint.setWrapStyleWord(true);
+		emptyHint.setFont(emptyHint.getFont().deriveFont(Font.PLAIN,
+				emptyHint.getFont().getSize2D()));
+		emptyHint.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+
+		JScrollPane listScroll = new JScrollPane(jconstraintList);
+		listScroll.setMinimumSize(new Dimension(80, 100));
+
+		splitPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT, listScroll,
 				panelConstraint);
+		splitPanel.setResizeWeight(0.35);
+		splitPanel.setDividerSize(9);
+		splitPanel.setContinuousLayout(true);
+		splitPanel.setOneTouchExpandable(true);
+		splitPanel.setBorder(BorderFactory.createEmptyBorder());
 
-		JPanel buttonPanel = new JPanel();
+		JPanel toolbarPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 4));
+		toolbarPanel.add(new JLabel(Messages.getString("ConstraintPanel.addComboLabel"))); //$NON-NLS-1$
+		toolbarPanel.add(comboAddConstraint);
+		toolbarPanel.add(addConstraint);
+		toolbarPanel.add(removeConstraint);
 
-		buttonPanel.add(comboAddConstraint);
-		buttonPanel.add(addConstraint);
-		buttonPanel.add(removeConstraint);
+		JPanel helpPanel = buildHelpPanel();
 
-		add(buttonPanel, BorderLayout.NORTH);
+		JPanel northStack = new JPanel(new BorderLayout(0, 6));
+		northStack.add(helpPanel, BorderLayout.NORTH);
+		northStack.add(toolbarPanel, BorderLayout.SOUTH);
+
+		add(northStack, BorderLayout.NORTH);
 		add(splitPanel, BorderLayout.CENTER);
 
-		splitPanel.setDividerLocation(100);
 		revalidate();
-
 		syncComboFromList();
+		refreshParameterPanel();
+	}
+
+	private JPanel buildHelpPanel() {
+		StringBuilder full = new StringBuilder();
+		full.append(Messages.getString("ConstraintPanel.intro")); //$NON-NLS-1$
+		full.append("\n\n"); //$NON-NLS-1$
+		full.append(Messages.getString("ConstraintPanel.availableTypesHeader")); //$NON-NLS-1$
+		full.append("\n\n"); //$NON-NLS-1$
+		AbstractScaleConstraintComponent[] all = ConstraintPanelFactory
+				.getAllComponents();
+		for (int i = 0; i < all.length; i++) {
+			AbstractScaleConstraintComponent c = all[i];
+			full.append("\u2022 ").append(c.getLabel()).append(" \u2014 ") //$NON-NLS-1$ //$NON-NLS-2$
+					.append(c.getLongDescription());
+			if (i < all.length - 1) {
+				full.append("\n"); //$NON-NLS-1$
+			}
+		}
+
+		JTextArea helpText = new JTextArea(full.toString());
+		ConstraintSketches.configureWrappingDescription(helpText);
+		helpText.setRows(10);
+
+		// Modest default width for layout; the column still stretches with the split.
+		final int helpPrefW = 360;
+		final int helpPrefH = 200;
+		JScrollPane scroll = ConstraintSketches.wrapHelpIntro(helpText, helpPrefW,
+				helpPrefH);
+		scroll.getVerticalScrollBar().setUnitIncrement(16);
+		scroll.setBorder(BorderFactory.createTitledBorder(
+				Messages.getString("ConstraintPanel.helpTitle"))); //$NON-NLS-1$
+
+		JPanel wrap = new JPanel(new BorderLayout());
+		wrap.add(scroll, BorderLayout.CENTER);
+		return wrap;
+	}
+
+	private void refreshParameterPanel() {
+		panelConstraint.removeAll();
+
+		DefaultListModel listModel = getListModel();
+		int n = listModel.size();
+		int sel = jconstraintList.getSelectedIndex();
+
+		if (n == 0) {
+			emptyHint.setText(Messages.getString("ConstraintPanel.emptyListHint")); //$NON-NLS-1$
+			panelConstraint.add(emptyHint, BorderLayout.CENTER);
+		} else if (sel < 0 || sel >= n) {
+			emptyHint.setText(Messages.getString("ConstraintPanel.emptySelectionHint")); //$NON-NLS-1$
+			panelConstraint.add(emptyHint, BorderLayout.CENTER);
+		} else {
+			ConstraintItem constraintitem = (ConstraintItem) listModel
+					.getElementAt(sel);
+			panelConstraint.add(constraintitem.getConstraintComponent(),
+					BorderLayout.CENTER);
+		}
+
+		panelConstraint.invalidate();
+		panelConstraint.revalidate();
+		panelConstraint.repaint();
 	}
 
 	private void addConstraintItem(AbstractScaleConstraintComponent c) {
@@ -179,8 +258,12 @@ public class ConstraintPanel extends JPanel {
 		});
 
 		lm.addElement(new ConstraintItem(c));
+		int last = lm.size() - 1;
+		jconstraintList.setSelectedIndex(last);
+		jconstraintList.ensureIndexIsVisible(last);
 		syncComboFromList();
 		fireConstraintListChanged();
+		refreshParameterPanel();
 	}
 
 	private DefaultListModel getListModel() {
@@ -197,8 +280,16 @@ public class ConstraintPanel extends JPanel {
 	private void removeConstraintItem(int index) {
 		getListModel().removeElementAt(index); // perhaps memory leak ... not
 		// implemented, and no consequences
+		DefaultListModel lm = getListModel();
+		if (lm.size() == 0) {
+			jconstraintList.clearSelection();
+		} else {
+			int newSel = Math.min(index, lm.size() - 1);
+			jconstraintList.setSelectedIndex(newSel);
+		}
 		syncComboFromList();
 		fireConstraintListChanged();
+		refreshParameterPanel();
 	}
 
 	private void syncComboFromList() {
@@ -292,6 +383,12 @@ public class ConstraintPanel extends JPanel {
 			}
 		}
 		syncComboFromList();
+		if (listModel.size() > 0) {
+			jconstraintList.setSelectedIndex(0);
+		} else {
+			jconstraintList.clearSelection();
+		}
+		refreshParameterPanel();
 
 	}
 
