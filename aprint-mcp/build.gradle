@@ -155,12 +155,12 @@ task buildMcpSdk {
 		println "Maven command: ${mvnCommand}"
 		
 		// Set up Java environment
-		def setenvScript = new File(System.getProperty('user.home'), 'java/setenv17.sh')
+		def setenvScript = new File(System.getProperty('user.home'), 'java/setenv21.sh')
 		def javaHome = System.getenv('JAVA_HOME')
 		
 		// Execute Maven build
 		if (!isWindows && setenvScript.exists()) {
-			// Source the Java 17 environment script for Unix-like systems
+			// Source the Java 21 environment script for Unix-like systems
 			exec {
 				workingDir mcpSdkDir
 				commandLine 'bash', '-c', "source ${setenvScript.absolutePath} && ${mvnCommand} clean install -DskipTests"

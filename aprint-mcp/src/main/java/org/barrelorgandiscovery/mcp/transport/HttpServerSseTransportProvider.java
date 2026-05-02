@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -59,6 +60,27 @@ public class HttpServerSseTransportProvider implements McpServerTransportProvide
 	public static final String MESSAGE_EVENT_TYPE = "message";
 	public static final String ENDPOINT_EVENT_TYPE = "endpoint";
 	public static final String SESSION_ID_PARAM = "sessionId";
+
+	/**
+	 * Binds the MCP HTTP server. Default {@code 127.0.0.1} (loopback only). Set system property
+	 * {@code aprint.mcp.bindAddress} to {@code 0.0.0.0} (or {@code *}) to listen on all interfaces
+	 * (use only behind a firewall / trusted network).
+	 */
+	static InetSocketAddress createBindAddress(int port) throws java.net.UnknownHostException {
+		String raw = System.getProperty("aprint.mcp.bindAddress", "127.0.0.1");
+		if (raw == null || raw.isBlank()) {
+			raw = "127.0.0.1";
+		}
+		String host = raw.trim();
+		if ("0.0.0.0".equals(host) || "*".equals(host) || "all".equalsIgnoreCase(host)) {
+			logger.warn("MCP HTTP binding to all interfaces (aprint.mcp.bindAddress=" + host
+				+ ") — ensure this port is not reachable from untrusted networks (no auth).");
+			return new InetSocketAddress(port);
+		}
+		InetAddress addr = InetAddress.getByName(host);
+		logger.info("MCP HTTP binding to " + addr.getHostAddress() + " (aprint.mcp.bindAddress)");
+		return new InetSocketAddress(addr, port);
+	}
 	
 	private final McpJsonMapper jsonMapper;
 	private final int port;
@@ -109,7 +131,7 @@ public class HttpServerSseTransportProvider implements McpServerTransportProvide
 		
 		logger.info("Starting MCP HTTP Server on port " + port + "...");
 		
-		InetSocketAddress address = new InetSocketAddress(port);
+		InetSocketAddress address = createBindAddress(port);
 		httpServer = HttpServer.create(address, 0);
 		executorService = Executors.newCachedThreadPool();
 		httpServer.setExecutor(executorService);
@@ -128,9 +150,9 @@ public class HttpServerSseTransportProvider implements McpServerTransportProvide
 		
 		httpServer.start();
 		
-		logger.info("MCP HTTP Server started successfully on port " + port);
-		logger.info("SSE endpoint: http://localhost:" + port + sseEndpoint);
-		logger.info("Message endpoint: http://localhost:" + port + messageEndpoint);
+		logger.info("MCP HTTP Server started successfully on " + address.getAddress().getHostAddress() + ":" + port);
+		logger.info("SSE endpoint: http://" + address.getAddress().getHostAddress() + ":" + port + sseEndpoint);
+		logger.info("Message endpoint: http://" + address.getAddress().getHostAddress() + ":" + port + messageEndpoint);
 	}
 	
 	/**

@@ -42,8 +42,10 @@ public class ActivateWindowTool {
 		
 		return McpSchema.Tool.builder()
 			.name("activate_window")
-			.description("Activate/focus a window by its ID. Brings the window to the front and gives it focus. " +
-			       "Useful for switching between multiple open windows.")
+			.description("Activate/focus a window by ID: VirtualBook frame id (from list_virtual_book_frames), "
+				+ "main window (\"main\" or \"aprintng\"), exact window title, or script console resource URI "
+				+ "(from list_all_windows / get_active_window: e.g. aprint://console/mcp_<frameId> for the MCP script console). "
+				+ "For the script console, call list_all_windows first, then pass resourceUri or windowId from the response.")
 			.inputSchema(inputSchema)
 			.build();
 	}

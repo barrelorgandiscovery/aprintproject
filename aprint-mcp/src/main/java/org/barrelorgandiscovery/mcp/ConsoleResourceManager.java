@@ -8,6 +8,7 @@ import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 
 import javax.swing.JDialog;
+import javax.swing.SwingUtilities;
 
 import org.apache.log4j.Logger;
 import org.barrelorgandiscovery.gui.script.groovy.APrintGroovyConsolePanel;
@@ -72,14 +73,33 @@ public class ConsoleResourceManager {
 	}
 	
 	/**
-	 * Read a console resource
+	 * Read a console resource (script text and metadata must be read on the EDT).
 	 */
 	public String readResource(String uri) {
 		ConsoleResource resource = openConsoles.get(uri);
 		if (resource == null) {
 			throw new IllegalArgumentException("Resource not found: " + uri);
 		}
-		return resource.toJson();
+		if (SwingUtilities.isEventDispatchThread()) {
+			return resource.toJson();
+		}
+		final String[] holder = new String[1];
+		final Throwable[] err = new Throwable[1];
+		try {
+			SwingUtilities.invokeAndWait(() -> {
+				try {
+					holder[0] = resource.toJson();
+				} catch (Throwable t) {
+					err[0] = t;
+				}
+			});
+		} catch (Exception e) {
+			throw new IllegalStateException("readResource EDT dispatch failed for " + uri, e);
+		}
+		if (err[0] != null) {
+			throw new IllegalStateException(err[0]);
+		}
+		return holder[0];
 	}
 	
 	/**
@@ -91,7 +111,7 @@ public class ConsoleResourceManager {
 	}
 	
 	/**
-	 * Set the script content in a console
+	 * Set the script content in a console (always applies on the Swing EDT; brings window forward).
 	 */
 	public void setConsoleScript(String resourceUri, String scriptContent) {
 		ConsoleResource resource = openConsoles.get(resourceUri);
@@ -101,8 +121,23 @@ public class ConsoleResourceManager {
 		if (resource.isReadonly()) {
 			throw new IllegalStateException("Console is readonly: " + resourceUri);
 		}
-		resource.getConsole().setScriptContent(scriptContent);
-		resource.markAsModified();
+		Runnable task = () -> {
+			resource.getConsole().setScriptContent(scriptContent);
+			resource.markAsModified();
+			JDialog d = resource.getDialog();
+			if (d != null) {
+				d.toFront();
+			}
+		};
+		if (SwingUtilities.isEventDispatchThread()) {
+			task.run();
+		} else {
+			try {
+				SwingUtilities.invokeAndWait(task);
+			} catch (Exception e) {
+				throw new IllegalStateException("Failed to update console script on EDT: " + resourceUri, e);
+			}
+		}
 		logger.debug("Updated script in console: " + resourceUri);
 	}
 	

@@ -3,8 +3,15 @@ package org.barrelorgandiscovery.mcp;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+
+import org.apache.lucene.document.Document;
+import org.barrelorgandiscovery.search.BookIndexing;
+import org.barrelorgandiscovery.search.ScoredDocument;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
@@ -351,13 +358,18 @@ public class MCPContextFactory {
 				if (resource == null) {
 					return null;
 				}
-				
 				APrintGroovyConsolePanel panel = resource.getConsole();
-				if (panel != null) {
-					return panel.getScriptContent();
+				if (panel == null) {
+					return null;
 				}
-				
-				return null;
+				final String[] out = new String[1];
+				Runnable read = () -> out[0] = panel.getScriptContent();
+				if (SwingUtilities.isEventDispatchThread()) {
+					read.run();
+				} else {
+					SwingUtilities.invokeAndWait(read);
+				}
+				return out[0];
 			} catch (Exception e) {
 				logger.error("Error getting console script: " + resourceUri, e);
 				return null;
@@ -737,6 +749,230 @@ public class MCPContextFactory {
 			} catch (Exception e) {
 				logger.error("Error creating frame snapshot: " + windowId, e);
 				return null;
+			}
+		}
+		
+		@Override
+		public LibrarySearchResult searchIndexedBooks(String query, int maxResults) {
+			if (!(application instanceof APrintNG)) {
+				return LibrarySearchResult.failure("Book indexing not available (APrintNG context required)");
+			}
+			APrintNG ng = (APrintNG) application;
+			BookIndexing bi = ng.getBookIndexing();
+			if (bi == null) {
+				return LibrarySearchResult.failure("Book index not initialized");
+			}
+			int limit = maxResults <= 0 ? 50 : Math.min(maxResults, 200);
+			try {
+				ScoredDocument[] hits = bi.search(query);
+				List<IndexedBookHit> out = new ArrayList<>();
+				for (int i = 0; i < hits.length && i < limit; i++) {
+					Document d = hits[i].document;
+					double sc = hits[i].score;
+					out.add(new IndexedBookHit(
+						sc,
+						d.get(BookIndexing.NAME_FIELD),
+						d.get(BookIndexing.SCALE_FIELD),
+						d.get(BookIndexing.INSTRUMENT_FIELD),
+						d.get(BookIndexing.GENRE_FIELD),
+						d.get(BookIndexing.DESCRIPTION_FIELD),
+						d.get(BookIndexing.FILEREF_FIELD)));
+				}
+				return LibrarySearchResult.ok(out);
+			} catch (Exception e) {
+				logger.error("searchIndexedBooks", e);
+				return LibrarySearchResult.failure(
+					e.getMessage() != null ? e.getMessage() : "search failed");
+			}
+		}
+		
+		@Override
+		public ImportInstrumentFromBookResult importInstrumentFromBook(ImportInstrumentFromBookRequest request) {
+			if (request == null) {
+				return ImportInstrumentFromBookResult.failure("request is null", null, null, null, null);
+			}
+			String referenceBookPath = request.getReferenceBookPath();
+			String srcName = request.getSourceInstrumentName();
+			try {
+				if (referenceBookPath.isEmpty()) {
+					return ImportInstrumentFromBookResult.failure(
+						"referenceBookPath is required (absolute path to a .book containing the gamme)",
+						null, null, srcName, request.getNewInstrumentName());
+				}
+				if (!request.hasSourceInstrumentName()) {
+					return ImportInstrumentFromBookResult.failure(
+						"sourceInstrumentName is required (repository instrument to clone the sound bank from)",
+						referenceBookPath, null, null, request.getNewInstrumentName());
+				}
+				org.barrelorgandiscovery.repository.Repository2 repo = application.getRepository();
+				if (repo == null) {
+					return ImportInstrumentFromBookResult.failure("No repository configured",
+						referenceBookPath, null, srcName, request.getNewInstrumentName());
+				}
+				if (!request.isDryRun() && repo.isReadOnly()) {
+					return ImportInstrumentFromBookResult.failure("Repository is read-only",
+						referenceBookPath, null, srcName, request.getNewInstrumentName());
+				}
+				java.io.File bookFile = new java.io.File(referenceBookPath);
+				final String normalizedPath;
+				if (!bookFile.isFile()) {
+					normalizedPath = referenceBookPath;
+				} else {
+					String resolved;
+					try {
+						resolved = bookFile.getCanonicalPath();
+					} catch (java.io.IOException e) {
+						resolved = bookFile.getAbsolutePath();
+					}
+					normalizedPath = resolved;
+				}
+				if (!bookFile.isFile()) {
+					return ImportInstrumentFromBookResult.failure("File not found: " + referenceBookPath,
+						normalizedPath, null, srcName, request.getNewInstrumentName());
+				}
+				final Throwable[] err = new Throwable[1];
+				final org.barrelorgandiscovery.scale.Scale[] scaleHolder =
+					new org.barrelorgandiscovery.scale.Scale[1];
+				final String[] designedInstrumentHolder = new String[1];
+				final String[] resolvedNewInstrumentName = new String[1];
+				final ImportInstrumentCompatibilityReport[] compatHolder =
+					new ImportInstrumentCompatibilityReport[1];
+				final ImportInstrumentFromBookResult[] dryOrImportResult =
+					new ImportInstrumentFromBookResult[1];
+				javax.swing.SwingUtilities.invokeAndWait(() -> {
+					try {
+						org.barrelorgandiscovery.xml.VirtualBookXmlIO.VirtualBookResult r =
+							org.barrelorgandiscovery.xml.VirtualBookXmlIO.read(bookFile);
+						if (r == null || r.virtualBook == null) {
+							throw new Exception("Could not read virtual book from file");
+						}
+						designedInstrumentHolder[0] = r.preferredInstrumentName;
+						if (request.hasNewInstrumentName()) {
+							resolvedNewInstrumentName[0] = request.getNewInstrumentName();
+						} else {
+							String pref = r.preferredInstrumentName;
+							if (pref != null && !pref.trim().isEmpty()) {
+								resolvedNewInstrumentName[0] = pref.trim();
+							} else {
+								throw new Exception(
+									"Provide newInstrumentName or set DesignedInstrumentName in the book metadata");
+							}
+						}
+						org.barrelorgandiscovery.scale.Scale scale = r.virtualBook.getScale();
+						if (scale == null) {
+							throw new Exception("Book has no embedded scale");
+						}
+						org.barrelorgandiscovery.instrument.Instrument source = repo.getInstrument(srcName);
+						ImportInstrumentCompatibilityReport compat = ImportInstrumentCompatibilityReport.analyze(
+							repo, scale, resolvedNewInstrumentName[0], source);
+						compatHolder[0] = compat;
+						if (!compat.isSourceInstrumentFound()) {
+							throw new Exception("Source instrument not found: " + srcName);
+						}
+						if (request.isDryRun()) {
+							ScaleInfo preview = new ScaleInfo(
+								scale.getName(),
+								scale.getWidth(),
+								scale.getTrackNb(),
+								scale.getSpeed(),
+								scale.getInformations(),
+								scale.getState(),
+								scale.getContact(),
+								scale.isBookMovingRightToLeft());
+							String hint = compat.getSummaryHint();
+							dryOrImportResult[0] = ImportInstrumentFromBookResult.dryRunOnly(
+								"dryRun: aucune écriture. " + hint,
+								normalizedPath,
+								designedInstrumentHolder[0],
+								srcName,
+								resolvedNewInstrumentName[0],
+								preview,
+								compat);
+							return;
+						}
+						if (request.isAbortIfCompatibleInstrumentExists()
+							&& !compat.getRepositoryInstrumentsWithEqualScale().isEmpty()) {
+							throw new Exception(
+								"Import annulé : le dépôt a déjà un instrument avec cette gamme ("
+									+ String.join(", ", compat.getRepositoryInstrumentsWithEqualScale())
+									+ "). Utilisez un instrument existant ou désactivez abortIfCompatibleInstrumentExists.");
+						}
+						if (compat.isTargetInstrumentNameAlreadyUsed() && !request.isAllowOverwrite()) {
+							throw new Exception(
+								"Un instrument nommé « " + resolvedNewInstrumentName[0]
+									+ " » existe déjà. Passez allowOverwrite=true pour remplacer, ou changez le nom.");
+						}
+						if (compat.isTargetInstrumentNameAlreadyUsed() && request.isAllowOverwrite()) {
+							repo.deleteInstrument(repo.getInstrument(resolvedNewInstrumentName[0]));
+						}
+						repo.saveScale(scale);
+						String insName = resolvedNewInstrumentName[0];
+						String descUrl = "Sound bank from \"" + srcName + "\" (import from book)";
+						org.barrelorgandiscovery.instrument.Instrument ins =
+							new org.barrelorgandiscovery.instrument.Instrument(
+								insName,
+								scale,
+								source.getSoundBankStream(),
+								source.getThumbnail(),
+								descUrl);
+						org.barrelorgandiscovery.instrument.RegisterSoundLink srcLinks =
+							source.getRegisterSoundLink();
+						org.barrelorgandiscovery.instrument.RegisterSoundLink dstLinks =
+							ins.getRegisterSoundLink();
+						for (String group : srcLinks.getPipeStopGroupNamesInWhichThereAreMappings()) {
+							for (String ps : srcLinks.getPipeStopNamesInWhichThereAreMappings(group)) {
+								try {
+									int preset = srcLinks.getInstrumentNumber(group, ps);
+									dstLinks.defineLink(group, ps, preset);
+								} catch (Exception ex) {
+									logger.warn("Register mapping skipped " + group + "/" + ps + ": "
+										+ ex.getMessage());
+								}
+							}
+						}
+						try {
+							if (srcLinks.getDrumSoundBank() >= 0) {
+								dstLinks.setDrumSoundBank(srcLinks.getDrumSoundBank());
+							}
+						} catch (Exception ignored) {
+							// optional
+						}
+						repo.saveInstrument(ins);
+						scaleHolder[0] = scale;
+					} catch (Exception e) {
+						err[0] = e;
+					}
+				});
+				if (dryOrImportResult[0] != null) {
+					return dryOrImportResult[0];
+				}
+				if (err[0] != null) {
+					Throwable t = err[0];
+					while (t instanceof java.lang.reflect.InvocationTargetException && t.getCause() != null) {
+						t = t.getCause();
+					}
+					return ImportInstrumentFromBookResult.failure(t, normalizedPath,
+						designedInstrumentHolder[0], srcName, request.getNewInstrumentName(), compatHolder[0]);
+				}
+				String insName = resolvedNewInstrumentName[0];
+				org.barrelorgandiscovery.scale.Scale sc = scaleHolder[0];
+				ScaleInfo scaleInfo = new ScaleInfo(
+					sc.getName(),
+					sc.getWidth(),
+					sc.getTrackNb(),
+					sc.getSpeed(),
+					sc.getInformations(),
+					sc.getState(),
+					sc.getContact(),
+					sc.isBookMovingRightToLeft());
+				String msg = "Gamme et instrument enregistrés dans le dépôt. Sélectionnez « " + insName
+					+ " » pour la lecture (redémarrer APrint si l’instrument n’apparaît pas).";
+				return ImportInstrumentFromBookResult.successAfterImport(msg, normalizedPath,
+					designedInstrumentHolder[0], srcName, insName, scaleInfo, compatHolder[0]);
+			} catch (Exception e) {
+				logger.error("importInstrumentFromBook", e);
+				return ImportInstrumentFromBookResult.failure(e, referenceBookPath, null, srcName,
+					request.getNewInstrumentName());
 			}
 		}
 		

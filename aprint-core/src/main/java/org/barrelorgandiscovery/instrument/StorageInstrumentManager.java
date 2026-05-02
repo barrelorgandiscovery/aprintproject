@@ -142,6 +142,11 @@ public class StorageInstrumentManager implements InstrumentManager {
 
 		ss.deleteStream(streamname, INSTRUMENT_TYPE);
 
+		for (int i = instruments.size() - 1; i >= 0; i--) {
+			if (instruments.get(i).getName().equals(instrument.getName())) {
+				instruments.remove(i);
+			}
+		}
 	}
 
 	/*

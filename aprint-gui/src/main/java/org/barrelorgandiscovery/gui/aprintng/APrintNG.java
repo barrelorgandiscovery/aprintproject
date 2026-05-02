@@ -2615,9 +2615,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 				java.util.List<VirtualBookScriptConsole> consoles = vbf.listOpenScriptConsoles();
 				for (VirtualBookScriptConsole console : consoles) {
 					if (console == activeWindow) {
-						// Find the resource URI for this console (if tracked by MCP)
-						// For now, we'll generate a simple identifier
-						String resourceUri = "aprint://console/" + entry.getKey() + "_" + console.getTitle();
+						String resourceUri = scriptConsoleResourceUri(console, entry.getKey());
 						result = new ActiveWindowInfo(
 							ActiveWindowInfo.WindowType.SCRIPT_CONSOLE,
 							resourceUri,
@@ -2642,7 +2640,7 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 				if (entry.getValue() instanceof APrintNGVirtualBookInternalFrame) {
 					APrintNGVirtualBookInternalFrame vbf = (APrintNGVirtualBookInternalFrame) entry.getValue();
 					if (vbf.listOpenScriptConsoles().contains(console)) {
-						String resourceUri = "aprint://console/" + entry.getKey() + "_" + console.getTitle();
+						String resourceUri = scriptConsoleResourceUri(console, entry.getKey());
 						result = new ActiveWindowInfo(
 							ActiveWindowInfo.WindowType.SCRIPT_CONSOLE,
 							resourceUri,
@@ -2950,13 +2948,14 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 				java.util.List<VirtualBookScriptConsole> consoles = vbf.listOpenScriptConsoles();
 				for (VirtualBookScriptConsole console : consoles) {
 					if (console.isVisible()) {
-						String resourceUri = "aprint://console/" + entry.getKey() + "_" + console.getTitle();
+						String title = console.getTitle();
+						String resourceUri = scriptConsoleResourceUri(console, entry.getKey());
 						String consoleId = resourceUri;
 						if (!addedWindowIds.contains(consoleId)) {
 							result.add(new ActiveWindowInfo(
 								ActiveWindowInfo.WindowType.SCRIPT_CONSOLE,
 								consoleId,
-								console.getTitle(),
+								title,
 								entry.getKey(),
 								resourceUri
 							));
@@ -3019,6 +3018,21 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 		
 		return result;
 	}
+
+	/**
+	 * MCP resource URI for a {@link VirtualBookScriptConsole}, aligned with
+	 * aprint-mcp {@code ConsoleResourceManager} ({@code aprint://console/mcp_<frameId>}). Non-MCP
+	 * consoles use a stable URI derived from the frame id and window identity.
+	 */
+	private String scriptConsoleResourceUri(VirtualBookScriptConsole console, String frameKey) {
+		String title = console.getTitle();
+		boolean mcpConsole = title != null && title.startsWith("MCP Console");
+		if (mcpConsole) {
+			return "aprint://console/mcp_" + frameKey;
+		}
+		return "aprint://console/script_" + frameKey + "_"
+			+ Integer.toHexString(System.identityHashCode(console));
+	}
 	
 	/**
 	 * Generate a stable window ID for an internal frame
@@ -3074,24 +3088,66 @@ public class APrintNG extends APrintNGInternalFrame implements ActionListener, A
 					return;
 				}
 				
-				// Try to find in all windows
-				java.awt.Window[] allWindows = java.awt.Window.getWindows();
-				for (java.awt.Window w : allWindows) {
-					if (w.isVisible()) {
-						// Check if it matches by title or name
-						if (w instanceof javax.swing.JFrame) {
-							String title = ((javax.swing.JFrame) w).getTitle();
-							if (windowId.equals(title) || windowId.equals(w.getName())) {
-								w.toFront();
-								w.requestFocus();
-								windowUsageTracker.markWindowUsed(w);
-								success[0] = true;
-								return;
+				// Script consoles / MCP: match resource URI from list_all_windows (aprint://console/...)
+				if (windowId.startsWith("aprint://console/")) {
+					for (ActiveWindowInfo info : listAllWindows()) {
+						if (info.getType() != ActiveWindowInfo.WindowType.SCRIPT_CONSOLE) {
+							continue;
+						}
+						if (!windowId.equals(info.getResourceUri()) && !windowId.equals(info.getWindowId())) {
+							continue;
+						}
+						String t = info.getTitle();
+						if (t == null) {
+							continue;
+						}
+						java.awt.Window[] allWindows = java.awt.Window.getWindows();
+						for (java.awt.Window w : allWindows) {
+							if (!w.isVisible()) {
+								continue;
+							}
+							if (w instanceof javax.swing.JDialog) {
+								String dt = ((javax.swing.JDialog) w).getTitle();
+								if (t.equals(dt)) {
+									w.toFront();
+									w.requestFocus();
+									windowUsageTracker.markWindowUsed(w);
+									success[0] = true;
+									return;
+								}
 							}
 						}
 					}
 				}
-				
+
+				// Any visible window: match by exact title (JFrame or JDialog) or component name
+				java.awt.Window[] allWindows = java.awt.Window.getWindows();
+				for (java.awt.Window w : allWindows) {
+					if (!w.isVisible()) {
+						continue;
+					}
+					String title = null;
+					if (w instanceof javax.swing.JFrame) {
+						title = ((javax.swing.JFrame) w).getTitle();
+					} else if (w instanceof javax.swing.JDialog) {
+						title = ((javax.swing.JDialog) w).getTitle();
+					}
+					if (title != null && windowId.equals(title)) {
+						w.toFront();
+						w.requestFocus();
+						windowUsageTracker.markWindowUsed(w);
+						success[0] = true;
+						return;
+					}
+					if (windowId.equals(w.getName())) {
+						w.toFront();
+						w.requestFocus();
+						windowUsageTracker.markWindowUsed(w);
+						success[0] = true;
+						return;
+					}
+				}
+
 				success[0] = false;
 			});
 		} catch (Exception e) {

@@ -45,7 +45,7 @@ public class ExtractTuneFeaturesTool {
 			.name("extract_tune_features")
 			.description("Extract musical features directly from the currently opened virtual book. " +
 				"Returns statistical features covering pitch, rhythm, harmony, and texture. " +
-				"Useful for analyzing tunes and suggesting transformations or enhancements.")
+				"Use search_library to find a .book by scale or keywords, open it in APrint, then call this tool on the active frame.")
 			.inputSchema(inputSchema)
 			.build();
 	}

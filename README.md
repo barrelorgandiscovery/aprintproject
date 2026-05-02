@@ -17,8 +17,8 @@ for discussions , [https://github.com/barrelorgandiscovery/aprintproject/discuss
 
 ### How to Build main project
 
-Note on 2022 version, this version switch to 13 to 17 java version mainly. This java version can be downloaded from Oracle Download Center or adoptjdk website.
-The binaries are now provided on the github website, and everybody is able to build the app-image. The adoptjdk 17 is needed.
+The build uses **Java 21** (toolchain). Install a JDK 21 (e.g. Temurin) or set `JAVA_HOME` to your JDK, for example via `source ~/java/setenv21.sh` if you use a local layout like `~/java/jdk-21.0.2/`.
+The binaries are also built on GitHub Actions; local builds need a matching JDK for Gradle and `jpackage`.
 
 
 #### Building the app image

@@ -185,6 +185,9 @@ public class APrintGroovyConsolePanel extends JPanel implements IScriptConsole,
 
 			cte.getTextEditor().setText(scriptContent);
 			cte.getTextEditor().setCaretPosition(0);
+			// Programmatic replace must not leave the tab "dirty" (quickscripts / MCP pushes).
+			clearDirty();
+			cte.getTextEditor().requestFocusInWindow();
 
 		} finally {
 			setCursor(Cursor.getDefaultCursor());

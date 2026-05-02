@@ -20,6 +20,7 @@ import org.barrelorgandiscovery.mcp.tools.GetComponentValueTool;
 import org.barrelorgandiscovery.mcp.tools.GetConsoleScriptTool;
 import org.barrelorgandiscovery.mcp.tools.GetInstrumentInfoTool;
 import org.barrelorgandiscovery.mcp.tools.GetScaleInfoTool;
+import org.barrelorgandiscovery.mcp.tools.GetGroovyScriptingDocumentationTool;
 import org.barrelorgandiscovery.mcp.tools.GetScriptContextTool;
 import org.barrelorgandiscovery.mcp.tools.GetVirtualBookInfoTool;
 import org.barrelorgandiscovery.mcp.tools.GetWindowActivationHistoryTool;
@@ -31,10 +32,13 @@ import org.barrelorgandiscovery.mcp.tools.ListScalesTool;
 import org.barrelorgandiscovery.mcp.tools.ListVirtualBookFramesTool;
 import org.barrelorgandiscovery.mcp.tools.OpenQuickscriptEditorTool;
 import org.barrelorgandiscovery.mcp.tools.OpenScriptConsoleTool;
+import org.barrelorgandiscovery.mcp.tools.ImportInstrumentFromBookTool;
+import org.barrelorgandiscovery.mcp.tools.SearchIndexedBooksTool;
 import org.barrelorgandiscovery.mcp.tools.ReadQuickscriptTool;
 import org.barrelorgandiscovery.mcp.tools.SetConsoleScriptTool;
 import org.barrelorgandiscovery.mcp.tools.TriggerPlayTool;
 import org.barrelorgandiscovery.mcp.tools.TriggerStopTool;
+import org.barrelorgandiscovery.mcp.resources.AprintMcpResourceRegistry;
 import org.barrelorgandiscovery.mcp.transport.HttpServerSseTransportProvider;
 
 import io.modelcontextprotocol.server.McpServer;
@@ -84,6 +88,8 @@ public class MCPServerManager {
 		}
 		this.httpPort = port;
 		logger.info("Final HTTP port: " + this.httpPort);
+		String bind = System.getProperty("aprint.mcp.bindAddress", "127.0.0.1");
+		logger.info("MCP bind (aprint.mcp.bindAddress, default loopback): " + bind);
 		logger.info("=== MCPServerManager constructor completed ===");
 	}
 	
@@ -150,7 +156,9 @@ public class MCPServerManager {
 					// Register direct execution tools (for AI)
 					serverBuilder
 						.toolCall(GetScriptContextTool.createTool(), GetScriptContextTool.createHandler(context))
-						.toolCall(ExecuteScriptOnFrameTool.createTool(), ExecuteScriptOnFrameTool.createHandler(context));
+						.toolCall(ExecuteScriptOnFrameTool.createTool(), ExecuteScriptOnFrameTool.createHandler(context))
+						.toolCall(GetGroovyScriptingDocumentationTool.createTool(),
+							GetGroovyScriptingDocumentationTool.createHandler(context));
 					
 					// Register window and console access tools
 					serverBuilder
@@ -165,7 +173,9 @@ public class MCPServerManager {
 						.toolCall(ListInstrumentsTool.createTool(), ListInstrumentsTool.createHandler(context))
 						.toolCall(GetInstrumentInfoTool.createTool(), GetInstrumentInfoTool.createHandler(context))
 						.toolCall(ListScalesTool.createTool(), ListScalesTool.createHandler(context))
-						.toolCall(GetScaleInfoTool.createTool(), GetScaleInfoTool.createHandler(context));
+						.toolCall(GetScaleInfoTool.createTool(), GetScaleInfoTool.createHandler(context))
+						.toolCall(SearchIndexedBooksTool.createTool(), SearchIndexedBooksTool.createHandler(context))
+						.toolCall(ImportInstrumentFromBookTool.createTool(), ImportInstrumentFromBookTool.createHandler(context));
 					
 					// Register music analysis tools
 					logger.info("Registering music analysis tools...");
@@ -181,11 +191,10 @@ public class MCPServerManager {
 						.toolCall(GetComponentPropertyTool.createTool(), GetComponentPropertyTool.createHandler(context))
 						.toolCall(CreateFrameSnapshotTool.createTool(), CreateFrameSnapshotTool.createHandler(context));
 					
-					// Register resources for console management
-					// Note: Resources are dynamic (consoles can be opened/closed)
-					// We need to register a resource template that can list all open consoles
-					logger.info("Console resources are managed dynamically via ConsoleResourceManager");
-					// Resources will be listed via the ConsoleResourceManager when requested
+					// MCP resources: aprint:// instruments, scales, books, GUI context, library search
+					logger.info("Registering MCP resources (aprint://) ...");
+					serverBuilder.resources(AprintMcpResourceRegistry.staticResources(context));
+					serverBuilder.resourceTemplates(AprintMcpResourceRegistry.resourceTemplates(context));
 					
 					mcpServer = serverBuilder.build();
 					

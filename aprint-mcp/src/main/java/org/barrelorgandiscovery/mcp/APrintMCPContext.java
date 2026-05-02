@@ -202,5 +202,23 @@ public interface APrintMCPContext {
 	 * @return String base64 de l'image PNG, ou null si la fenêtre n'a pas pu être capturée
 	 */
 	String createFrameSnapshot(String windowId);
+	
+	/**
+	 * Search indexed books (Lucene index used by APrint search panel).
+	 * @param query Lucene query syntax (same as Search panel); empty or null matches all (up to limit)
+	 * @param maxResults max rows (capped internally)
+	 */
+	LibrarySearchResult searchIndexedBooks(String query, int maxResults);
+	
+	/**
+	 * Import the scale embedded in a reference .book file into the repository, then create an instrument
+	 * by cloning an existing instrument's soundbank and register mappings.
+	 * <p>
+	 * Use {@link ImportInstrumentFromBookRequest#isDryRun()} to analyze compatibility without writing.
+	 * Use {@link ImportInstrumentFromBookRequest#isAbortIfCompatibleInstrumentExists()} to refuse imports
+	 * when an instrument with the same scale already exists (avoids redundant instruments).
+	 * </p>
+	 */
+	ImportInstrumentFromBookResult importInstrumentFromBook(ImportInstrumentFromBookRequest request);
 }
 
